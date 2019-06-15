@@ -1,0 +1,17 @@
+{
+  "foo": {
+    "name": "Jen",
+    "bar": {
+      "baz": [
+        {
+          "name": "Rui",
+          "age": 30
+        },
+        {
+          "name": "Lifang",
+          "age": 30
+        }
+      ]
+    }
+  }
+}
