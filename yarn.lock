@@ -6583,6 +6583,7 @@ trim-right@^1.0.1:
   resolved "https://registry.yarnpkg.com/trim-right/-/trim-right-1.0.1.tgz#cb2e1203067e0c8de1f614094b9fe45704ea6003"
   integrity sha1-yy4SAwZ+DI3h9hQJS5/kVwTqYAM=
 
+<<<<<<< HEAD
 ts-babel-node@^1.1.1:
   version "1.1.1"
   resolved "https://registry.npm.taobao.org/ts-babel-node/download/ts-babel-node-1.1.1.tgz#3f7e0ddbfeb6b0b6bfa4f2b24179510397af29c0"
@@ -6592,6 +6593,8 @@ ts-babel-node@^1.1.1:
     babel-preset-es2015 "^6.9.0"
     source-map-support "^0.4.0"
 
+=======
+>>>>>>> 2ec75582093ffbe53fbf4b2b6a759e83c9413792
 ts-node@^8.3.0:
   version "8.3.0"
   resolved "https://registry.npm.taobao.org/ts-node/download/ts-node-8.3.0.tgz#e4059618411371924a1fb5f3b125915f324efb57"

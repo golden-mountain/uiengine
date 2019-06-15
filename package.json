@@ -6,9 +6,15 @@
   "scripts": {
     "build": "webpack --env dev && webpack --env build && npm run test",
     "dev": "webpack --progress --colors --watch --env dev",
+<<<<<<< HEAD
     "test": "mocha --require ts-node/register --colors ./test/*.spec.ts",
     "test:watch": "mocha --require ts-node/register --colors --watch-extensions ts,tsx -w ./test/*.spec.ts",
     "test:cover": "cross-env NODE_ENV=test nyc mocha --require ts-node/register --colors test/*.ts",
+=======
+    "test": "mocha --require ./node_modules/ts-node/register --colors ./test/*.spec.ts",
+    "test:watch": "mocha --require ./node_modules/ts-node/register --colors -w ./test/*.spec.ts",
+    "test:cover": "cross-env NODE_ENV=test nyc mocha --require ./node_modules/ts-node/register --colors test/*.ts",
+>>>>>>> 2ec75582093ffbe53fbf4b2b6a759e83c9413792
     "repl": "node -i -e \"$(< ./lib/UIEngine.js)\""
   },
   "repository": {
