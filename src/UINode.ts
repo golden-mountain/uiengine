@@ -4,4 +4,8 @@ export default class UINode {
   constructor(schema: object) {
     this.schema = schema;
   }
+
+  getSchema() {
+    return this.schema;
+  }
 }
