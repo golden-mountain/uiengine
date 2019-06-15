@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "amd",
+    "module": "umd",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "esModuleInterop": true,
@@ -11,6 +11,7 @@
     "experimentalDecorators": true,
     "preserveConstEnums": true,
     "suppressImplicitAnyIndexErrors": true,
+    "resolveJsonModule": true,
     "lib": ["es2015", "es2016"]
   },
   "include": ["./src/*"],
