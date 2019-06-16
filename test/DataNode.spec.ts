@@ -29,9 +29,13 @@ describe("Given an instance of my DataNode library", () => {
     it("if data is string, should load from remote and same as the loaded", async () => {
       dataNode = new DataNode(dataSource, request);
       const promise = dataNode.loadData("data/basic.json");
-      promise.then(() => {
-        expect(dataNode.getDataNode()).to.deep.equal(dataNodeJson);
-      });
+      promise
+        .then(() => {
+          expect(dataNode.getDataNode()).to.deep.equal(dataNodeJson);
+        })
+        .catch(function(error: any) {
+          console.log("Error " + error.message);
+        });
     });
   });
 });

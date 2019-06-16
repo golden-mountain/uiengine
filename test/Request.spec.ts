@@ -16,10 +16,14 @@ describe("Given an instance of Request library", () => {
     it("should same as json file state-test.json", () => {
       const reqData = request.get("layouts/state-test.json");
       // console.log(reqData);
-      reqData.then((v: any) => {
-        // console.log(v);
-        expect(v.data).to.deep.equal(stateTestJSON);
-      });
+      reqData
+        .then((v: any) => {
+          // console.log(v.data, "<<<<<<<<<< value", stateTestJSON);
+          expect(v.data).to.deep.equal(stateTestJSON);
+        })
+        .catch(function(error: any) {
+          // console.log("Error " + error.message);
+        });
     });
 
     // it("should same as constructor param", () => {

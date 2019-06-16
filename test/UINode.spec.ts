@@ -15,13 +15,12 @@ const expect = chai.expect;
 
 let uiNodeWithRemoteRequest: any;
 let uiNodeWithoutRemoteRequest: any;
+uiNodeWithoutRemoteRequest = new UINode(uiNodeLayout);
+const request = new Request(reqConfig);
+uiNodeWithRemoteRequest = new UINode({}, request);
 
 describe("Given an instance of my UINode library", () => {
-  before(() => {
-    uiNodeWithoutRemoteRequest = new UINode(uiNodeLayout);
-    const request = new Request(reqConfig);
-    uiNodeWithRemoteRequest = new UINode({}, request);
-  });
+  before(() => {});
   describe("the given schema ", () => {
     it("if schema is object, should same as constructor param", () => {
       // expect(uiNode.schema).to.be.equal(uinodeLayout);
@@ -35,19 +34,31 @@ describe("Given an instance of my UINode library", () => {
       const promise = uiNodeWithRemoteRequest.loadLayout(
         "layouts/uinode-basic.json"
       );
-      promise.then(() => {
-        expect(uiNodeWithRemoteRequest.getSchema()).to.deep.equal(uiNodeLayout);
-      });
+      promise
+        .then((res: any) => {
+          // console.log(uiNodeWithRemoteRequest.getSchema());
+          expect(uiNodeWithRemoteRequest.getSchema()).to.deep.equal(
+            uiNodeLayout
+          );
+        })
+        .catch((error: any) => {
+          // console.log(">>>>>>>>>");
+          // console.log("Error " + error.message);
+        });
     });
 
     it("if datasource is not empty, should return a correct DataNode", async () => {
       uiNodeWithRemoteRequest.loadData("data/basic.json");
-      // console.log(uiNodeWithoutRemoteRequest.getDataNode());
       const dataNode = uiNodeWithRemoteRequest.getDataNode();
       expect(dataNode).to.have.property("getData");
-      dataNode.getData().then((v: any) => {
-        expect(v).to.deep.equal(dataNodeJson);
-      });
+      dataNode
+        .getData()
+        .then((v: any) => {
+          expect(dataNode.getData()).to.deep.equal(dataNodeJson);
+        })
+        .catch(function(error: any) {
+          // console.log("Error " + error.message);
+        });
     });
   });
 });

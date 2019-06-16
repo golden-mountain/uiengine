@@ -5,10 +5,10 @@ import { IDataNode, IDataSource } from "../typings/DataNode";
 
 export default class UINode implements IUINode {
   private errorInfo: object = {};
-  private request: IRequest = {} as IRequest;
+  private request: IRequest = new Request();
   private children: Array<UINode> = [];
   private schema: ILayoutSchema = {};
-  private dataNode: IDataNode = {} as IDataNode;
+  private dataNode?: any;
   private data: any;
 
   constructor(schema: ILayoutSchema, request?: IRequest) {
@@ -29,13 +29,10 @@ export default class UINode implements IUINode {
 
   async loadLayout(url: string): Promise<AxiosPromise> {
     let response: any = await this.request.get(url);
+    // console.log(response);
     if (response.data) {
-      // this.schema = response.data;
       this.assignSchema(response.data);
     } else {
-      // this.schema = {
-      //   error: `Error loading from ${url}`
-      // };
       this.errorInfo = {
         error: `Error loading from ${url}`
       };
