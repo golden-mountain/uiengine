@@ -1,39 +1,35 @@
 {
   "name": "uinode-basic",
-  "layout": {
-    "component": "lib:DemoElement1",
-    "id": "id-of-demo-element-1",
-    "children": [
-      {
-        "component": "lib:DemoElement2",
-        "id": "id-of-demo-element-2",
-        "data-source": "foo.bar.name",
-        "props": {
-          "name": "demo-element-2"
-        }
-      },
-      {
-        "component": "lib:DemoLiveElement",
-        "id": "id-of-live-element-1",
-        "data-source": "foo.bar.baz",
-        "template": {
-          "type": "row",
-          "component": "div",
-          "children": [
-            {
-              "component": "p",
-              "data-source": "$.name"
-            },
-            {
-              "component": "p",
-              "data-source": "$.age"
-            }
-          ]
-        },
-        "props": {
-          "default-value": "hello"
-        }
+  "component": "lib:DemoElement1",
+  "children": [
+    {
+      "component": "lib:DemoElement2",
+      "id": "id-of-demo-element-2",
+      "datasource": "foo.bar.name",
+      "props": {
+        "name": "demo-element-2"
       }
-    ]
-  }
+    },
+    {
+      "component": "lib:DemoLiveElement",
+      "datasource": "foo.bar.baz",
+      "template": {
+        "type": "row",
+        "component": "div",
+        "children": [
+          {
+            "component": "p",
+            "datasource": "$.name"
+          },
+          {
+            "component": "p",
+            "datasource": "$.age"
+          }
+        ]
+      },
+      "props": {
+        "defaultvalue": "hello"
+      }
+    }
+  ]
 }
