@@ -10,7 +10,7 @@ let request: any;
 
 describe("Given an instance of Request library", () => {
   before(() => {
-    request = new Request({ pathPrefix: "../test" }, true);
+    request = new Request({ pathPrefix: "../test", devMode: true });
   });
   describe("the given response ", () => {
     it("should same as json file state-test.json", () => {

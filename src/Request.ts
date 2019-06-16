@@ -20,19 +20,19 @@ class RequestAbstract {
   //   }
   // }
 
-  get(url: string, params: any) {
+  get(url: string, params?: any) {
     return this.axios.get(url, params);
   }
 
-  put(url: string, params: any) {
+  put(url: string, params?: any) {
     return this.axios.put(url, params);
   }
 
-  post(url: string, params: any) {
+  post(url: string, params?: any) {
     return this.axios.post(url, params);
   }
 
-  delete(url: string, params: any) {
+  delete(url: string, params?: any) {
     return this.axios.delete(url, params);
   }
 }
@@ -55,22 +55,22 @@ class RequestDev extends RequestAbstract {
     this.mock[methodName](url, parmas).reply(200, data);
   }
 
-  get(url: string, params: any) {
+  get(url: string, params?: any) {
     this.mockRequest(url, params);
     return this.axios.get(url, params);
   }
 
-  put(url: string, params: any) {
+  put(url: string, params?: any) {
     this.mockRequest(url, params);
     return this.axios.put(url, params);
   }
 
-  post(url: string, params: any) {
+  post(url: string, params?: any) {
     this.mockRequest(url, params);
     return this.axios.post(url, params);
   }
 
-  delete(url: string, params: any) {
+  delete(url: string, params?: any) {
     this.mockRequest(url, params);
     return this.axios.delete(url, params);
   }
@@ -84,27 +84,27 @@ class RequestProduct extends RequestAbstract {
 export default class Request implements IRequest {
   private req: any;
 
-  constructor(config: object, devMode: boolean = false) {
-    if (devMode) {
+  constructor(config?: IRequestConfig) {
+    if (config && config.devMode) {
       this.req = new RequestDev(config);
     } else {
       this.req = new RequestProduct(config);
     }
   }
 
-  get(url: string, params: any) {
+  get(url: string, params?: any) {
     return this.req.get(url, params);
   }
 
-  put(url: string, params: any) {
+  put(url: string, params?: any) {
     return this.req.put(url, params);
   }
 
-  post(url: string, params: any) {
+  post(url: string, params?: any) {
     return this.req.post(url, params);
   }
 
-  delete(url: string, params: any) {
+  delete(url: string, params?: any) {
     return this.req.delete(url, params);
   }
 }
