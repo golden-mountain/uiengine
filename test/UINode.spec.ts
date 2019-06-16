@@ -3,6 +3,7 @@
 import chai from "chai";
 import { UINode } from "../src";
 import * as uiNodeLayout from "./layouts/uinode-basic.json";
+
 // const uiNodeLayout = {};
 // chai.expect();
 
@@ -15,9 +16,16 @@ describe("Given an instance of my UINode library", () => {
     uiNode = new UINode(uiNodeLayout);
   });
   describe("the given schema ", () => {
-    it("should same as constructor param", () => {
+    it("if schema is object, should same as constructor param", () => {
       // expect(uiNode.schema).to.be.equal(uinodeLayout);
       expect(uiNode.getSchema()).to.deep.equal(uiNodeLayout);
+    });
+
+    it("if schema is string, should load from remote and same as the loaded", () => {
+      // expect(uiNode.schema).to.be.equal(uinodeLayout);
+      expect(uiNode.getSchema("layouts/uinode-basic.json")).to.deep.equal(
+        uiNodeLayout
+      );
     });
   });
 });

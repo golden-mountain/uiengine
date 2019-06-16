@@ -81,7 +81,7 @@ class RequestProduct extends RequestAbstract {
   // }
 }
 
-export default class Request {
+export default class Request implements IRequest {
   private req: any;
 
   constructor(config: object, devMode: boolean = false) {

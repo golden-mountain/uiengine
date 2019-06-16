@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "umd",
+    "module": "commonjs",
     "moduleResolution": "node",
     "noImplicitAny": true,
     "esModuleInterop": true,
@@ -20,8 +20,8 @@
     "jsx": "preserve",
     "allowSyntheticDefaultImports": true,
     "lib": ["es2015", "es2016"],
-    "types": ["node", "mocha", "lodash"]
+    "typeRoots": ["./node_modules/@types", "./typings"]
   },
   "include": ["src/**/*", "typings/*"],
-  "exclude": ["node_modules"]
+  "exclude": ["./node_modules", "test/*"]
 }
