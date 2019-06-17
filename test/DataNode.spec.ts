@@ -20,13 +20,13 @@ const request = new Request(reqConfig);
 
 describe("Given an instance of my DataNode library", () => {
   before(() => {});
-  describe("the given data  ", () => {
-    it("if data is object, should same as constructor param", () => {
+  describe("the given data", () => {
+    it("getData: if data is object, should same as constructor param", () => {
       dataNode = new DataNode(dataSource);
       expect(dataNode.getData()).to.deep.equal(dataNodeJson);
     });
 
-    it("if data is string, should load from remote and same as the loaded", async () => {
+    it("loadData & getData: if data is string, should load from remote and same as the loaded", async () => {
       dataNode = new DataNode(dataSource, request);
       const promise = dataNode.loadData("data/basic.json");
       promise

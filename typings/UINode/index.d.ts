@@ -9,14 +9,15 @@ interface ILayoutSchema {
 }
 
 interface IUINode {
-  loadLayout(url: stringremoteURL): Promise<AxiosPromise>;
+  loadLayout(schema: ILayoutSchema | string);
+  loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
   loadData(source: string): IUINode;
   getSchema(): ILayoutSchema;
-  // replaceLayout(): IUINode;
-  // updateLayout(): IUINode;
+  replaceLayout(newSchema: ILayoutSchema | string): IUINode;
+  updateLayout(): IUINode;
   // genLiveLayout(): IUINode;
-  // deleteLayout(): IUINode;
+  clearLayout(): IUINode;
   getDataNode(): IDataNode;
-  // getNode(path?: string): IUINode;
+  getNode(path?: string): IUINode;
   // getProps(): INodeProps;
 }

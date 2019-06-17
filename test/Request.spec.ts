@@ -14,7 +14,7 @@ describe("Given an instance of Request library", () => {
     request = new Request(reqConfig);
   });
   describe("the given response ", () => {
-    it("should same as json file state-test.json", () => {
+    it("get:should same as json file state-test.json", () => {
       const reqData = request.get("layouts/state-test.json");
       // console.log(reqData);
       reqData

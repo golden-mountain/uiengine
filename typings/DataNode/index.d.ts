@@ -11,7 +11,7 @@ interface IDataNode {
   loadData(source: string): Promise<AxiosPromise>;
   // loadData(): IDataNode;
   // updateData(): IDataNode;
-  // getData(): object;
+  getData(): any;
   // deleteNode(): IDataNode;
   // mockData(): IDataNode; //plugin
   // setDataSchema(): IDataSchema;
