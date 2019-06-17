@@ -1,3 +1,3 @@
-const reqConfig = { pathPrefix: "../test", devMode: true };
+const reqConfig = { pathPrefix: "../../test", devMode: true };
 
 export default reqConfig;

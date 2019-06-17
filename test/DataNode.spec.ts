@@ -4,7 +4,7 @@ import chai from "chai";
 import { DataNode, Request } from "../src";
 import reqConfig from "./config/request";
 
-import * as dataNodeJson from "./data/basic.json";
+import dataNodeJson from "./data/basic.json";
 
 // const DataNodeLayout = {};
 // chai.expect();
@@ -31,7 +31,7 @@ describe("Given an instance of my DataNode library", () => {
       const promise = dataNode.loadData("data/basic.json");
       promise
         .then(() => {
-          expect(dataNode.getDataNode()).to.deep.equal(dataNodeJson);
+          expect(dataNode.getData()).to.deep.equal(dataNodeJson);
         })
         .catch(function(error: any) {
           console.log("Error " + error.message);

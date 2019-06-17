@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { Request, DataNode } from ".";
 import { AxiosPromise } from "axios";
-import { IDataNode, IDataSource } from "../typings/DataNode";
+import { IDataNode, IDataSource } from "../../typings/DataNode";
 
 export default class UINode implements IUINode {
   private errorInfo: object = {};
@@ -28,17 +28,21 @@ export default class UINode implements IUINode {
   }
 
   async loadLayout(url: string): Promise<AxiosPromise> {
-    let response: any = await this.request.get(url);
-    // console.log(response);
-    if (response.data) {
-      this.assignSchema(response.data);
-    } else {
-      this.errorInfo = {
-        error: `Error loading from ${url}`
-      };
+    try {
+      let response: any = await this.request.get(url);
+      // console.log(response);
+      if (response.data) {
+        this.assignSchema(response.data);
+      } else {
+        this.errorInfo = {
+          error: `Error loading from ${url}`
+        };
+      }
+      // this.schema = response;
+      return response;
+    } catch (e) {
+      return e;
     }
-    // this.schema = response;
-    return response;
   }
 
   private assignSchema(schema: ILayoutSchema) {

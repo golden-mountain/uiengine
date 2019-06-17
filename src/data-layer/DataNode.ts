@@ -1,11 +1,12 @@
 import _ from "lodash";
 // import { Request } from ".";
-import Axios, { AxiosPromise } from "axios";
-import { IDataNode, IDataSource, IDataSchema } from "../typings/DataNode";
+import { AxiosPromise } from "axios";
+import { IDataNode, IDataSource, IDataSchema } from "../../typings/DataNode";
+import { Request } from ".";
 
 export default class DataNode implements IDataNode {
   private errorInfo: IErrorInfo = {};
-  private request: IRequest = {} as IRequest;
+  private request: IRequest = new Request({});
   private schema: IDataSchema = {};
   private data: any;
 
@@ -24,17 +25,21 @@ export default class DataNode implements IDataNode {
   }
 
   async loadData(source: string): Promise<AxiosPromise> {
-    let response: any = await this.request.get(source);
+    try {
+      let response: any = await this.request.get(source);
 
-    if (response.data) {
-      this.data = response.data;
-    } else {
-      this.errorInfo = {
-        code: `Error loading from ${source}`
-      };
+      if (response.data) {
+        this.data = response.data;
+      } else {
+        this.errorInfo = {
+          code: `Error loading from ${source}`
+        };
+      }
+      // this.data = response;
+      // console.log("l....................");
+      return response;
+    } catch (e) {
+      return e;
     }
-    // this.data = response;
-    // console.log("l....................");
-    return response;
   }
 }
