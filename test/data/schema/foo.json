@@ -1,0 +1,38 @@
+{
+  "endpoint": {
+    "default": {
+      "path": "foo.json"
+    },
+    "delete": "foo/{foo.name}",
+    "post": "foo/{foo.name}"
+  },
+  "definition": {
+    "foo": {
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 20,
+        "defaultValue": "baby"
+      },
+      "bar": {
+        "baz": {
+          "type": "nodes",
+          "model": {
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 20,
+              "defaultValue": "yoo"
+            },
+            "age": {
+              "type": "number",
+              "min": 1,
+              "max": 120,
+              "defaultValue": 3
+            }
+          }
+        }
+      }
+    }
+  }
+}

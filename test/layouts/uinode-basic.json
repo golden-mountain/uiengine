@@ -5,25 +5,25 @@
     {
       "component": "lib:DemoElement2",
       "id": "id-of-demo-element-2",
-      "datasource": "foo.bar.name",
+      "datasource": "foo:bar.name",
       "props": {
         "name": "demo-element-2"
       }
     },
     {
       "component": "lib:DemoLiveElement",
-      "datasource": "foo.bar.baz",
       "template": {
         "type": "row",
         "component": "div",
+        "datasource": "foo:bar.baz",
         "children": [
           {
             "component": "p",
-            "datasource": "$.name"
+            "datasource": "foo:bar.baz.$.name"
           },
           {
             "component": "p",
-            "datasource": "$.age"
+            "datasource": "foo:bar.baz.$.age"
           }
         ]
       },

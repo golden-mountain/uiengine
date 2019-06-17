@@ -77,8 +77,8 @@ export default class UINode implements IUINode {
   }
 
   loadData(source: string): IUINode {
-    const dataSource: IDataSource = { isURL: true, value: source };
-    this.dataNode = new DataNode(dataSource, this.request);
+    // const dataSource: IDataSource = { isURL: true, value: source };
+    this.dataNode = new DataNode(source, this.request);
     return this;
   }
 

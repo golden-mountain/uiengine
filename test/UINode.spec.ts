@@ -10,7 +10,7 @@ import reqConfig from "./config/request";
 
 import uiNodeLayout from "./layouts/uinode-basic.json";
 import stateTestLayout from "./layouts/state-test.json";
-import dataNodeJson from "./data/basic.json";
+import dataNodeJson from "./data/foo.json";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -42,7 +42,7 @@ describe("Given an instance of my UINode library", () => {
       // expect(uiNode.schema).to.be.equal(uinodeLayout);
       const remoteUINode = createRemoteUINode();
       const promise = remoteUINode.loadRemoteLayout(
-        "layouts/uinode-basic.json"
+        `${reqConfig.layoutSchemaPrefix}uinode-basic.json`
       );
       promise
         .then((res: any) => {
@@ -56,17 +56,17 @@ describe("Given an instance of my UINode library", () => {
 
     it("getDataNode: if datasource is not empty, should return a correct DataNode", async () => {
       const remoteUINode = createRemoteUINode();
-      remoteUINode.loadData("data/basic.json");
+      remoteUINode.loadData(`${reqConfig.dataPathPrefix}/basic.json`);
       const dataNode = remoteUINode.getDataNode();
       expect(dataNode).to.have.property("getData");
-      dataNode
-        .getData()
-        .then((v: any) => {
-          expect(dataNode.getData()).to.deep.equal(dataNodeJson);
-        })
-        .catch(function(e: any) {
-          console.log(e.message);
-        });
+      // dataNode
+      //   .getData()
+      //   .then((v: any) => {
+      //     expect(dataNode.getData()).to.deep.equal(dataNodeJson);
+      //   })
+      //   .catch(function(e: any) {
+      //     console.log(e.message);
+      //   });
     });
 
     it("replaceLayout: if bring a new schema on this node, this uiNode should replaced with new", () => {
@@ -83,7 +83,7 @@ describe("Given an instance of my UINode library", () => {
       // remote schema
       const remoteUINode = createRemoteUINode();
       const newRemoteUINode = remoteUINode.replaceLayout(
-        "layouts/uinode-basic.json"
+        `${reqConfig.layoutSchemaPrefix}uinode-basic.json`
       );
       expect(newRemoteUINode).to.equal(remoteUINode);
       newRemoteUINode

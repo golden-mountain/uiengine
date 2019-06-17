@@ -1,5 +1,6 @@
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
+import _ from "lodash";
 // Add a request interceptor
 // axios.interceptors.request.use(
 //   function(config) {
@@ -106,8 +107,11 @@ class RequestProduct extends RequestAbstract {
 
 export default class Request implements IRequest {
   private req: any;
+  private config: IRequestConfig | any;
 
   constructor(config?: IRequestConfig) {
+    if (config) this.config = config;
+
     if (config && config.devMode) {
       this.req = new RequestDev(config);
     } else {
@@ -129,5 +133,10 @@ export default class Request implements IRequest {
 
   delete(url: string, params?: any) {
     return this.req.delete(url, params);
+  }
+
+  getConfig(configName?: string) {
+    // console.log("get config>>>", configName, this.config);
+    return configName ? _.get(this.config, configName) : this.config;
   }
 }

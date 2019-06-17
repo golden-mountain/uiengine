@@ -3,11 +3,15 @@ interface IRequest {
   put(url: string, params?: any);
   post(url: string, params?: any);
   delete(url: string, params?: any);
+  getConfig(configName?: string);
 }
 
 interface IRequestConfig extends AxiosRequestConfig {
   devMode?: boolean;
   pathPrefix?: string;
+  dataSchemaPrefix?: string;
+  mockDataPrefix?: string;
+  layoutSchemaPrefix?: string;
 }
 
 interface IErrorInfo {
