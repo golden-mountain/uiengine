@@ -11,11 +11,11 @@ interface ILayoutSchema {
 interface IUINode {
   loadLayout(schema: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
-  loadData(source: string): IUINode;
+  loadData(source: string);
   getSchema(): ILayoutSchema;
   replaceLayout(newSchema: ILayoutSchema | string): IUINode;
   updateLayout(): IUINode;
-  // genLiveLayout(): IUINode;
+  genLiveLayout();
   clearLayout(): IUINode;
   getDataNode(): IDataNode;
   getNode(path?: string): IUINode;

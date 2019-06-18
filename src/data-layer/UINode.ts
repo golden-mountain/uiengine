@@ -16,10 +16,12 @@ export default class UINode implements IUINode {
       this.request = request;
     }
 
-    this.loadLayout(schema);
+    // this.loadLayout(schema);
+    this.schema = schema;
   }
 
-  loadLayout(schema: ILayoutSchema | string) {
+  loadLayout(schema?: ILayoutSchema | string) {
+    if (!schema) schema = this.schema;
     if (typeof schema === "object") {
       this.assignSchema(schema);
     } else {
@@ -65,6 +67,7 @@ export default class UINode implements IUINode {
   private assignSchema(schema: ILayoutSchema) {
     if (schema.children) {
       this.children = schema.children.map((s: any) => {
+        this.loadLayout(s);
         return new UINode(s);
       });
       // console.log(this.children);
@@ -73,13 +76,17 @@ export default class UINode implements IUINode {
       // console.log("load schema", schema["datasource"]);
       this.loadData(schema.datasource);
     }
+
+    if (schema["template"]) {
+      this.genLiveLayout();
+    }
     this.schema = schema;
   }
 
-  loadData(source: string): IUINode {
+  async loadData(source: string) {
     // const dataSource: IDataSource = { isURL: true, value: source };
     this.dataNode = new DataNode(source, this.request);
-    return this;
+    return await this.dataNode.loadData();
   }
 
   replaceLayout(newSchema: ILayoutSchema | string) {
@@ -108,5 +115,13 @@ export default class UINode implements IUINode {
       return _.get(this, path);
     }
     return this;
+  }
+
+  genLiveLayout() {
+    const template = _.get(this.schema, "template");
+    const data = this.getDataNode().getData();
+    // console.log(data);
+    if (template && data) {
+    }
   }
 }
