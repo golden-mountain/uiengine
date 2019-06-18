@@ -12,8 +12,8 @@ interface IDataSource {
 }
 
 interface IDataSourceInfo {
-  name: string;
-  schemaPath: string;
+  name?: string;
+  schemaPath?: string;
 }
 
 interface IDataNode {
@@ -29,4 +29,6 @@ interface IDataNode {
   loadRemoteData(source: string): Promise<AxiosPromise> | any;
   getDataEntryPoint(method: string = "default"): string;
   // loadPlugins();
+  getErrorInfo();
+  getSource();
 }

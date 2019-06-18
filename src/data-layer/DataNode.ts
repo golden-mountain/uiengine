@@ -11,6 +11,9 @@ import { Request } from ".";
 
 export default class DataNode implements IDataNode {
   static cache: IDataSource = {};
+  static clearCache = () => {
+    DataNode.cache = {};
+  };
 
   private errorInfo: IErrorInfo = {};
   private request: IRequest = new Request({});
@@ -22,7 +25,8 @@ export default class DataNode implements IDataNode {
     if (request) this.request = request;
 
     if (typeof source === "object") {
-      this.source = source;
+      this.data = source;
+      this.source = {};
     } else {
       this.source = this.getSchemaInfo(source);
       try {
@@ -38,7 +42,11 @@ export default class DataNode implements IDataNode {
     // no  ":"
     if (!name) {
       name = schemaPath;
-      schemaPath = "";
+      const firstDotPos = schemaPath.indexOf(".");
+      schemaPath = schemaPath.substr(
+        0,
+        firstDotPos !== -1 ? firstDotPos : schemaPath.length
+      );
     }
 
     if (name.indexOf(schemaPath) === -1) {
@@ -47,8 +55,20 @@ export default class DataNode implements IDataNode {
     return { name, schemaPath: `${schemaPath}.json` };
   }
 
+  getSource() {
+    return this.source;
+  }
+
+  getErrorInfo() {
+    return this.errorInfo;
+  }
+
   getData(path?: string) {
     return path ? _.get(this.data, path, this.data) : this.data;
+  }
+
+  getSchema() {
+    return this.schema;
   }
 
   getDataEntryPoint(method: string): string {
@@ -63,20 +83,14 @@ export default class DataNode implements IDataNode {
   }
 
   loadData() {
-    const { name, schemaPath } = this.source;
+    const { name = "", schemaPath } = this.source;
     if (schemaPath) {
       if (DataNode.cache[schemaPath]) {
-        // console.log(">>>> get schema from cache");
         this.data = _.get(DataNode.cache[schemaPath], name);
       } else {
-        // console.log(">>>> loading schema");
         this.schema = this.loadSchema().then((response: any) => {
-          // console.log("schema data:", response.data);
           if (response.data) {
-            // const { definition, endpoint } = response.data;
-            this.schema = response.data;
             const endpoint = this.getDataEntryPoint("get");
-            // console.log(">>>>>>>>data endpoint", endpoint);
             this.data = this.loadRemoteData(endpoint);
           }
           return response;
@@ -89,31 +103,26 @@ export default class DataNode implements IDataNode {
   }
 
   async loadRemoteData(source: string) {
+    const { name = "", schemaPath = "deault" } = this.source;
     try {
       let response: any = await this.request.get(source);
 
       if (response.data) {
-        this.data = response.data;
-      } else {
-        this.errorInfo = {
-          code: `Error loading from ${source}`
-        };
+        this.data = _.get(response.data, name);
+        DataNode.cache[schemaPath] = this.data;
       }
-      // this.data = response;
-      // console.log("l....................");
+
       return response;
     } catch (e) {
-      return e;
+      this.errorInfo = {
+        code: `Error loading from ${source}`
+      };
+      return null;
     }
   }
 
-  getSchema() {
-    return this.schema;
-  }
-
   async loadSchema() {
-    if (_.get(this.schema, "definition")) {
-      // console.log("schema loaded>>>>");
+    if (this.schema) {
       return this.schema;
     }
     // const { schemaPath } = this.source;
@@ -122,7 +131,11 @@ export default class DataNode implements IDataNode {
       // console.log(this.source, "<<<<<<<<<<<<<<<<<");
       const path = `${dataSchemaPath}${this.source.schemaPath}`;
       // console.log(">>>>>>>>>>>>>>>>>>>>>>>", path);
-      return await this.request.get(path);
+      let response = await this.request.get(path);
+      if (response.data) {
+        this.schema = response.data;
+      }
+      return response;
     } catch (e) {
       return e;
     }

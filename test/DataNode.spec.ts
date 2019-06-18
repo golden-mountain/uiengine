@@ -2,6 +2,7 @@
 
 import chai from "chai";
 import chaiSpies from "chai-spies";
+import _ from "lodash";
 import { DataNode, Request } from "../src";
 import reqConfig from "./config/request";
 
@@ -20,50 +21,78 @@ describe("Given an instance of my DataNode library", () => {
   before(() => {});
   describe("the given data", () => {
     it("constructor: should called getSchemaInfo & loadData", async () => {
-      const dataNode = new DataNode("foo:bar", request);
-      // expect(spy).to.have.been.called.once;
-      // expect(dataNode.getSchema()).instanceOf(Promise);
-      // dataNode.getSchema().then((v: any) => {
-      //   // console.log(v);
-      //   // const spy = chai.spy.on(dataNode, "loadData");
-      //   expect(dataNode.getData()).instanceOf(Promise);
-      //   dataNode.getData().then((d: any) => {
-      //     // console.log(d, "<<<<<<<<<<<<<<<");
-      //     expect(dataNode.getData()).to.deep.equal(dataNodeJson);
-      //   });
-      // });
+      DataNode.clearCache();
+      const toLoadName = "foo.bar";
+      const dataNode = new DataNode(toLoadName, request);
+      expect(dataNode.getSchema()).is.instanceOf(Promise);
+      // load schema test
       const schema = await dataNode.getSchema();
+      expect(dataNode.getSchema()).to.deep.equal(schema.data);
       expect(dataNode.getSchema()).to.deep.equal(dataSchemaJson);
+      // load data test
+      expect(dataNode.getData()).is.instanceOf(Promise);
       const res = await dataNode.getData();
-      expect(dataNode.getData()).to.deep.equal(dataNodeJson);
+      expect(dataNode.getData()).to.deep.equal(_.get(res.data, toLoadName));
+      expect(dataNode.getData()).to.deep.equal(_.get(dataNodeJson, toLoadName));
+      // load cached data
+      // const spy = chai.spy.on(dataNode, "loadSchema");
+      // expect(dataNode.loadData()).to.deep.equal(
+      //   _.get(dataNodeJson, toLoadName)
+      // );
+      // expect(spy).have.not.been.called;
+
+      // localObject
+      const dataLocalNode = new DataNode(dataNodeJson);
+      expect(dataLocalNode.getData()).to.be.deep.equal(dataNodeJson);
     });
 
-    // it("loadData & getData: if data is string, should load from remote and same as the loaded", async () => {
-    //   const dataNode = new DataNode(dataSource, request);
-    //   const promise = dataNode.loadRemoteData(
-    //     `${reqConfig.mockDataPrefix}/basic.json`
-    //   );
-    //   promise
-    //     .then(() => {
-    //       expect(dataNode.getData()).to.deep.equal(dataNodeJson);
-    //     })
-    //     .catch(function(error: any) {
-    //       console.log(error.message);
-    //     });
-    // });
+    it("getSchemaInfo: if source is string, the source should translate to IDataSourceInfo", async () => {
+      const dataNode = new DataNode({});
+      let sourceInfo = dataNode.getSchemaInfo("foo:bar.baz");
+      let expectInfo = {
+        name: "foo.bar.baz",
+        schemaPath: "foo.json"
+      };
+      expect(sourceInfo).to.be.deep.equal(expectInfo);
 
-    // it("loadSchema: the remote loaded schema should same as local test loaded", () => {
-    //   const dataNode = new DataNode(dataSource, request);
-    //   let promise = dataNode.loadSchema();
-    //   promise
-    //     .then(() => {
-    //       expect(dataNode.getSchema()).to.deep.equal(dataSchemaJson);
-    //       expect(dataNode.getCache()).to.deep.equal(dataSchemaJson);
-    //     })
-    //     .catch(function(error: any) {
-    //       console.log(error.message);
-    //     });
-    // });
+      sourceInfo = dataNode.getSchemaInfo("foo.bar.baz");
+      expect(sourceInfo).to.be.deep.equal(expectInfo);
+
+      sourceInfo = dataNode.getSchemaInfo("foo");
+      expectInfo = {
+        name: "foo",
+        schemaPath: "foo.json"
+      };
+      expect(sourceInfo).to.be.deep.equal(expectInfo);
+    });
+
+    it("loadSchema: schema should be loaded from remote and be cached", async () => {
+      DataNode.clearCache();
+      const dataNode = new DataNode("foo:bar", request);
+      expect(dataNode.getSchema()).is.instanceOf(Promise);
+      let schema = await dataNode.getSchema();
+      expect(dataNode.getSchema()).to.deep.equal(dataSchemaJson);
+
+      // load from cache
+      schema = await dataNode.loadSchema();
+      expect(schema).to.deep.equal(dataSchemaJson);
+    });
+
+    it("loadRemoteData: data should be loaded from remote and be cached", async () => {
+      const dataNode = new DataNode({}, request);
+      // const source: any = dataNode.getSchemaInfo("foo:bar");
+      // const endpoint = dataNode.getDataEntryPoint("get");
+      let source = "data/foo.json";
+      let data = await dataNode.loadRemoteData(source);
+      expect(dataNode.getData()).to.be.undefined;
+
+      source = "data/wrong.json";
+      data = await dataNode.loadRemoteData(source);
+      const errorInfo = {
+        code: `Error loading from ${source}`
+      };
+      expect(dataNode.getErrorInfo()).to.be.deep.equal(errorInfo);
+    });
   });
 });
 
