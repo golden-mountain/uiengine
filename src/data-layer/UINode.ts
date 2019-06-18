@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { Request, DataNode } from ".";
 import { AxiosPromise } from "axios";
-import { IDataNode, IDataSource } from "../../typings/DataNode";
+import { IDataNode } from "../../typings/DataNode";
 // import { IUINode, ILayoutSchema } from "../../typings/UINode";
 
 export default class UINode implements IUINode {

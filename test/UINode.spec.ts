@@ -2,7 +2,9 @@
 
 import chai from "chai";
 import chaiSpies from "chai-spies";
-import { UINode, Request } from "../src";
+import _ from "lodash";
+
+import { UINode, Request, DataNode } from "../src";
 import reqConfig from "./config/request";
 // import defaultSchema from "./config/default-schema";
 // import { IUINode } from "../typings/UINode";
@@ -11,6 +13,7 @@ import reqConfig from "./config/request";
 import uiNodeLayout from "./layouts/uinode-basic.json";
 import stateTestLayout from "./layouts/state-test.json";
 import dataNodeJson from "./data/foo.json";
+import dataSchemaJson from "./data/schema/foo.json";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -25,6 +28,7 @@ const creatLocalUINode = () => {
 };
 
 const createRemoteUINode = () => {
+  // DataNode.clearCache();
   const request = new Request(reqConfig);
   return new UINode({}, request);
 };
@@ -56,17 +60,9 @@ describe("Given an instance of my UINode library", () => {
 
     it("getDataNode: if datasource is not empty, should return a correct DataNode", async () => {
       const remoteUINode = createRemoteUINode();
-      remoteUINode.loadData(`${reqConfig.dataPathPrefix}/basic.json`);
+      remoteUINode.loadData("foo:bar");
       const dataNode = remoteUINode.getDataNode();
-      expect(dataNode).to.have.property("getData");
-      // dataNode
-      //   .getData()
-      //   .then((v: any) => {
-      //     expect(dataNode.getData()).to.deep.equal(dataNodeJson);
-      //   })
-      //   .catch(function(e: any) {
-      //     console.log(e.message);
-      //   });
+      expect(dataNode).to.have.property("loadData");
     });
 
     it("replaceLayout: if bring a new schema on this node, this uiNode should replaced with new", () => {

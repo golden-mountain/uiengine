@@ -3,7 +3,7 @@
 import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
-import { DataNode, Request } from "../src";
+import { DataNode, Request, Cache } from "../src";
 import reqConfig from "./config/request";
 
 import dataNodeJson from "./data/foo.json";
@@ -21,29 +21,23 @@ describe("Given an instance of my DataNode library", () => {
   before(() => {});
   describe("the given data", () => {
     it("constructor: should called getSchemaInfo & loadData", async () => {
-      DataNode.clearCache();
+      //DataNode.clearCache();
       const toLoadName = "foo.bar";
       const dataNode = new DataNode(toLoadName, request);
-      expect(dataNode.getSchema()).is.instanceOf(Promise);
-      // load schema test
-      const schema = await dataNode.getSchema();
-      expect(dataNode.getSchema()).to.deep.equal(schema.data);
-      expect(dataNode.getSchema()).to.deep.equal(dataSchemaJson);
-      // load data test
-      expect(dataNode.getData()).is.instanceOf(Promise);
-      const res = await dataNode.getData();
-      expect(dataNode.getData()).to.deep.equal(_.get(res.data, toLoadName));
+      const source = { name: "foo.bar", schemaPath: "foo.json" };
+      expect(dataNode.getSource()).to.be.deep.equal(source);
+      let data = await dataNode.loadData();
       expect(dataNode.getData()).to.deep.equal(_.get(dataNodeJson, toLoadName));
-      // load cached data
-      // const spy = chai.spy.on(dataNode, "loadSchema");
-      // expect(dataNode.loadData()).to.deep.equal(
-      //   _.get(dataNodeJson, toLoadName)
-      // );
-      // expect(spy).have.not.been.called;
+      // load schema test
+      let schema = dataNode.getSchema();
+      expect(schema).to.deep.equal(
+        _.get(dataSchemaJson, `definition.${toLoadName}`)
+      );
 
       // localObject
-      const dataLocalNode = new DataNode(dataNodeJson);
-      expect(dataLocalNode.getData()).to.be.deep.equal(dataNodeJson);
+      const anyValue = { any: 1 };
+      const dataLocalNode = new DataNode(anyValue);
+      expect(dataLocalNode.getData()).to.be.deep.equal(anyValue);
     });
 
     it("getSchemaInfo: if source is string, the source should translate to IDataSourceInfo", async () => {
@@ -66,43 +60,49 @@ describe("Given an instance of my DataNode library", () => {
       expect(sourceInfo).to.be.deep.equal(expectInfo);
     });
 
-    it("loadSchema: schema should be loaded from remote and be cached", async () => {
-      DataNode.clearCache();
-      const dataNode = new DataNode("foo:bar", request);
-      expect(dataNode.getSchema()).is.instanceOf(Promise);
-      let schema = await dataNode.getSchema();
-      expect(dataNode.getSchema()).to.deep.equal(dataSchemaJson);
+    it("loadSchema: schema should be loaded from remote", async () => {
+      Cache.clearDataSchemaCache();
+      let dataNode = new DataNode("foo:bar", request);
+      // expect(dataNode.getSchema()).is.instanceOf(Promise);
+      let schema = await dataNode.loadSchema();
+      const data = _.get(dataSchemaJson, "definition.foo.bar");
+      expect(schema).to.deep.equal(data);
 
       // load from cache
+      schema = dataNode.getSchema();
+      expect(schema).to.deep.equal(data);
+
+      // error loading
+      dataNode = new DataNode("foola.bar", request);
       schema = await dataNode.loadSchema();
-      expect(schema).to.deep.equal(dataSchemaJson);
+      const errorCode = "Cannot find module";
+      const errorInfo = dataNode.getErrorInfo("schema");
+      // console.log(errorCode);
+      expect(errorInfo.code).to.include(errorCode);
     });
 
     it("loadRemoteData: data should be loaded from remote and be cached", async () => {
-      const dataNode = new DataNode({}, request);
-      // const source: any = dataNode.getSchemaInfo("foo:bar");
-      // const endpoint = dataNode.getDataEntryPoint("get");
-      let source = "data/foo.json";
-      let data = await dataNode.loadRemoteData(source);
-      expect(dataNode.getData()).to.be.undefined;
+      Cache.clearDataCache();
+      let dataNode = new DataNode("foo:bar", request);
+      // expect(dataNode.getSchema()).is.instanceOf(Promise);
+      let schema = await dataNode.loadSchema();
+      let endpoint = dataNode.getDataEntryPoint("get");
+      expect(endpoint).to.equal(`${reqConfig.dataPathPrefix}foo.json`);
+      let data = await dataNode.loadRemoteData(endpoint);
+      let equalData = _.get(dataNodeJson, "foo.bar");
+      expect(data).to.deep.equal(equalData);
+      // load from cache
+      data = dataNode.getData();
+      expect(data).to.deep.equal(equalData);
 
-      source = "data/wrong.json";
-      data = await dataNode.loadRemoteData(source);
-      const errorInfo = {
-        code: `Error loading from ${source}`
-      };
-      expect(dataNode.getErrorInfo()).to.be.deep.equal(errorInfo);
+      // error loading
+      Cache.clearDataCache();
+      dataNode = new DataNode("foo:bar", request);
+      data = await dataNode.loadRemoteData("any.wrong.node");
+      const errorCode = "Cannot find module";
+      const errorInfo = dataNode.getErrorInfo("data");
+      // console.log(errorCode);
+      expect(errorInfo.code).to.include(errorCode);
     });
   });
 });
-
-// describe("Given an instance of my Dog library", () => {
-//   before(() => {
-//     // lib = new Dog();
-//   });
-//   describe("when I need the name", () => {
-//     // it("should return the name", () => {
-//     //   expect(lib.name).to.be.equal("Dog");
-//     // });
-//   });
-// });

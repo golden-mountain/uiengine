@@ -5,10 +5,8 @@ interface IDataSchema {
   definition: {};
 }
 
-interface IDataSource {
-  [name: string]: {
-    data: any;
-  };
+interface ICache {
+  [name: string]: {};
 }
 
 interface IDataSourceInfo {
@@ -17,14 +15,12 @@ interface IDataSourceInfo {
 }
 
 interface IDataNode {
-  loadData(): IDataNode;
+  loadData(): Promise<AxiosPromise> | any;
   loadSchema(): Promise<AxiosPromise> | any;
-  // loadData(): IDataNode;
   // updateData(): IDataNode;
-  getData(): IDataNode;
-  // deleteNode(): IDataNode;
+  getData(): Promise<AxiosPromise> | any;
   // mockData(): IDataNode; //plugin
-  getSchema(): IDataSchema | void;
+  getSchema(): Promise<AxiosPromise> | any;
   getSchemaInfo(source: string): IDataSourceInfo;
   loadRemoteData(source: string): Promise<AxiosPromise> | any;
   getDataEntryPoint(method: string = "default"): string;

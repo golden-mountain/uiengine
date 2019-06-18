@@ -12,3 +12,6 @@ export { default as DataMapper } from "./DataMapper";
 
 // messager
 export { default as Messager } from "./Messager";
+
+// cache
+export { default as Cache } from "./Cache";
