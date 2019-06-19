@@ -1,5 +1,5 @@
 {
-  "name": "uinode-basic",
+  "id": "uinode-basic",
   "component": "lib:DemoElement1",
   "datasource": "foo:bar",
   "children": [

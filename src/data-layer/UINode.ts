@@ -1,16 +1,19 @@
 import _ from "lodash";
-import { Request, DataNode, Cache } from ".";
+import { Request, DataNode, Cache, StateNode } from ".";
 import { AxiosPromise } from "axios";
 import { IDataNode } from "../../typings/DataNode";
-// import { IUINode, ILayoutSchema } from "../../typings/UINode";
+import { IStateNode } from "../../typings/StateNode";
+import { IUINode, ILayoutSchema } from "../../typings/UINode";
 
 export default class UINode implements IUINode {
   private errorInfo: IErrorInfo = {};
   private request: IRequest = new Request();
-  private children: Array<UINode> = [];
+  private children: Array<UINode> | Array<any> = [];
   private schema: ILayoutSchema = {};
   private liveSchema: ILayoutSchema = {};
+  private rootSchema: ILayoutSchema = {};
   private dataNode?: any;
+  private stateNode: IStateNode = new StateNode(this);
 
   constructor(schema: ILayoutSchema, request?: IRequest) {
     if (request) {
@@ -26,6 +29,7 @@ export default class UINode implements IUINode {
     if (!schema) schema = this.schema;
     if (typeof schema === "string") {
       schema = await this.loadRemoteLayout(schema);
+      this.rootSchema = schema;
     }
     await this.assignSchema(schema);
     return schema;
@@ -51,6 +55,14 @@ export default class UINode implements IUINode {
     return this.liveSchema;
   }
 
+  getRootSchema(): ILayoutSchema {
+    return this.rootSchema;
+  }
+
+  getStateNode(): IStateNode {
+    return this.stateNode;
+  }
+
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {
     let result: any = Cache.getLayoutSchema(url);
     if (!result) {
@@ -58,6 +70,7 @@ export default class UINode implements IUINode {
         let response: any = await this.request.get(url);
         if (response.data) {
           result = response.data;
+          Cache.setLayoutSchema(url, result);
         }
       } catch (e) {
         this.errorInfo = {
@@ -100,6 +113,8 @@ export default class UINode implements IUINode {
 
     this.schema = schema;
     this.liveSchema = liveSchema;
+
+    await this.updateState();
     return this;
   }
 
@@ -157,5 +172,9 @@ export default class UINode implements IUINode {
     // add a new children
     this.liveSchema = liveSchema;
     return liveSchema;
+  }
+
+  async updateState() {
+    return this.getStateNode().renewStates();
   }
 }

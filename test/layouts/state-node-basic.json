@@ -1,0 +1,56 @@
+{
+  "id": "state-node-basic",
+  "component": "lib:DemoElement1",
+  "datasource": "foo:bar",
+  "children": [
+    {
+      "component": "lib:DemoElement2",
+      "id": "id-of-demo-element-1",
+      "datasource": "foo:bar.name",
+      "name": "demo-element-2",
+      "props": {}
+    },
+    {
+      "component": "lib:DemoLiveElement",
+      "datasource": "foo:bar.baz",
+      "state": {
+        "deps": {
+          "visible": [
+            {
+              "prop": "id",
+              "id": "id-of-demo-element-1",
+              "state": {
+                "visible": true
+              }
+            }
+          ]
+        }
+      },
+      "$children": [
+        {
+          "component": "p",
+          "datasource": "foo:bar.baz.$.name",
+          "id": "for.bar.baz.$.name"
+        },
+        {
+          "component": "p",
+          "datasource": "foo:bar.baz.$.age",
+          "state": {
+            "deps": {
+              "visible": [
+                {
+                  "prop": "id",
+                  "id": "for.bar.baz.$.name",
+                  "data": "Rui"
+                }
+              ]
+            }
+          }
+        }
+      ],
+      "props": {
+        "defaultvalue": "hello"
+      }
+    }
+  ]
+}
