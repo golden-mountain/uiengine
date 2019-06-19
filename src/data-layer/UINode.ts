@@ -10,6 +10,7 @@ export default class UINode implements IUINode {
   private children: Array<UINode> = [];
   private schema: ILayoutSchema = {};
   private liveSchema: ILayoutSchema = {};
+  private rootSchemas: object = {};
   private dataNode?: any;
 
   constructor(schema: ILayoutSchema, request?: IRequest) {
@@ -23,12 +24,14 @@ export default class UINode implements IUINode {
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
-    if (!schema) schema = this.schema;
+    let returnSchema: any = schema;
+    if (!returnSchema) returnSchema = this.schema;
     if (typeof schema === "string") {
-      schema = await this.loadRemoteLayout(schema);
+      returnSchema = await this.loadRemoteLayout(schema);
+      this.rootSchemas[schema] = returnSchema;
     }
-    await this.assignSchema(schema);
-    return schema;
+    await this.assignSchema(returnSchema);
+    return returnSchema;
   }
 
   getSchema(): ILayoutSchema {
@@ -49,6 +52,13 @@ export default class UINode implements IUINode {
 
   getLiveSchema(): ILayoutSchema {
     return this.liveSchema;
+  }
+
+  getRootSchemas(name?: string) {
+    if (name) {
+      return this.rootSchemas[name];
+    }
+    return this.rootSchemas;
   }
 
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {

@@ -155,6 +155,18 @@ describe("Given an instance of my UINode library", () => {
       const firstNodeData = firstChildren.getDataNode().getData();
       expect(firstNodeData).to.equal("Rui");
     });
+
+    it("loadLayout: should load remote/given layout, and rootSchemas is assigned", async () => {
+      // use given layout from constructor
+      const schemaPath = `${reqConfig.layoutSchemaPrefix}uinode-basic.json`;
+      const uinode = new UINode({}, request);
+      const schema = await uinode.loadLayout(schemaPath);
+      expect(schema).to.deep.equal(uiNodeLayout);
+      const rootSchemas = {
+        [schemaPath]: schema
+      };
+      expect(uinode.getRootSchemas()).to.deep.equal(rootSchemas);
+    });
   });
 });
 
