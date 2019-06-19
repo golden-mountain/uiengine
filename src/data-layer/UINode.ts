@@ -9,8 +9,7 @@ export default class UINode implements IUINode {
   private request: IRequest = new Request();
   private children: Array<UINode> = [];
   private schema: ILayoutSchema = {};
-  private liveSchema: ILayoutSchema = {};
-  private rootSchemas: object = {};
+  private rootLiveSchemas: object = {};
   private dataNode?: any;
 
   constructor(schema: ILayoutSchema, request?: IRequest) {
@@ -18,19 +17,18 @@ export default class UINode implements IUINode {
       this.request = request;
     }
 
-    // this.loadLayout(schema);
     this.schema = schema;
-    this.liveSchema = _.cloneDeep(schema);
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
     let returnSchema: any = schema;
     if (!returnSchema) returnSchema = this.schema;
+    let rootSchemaName: string = "";
     if (typeof schema === "string") {
       returnSchema = await this.loadRemoteLayout(schema);
-      this.rootSchemas[schema] = returnSchema;
+      rootSchemaName = schema;
     }
-    await this.assignSchema(returnSchema);
+    await this.assignSchema(returnSchema, rootSchemaName);
     return returnSchema;
   }
 
@@ -50,15 +48,11 @@ export default class UINode implements IUINode {
     return this.dataNode;
   }
 
-  getLiveSchema(): ILayoutSchema {
-    return this.liveSchema;
-  }
-
-  getRootSchemas(name?: string) {
+  getRootLiveSchemas(name?: string) {
     if (name) {
-      return this.rootSchemas[name];
+      return this.rootLiveSchemas[name];
     }
-    return this.rootSchemas;
+    return this.rootLiveSchemas;
   }
 
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {
@@ -79,8 +73,11 @@ export default class UINode implements IUINode {
     return result;
   }
 
-  private async assignSchema(schema: ILayoutSchema) {
-    let liveSchema = _.cloneDeep(schema);
+  private async assignSchema(
+    schema: ILayoutSchema,
+    rootSchemaName: string = ""
+  ) {
+    let liveSchema = schema;
     if (liveSchema["datasource"]) {
       await this.loadData(liveSchema["datasource"]);
     }
@@ -108,8 +105,8 @@ export default class UINode implements IUINode {
       });
     }
 
-    this.schema = schema;
-    this.liveSchema = liveSchema;
+    this.schema = liveSchema;
+    if (rootSchemaName) this.rootLiveSchemas[rootSchemaName] = liveSchema;
     return this;
   }
 
@@ -132,7 +129,6 @@ export default class UINode implements IUINode {
 
   clearLayout() {
     this.schema = {};
-    this.liveSchema = {};
     this.errorInfo = {};
     this.children = [];
     return this;
@@ -150,7 +146,7 @@ export default class UINode implements IUINode {
       data = await this.loadData(schema.datasource);
     }
 
-    const liveSchema = _.cloneDeep(schema);
+    const liveSchema = schema;
     const rowTemplate: any = liveSchema.$children;
     if (rowTemplate && data) {
       liveSchema.children = data.map((d: any, index: number) =>
@@ -165,7 +161,6 @@ export default class UINode implements IUINode {
     }
 
     // add a new children
-    this.liveSchema = liveSchema;
     return liveSchema;
   }
 }

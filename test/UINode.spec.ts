@@ -123,22 +123,20 @@ describe("Given an instance of my UINode library", () => {
         dataNodeJson.foo.bar.baz
       );
 
-      expect(localUINode.getLiveSchema().children).to.deep.equal(
-        expectedResult
-      );
+      expect(schema.children).to.deep.equal(expectedResult);
     });
 
     it("assignSchema: if assign a schema to this node, data & schema should loaded", async () => {
       const schemaWithLiveNode: any = uiNodeLayout.children[1];
       const localUINode = new UINode(schemaWithLiveNode);
-      await localUINode.loadLayout();
+      const schema = await localUINode.loadLayout();
       // data shource loaded
       const data = localUINode.getDataNode().getData();
       const datasource = localUINode.getSchema().datasource.replace(":", ".");
       expect(data).to.deep.equal(_.get(dataNodeJson, datasource));
 
       // liveschema loaded
-      const liveschema: any = localUINode.getLiveSchema();
+      const liveschema: any = localUINode.getSchema();
       expect(liveschema.children).to.deep.equal(expectedResult);
 
       // children generated
@@ -162,21 +160,12 @@ describe("Given an instance of my UINode library", () => {
       const uinode = new UINode({}, request);
       const schema = await uinode.loadLayout(schemaPath);
       expect(schema).to.deep.equal(uiNodeLayout);
+      const liveChildren = _.get(schema, "children[1].children");
+      expect(liveChildren).to.deep.equal(expectedResult);
       const rootSchemas = {
-        [schemaPath]: schema
+        [schemaPath]: uinode.getSchema()
       };
-      expect(uinode.getRootSchemas()).to.deep.equal(rootSchemas);
+      expect(uinode.getRootLiveSchemas()).to.deep.equal(rootSchemas);
     });
   });
 });
-
-// describe("Given an instance of my Dog library", () => {
-//   before(() => {
-//     // lib = new Dog();
-//   });
-//   describe("when I need the name", () => {
-//     // it("should return the name", () => {
-//     //   expect(lib.name).to.be.equal("Dog");
-//     // });
-//   });
-// });
