@@ -26,7 +26,7 @@ describe("Given an instance of my DataNode library", () => {
       const dataNode = new DataNode(toLoadName, request);
       const source = { name: "foo.bar", schemaPath: "foo.json" };
       expect(dataNode.getSource()).to.be.deep.equal(source);
-      let data = await dataNode.loadData();
+      await dataNode.loadData();
       expect(dataNode.getData()).to.deep.equal(_.get(dataNodeJson, toLoadName));
       // load schema test
       let schema = dataNode.getSchema();

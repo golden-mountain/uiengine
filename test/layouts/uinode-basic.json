@@ -1,6 +1,7 @@
 {
   "name": "uinode-basic",
   "component": "lib:DemoElement1",
+  "datasource": "foo:bar",
   "children": [
     {
       "component": "lib:DemoElement2",
@@ -12,21 +13,17 @@
     },
     {
       "component": "lib:DemoLiveElement",
-      "template": {
-        "type": "row",
-        "component": "div",
-        "datasource": "foo:bar.baz",
-        "children": [
-          {
-            "component": "p",
-            "datasource": "foo:bar.baz.$.name"
-          },
-          {
-            "component": "p",
-            "datasource": "foo:bar.baz.$.age"
-          }
-        ]
-      },
+      "datasource": "foo:bar.baz",
+      "$children": [
+        {
+          "component": "p",
+          "datasource": "foo:bar.baz.$.name"
+        },
+        {
+          "component": "p",
+          "datasource": "foo:bar.baz.$.age"
+        }
+      ],
       "props": {
         "defaultvalue": "hello"
       }

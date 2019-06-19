@@ -16,20 +16,17 @@
       },
       "bar": {
         "baz": {
-          "type": "nodes",
-          "model": {
-            "name": {
-              "type": "string",
-              "minLength": 1,
-              "maxLength": 20,
-              "defaultValue": "yoo"
-            },
-            "age": {
-              "type": "number",
-              "min": 1,
-              "max": 120,
-              "defaultValue": 3
-            }
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20,
+            "defaultValue": "yoo"
+          },
+          "age": {
+            "type": "number",
+            "min": 1,
+            "max": 120,
+            "defaultValue": 3
           }
         }
       }

@@ -18,7 +18,7 @@ interface IDataNode {
   loadData(): Promise<AxiosPromise> | any;
   loadSchema(): Promise<AxiosPromise> | any;
   // updateData(): IDataNode;
-  getData(): Promise<AxiosPromise> | any;
+  getData(path?: string): Promise<AxiosPromise> | any;
   // mockData(): IDataNode; //plugin
   getSchema(): Promise<AxiosPromise> | any;
   getSchemaInfo(source: string): IDataSourceInfo;

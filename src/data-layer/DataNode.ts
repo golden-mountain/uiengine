@@ -10,12 +10,15 @@ export default class DataNode implements IDataNode {
   private schema?: any;
   private data: any;
   private source: IDataSourceInfo;
+  private rootSchema?: any;
+  private rootData?: any;
 
   constructor(source: any, request?: IRequest) {
     if (request) this.request = request;
 
     if (typeof source === "object") {
       this.data = source;
+      this.rootData = source;
       this.source = {};
     } else {
       this.source = this.getSchemaInfo(source);
@@ -59,9 +62,17 @@ export default class DataNode implements IDataNode {
     return this.schema;
   }
 
+  getRootSchema() {
+    return this.rootSchema;
+  }
+
+  getRootData() {
+    return this.rootData;
+  }
+
   getDataEntryPoint(method: string): string {
-    const { name = "" } = this.source;
-    let schema: any = Cache.getDataSchema(name);
+    const { schemaPath = "" } = this.source;
+    let schema: any = Cache.getDataSchema(schemaPath);
     const defaultEndPoint = _.get(schema, `endpoint.default.path`, "");
     const endpoint = _.get(schema, `endpoint.${method}.path`, defaultEndPoint);
     const dataURLPrefix = this.request.getConfig("dataPathPrefix");
@@ -71,14 +82,9 @@ export default class DataNode implements IDataNode {
   async loadData() {
     const { schemaPath } = this.source;
     if (schemaPath) {
-      // if (DataNode.cache[schemaPath]) {
-      //   this.data = _.get(DataNode.cache[schemaPath], name);
-      // } else {
       this.schema = await this.loadSchema();
-      // console.log(this.schema, "97");
       const endpoint = this.getDataEntryPoint("get");
       this.data = await this.loadRemoteData(endpoint);
-      // }
     } else {
       this.schema = null;
       this.data = null;
@@ -89,18 +95,18 @@ export default class DataNode implements IDataNode {
   async loadRemoteData(source: string) {
     let result: any = null;
     try {
-      const { name = "" } = this.source;
-      let data: any = Cache.getData(name);
+      const { schemaPath = "", name = "" } = this.source;
+      let data: any = Cache.getData(schemaPath);
       if (!data) {
         data = await this.request.get(source);
         if (data.data) {
-          Cache.setData(name, data.data);
+          Cache.setData(schemaPath, data.data);
+          data = data.data;
         }
       }
-
-      result = _.get(data, `data.${name}`, null);
+      this.rootData = data;
+      result = _.get(data, name, null);
     } catch (e) {
-      // console.error(e.message);
       this.errorInfo.data = {
         code: e.message
       };
@@ -112,24 +118,25 @@ export default class DataNode implements IDataNode {
   async loadSchema() {
     let result: any = null;
     try {
-      const { name = "" } = this.source;
-      let schema: any = Cache.getDataSchema(name);
+      const { name = "", schemaPath = "" } = this.source;
+      let schema: any = Cache.getDataSchema(schemaPath);
       if (!schema) {
         const dataSchemaPath = this.request.getConfig("dataSchemaPrefix");
         const path = `${dataSchemaPath}${this.source.schemaPath}`;
         schema = await this.request.get(path);
         if (schema.data) {
-          Cache.setDataSchema(name, schema.data);
+          Cache.setDataSchema(schemaPath, schema.data);
+          schema = schema.data;
         }
       }
-      this.schema = _.get(schema, `data.definition.${name}`);
-      return this.schema;
+      this.rootSchema = schema;
+      result = _.get(schema, `definition.${name}`);
     } catch (e) {
       this.errorInfo.schema = {
         code: e.message
       };
     }
-    this.data = result;
+    this.schema = result;
     return result;
   }
 }

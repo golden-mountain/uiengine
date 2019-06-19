@@ -3,6 +3,7 @@ interface INodeProps {}
 interface ILayoutSchema {
   component?: string;
   children?: Array<ILayoutSchema>;
+  _children?: Array<ILayoutSchema>;
   name?: string;
   props?: object;
   [key: string]: any;
@@ -13,9 +14,10 @@ interface IUINode {
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
   loadData(source: string);
   getSchema(): ILayoutSchema;
+  getLiveSchema(): ILayoutSchema;
   replaceLayout(newSchema: ILayoutSchema | string);
   updateLayout();
-  genLiveLayout();
+  genLiveLayout(schema: ILayoutSchema, data: any);
   clearLayout();
   getDataNode(): IDataNode;
   getNode(path?: string);

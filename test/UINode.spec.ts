@@ -12,6 +12,7 @@ import reqConfig from "./config/request";
 
 import uiNodeLayout from "./layouts/uinode-basic.json";
 import stateTestLayout from "./layouts/state-test.json";
+import dataNodeJson from "./data/foo.json";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -61,7 +62,7 @@ describe("Given an instance of my UINode library", () => {
 
     it("replaceLayout: if bring a new schema on this node, this uiNode should replaced with new", async () => {
       const localUINode = new UINode(uiNodeLayout);
-      localUINode.loadLayout();
+      // await localUINode.loadLayout();
       // local schema
       await localUINode.replaceLayout(stateTestLayout);
       expect(localUINode.getSchema()).to.deep.equal(stateTestLayout);
@@ -69,7 +70,7 @@ describe("Given an instance of my UINode library", () => {
 
       // remote schema
       const remoteUINode = new UINode({}, request);
-      await remoteUINode.replaceLayout(
+      const schema = await remoteUINode.replaceLayout(
         `${reqConfig.layoutSchemaPrefix}uinode-basic.json`
       );
       expect(remoteUINode.getSchema()).to.deep.equal(uiNodeLayout);
@@ -78,51 +79,81 @@ describe("Given an instance of my UINode library", () => {
     it("updateLayout: loadLayout should be called", () => {
       const localUINode = new UINode(uiNodeLayout);
       const spy = chai.spy.on(localUINode, "loadLayout");
-      localUINode.loadLayout();
+      // localUINode.loadLayout();
       localUINode.updateLayout();
       expect(localUINode.getSchema()).to.deep.equal(uiNodeLayout);
-      expect(spy).to.have.been.called.exactly(6);
+      expect(spy).to.have.been.called.exactly(1);
     });
 
-    it("getNode: should return correct sub node", () => {
+    it("getNode: should return correct sub node", async () => {
       const localUINode = new UINode(uiNodeLayout);
-      localUINode.loadLayout();
+      await localUINode.loadLayout();
       const subNode: UINode = localUINode.getNode("children[1]");
       expect(subNode).to.be.instanceOf(UINode);
       expect(subNode.getSchema()).to.deep.equal(uiNodeLayout.children[1]);
     });
 
-    it("genLiveLayout: follow schema's template field and given data, auto generate layouts", () => {
-      const localUINode = new UINode(uiNodeLayout);
-      localUINode.loadLayout();
-      const expectedResult = {
-        component: "div",
-        datasource: "foo:bar.baz",
-        children: [
-          [
-            {
-              component: "p",
-              datasource: "foo.bar.baz.0.name"
-            },
-            {
-              component: "p",
-              datasource: "foo.bar.baz.0.age"
-            }
-          ],
-          [
-            {
-              component: "p",
-              datasource: "foo.bar.baz.1.name"
-            },
-            {
-              component: "p",
-              datasource: "foo.bar.baz.1.age"
-            }
-          ]
-        ]
-      };
+    const expectedResult = [
+      [
+        {
+          component: "p",
+          datasource: "foo:bar.baz.0.name"
+        },
+        {
+          component: "p",
+          datasource: "foo:bar.baz.0.age"
+        }
+      ],
+      [
+        {
+          component: "p",
+          datasource: "foo:bar.baz.1.name"
+        },
+        {
+          component: "p",
+          datasource: "foo:bar.baz.1.age"
+        }
+      ]
+    ];
 
-      expect(localUINode.getSchema()).to.be.deep.equal(expectedResult);
+    it("genLiveLayout: follow schema's template field and given data, auto generate layouts", async () => {
+      const localUINode = new UINode({});
+      const schema = await localUINode.genLiveLayout(
+        uiNodeLayout.children[1],
+        dataNodeJson.foo.bar.baz
+      );
+
+      expect(localUINode.getLiveSchema().children).to.deep.equal(
+        expectedResult
+      );
+    });
+
+    it("assignSchema: if assign a schema to this node, data & schema should loaded", async () => {
+      const schemaWithLiveNode: any = uiNodeLayout.children[1];
+      const localUINode = new UINode(schemaWithLiveNode);
+      await localUINode.loadLayout();
+      // data shource loaded
+      const data = localUINode.getDataNode().getData();
+      const datasource = localUINode.getSchema().datasource.replace(":", ".");
+      expect(data).to.deep.equal(_.get(dataNodeJson, datasource));
+
+      // liveschema loaded
+      const liveschema: any = localUINode.getLiveSchema();
+      expect(liveschema.children).to.deep.equal(expectedResult);
+
+      // children generated
+      const children = localUINode.getChildren();
+      const firstChildren = children[0][0] as UINode;
+      await firstChildren.loadLayout();
+      expect(firstChildren).is.instanceOf(UINode);
+
+      // expect first children schema
+      const firstchildrenSchema: any = firstChildren.getSchema();
+      expect(firstchildrenSchema).to.deep.equal(expectedResult[0][0]);
+
+      // expect first children name is Rui
+      const firstNodeData = firstChildren.getDataNode().getData();
+      expect(firstNodeData).to.equal("Rui");
     });
   });
 });
