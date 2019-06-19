@@ -13,11 +13,11 @@ interface IUINode {
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
   loadData(source: string);
   getSchema(): ILayoutSchema;
-  replaceLayout(newSchema: ILayoutSchema | string): IUINode;
-  updateLayout(): IUINode;
+  replaceLayout(newSchema: ILayoutSchema | string);
+  updateLayout();
   genLiveLayout();
-  clearLayout(): IUINode;
+  clearLayout();
   getDataNode(): IDataNode;
-  getNode(path?: string): IUINode;
+  getNode(path?: string);
   // getProps(): INodeProps;
 }

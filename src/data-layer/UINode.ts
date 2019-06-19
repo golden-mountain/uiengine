@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Request, DataNode } from ".";
+import { Request, DataNode, Cache } from ".";
 import { AxiosPromise } from "axios";
 import { IDataNode } from "../../typings/DataNode";
 // import { IUINode, ILayoutSchema } from "../../typings/UINode";
@@ -20,13 +20,13 @@ export default class UINode implements IUINode {
     this.schema = schema;
   }
 
-  loadLayout(schema?: ILayoutSchema | string) {
+  async loadLayout(schema?: ILayoutSchema | string) {
     if (!schema) schema = this.schema;
-    if (typeof schema === "object") {
-      this.assignSchema(schema);
-    } else {
-      this.schema = this.loadRemoteLayout(schema);
+    if (typeof schema !== "object") {
+      schema = await this.loadRemoteLayout(schema);
     }
+    this.assignSchema(schema);
+    return schema;
   }
 
   getSchema(): ILayoutSchema {
@@ -46,22 +46,21 @@ export default class UINode implements IUINode {
   }
 
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {
-    try {
-      let response: any = await this.request.get(url);
-      // console.log(response);
-      if (response.data) {
-        this.assignSchema(response.data);
-      } else {
+    let result: any = Cache.getLayoutSchema(url);
+    if (!result) {
+      try {
+        let response: any = await this.request.get(url);
+        if (response.data) {
+          result = response.data;
+        }
+      } catch (e) {
         this.errorInfo = {
           status: 400,
           code: `Error loading from ${url}`
         };
       }
-      // this.schema = response;
-      return response;
-    } catch (e) {
-      return e;
     }
+    return result;
   }
 
   private assignSchema(schema: ILayoutSchema) {
@@ -81,6 +80,7 @@ export default class UINode implements IUINode {
       this.genLiveLayout();
     }
     this.schema = schema;
+    return this;
   }
 
   async loadData(source: string) {
@@ -89,15 +89,15 @@ export default class UINode implements IUINode {
     return await this.dataNode.loadData();
   }
 
-  replaceLayout(newSchema: ILayoutSchema | string) {
+  async replaceLayout(newSchema: ILayoutSchema | string) {
     this.clearLayout();
-    this.loadLayout(newSchema);
+    await this.loadLayout(newSchema);
     return this;
   }
 
-  updateLayout() {
+  async updateLayout() {
     // console.log(this.schema);
-    this.loadLayout(this.schema);
+    await this.loadLayout(this.schema);
     return this;
   }
 

@@ -31,17 +31,25 @@ describe("Given an instance of my UINode library", () => {
     it("loadRemoteLayout: if schema is string, should load from remote and same as the loaded", async () => {
       // expect(uiNode.schema).to.be.equal(uinodeLayout);
       const remoteUINode = new UINode({}, request);
-      const promise = remoteUINode.loadRemoteLayout(
+      let schema = await remoteUINode.loadRemoteLayout(
         `${reqConfig.layoutSchemaPrefix}uinode-basic.json`
       );
-      promise
-        .then((res: any) => {
-          // console.log(remoteUINode.getSchema());
-          expect(remoteUINode.getSchema()).to.deep.equal(uiNodeLayout);
-        })
-        .catch((e: any) => {
-          console.log(e.message);
-        });
+      // console.log(remoteUINode.getSchema());
+      expect(schema).to.deep.equal(uiNodeLayout);
+
+      // load from cache
+      const spy = chai.spy.on(request, "get");
+      schema = await remoteUINode.loadRemoteLayout(
+        `${reqConfig.layoutSchemaPrefix}uinode-basic.json`
+      );
+      expect(spy).to.have.not.been.called;
+      expect(schema).to.deep.equal(uiNodeLayout);
+
+      // error loading
+      await remoteUINode.loadRemoteLayout(
+        `${reqConfig.layoutSchemaPrefix}not-exist.json`
+      );
+      expect(remoteUINode.getErrorInfo().status).to.equal(400);
     });
 
     it("getDataNode: if datasource is not empty, should return a correct DataNode", async () => {
@@ -51,36 +59,26 @@ describe("Given an instance of my UINode library", () => {
       expect(dataNode).to.have.property("loadData");
     });
 
-    it("replaceLayout: if bring a new schema on this node, this uiNode should replaced with new", () => {
+    it("replaceLayout: if bring a new schema on this node, this uiNode should replaced with new", async () => {
       const localUINode = new UINode(uiNodeLayout);
       localUINode.loadLayout();
       // local schema
-      localUINode.replaceLayout(stateTestLayout);
+      await localUINode.replaceLayout(stateTestLayout);
       expect(localUINode.getSchema()).to.deep.equal(stateTestLayout);
       expect(localUINode.getErrorInfo()).to.deep.equal({});
 
       // remote schema
       const remoteUINode = new UINode({}, request);
-      const newRemoteUINode = remoteUINode.replaceLayout(
+      await remoteUINode.replaceLayout(
         `${reqConfig.layoutSchemaPrefix}uinode-basic.json`
       );
-      expect(newRemoteUINode).to.equal(remoteUINode);
-      newRemoteUINode
-        .getSchema()
-        .then((v: any) => {
-          // expect(newRemoteUINode.getSchema()).to.deep.equal(uiNodeLayout);
-          expect(localUINode.getSchema()).to.deep.equal(uiNodeLayout);
-        })
-        .catch((e: any) => {
-          console.log(e.message);
-        });
+      expect(remoteUINode.getSchema()).to.deep.equal(uiNodeLayout);
     });
 
     it("updateLayout: loadLayout should be called", () => {
       const localUINode = new UINode(uiNodeLayout);
       const spy = chai.spy.on(localUINode, "loadLayout");
       localUINode.loadLayout();
-
       localUINode.updateLayout();
       expect(localUINode.getSchema()).to.deep.equal(uiNodeLayout);
       expect(spy).to.have.been.called.exactly(6);
