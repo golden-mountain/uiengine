@@ -10,7 +10,6 @@ export default class UINode implements IUINode {
   private request: IRequest = new Request();
   private children: Array<UINode> | Array<any> = [];
   private schema: ILayoutSchema = {};
-  private rootLiveSchemas: object = {};
   private dataNode?: any;
   private stateNode: IStateNode = new StateNode(this);
 
@@ -25,13 +24,11 @@ export default class UINode implements IUINode {
   async loadLayout(schema?: ILayoutSchema | string) {
     let returnSchema: any = schema;
     if (!returnSchema) returnSchema = this.schema;
-    let rootSchemaName: string = "";
     if (typeof schema === "string") {
       returnSchema = await this.loadRemoteLayout(schema);
-      rootSchemaName = schema;
     }
     if (returnSchema) {
-      await this.assignSchema(returnSchema, rootSchemaName);
+      await this.assignSchema(returnSchema);
     }
     return returnSchema;
   }
@@ -50,13 +47,6 @@ export default class UINode implements IUINode {
 
   getDataNode(): IDataNode {
     return this.dataNode;
-  }
-
-  getRootLiveSchemas(name?: string) {
-    if (name) {
-      return this.rootLiveSchemas[name];
-    }
-    return this.rootLiveSchemas;
   }
 
   getStateNode(): IStateNode {
@@ -82,12 +72,8 @@ export default class UINode implements IUINode {
     return result;
   }
 
-  private async assignSchema(
-    schema: ILayoutSchema,
-    rootSchemaName: string = ""
-  ) {
+  private async assignSchema(schema: ILayoutSchema) {
     let liveSchema = schema;
-    // console.log(liveSchema, "<<<<<<<<<<<<< liveschema");
     if (liveSchema["datasource"]) {
       await this.loadData(liveSchema["datasource"]);
     }
@@ -136,7 +122,6 @@ export default class UINode implements IUINode {
 
     // console.log(liveSchema);
     this.schema = liveSchema;
-    if (rootSchemaName) this.rootLiveSchemas[rootSchemaName] = liveSchema;
     return this;
   }
 

@@ -14,8 +14,6 @@ export interface IUINode {
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
   loadData(source: string);
   getSchema(): ILayoutSchema;
-  // getLiveSchema(): ILayoutSchema;
-  getRootLiveSchemas();
   replaceLayout(newSchema: ILayoutSchema | string);
   updateLayout();
   genLiveLayout(schema: ILayoutSchema, data: any);

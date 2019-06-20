@@ -4,7 +4,7 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, Request } from "../src";
+import { UINode, Request, Cache } from "../src";
 import reqConfig from "./config/request";
 // import defaultSchema from "./config/default-schema";
 // import { IUINode } from "../typings/UINode";
@@ -174,18 +174,19 @@ describe("Given an instance of my UINode library", () => {
 
     it("loadLayout: should load remote/given layout, and rootSchemas is assigned", async () => {
       // use given layout from constructor
-      const schemaPath = `${reqConfig.layoutSchemaPrefix}uinode-basic.json`;
+      const schemaPath = `${reqConfig.layoutSchemaPrefix}uinode-basic`;
       const uinode = new UINode({}, request);
-      let schema = await uinode.loadLayout(schemaPath);
+      let schema = await uinode.loadLayout(`${schemaPath}.json`);
       const liveChildren = _.get(uinode, "children[1]");
       schema = liveChildren.getSchema().children;
       expect(schema).to.deep.equal(expectedResult);
 
       // root schemas exists
+      const path = `${schemaPath}-json`;
       const rootSchemas = {
-        [schemaPath]: uinode.getSchema()
+        [path]: uinode.getSchema()
       };
-      expect(uinode.getRootLiveSchemas()).to.deep.equal(rootSchemas);
+      expect(Cache.getLayoutSchema()).to.deep.equal(rootSchemas);
     });
   });
 });
