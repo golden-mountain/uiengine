@@ -23,21 +23,25 @@ const expectedResult = [
   [
     {
       component: "p",
-      datasource: "foo:bar.baz.0.name"
+      datasource: "foo:bar.baz.0.name",
+      _index: 0
     },
     {
       component: "p",
-      datasource: "foo:bar.baz.0.age"
+      datasource: "foo:bar.baz.0.age",
+      _index: 0
     }
   ],
   [
     {
       component: "p",
-      datasource: "foo:bar.baz.1.name"
+      datasource: "foo:bar.baz.1.name",
+      _index: 1
     },
     {
       component: "p",
-      datasource: "foo:bar.baz.1.age"
+      datasource: "foo:bar.baz.1.age",
+      _index: 1
     }
   ]
 ];
@@ -203,6 +207,20 @@ describe("Given an instance of my UINode library", () => {
         datasource: "foo:bar.baz.0.age"
       });
       expect(nodes.length).to.equal(1);
+
+      // multiple condition find
+      nodes = localUINode.searchNodes({
+        datasource: "foo:bar.baz.0.age",
+        component: "p"
+      });
+      expect(nodes.length).to.equal(1);
+
+      // negtive cases
+      nodes = localUINode.searchNodes({
+        datasource: "foo:bar.baz.0.age",
+        component: "div" // not match this line
+      });
+      expect(nodes.length).to.equal(0);
     });
   });
 });

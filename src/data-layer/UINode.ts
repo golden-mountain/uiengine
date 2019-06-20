@@ -13,9 +13,13 @@ export default class UINode implements IUINode {
   private schema: ILayoutSchema = {};
   private dataNode?: any;
   private stateNode: IStateNode = new StateNode(this);
-  private rootName: string = "default";
+  private rootName: string = "";
 
-  constructor(schema: ILayoutSchema, request?: IRequest, root?: string) {
+  constructor(
+    schema: ILayoutSchema,
+    request?: IRequest,
+    root: string = "default"
+  ) {
     if (request) {
       this.request = request;
     }
@@ -86,7 +90,6 @@ export default class UINode implements IUINode {
 
     if (liveSchema["$children"]) {
       const data = this.getDataNode().getData();
-      ////////////// SCHEMA SWITCHED TO LIVE schema//////
       liveSchema = await this.genLiveLayout(schema, data);
     }
 
@@ -108,7 +111,6 @@ export default class UINode implements IUINode {
         }
         children.push(node);
       }
-      // console.log("children.length", children.length);
       this.children = children;
     }
     this.schema = liveSchema;
@@ -160,13 +162,12 @@ export default class UINode implements IUINode {
     }
   }
 
-  searchNodes(prop: object, target?: IUINode): any {
+  searchNodes(prop: object, target?: IUINode, root?: string): any {
     let nodes: Array<any> = [];
     // search this rootSchemas
-    const rootNode = Cache.getLayoutRoot(this.rootName) as IUINode;
+    const rootName = root || this.rootName;
+    const rootNode = Cache.getLayoutRoot(rootName) as IUINode;
     if (!target) target = rootNode;
-    console.log(target.getChildren().length);
-    // if (_.isEmpty(target) || !target.getChildren) return nodes;
 
     const schema = target.getSchema();
     let finded = true;
@@ -178,16 +179,11 @@ export default class UINode implements IUINode {
     }
     if (finded) nodes.push(target);
 
-    // recursive find
+    // TO Improve?: recursive find
     const children = target.getChildren();
     _.forEach(children, (child: any) => {
       if (_.isArray(child)) {
         _.forEach(child, (c: any) => {
-          // console.log(
-          //   "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n",
-          //   c.getSchema(),
-          //   "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
-          // );
           nodes = nodes.concat(this.searchNodes(prop, c));
         });
       } else {
@@ -210,6 +206,7 @@ export default class UINode implements IUINode {
           const newSchema = _.cloneDeep(s);
           if (newSchema.datasource) {
             newSchema.datasource = newSchema.datasource.replace("$", index);
+            newSchema._index = index; // row id
           }
           return newSchema;
         })

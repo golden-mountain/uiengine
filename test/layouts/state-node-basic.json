@@ -15,8 +15,9 @@
       "component": "lib:DemoLiveElement",
       "datasource": "foo:bar.baz",
       "state": {
-        "deps": {
-          "visible": [
+        "visible": {
+          "strategy": "and",
+          "deps": [
             {
               "selector": {
                 "id": "id-of-demo-element-1"
@@ -38,8 +39,8 @@
           "component": "p",
           "datasource": "foo:bar.baz.$.age",
           "state": {
-            "deps": {
-              "visible": [
+            "visible": {
+              "deps": [
                 {
                   "selector": {
                     "id": "for.bar.baz.$.name"

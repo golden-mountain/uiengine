@@ -24,6 +24,6 @@ export interface IUINode {
   getNode(path?: string);
   updateState();
   getStateNode(): IStateNode;
-  searchNodes(prop: object, target?: IUINode);
+  searchNodes(prop: object, target?: IUINode, root?: string);
   // getProps(): INodeProps;
 }
