@@ -11,8 +11,10 @@ export default class StateNode implements IStateNode {
   private plugins: object = statePlugins;
   constructor(uiNode: IUINode) {
     this.uiNode = uiNode;
-    this.loadPlugins();
-    this.renewStates();
+  }
+
+  getUINode() {
+    return this.uiNode;
   }
 
   getState(key?: string) {

@@ -112,6 +112,7 @@ export default class Request implements IRequest {
   constructor(config?: IRequestConfig) {
     if (config) this.config = config;
 
+    // console.log(config);
     if (config && config.devMode) {
       this.req = new RequestDev(config);
     } else {

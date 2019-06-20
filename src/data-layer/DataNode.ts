@@ -14,7 +14,9 @@ export default class DataNode implements IDataNode {
   private rootData?: any;
 
   constructor(source: any, request?: IRequest) {
-    if (request) this.request = request;
+    if (request) {
+      this.request = request;
+    }
 
     if (typeof source === "object") {
       this.data = source;

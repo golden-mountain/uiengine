@@ -4,10 +4,8 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, DataNode, StateNode } from "../src";
+import { UINode, StateNode } from "../src";
 // import reqConfig from "./config/request";
-import stateNodeBasicLayout from "./layouts/state-node-basic.json";
-import { visible } from "../src/plugins/state";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -40,18 +38,6 @@ describe("Given an instance of my StateNode library", () => {
       const plugins = stateNode.loadPlugins();
       // have buildin plugin value
       expect(plugins).to.have.property("visible");
-    });
-  });
-});
-
-describe("Given all the default plugins", () => {
-  before(() => {});
-  describe("the given plugins ", () => {
-    it("visiblization should be caculated ", () => {
-      const uiNode = new UINode(stateNodeBasicLayout);
-      const stateNode = uiNode.getStateNode();
-      const visibles = stateNode.getState("visible");
-      //   expect(_.get(visible, ''))
     });
   });
 });

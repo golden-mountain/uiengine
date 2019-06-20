@@ -18,6 +18,7 @@ export interface IUINode {
   updateLayout();
   genLiveLayout(schema: ILayoutSchema, data: any);
   clearLayout();
+  getChildren(...args: any);
   getDataNode(): IDataNode;
   getNode(path?: string);
   updateState();

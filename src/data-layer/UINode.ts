@@ -8,7 +8,7 @@ import { IUINode, ILayoutSchema } from "../../typings/UINode";
 export default class UINode implements IUINode {
   private errorInfo: IErrorInfo = {};
   private request: IRequest = new Request();
-  private children: Array<UINode> | Array<any> = [];
+  private children: Array<UINode> = [];
   private schema: ILayoutSchema = {};
   private dataNode?: any;
   private stateNode: IStateNode = new StateNode(this);
@@ -39,10 +39,6 @@ export default class UINode implements IUINode {
 
   getErrorInfo(): IErrorInfo {
     return this.errorInfo;
-  }
-
-  getChildren(): Array<IUINode> {
-    return this.children;
   }
 
   getDataNode(): IDataNode {
@@ -103,25 +99,11 @@ export default class UINode implements IUINode {
         children.push(node);
       }
       this.children = children;
-
-      // this.children = liveSchema.children.map((s: any) => {
-      //   let node: any;
-      //   if (_.isArray(s)) {
-      //     node = _.map(s, (v: ILayoutSchema) => {
-      //       const subnode = new UINode(v);
-      //       // subnode.loadLayout(v);
-      //       return subnode;
-      //     });
-      //   } else {
-      //     node = new UINode(s);
-      //     // node.loadLayout(s);
-      //   }
-      //   return node;
-      // });
     }
-
-    // console.log(liveSchema);
     this.schema = liveSchema;
+    // load State
+    this.stateNode = new StateNode(this);
+    this.stateNode.renewStates();
     return this;
   }
 
@@ -154,6 +136,13 @@ export default class UINode implements IUINode {
       return _.get(this, path);
     }
     return this;
+  }
+
+  getChildren(...args: any) {
+    const path = args.map((v: number) => {
+      return `children[${v}]`;
+    });
+    return this.getNode(path.join("."));
   }
 
   async genLiveLayout(schema: ILayoutSchema, data: any) {

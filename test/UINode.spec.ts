@@ -158,18 +158,18 @@ describe("Given an instance of my UINode library", () => {
       expect(liveschema.children).to.deep.equal(expectedResult);
 
       // children generated
-      const children = localUINode.getChildren();
-      const firstChildren = children[0][0] as UINode;
-      await firstChildren.loadLayout();
+      const children = localUINode.getChildren(1);
+      const firstChildren = children[0] as UINode;
+
       expect(firstChildren).is.instanceOf(UINode);
 
       // expect first children schema
       const firstchildrenSchema: any = firstChildren.getSchema();
-      expect(firstchildrenSchema).to.deep.equal(expectedResult[0][0]);
+      expect(firstchildrenSchema).to.deep.equal(expectedResult[1][0]);
 
-      // expect first children name is Rui
+      // expect first children name is Lifang
       const firstNodeData = firstChildren.getDataNode().getData();
-      expect(firstNodeData).to.equal("Rui");
+      expect(firstNodeData).to.equal("Lifang");
     });
 
     it("loadLayout: should load remote/given layout, and rootSchemas is assigned", async () => {
