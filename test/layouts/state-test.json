@@ -1,15 +1,15 @@
 {
   "component": "lib:DemoElement1",
-  "id": "id-of-demo-element-1",
+  "id": "state-test-id-1",
   "children": [
     {
       "component": "lib:DemoElement2",
-      "id": "id-of-demo-element-2",
+      "id": "state-test-id-2",
       "deps": {
         "visible": [
           {
             "prop": "id",
-            "id": "id-of-demo-element-1",
+            "id": "state-test-id-3",
             "state": {
               "visible": true
             }

@@ -19,6 +19,29 @@ import dataNodeJson from "./data/foo.json";
 chai.use(chaiSpies);
 const expect = chai.expect;
 
+const expectedResult = [
+  [
+    {
+      component: "p",
+      datasource: "foo:bar.baz.0.name"
+    },
+    {
+      component: "p",
+      datasource: "foo:bar.baz.0.age"
+    }
+  ],
+  [
+    {
+      component: "p",
+      datasource: "foo:bar.baz.1.name"
+    },
+    {
+      component: "p",
+      datasource: "foo:bar.baz.1.age"
+    }
+  ]
+];
+
 const request = new Request(reqConfig);
 describe("Given an instance of my UINode library", () => {
   before(() => {});
@@ -69,16 +92,20 @@ describe("Given an instance of my UINode library", () => {
       const localUINode = new UINode(copyLayout);
       // await localUINode.loadLayout();
       // local schema
-      await localUINode.replaceLayout(stateTestLayout);
+      let schema = await localUINode.replaceLayout(stateTestLayout);
+      // console.log(localUINode.getSchema(), "<<<<<<<<<<<<<<<<");
       expect(localUINode.getSchema()).to.deep.equal(stateTestLayout);
       expect(localUINode.getErrorInfo()).to.deep.equal({});
 
       // remote schema
+      const remoteCopyLayout = _.cloneDeep(uiNodeLayout);
       const remoteUINode = new UINode({}, request);
-      const schema = await remoteUINode.replaceLayout(
+      schema = await remoteUINode.replaceLayout(
         `${reqConfig.layoutSchemaPrefix}uinode-basic.json`
       );
-      expect(remoteUINode.getSchema()).to.deep.equal(copyLayout);
+      // console.log(remoteUINode.getSchema());
+      const liveChildren = _.get(schema, "children[1].children");
+      expect(liveChildren).to.deep.equal(expectedResult);
     });
 
     it("updateLayout: loadLayout should be called", () => {
@@ -97,33 +124,11 @@ describe("Given an instance of my UINode library", () => {
 
       const localUINode = new UINode(copyLayout);
       const schema = await localUINode.loadLayout();
+      // try to get child node
       const subNode: UINode = localUINode.getNode("children[1]");
       expect(subNode).to.be.instanceOf(UINode);
       expect(subNode.getSchema()).to.deep.equal(copyLayout.children[1]);
     });
-
-    const expectedResult = [
-      [
-        {
-          component: "p",
-          datasource: "foo:bar.baz.0.name"
-        },
-        {
-          component: "p",
-          datasource: "foo:bar.baz.0.age"
-        }
-      ],
-      [
-        {
-          component: "p",
-          datasource: "foo:bar.baz.1.name"
-        },
-        {
-          component: "p",
-          datasource: "foo:bar.baz.1.age"
-        }
-      ]
-    ];
 
     it("genLiveLayout: follow schema's template field and given data, auto generate layouts", async () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
@@ -168,15 +173,13 @@ describe("Given an instance of my UINode library", () => {
     });
 
     it("loadLayout: should load remote/given layout, and rootSchemas is assigned", async () => {
-      let copyLayout = _.cloneDeep(uiNodeLayout);
       // use given layout from constructor
       const schemaPath = `${reqConfig.layoutSchemaPrefix}uinode-basic.json`;
       const uinode = new UINode({}, request);
       let schema = await uinode.loadLayout(schemaPath);
-      expect(uinode.getSchema()).to.deep.include(copyLayout);
       const liveChildren = _.get(uinode, "children[1]");
-      schema = await liveChildren.loadLayout();
-      expect(schema.children).to.deep.equal(expectedResult);
+      schema = liveChildren.getSchema().children;
+      expect(schema).to.deep.equal(expectedResult);
 
       // root schemas exists
       const rootSchemas = {

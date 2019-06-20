@@ -99,39 +99,39 @@ export default class UINode implements IUINode {
     }
 
     if (liveSchema.children) {
-      // const children: any = [];
-      // for (let index in liveSchema) {
-      //   let node: any;
-      //   let s: any = liveSchema[index];
-      //   if (_.isArray(s)) {
-      //     node = [];
-      //     for (let i in s) {
-      //       const subnode = new UINode(s[i]);
-      //       await subnode.loadLayout(s[i]);
-      //       node.push(subnode);
-      //     }
-      //   } else {
-      //     node = new UINode(s);
-      //     await node.loadLayout(s);
-      //   }
-      //   children.push(node);
-      // }
-      // this.children = children;
-
-      this.children = liveSchema.children.map((s: any) => {
+      const children: any = [];
+      for (let index in liveSchema.children) {
         let node: any;
+        let s: any = liveSchema.children[index];
         if (_.isArray(s)) {
-          node = _.map(s, (v: ILayoutSchema) => {
-            const subnode = new UINode(v);
-            // subnode.loadLayout(v);
-            return subnode;
-          });
+          node = [];
+          for (let i in s) {
+            const subnode = new UINode(s[i]);
+            await subnode.loadLayout(s[i]);
+            node.push(subnode);
+          }
         } else {
           node = new UINode(s);
-          // node.loadLayout(s);
+          await node.loadLayout(s);
         }
-        return node;
-      });
+        children.push(node);
+      }
+      this.children = children;
+
+      // this.children = liveSchema.children.map((s: any) => {
+      //   let node: any;
+      //   if (_.isArray(s)) {
+      //     node = _.map(s, (v: ILayoutSchema) => {
+      //       const subnode = new UINode(v);
+      //       // subnode.loadLayout(v);
+      //       return subnode;
+      //     });
+      //   } else {
+      //     node = new UINode(s);
+      //     // node.loadLayout(s);
+      //   }
+      //   return node;
+      // });
     }
 
     // console.log(liveSchema);
