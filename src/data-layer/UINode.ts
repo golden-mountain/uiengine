@@ -9,16 +9,24 @@ export default class UINode implements IUINode {
   private errorInfo: IErrorInfo = {};
   private request: IRequest = new Request();
   private children: Array<UINode> = [];
+  isLiveChildren: boolean = false;
   private schema: ILayoutSchema = {};
   private dataNode?: any;
   private stateNode: IStateNode = new StateNode(this);
+  private rootName: string = "default";
 
-  constructor(schema: ILayoutSchema, request?: IRequest) {
+  constructor(schema: ILayoutSchema, request?: IRequest, root?: string) {
     if (request) {
       this.request = request;
     }
 
     this.schema = schema;
+
+    // cache root object if given root name
+    if (root) {
+      Cache.setLayoutRoot(root, this);
+      this.rootName = root;
+    }
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
@@ -26,6 +34,8 @@ export default class UINode implements IUINode {
     if (!returnSchema) returnSchema = this.schema;
     if (typeof schema === "string") {
       returnSchema = await this.loadRemoteLayout(schema);
+      Cache.setLayoutRoot(schema, this);
+      this.rootName = schema;
     }
     if (returnSchema) {
       await this.assignSchema(returnSchema);
@@ -98,6 +108,7 @@ export default class UINode implements IUINode {
         }
         children.push(node);
       }
+      // console.log("children.length", children.length);
       this.children = children;
     }
     this.schema = liveSchema;
@@ -142,7 +153,48 @@ export default class UINode implements IUINode {
     const path = args.map((v: number) => {
       return `children[${v}]`;
     });
-    return this.getNode(path.join("."));
+    if (args.length) {
+      return _.get(this, path.join("."));
+    } else {
+      return this.children;
+    }
+  }
+
+  searchNodes(prop: object, target?: IUINode): any {
+    let nodes: Array<any> = [];
+    // search this rootSchemas
+    const rootNode = Cache.getLayoutRoot(this.rootName) as IUINode;
+    if (!target) target = rootNode;
+    console.log(target.getChildren().length);
+    // if (_.isEmpty(target) || !target.getChildren) return nodes;
+
+    const schema = target.getSchema();
+    let finded = true;
+    for (let name in prop) {
+      const value = prop[name];
+      if (!schema[name] || schema[name] !== value) {
+        finded = false;
+      }
+    }
+    if (finded) nodes.push(target);
+
+    // recursive find
+    const children = target.getChildren();
+    _.forEach(children, (child: any) => {
+      if (_.isArray(child)) {
+        _.forEach(child, (c: any) => {
+          // console.log(
+          //   "\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n",
+          //   c.getSchema(),
+          //   "\n<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n"
+          // );
+          nodes = nodes.concat(this.searchNodes(prop, c));
+        });
+      } else {
+        nodes = nodes.concat(this.searchNodes(prop, child));
+      }
+    });
+    return nodes;
   }
 
   async genLiveLayout(schema: ILayoutSchema, data: any) {
@@ -165,6 +217,7 @@ export default class UINode implements IUINode {
     }
 
     // add a new children
+    this.isLiveChildren = true;
     return liveSchema;
   }
 

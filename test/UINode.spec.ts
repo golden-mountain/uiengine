@@ -188,5 +188,21 @@ describe("Given an instance of my UINode library", () => {
       };
       expect(Cache.getLayoutSchema()).to.deep.equal(rootSchemas);
     });
+
+    it("searchNodes: should return right node by given prop", async () => {
+      let copyLayout = _.cloneDeep(uiNodeLayout);
+      const localUINode = new UINode(copyLayout, request, "test-root-name");
+      await localUINode.loadLayout();
+      let nodes = localUINode.searchNodes({
+        // datasource: "foo:bar.baz.$.age"
+        datasource: "foo:bar"
+      });
+      expect(nodes.length).to.equal(1);
+
+      nodes = localUINode.searchNodes({
+        datasource: "foo:bar.baz.0.age"
+      });
+      expect(nodes.length).to.equal(1);
+    });
   });
 });

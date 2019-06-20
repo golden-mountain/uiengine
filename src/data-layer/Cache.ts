@@ -5,7 +5,8 @@ export default class Cache {
   static cache: ICache = {
     dataSchema: {},
     data: {},
-    layoutSchema: {}
+    layoutSchema: {},
+    layoutRoots: {}
   };
 
   // static schema: ICache = {};
@@ -58,6 +59,10 @@ export default class Cache {
     Cache.setCache("layoutSchema", path, data);
   }
 
+  static setLayoutRoot(path: string, data: any) {
+    Cache.setCache("layoutRoots", path, data);
+  }
+
   static getDataSchema(path?: string) {
     return Cache.getCache("dataSchema", path);
   }
@@ -68,5 +73,9 @@ export default class Cache {
 
   static getLayoutSchema(path?: string) {
     return Cache.getCache("layoutSchema", path);
+  }
+
+  static getLayoutRoot(path?: string) {
+    return Cache.getCache("layoutRoots", path);
   }
 }

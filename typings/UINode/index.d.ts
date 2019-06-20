@@ -10,6 +10,7 @@ export interface ILayoutSchema {
 }
 
 export interface IUINode {
+  isLiveChildren: boolean;
   loadLayout(schema: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
   loadData(source: string);
@@ -23,5 +24,6 @@ export interface IUINode {
   getNode(path?: string);
   updateState();
   getStateNode(): IStateNode;
+  searchNodes(prop: object, target?: IUINode);
   // getProps(): INodeProps;
 }

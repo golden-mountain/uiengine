@@ -25,7 +25,7 @@ describe("Given all the default plugins", () => {
       expect(visible).to.equal(true);
 
       // children 0:
-      let child = uiNode.getChildren(0);
+      let child: any = uiNode.getChildren(0);
       visible = child.getStateNode().getState("visible");
       expect(visible).to.equal(true);
 
