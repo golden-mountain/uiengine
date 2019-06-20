@@ -26,12 +26,14 @@ export default class StateNode implements IStateNode {
     return this.state;
   }
 
-  loadPlugins(newPlugins: object = {}): Array<IState> {
+  loadPlugins(newPlugins: object = {}) {
     let plugins = _.merge(this.plugins, newPlugins);
 
-    _.forEach(plugins, (v: StatePluginFunc, name: string) => {
-      console.log(v, name);
+    _.forEach(plugins, (plugin: StatePluginFunc, name: string) => {
+      //   console.log(plugin, name);
+      const result = plugin.call(this);
+      this.state[name] = result;
     });
-    return [];
+    return this.state;
   }
 }

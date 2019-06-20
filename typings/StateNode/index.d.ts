@@ -6,5 +6,5 @@ export interface IStateNode {
   getState(): IState;
   renewStates(): IState;
   setState(key: string, value: any): IState;
-  loadPlugins(newPlugins: Array<StatePluginFunc> = []): Array<IState>;
+  loadPlugins(newPlugins: Array<StatePluginFunc> = []);
 }

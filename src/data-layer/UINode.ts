@@ -10,8 +10,7 @@ export default class UINode implements IUINode {
   private request: IRequest = new Request();
   private children: Array<UINode> | Array<any> = [];
   private schema: ILayoutSchema = {};
-  private liveSchema: ILayoutSchema = {};
-  private rootSchema: ILayoutSchema = {};
+  private rootLiveSchemas: object = {};
   private dataNode?: any;
   private stateNode: IStateNode = new StateNode(this);
 
@@ -20,19 +19,21 @@ export default class UINode implements IUINode {
       this.request = request;
     }
 
-    // this.loadLayout(schema);
     this.schema = schema;
-    this.liveSchema = _.cloneDeep(schema);
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
-    if (!schema) schema = this.schema;
+    let returnSchema: any = schema;
+    if (!returnSchema) returnSchema = this.schema;
+    let rootSchemaName: string = "";
     if (typeof schema === "string") {
-      schema = await this.loadRemoteLayout(schema);
-      this.rootSchema = schema;
+      returnSchema = await this.loadRemoteLayout(schema);
+      rootSchemaName = schema;
     }
-    await this.assignSchema(schema);
-    return schema;
+    if (returnSchema) {
+      await this.assignSchema(returnSchema, rootSchemaName);
+    }
+    return returnSchema;
   }
 
   getSchema(): ILayoutSchema {
@@ -51,12 +52,11 @@ export default class UINode implements IUINode {
     return this.dataNode;
   }
 
-  getLiveSchema(): ILayoutSchema {
-    return this.liveSchema;
-  }
-
-  getRootSchema(): ILayoutSchema {
-    return this.rootSchema;
+  getRootLiveSchemas(name?: string) {
+    if (name) {
+      return this.rootLiveSchemas[name];
+    }
+    return this.rootLiveSchemas;
   }
 
   getStateNode(): IStateNode {
@@ -82,8 +82,12 @@ export default class UINode implements IUINode {
     return result;
   }
 
-  private async assignSchema(schema: ILayoutSchema) {
-    let liveSchema = _.cloneDeep(schema);
+  private async assignSchema(
+    schema: ILayoutSchema,
+    rootSchemaName: string = ""
+  ) {
+    let liveSchema = schema;
+    // console.log(liveSchema, "<<<<<<<<<<<<< liveschema");
     if (liveSchema["datasource"]) {
       await this.loadData(liveSchema["datasource"]);
     }
@@ -95,6 +99,25 @@ export default class UINode implements IUINode {
     }
 
     if (liveSchema.children) {
+      // const children: any = [];
+      // for (let index in liveSchema) {
+      //   let node: any;
+      //   let s: any = liveSchema[index];
+      //   if (_.isArray(s)) {
+      //     node = [];
+      //     for (let i in s) {
+      //       const subnode = new UINode(s[i]);
+      //       await subnode.loadLayout(s[i]);
+      //       node.push(subnode);
+      //     }
+      //   } else {
+      //     node = new UINode(s);
+      //     await node.loadLayout(s);
+      //   }
+      //   children.push(node);
+      // }
+      // this.children = children;
+
       this.children = liveSchema.children.map((s: any) => {
         let node: any;
         if (_.isArray(s)) {
@@ -111,10 +134,9 @@ export default class UINode implements IUINode {
       });
     }
 
-    this.schema = schema;
-    this.liveSchema = liveSchema;
-
-    await this.updateState();
+    // console.log(liveSchema);
+    this.schema = liveSchema;
+    if (rootSchemaName) this.rootLiveSchemas[rootSchemaName] = liveSchema;
     return this;
   }
 
@@ -137,7 +159,6 @@ export default class UINode implements IUINode {
 
   clearLayout() {
     this.schema = {};
-    this.liveSchema = {};
     this.errorInfo = {};
     this.children = [];
     return this;
@@ -155,7 +176,7 @@ export default class UINode implements IUINode {
       data = await this.loadData(schema.datasource);
     }
 
-    const liveSchema = _.cloneDeep(schema);
+    const liveSchema = schema;
     const rowTemplate: any = liveSchema.$children;
     if (rowTemplate && data) {
       liveSchema.children = data.map((d: any, index: number) =>
@@ -170,7 +191,6 @@ export default class UINode implements IUINode {
     }
 
     // add a new children
-    this.liveSchema = liveSchema;
     return liveSchema;
   }
 
