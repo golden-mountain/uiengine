@@ -5,5 +5,5 @@ import {
 } from "../../../typings/StateNode";
 
 export function visible(this: IStateNode) {
-  return {};
+  return true;
 }

@@ -12,28 +12,33 @@ export default class StateNode implements IStateNode {
   constructor(uiNode: IUINode) {
     this.uiNode = uiNode;
     this.loadPlugins();
+    this.renewStates();
   }
 
-  getState(): IState {
+  getState(key?: string) {
+    if (key) return _.get(this.state, key);
     return this.state;
   }
 
+  getPlugins(key?: string) {
+    return this.plugins;
+  }
+
   renewStates(): IState {
+    _.forEach(this.plugins, (plugin: StatePluginFunc, name: string) => {
+      const result = plugin.call(this);
+      _.set(this.state, name, result);
+    });
     return this.state;
   }
 
   setState(key: string, value: any): IState {
+    _.set(this.state, key, value);
     return this.state;
   }
 
   loadPlugins(newPlugins: object = {}) {
-    let plugins = _.merge(this.plugins, newPlugins);
-
-    _.forEach(plugins, (plugin: StatePluginFunc, name: string) => {
-      //   console.log(plugin, name);
-      const result = plugin.call(this);
-      this.state[name] = result;
-    });
-    return this.state;
+    this.plugins = _.merge(this.plugins, newPlugins);
+    return this.plugins;
   }
 }

@@ -7,8 +7,9 @@
       "component": "lib:DemoElement2",
       "id": "id-of-demo-element-1",
       "datasource": "foo:bar.name",
-      "name": "demo-element-2",
-      "props": {}
+      "props": {
+        "name": "demo-element-2"
+      }
     },
     {
       "component": "lib:DemoLiveElement",
