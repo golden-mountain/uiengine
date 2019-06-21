@@ -26,6 +26,7 @@ export default class UINode implements IUINode {
     }
 
     this.schema = schema;
+    this.id = _.uniqueId();
 
     // cache root object if given root name
     if (root) {
