@@ -8,12 +8,13 @@ import { IUINode, ILayoutSchema } from "../../typings/UINode";
 export default class UINode implements IUINode {
   private errorInfo: IErrorInfo = {};
   private request: IRequest = new Request();
-  children: Array<UINode> = [];
-  isLiveChildren: boolean = false;
   private schema: ILayoutSchema = {};
   private dataNode?: any;
   private stateNode: IStateNode = new StateNode(this);
-  private rootName: string = "";
+  private rootName: string = "default";
+  children: Array<UINode> = [];
+  isLiveChildren: boolean = false;
+  id: string = "";
 
   constructor(
     schema: ILayoutSchema,
@@ -28,21 +29,28 @@ export default class UINode implements IUINode {
 
     // cache root object if given root name
     if (root) {
-      Cache.setLayoutRoot(root, this);
       this.rootName = root;
     }
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
+    // initial id
+    this.id = _.uniqueId();
+
+    // load remote node
     let returnSchema: any = schema;
     if (!returnSchema) returnSchema = this.schema;
     if (typeof schema === "string") {
       returnSchema = await this.loadRemoteLayout(schema);
       this.rootName = schema;
     }
+    // assign the schema to this and it's children
     if (returnSchema) {
       await this.assignSchema(returnSchema);
     }
+
+    // cache this node
+    Cache.setUINode(this.rootName, this);
     return returnSchema;
   }
 
@@ -116,7 +124,6 @@ export default class UINode implements IUINode {
     // load State
     this.stateNode = new StateNode(this);
     this.stateNode.renewStates();
-    Cache.setLayoutRoot(this.rootName, this);
     return this;
   }
 
@@ -141,6 +148,9 @@ export default class UINode implements IUINode {
     this.schema = {};
     this.errorInfo = {};
     this.children = [];
+    this.rootName = "";
+    this.isLiveChildren = false;
+    this.id = "";
     return this;
   }
 
@@ -162,37 +172,26 @@ export default class UINode implements IUINode {
     }
   }
 
-  searchNodes(prop: object, target?: IUINode, root?: string): any {
+  searchNodes(prop: object, root?: string): any {
     let nodes: Array<any> = [];
 
-    // search this rootSchemas
     const rootName = root || this.rootName;
-    if (!target) {
-      target = Cache.getLayoutRoot(rootName) as IUINode;
-    }
-
-    const schema = target.getSchema();
-    let finded = true;
-    for (let name in prop) {
-      const value = prop[name];
-      // console.log(value, name, ">>>>>>>>>>>>>>>", schema[name]);
-      if (schema[name] === undefined || !_.isEqual(schema[name], value)) {
-        finded = false;
-      }
-    }
-    if (finded) nodes.push(target);
-
-    // TO Improve?: recursive find
-    const children = target.getChildren();
-    _.forEach(children, (child: any) => {
-      if (_.isArray(child)) {
-        _.forEach(child, (c: any) => {
-          nodes = nodes.concat(this.searchNodes(prop, c));
+    let allUINodes = Cache.getUINode(rootName) as IUINode;
+    if (_.isObject(allUINodes)) {
+      _.forIn(allUINodes, (target: any, id: string) => {
+        let finded = true;
+        const schema = target.getSchema();
+        _.forIn(prop, (v: any, name: string) => {
+          if (v !== schema[name]) {
+            finded = false;
+            return;
+          }
         });
-      } else {
-        nodes = nodes.concat(this.searchNodes(prop, child));
-      }
-    });
+        if (finded) {
+          nodes.push(target);
+        }
+      });
+    }
     return nodes;
   }
 
@@ -202,13 +201,13 @@ export default class UINode implements IUINode {
     }
 
     // replace $ to row number
-    const updatePropRow = (target: ILayoutSchema, index: number) => {
+    const updatePropRow = (target: ILayoutSchema, index: string) => {
       if (_.isArray(target)) {
         _.forEach(target, (c: any) => {
           _.forIn(c, function(value, key) {
             if (typeof value === "object") {
               updatePropRow(value, index);
-            } else if (value.indexOf("$") > -1) {
+            } else if (_.isString(value) && value.indexOf("$") > -1) {
               _.set(c, key, value.replace("$", index));
             }
           });
@@ -217,7 +216,7 @@ export default class UINode implements IUINode {
         _.forIn(target, function(value, key) {
           if (typeof value === "object") {
             updatePropRow(value, index);
-          } else if (value.indexOf("$") > -1) {
+          } else if (_.isString(value) && value.indexOf("$") > -1) {
             _.set(target, key, value.replace("$", index));
           }
         });
@@ -227,7 +226,7 @@ export default class UINode implements IUINode {
     const liveSchema = schema;
     const rowTemplate: any = liveSchema.$children;
     if (rowTemplate && data) {
-      liveSchema.children = data.map((d: any, index: number) =>
+      liveSchema.children = data.map((d: any, index: string) =>
         rowTemplate.map((s: any) => {
           const newSchema = _.cloneDeep(s);
           if (newSchema.datasource) {

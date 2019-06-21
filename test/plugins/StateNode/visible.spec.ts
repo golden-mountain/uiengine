@@ -17,7 +17,7 @@ const expect = chai.expect;
 describe("Given all the default plugins", () => {
   before(() => {});
   describe("the given plugins ", () => {
-    it("visiblization should be caculated ", async () => {
+    it("visiblization should be caculated on the first initial", async () => {
       const request = new Request(reqConfig);
       const uiNode = new UINode(
         stateNodeBasicLayout,
@@ -45,13 +45,32 @@ describe("Given all the default plugins", () => {
 
       // children 1, 1
       visible = child[1].getStateNode().getState("visible");
+      expect(visible).to.equal(true);
+    });
 
-      // depends on following state
-      //{
-      //     "prop": "id",
-      //     "id": "for.bar.baz.$.name",
-      //     "data": ""
-      // }
+    it("visiblization should be caculated on the when update the schema", async () => {
+      const request = new Request(reqConfig);
+      const uiNode = new UINode(
+        stateNodeBasicLayout,
+        request,
+        "loaded-from-local-node"
+      );
+      const schema = await uiNode.loadLayout();
+      expect(schema.id).to.equal("state-node-basic");
+
+      //replace
+      const path = `${reqConfig.layoutSchemaPrefix}state-test.json`;
+      const replacedSchema = await uiNode.replaceLayout(path);
+      expect(replacedSchema.id).to.equal("state-test-id-1");
+      const rootNodeVisible = uiNode.getStateNode().getState("visible");
+      expect(rootNodeVisible).to.equal(true);
+
+      let child: any = uiNode.getChildren([0]);
+      let visible = child.getStateNode().getState("visible");
+      expect(visible).to.equal(true);
+
+      child = uiNode.getChildren([1]);
+      visible = child.getStateNode().getState("visible");
       expect(visible).to.equal(false);
     });
   });

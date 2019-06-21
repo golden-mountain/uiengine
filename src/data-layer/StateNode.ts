@@ -31,7 +31,7 @@ export default class StateNode implements IStateNode {
     _.forEach(this.plugins, (plugin: StatePluginFunc, name: string) => {
       try {
         const result = plugin.call(this, this);
-        _.set(this.state, name, result);
+        this.setState(name, result);
       } catch (e) {
         this.errorInfo = {
           code: e.message

@@ -1,5 +1,6 @@
 import { ICache } from "../../typings/DataNode";
 import _ from "lodash";
+import { IUINode } from "../../typings/UINode";
 
 export default class Cache {
   static cache: ICache = {
@@ -71,8 +72,16 @@ export default class Cache {
     Cache.setCache("layoutSchema", path, data);
   }
 
-  static setLayoutRoot(path: string, data: any, replace: boolean = false) {
-    Cache.setCache("layoutRoots", path, data, replace);
+  static setUINode(path: string, node: IUINode, replace: boolean = false) {
+    let currentCache = Cache.getCache("layoutRoots", path);
+    if (currentCache) {
+      currentCache[node.id] = node;
+    } else {
+      currentCache = {
+        [node.id]: node
+      };
+    }
+    Cache.setCache("layoutRoots", path, currentCache, replace);
   }
 
   static getDataSchema(path?: string) {
@@ -87,7 +96,7 @@ export default class Cache {
     return Cache.getCache("layoutSchema", path);
   }
 
-  static getLayoutRoot(path?: string) {
+  static getUINode(path?: string) {
     return Cache.getCache("layoutRoots", path);
   }
 }

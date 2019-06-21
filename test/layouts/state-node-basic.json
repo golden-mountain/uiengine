@@ -14,6 +14,7 @@
     {
       "component": "lib:DemoLiveElement",
       "datasource": "foo:bar.baz",
+      "id": "id-of-demo-element-2",
       "state": {
         "visible": {
           "strategy": "and",
@@ -32,23 +33,38 @@
       "$children": [
         {
           "component": "p",
-          "datasource": "foo:bar.baz.$.name",
-          "id": "foo.bar.baz.$.name",
-          "prop": {
-            "any": "prop"
-          }
-        },
-        {
-          "component": "p",
           "datasource": "foo:bar.baz.$.age",
+          "id": "foo.bar.baz.$.age",
           "state": {
             "visible": {
               "deps": [
                 {
                   "selector": {
-                    "id": "foo.bar.baz.$.name"
+                    "id": "id-of-demo-element-1"
                   },
-                  "data": ""
+                  "data": "Zp"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "component": "p",
+          "datasource": "foo:bar.baz.$.name",
+          "id": "foo.bar.baz.$.name",
+          "prop": {
+            "any": "prop"
+          },
+          "state": {
+            "visible": {
+              "deps": [
+                {
+                  "selector": {
+                    "id": "foo.bar.baz.$.age"
+                  },
+                  "state": {
+                    "visible": true
+                  }
                 }
               ]
             }

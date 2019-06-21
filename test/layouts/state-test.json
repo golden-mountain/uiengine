@@ -3,18 +3,25 @@
   "id": "state-test-id-1",
   "children": [
     {
+      "component": "lib:DemoElement3",
+      "id": "state-test-id-3"
+    },
+    {
       "component": "lib:DemoElement2",
       "id": "state-test-id-2",
-      "deps": {
-        "visible": [
-          {
-            "prop": "id",
-            "id": "state-test-id-3",
-            "state": {
-              "visible": true
+      "state": {
+        "visible": {
+          "deps": [
+            {
+              "selector": {
+                "id": "state-test-id-3"
+              },
+              "state": {
+                "visible": false
+              }
             }
-          }
-        ]
+          ]
+        }
       }
     }
   ]

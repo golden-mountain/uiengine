@@ -10,6 +10,7 @@ export interface ILayoutSchema {
 }
 
 export interface IUINode {
+  id: string;
   children: Array<IUINode>;
   isLiveChildren: boolean;
   loadLayout(schema: ILayoutSchema | string);
@@ -25,6 +26,6 @@ export interface IUINode {
   getNode(path?: string);
   updateState();
   getStateNode(): IStateNode;
-  searchNodes(prop: object, target?: IUINode, root?: string);
+  searchNodes(prop: object, root?: string);
   // getProps(): INodeProps;
 }

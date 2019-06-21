@@ -18,12 +18,11 @@ export function visible(stateNode: IStateNode) {
     deps.forEach((dep: any) => {
       if (dep.selector) {
         const depUINodes = uiNode.searchNodes(dep.selector);
-        // console.log(depUINodes.length, dep.selector);
         if (depUINodes.length) {
           // searched the props met the condition
           depUINodes.forEach((depUINode: any) => {
             // match data deps
-            if (dep.data) {
+            if (dep.data !== undefined) {
               const dataNode = depUINode.getDataNode();
               if (dataNode) {
                 const data = dataNode.getData();
@@ -39,20 +38,22 @@ export function visible(stateNode: IStateNode) {
             }
 
             // state deps
-            if (dep.state) {
+            if (dep.state && depUINode) {
               const stateNode = depUINode.getStateNode();
               if (stateNode) {
                 const stateVisible = stateNode.getState("visible");
                 if (stateVisible !== "undefined") {
+                  const depVisible = _.get(dep.state, "visible");
                   if (strategy === "and") {
-                    result = result && _.isEqual(stateVisible, dep.data);
+                    result = result && _.isEqual(stateVisible, depVisible);
                     if (!result) return;
                   } else {
                     // or
-                    result = result || _.isEqual(stateVisible, dep.data);
-                    if (result) return;
+                    result = result || _.isEqual(stateVisible, depVisible);
+                    if (!result) return;
                   }
                 } else {
+                  // TODO: Need a case to improve this
                   // recursively find other UI Node
                   result = visible(stateNode);
                 }
