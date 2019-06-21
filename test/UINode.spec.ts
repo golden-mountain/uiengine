@@ -209,7 +209,7 @@ describe("Given an instance of my UINode library", () => {
       expect(nodes.length).to.equal(1);
 
       nodes = localUINode.searchNodes({
-        id: "id-of-demo-element-2"
+        id: "id-of-demo-element-1"
       });
       expect(nodes.length).to.equal(1);
 
@@ -226,6 +226,16 @@ describe("Given an instance of my UINode library", () => {
         component: "div" // not match this line
       });
       expect(nodes.length).to.equal(0);
+
+      // from subnode search
+      const childNode = localUINode.getChildren([1, 0])[1];
+      // console.log(childNode.getSchema());
+      nodes = childNode.searchNodes({
+        component: "lib:DemoElement2",
+        id: "id-of-demo-element-1",
+        datasource: "foo:bar.name"
+      });
+      expect(nodes.length).to.equal(1);
     });
   });
 });

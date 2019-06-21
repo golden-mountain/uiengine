@@ -8,12 +8,13 @@ import { IUINode, ILayoutSchema } from "../../typings/UINode";
 export default class UINode implements IUINode {
   private errorInfo: IErrorInfo = {};
   private request: IRequest = new Request();
-  children: Array<UINode> = [];
-  isLiveChildren: boolean = false;
   private schema: ILayoutSchema = {};
   private dataNode?: any;
   private stateNode: IStateNode = new StateNode(this);
   private rootName: string = "";
+  children: Array<UINode> = [];
+  isLiveChildren: boolean = false;
+  id: string = "";
 
   constructor(
     schema: ILayoutSchema,
@@ -25,10 +26,11 @@ export default class UINode implements IUINode {
     }
 
     this.schema = schema;
+    this.id = _.uniqueId();
 
     // cache root object if given root name
     if (root) {
-      Cache.setLayoutRoot(root, this);
+      Cache.setUINode(root, this);
       this.rootName = root;
     }
   }
@@ -116,7 +118,6 @@ export default class UINode implements IUINode {
     // load State
     this.stateNode = new StateNode(this);
     this.stateNode.renewStates();
-    Cache.setLayoutRoot(this.rootName, this);
     return this;
   }
 
@@ -162,37 +163,26 @@ export default class UINode implements IUINode {
     }
   }
 
-  searchNodes(prop: object, target?: IUINode, root?: string): any {
+  searchNodes(prop: object, root?: string): any {
     let nodes: Array<any> = [];
 
-    // search this rootSchemas
     const rootName = root || this.rootName;
-    if (!target) {
-      target = Cache.getLayoutRoot(rootName) as IUINode;
-    }
+    let allUINodes = Cache.getUINode(rootName) as IUINode;
 
-    const schema = target.getSchema();
-    let finded = true;
-    for (let name in prop) {
-      const value = prop[name];
-      // console.log(value, name, ">>>>>>>>>>>>>>>", schema[name]);
-      if (schema[name] === undefined || !_.isEqual(schema[name], value)) {
-        finded = false;
+    if (_.isObject(allUINodes)) {
+      let finded = true;
+      for (let key in allUINodes) {
+        const target = allUINodes[key];
+        const schema = target.getSchema();
+        for (let name in prop) {
+          if (schema[name] !== prop[name]) {
+            finded = false;
+            break;
+          }
+        }
+        if (finded) nodes.push(target);
       }
     }
-    if (finded) nodes.push(target);
-
-    // TO Improve?: recursive find
-    const children = target.getChildren();
-    _.forEach(children, (child: any) => {
-      if (_.isArray(child)) {
-        _.forEach(child, (c: any) => {
-          nodes = nodes.concat(this.searchNodes(prop, c));
-        });
-      } else {
-        nodes = nodes.concat(this.searchNodes(prop, child));
-      }
-    });
     return nodes;
   }
 
