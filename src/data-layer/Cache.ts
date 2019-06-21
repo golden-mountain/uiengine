@@ -33,9 +33,21 @@ export default class Cache {
     Cache.clearCache("layoutSchema");
   }
 
-  static setCache = (type: string, schemaPath: string, data: any) => {
+  static setCache = (
+    type: string,
+    schemaPath: string,
+    data: any,
+    replace: boolean = true
+  ) => {
     let path = schemaPath.replace(".", "-");
-    _.set(Cache.cache, `${type}.${path}`, data);
+    if (replace) {
+      _.set(Cache.cache, `${type}.${path}`, data);
+    } else {
+      const cache = Cache.getCache(type, schemaPath);
+      if (!cache) {
+        _.set(Cache.cache, `${type}.${path}`, data);
+      }
+    }
   };
 
   static getCache(type: string, schemaPath?: string) {
@@ -59,8 +71,8 @@ export default class Cache {
     Cache.setCache("layoutSchema", path, data);
   }
 
-  static setLayoutRoot(path: string, data: any) {
-    Cache.setCache("layoutRoots", path, data);
+  static setLayoutRoot(path: string, data: any, replace: boolean = false) {
+    Cache.setCache("layoutRoots", path, data, replace);
   }
 
   static getDataSchema(path?: string) {

@@ -8,7 +8,7 @@ import { IUINode, ILayoutSchema } from "../../typings/UINode";
 export default class UINode implements IUINode {
   private errorInfo: IErrorInfo = {};
   private request: IRequest = new Request();
-  private children: Array<UINode> = [];
+  children: Array<UINode> = [];
   isLiveChildren: boolean = false;
   private schema: ILayoutSchema = {};
   private dataNode?: any;
@@ -38,7 +38,6 @@ export default class UINode implements IUINode {
     if (!returnSchema) returnSchema = this.schema;
     if (typeof schema === "string") {
       returnSchema = await this.loadRemoteLayout(schema);
-      Cache.setLayoutRoot(schema, this);
       this.rootName = schema;
     }
     if (returnSchema) {
@@ -101,12 +100,12 @@ export default class UINode implements IUINode {
         if (_.isArray(s)) {
           node = [];
           for (let i in s) {
-            const subnode = new UINode(s[i]);
+            const subnode = new UINode(s[i], this.request, this.rootName);
             await subnode.loadLayout(s[i]);
             node.push(subnode);
           }
         } else {
-          node = new UINode(s);
+          node = new UINode(s, this.request, this.rootName);
           await node.loadLayout(s);
         }
         children.push(node);
@@ -117,6 +116,7 @@ export default class UINode implements IUINode {
     // load State
     this.stateNode = new StateNode(this);
     this.stateNode.renewStates();
+    Cache.setLayoutRoot(this.rootName, this);
     return this;
   }
 
@@ -151,11 +151,11 @@ export default class UINode implements IUINode {
     return this;
   }
 
-  getChildren(...args: any) {
-    const path = args.map((v: number) => {
-      return `children[${v}]`;
-    });
-    if (args.length) {
+  getChildren(route?: Array<Number>) {
+    if (route) {
+      const path = route.map((v: Number) => {
+        return `children[${v}]`;
+      });
       return _.get(this, path.join("."));
     } else {
       return this.children;
@@ -164,16 +164,19 @@ export default class UINode implements IUINode {
 
   searchNodes(prop: object, target?: IUINode, root?: string): any {
     let nodes: Array<any> = [];
+
     // search this rootSchemas
     const rootName = root || this.rootName;
-    const rootNode = Cache.getLayoutRoot(rootName) as IUINode;
-    if (!target) target = rootNode;
+    if (!target) {
+      target = Cache.getLayoutRoot(rootName) as IUINode;
+    }
 
     const schema = target.getSchema();
     let finded = true;
     for (let name in prop) {
       const value = prop[name];
-      if (!schema[name] || schema[name] !== value) {
+      // console.log(value, name, ">>>>>>>>>>>>>>>", schema[name]);
+      if (schema[name] === undefined || !_.isEqual(schema[name], value)) {
         finded = false;
       }
     }
@@ -198,6 +201,29 @@ export default class UINode implements IUINode {
       data = await this.loadData(schema.datasource);
     }
 
+    // replace $ to row number
+    const updatePropRow = (target: ILayoutSchema, index: number) => {
+      if (_.isArray(target)) {
+        _.forEach(target, (c: any) => {
+          _.forIn(c, function(value, key) {
+            if (typeof value === "object") {
+              updatePropRow(value, index);
+            } else if (value.indexOf("$") > -1) {
+              _.set(c, key, value.replace("$", index));
+            }
+          });
+        });
+      } else {
+        _.forIn(target, function(value, key) {
+          if (typeof value === "object") {
+            updatePropRow(value, index);
+          } else if (value.indexOf("$") > -1) {
+            _.set(target, key, value.replace("$", index));
+          }
+        });
+      }
+    };
+
     const liveSchema = schema;
     const rowTemplate: any = liveSchema.$children;
     if (rowTemplate && data) {
@@ -205,7 +231,7 @@ export default class UINode implements IUINode {
         rowTemplate.map((s: any) => {
           const newSchema = _.cloneDeep(s);
           if (newSchema.datasource) {
-            newSchema.datasource = newSchema.datasource.replace("$", index);
+            updatePropRow(newSchema, index);
             newSchema._index = index; // row id
           }
           return newSchema;

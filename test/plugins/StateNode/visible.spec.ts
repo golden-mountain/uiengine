@@ -19,23 +19,27 @@ describe("Given all the default plugins", () => {
   describe("the given plugins ", () => {
     it("visiblization should be caculated ", async () => {
       const request = new Request(reqConfig);
-      const uiNode = new UINode(stateNodeBasicLayout, request);
+      const uiNode = new UINode(
+        stateNodeBasicLayout,
+        request,
+        "loaded-from-local-node"
+      );
       const schema = await uiNode.loadLayout();
       let visible = uiNode.getStateNode().getState("visible");
       expect(visible).to.equal(true);
 
       // children 0:
-      let child: any = uiNode.getChildren(0);
+      let child: any = uiNode.getChildren([0]);
       visible = child.getStateNode().getState("visible");
       expect(visible).to.equal(true);
 
       // children 1
-      child = uiNode.getChildren(1);
+      child = uiNode.getChildren([1]);
       visible = child.getStateNode().getState("visible");
       expect(visible).to.equal(true);
 
       // children 1, 0
-      child = uiNode.getChildren(1, 0);
+      child = uiNode.getChildren([1, 0]);
       visible = child[0].getStateNode().getState("visible");
       expect(visible).to.equal(true);
 

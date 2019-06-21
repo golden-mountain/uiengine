@@ -10,6 +10,7 @@ export interface ILayoutSchema {
 }
 
 export interface IUINode {
+  children: Array<IUINode>;
   isLiveChildren: boolean;
   loadLayout(schema: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
@@ -19,7 +20,7 @@ export interface IUINode {
   updateLayout();
   genLiveLayout(schema: ILayoutSchema, data: any);
   clearLayout();
-  getChildren(...args: any);
+  getChildren(route?: Array<Number>);
   getDataNode(): IDataNode;
   getNode(path?: string);
   updateState();

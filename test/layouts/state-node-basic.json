@@ -33,7 +33,10 @@
         {
           "component": "p",
           "datasource": "foo:bar.baz.$.name",
-          "id": "for.bar.baz.$.name"
+          "id": "foo.bar.baz.$.name",
+          "prop": {
+            "any": "prop"
+          }
         },
         {
           "component": "p",
@@ -43,7 +46,7 @@
               "deps": [
                 {
                   "selector": {
-                    "id": "for.bar.baz.$.name"
+                    "id": "foo.bar.baz.$.name"
                   },
                   "data": ""
                 }

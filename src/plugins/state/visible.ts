@@ -5,21 +5,24 @@ import {
   StatePluginFunc
 } from "../../../typings/StateNode";
 
-export function visible(this: IStateNode) {
+export function visible(stateNode: IStateNode) {
   let result = true;
-  const uiNode = this.getUINode();
+  const uiNode = stateNode.getUINode();
   const schema = uiNode.getSchema();
-  const visibleCondition = _.get(schema, "visible");
+  const visibleCondition = _.get(schema, "state.visible");
 
   // strategy could and|or
   if (typeof visibleCondition === "object") {
     const { strategy = "and", deps = [] } = visibleCondition;
+    // deps condition on UI schema
     deps.forEach((dep: any) => {
       if (dep.selector) {
         const depUINodes = uiNode.searchNodes(dep.selector);
+        // console.log(depUINodes.length, dep.selector);
         if (depUINodes.length) {
+          // searched the props met the condition
           depUINodes.forEach((depUINode: any) => {
-            // data deps
+            // match data deps
             if (dep.data) {
               const dataNode = depUINode.getDataNode();
               if (dataNode) {
@@ -51,7 +54,7 @@ export function visible(this: IStateNode) {
                   }
                 } else {
                   // recursively find other UI Node
-                  // result = visible();
+                  result = visible(stateNode);
                 }
               }
             }

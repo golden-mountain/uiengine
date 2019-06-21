@@ -6,6 +6,7 @@ import { Cache } from ".";
 import * as statePlugins from "../plugins/state";
 
 export default class StateNode implements IStateNode {
+  private errorInfo: IErrorInfo = {};
   private state: IState = {};
   private uiNode: IUINode;
   private plugins: object = statePlugins;
@@ -28,8 +29,15 @@ export default class StateNode implements IStateNode {
 
   renewStates(): IState {
     _.forEach(this.plugins, (plugin: StatePluginFunc, name: string) => {
-      const result = plugin.call(this);
-      _.set(this.state, name, result);
+      try {
+        const result = plugin.call(this, this);
+        _.set(this.state, name, result);
+      } catch (e) {
+        this.errorInfo = {
+          code: e.message
+        };
+        // console.log(e.message);
+      }
     });
     return this.state;
   }
