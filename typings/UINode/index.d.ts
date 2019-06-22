@@ -10,9 +10,11 @@ export interface ILayoutSchema {
 }
 
 export interface IUINode {
-  id: string;
-  children: Array<IUINode>;
+  errorInfo: IErrorInfo;
+  schema: ILayoutSchema;
+  rootName: string;
   isLiveChildren: boolean;
+  id: string;
   loadLayout(schema: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
   loadData(source: string);
@@ -27,5 +29,6 @@ export interface IUINode {
   updateState();
   getStateNode(): IStateNode;
   searchNodes(prop: object, root?: string);
+  getPluginManager(): IPluginManager;
   // getProps(): INodeProps;
 }

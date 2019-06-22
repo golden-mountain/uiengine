@@ -1,20 +1,20 @@
 import { AxiosPromise } from "axios";
 
-interface IDataSchema {
+export interface IDataSchema {
   endpoint: {};
   definition: {};
 }
 
-interface ICache {
+export interface ICache {
   [name: string]: {};
 }
 
-interface IDataSourceInfo {
+export interface IDataSourceInfo {
   name?: string;
   schemaPath?: string;
 }
 
-interface IDataNode {
+export interface IDataNode {
   loadData(): Promise<AxiosPromise> | any;
   loadSchema(): Promise<AxiosPromise> | any;
   // updateData(): IDataNode;
@@ -27,4 +27,5 @@ interface IDataNode {
   // loadPlugins();
   getErrorInfo();
   getSource();
+  getPluginManager(): IPluginManager;
 }

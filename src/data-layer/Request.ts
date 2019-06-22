@@ -1,6 +1,8 @@
 import axios from "axios";
 import MockAdapter from "axios-mock-adapter";
 import _ from "lodash";
+
+import { IRequest, IRequestConfig } from "../../typings";
 // Add a request interceptor
 // axios.interceptors.request.use(
 //   function(config) {

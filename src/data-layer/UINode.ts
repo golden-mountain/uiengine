@@ -1,18 +1,25 @@
 import _ from "lodash";
-import { Request, DataNode, Cache, StateNode } from ".";
+import { Request, DataNode, Cache, StateNode, PluginManager } from ".";
 import { AxiosPromise } from "axios";
-import { IDataNode } from "../../typings/DataNode";
-import { IStateNode } from "../../typings/StateNode";
-import { IUINode, ILayoutSchema } from "../../typings/UINode";
+import {
+  IDataNode,
+  IStateNode,
+  IUINode,
+  ILayoutSchema,
+  IRequest,
+  IErrorInfo,
+  IPluginManager
+} from "../../typings";
 
 export default class UINode implements IUINode {
-  private errorInfo: IErrorInfo = {};
   private request: IRequest = new Request();
-  private schema: ILayoutSchema = {};
   private dataNode?: any;
   private stateNode: IStateNode = new StateNode(this);
-  private rootName: string = "default";
-  children: Array<UINode> = [];
+  private children: Array<UINode> = [];
+  private pluginManager: IPluginManager = new PluginManager(this);
+  errorInfo: IErrorInfo = {};
+  schema: ILayoutSchema = {};
+  rootName: string = "default";
   isLiveChildren: boolean = false;
   id: string = "";
 
@@ -24,9 +31,7 @@ export default class UINode implements IUINode {
     if (request) {
       this.request = request;
     }
-
     this.schema = schema;
-    this.id = _.uniqueId();
 
     // cache root object if given root name
     if (root) {
@@ -69,6 +74,10 @@ export default class UINode implements IUINode {
 
   getStateNode(): IStateNode {
     return this.stateNode;
+  }
+
+  getPluginManager(): IPluginManager {
+    return this.pluginManager;
   }
 
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {

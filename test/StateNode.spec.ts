@@ -6,6 +6,7 @@ import _ from "lodash";
 
 import { UINode, StateNode } from "../src";
 // import reqConfig from "./config/request";
+import { IStateNode } from "../typings/StateNode";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -19,11 +20,11 @@ describe("Given an instance of my StateNode library", () => {
       const uiNode = new UINode({});
       const stateNode = uiNode.getStateNode();
       expect(stateNode).is.instanceOf(StateNode);
-      const plugins = stateNode.getPlugins();
+      const plugins = stateNode.getPluginManager().getPlugins("state");
       expect(plugins).to.have.property("visible");
     });
 
-    it("renewState: should renee all state data", () => {
+    it("renewState: should renew all state data", () => {
       const uiNode = new UINode({});
       const stateNode = uiNode.getStateNode();
       const state = stateNode.renewStates();
@@ -32,12 +33,34 @@ describe("Given an instance of my StateNode library", () => {
       expect(stateNode.getState("visible")).is.not.undefined;
     });
 
-    it("loadPlugins: should renee all state data", () => {
+    it("loadPlugins: should renew all state data", () => {
       const uiNode = new UINode({});
       const stateNode = uiNode.getStateNode();
-      const plugins = stateNode.loadPlugins();
+      stateNode.getPluginManager().loadPlugins();
+      let plugins = stateNode.getPluginManager().getPlugins("state");
+
       // have buildin plugin value
       expect(plugins).to.have.property("visible");
+      expect(plugins).to.have.property("valid");
+
+      // append plugins
+      const plugin = {
+        type: "any",
+        initialize: false,
+        callback: () => {},
+        name: "anyname"
+      };
+      const externalPlugins = {
+        external_plugin_1: plugin,
+        external_plugin_2: plugin,
+        external_plugin_3: plugin
+      };
+      stateNode.getPluginManager().loadPlugins(externalPlugins);
+
+      plugins = stateNode.getPluginManager().getPlugins("any");
+      expect(Object.keys(plugins).length).to.equal(1);
+      expect(plugins).to.have.property("anyname");
+      expect(plugins).to.not.have.property("external_plugin_1");
     });
   });
 });

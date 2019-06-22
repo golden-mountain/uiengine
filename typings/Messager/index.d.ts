@@ -1,4 +1,4 @@
-interface IMessager {
+export interface IMessager {
   // send(msg: string, info: any, paths?: Array<path>);
   // listen(msg: string, callback: function);
   // broadcast(msg: string, info: any);

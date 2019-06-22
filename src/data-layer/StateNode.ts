@@ -1,8 +1,8 @@
 import _ from "lodash";
 
-import { IState, IStateNode, StatePluginFunc } from "../../typings/StateNode";
+import { IState, IStateNode, IErrorInfo, IPluginManager } from "../../typings";
 import { IUINode } from "../../typings/UINode";
-import { Cache } from ".";
+import { Cache, PluginManager } from ".";
 import * as statePlugins from "../plugins/state";
 
 export default class StateNode implements IStateNode {
@@ -10,8 +10,11 @@ export default class StateNode implements IStateNode {
   private state: IState = {};
   private uiNode: IUINode;
   private plugins: object = statePlugins;
+  private pluginManager: IPluginManager = new PluginManager(this);
+
   constructor(uiNode: IUINode) {
     this.uiNode = uiNode;
+    this.pluginManager.loadPlugins(statePlugins);
   }
 
   getUINode() {
@@ -28,17 +31,7 @@ export default class StateNode implements IStateNode {
   }
 
   renewStates(): IState {
-    _.forEach(this.plugins, (plugin: StatePluginFunc, name: string) => {
-      try {
-        const result = plugin.call(this, this);
-        this.setState(name, result);
-      } catch (e) {
-        this.errorInfo = {
-          code: e.message
-        };
-        // console.log(e.message);
-      }
-    });
+    this.state = this.pluginManager.executePlugins("state");
     return this.state;
   }
 
@@ -47,8 +40,7 @@ export default class StateNode implements IStateNode {
     return this.state;
   }
 
-  loadPlugins(newPlugins: object = {}) {
-    this.plugins = _.merge(this.plugins, newPlugins);
-    return this.plugins;
+  getPluginManager(): IPluginManager {
+    return this.pluginManager;
   }
 }

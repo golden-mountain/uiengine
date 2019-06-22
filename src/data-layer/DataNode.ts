@@ -1,7 +1,14 @@
 import _ from "lodash";
+import { PluginManager } from "./";
 // import { Request } from ".";
 // import { AxiosPromise } from "axios";
-import { IDataNode, IDataSourceInfo } from "../../typings/DataNode";
+import {
+  IDataNode,
+  IDataSourceInfo,
+  IRequest,
+  IRequestConfig,
+  IPluginManager
+} from "../../typings";
 import { Request, Cache } from ".";
 
 export default class DataNode implements IDataNode {
@@ -12,6 +19,7 @@ export default class DataNode implements IDataNode {
   private source: IDataSourceInfo;
   private rootSchema?: any;
   private rootData?: any;
+  private pluginManager: IPluginManager = new PluginManager(this);
 
   constructor(source: any, request?: IRequest) {
     if (request) {
@@ -70,6 +78,10 @@ export default class DataNode implements IDataNode {
 
   getRootData() {
     return this.rootData;
+  }
+
+  getPluginManager(): IPluginManager {
+    return this.pluginManager;
   }
 
   getDataEntryPoint(method: string): string {

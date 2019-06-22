@@ -12,6 +12,8 @@ export interface IStateNode {
   getState(key?: string): IState;
   renewStates(): IState;
   setState(key: string, value: any): IState;
-  loadPlugins(newPlugins: Array<StatePluginFunc> = []);
-  getPlugins(key?: string);
+  // loadPlugins(newPlugins?: object);
+  // getPlugins(key?: string);
+  // setErrorInfo(key: string, value: any): IErrorInfo;
+  getPluginManager(): IPluginManager;
 }

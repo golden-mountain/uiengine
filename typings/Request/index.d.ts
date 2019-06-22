@@ -1,4 +1,4 @@
-interface IRequest {
+export interface IRequest {
   get(url: string, params?: any);
   put(url: string, params?: any);
   post(url: string, params?: any);
@@ -6,7 +6,7 @@ interface IRequest {
   getConfig(configName?: string);
 }
 
-interface IRequestConfig extends AxiosRequestConfig {
+export interface IRequestConfig extends AxiosRequestConfig {
   devMode?: boolean;
   pathPrefix?: string;
   dataSchemaPrefix?: string;
@@ -14,7 +14,7 @@ interface IRequestConfig extends AxiosRequestConfig {
   layoutSchemaPrefix?: string;
 }
 
-interface IErrorInfo {
+export interface IErrorInfo {
   status?: number;
   code?: any;
 }

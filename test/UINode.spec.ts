@@ -8,7 +8,6 @@ import { UINode, Request, Cache } from "../src";
 import reqConfig from "./config/request";
 // import defaultSchema from "./config/default-schema";
 // import { IUINode } from "../typings/UINode";
-// import { IDataNode } from "../typings/DataNode";
 
 import uiNodeLayout from "./layouts/uinode-basic.json";
 import stateTestLayout from "./layouts/state-node-basic.json";
@@ -55,6 +54,7 @@ describe("Given an instance of my UINode library", () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
       const localUINode = new UINode(copyLayout);
       expect(localUINode.getSchema()).to.deep.equal(copyLayout);
+      expect(localUINode.rootName).to.equal("default");
     });
 
     it("loadRemoteLayout: if schema is string, should load from remote and same as the loaded", async () => {
@@ -180,11 +180,14 @@ describe("Given an instance of my UINode library", () => {
       // use given layout from constructor
       const schemaPath = `${reqConfig.layoutSchemaPrefix}uinode-basic`;
       const uinode = new UINode({}, request);
-      let schema = await uinode.loadLayout(`${schemaPath}.json`);
+      const layoutName = `${schemaPath}.json`;
+      let schema = await uinode.loadLayout(layoutName);
+      expect(uinode.id).is.not.empty;
+      expect(uinode.rootName).to.equal(layoutName);
+
       const liveChildren = _.get(uinode, "children[1]");
       schema = liveChildren.getSchema().children;
       expect(schema).to.deep.equal(expectedResult);
-
       // root schemas exists
       const path = `${schemaPath}-json`;
       expect(Cache.getLayoutSchema(path)).to.deep.equal(uinode.getSchema());

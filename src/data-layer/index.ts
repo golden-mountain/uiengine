@@ -15,3 +15,6 @@ export { default as Messager } from "./Messager";
 
 // cache
 export { default as Cache } from "./Cache";
+
+// plugin
+export { default as PluginManager } from "./PluginManager";

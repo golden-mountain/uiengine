@@ -5,13 +5,13 @@ import { IPluginFunc, IPlugin } from "../../../typings";
 
 const callback: IPluginFunc = (stateNode: IStateNode) => {
   let result = true;
-  result = stateDepsResolver(stateNode, "visible");
+  result = stateDepsResolver(stateNode, "valid");
   return result;
 };
 
-export const visible: IPlugin = {
+export const valid: IPlugin = {
   type: "state",
   initialize: false,
   callback,
-  name: "visible"
+  name: "valid"
 };
