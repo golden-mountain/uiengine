@@ -114,9 +114,9 @@ describe("Given an instance of my PluginManager library", () => {
       expect(_.keys(allPlugins).length).to.equal(1);
     });
 
-    it("executePlugins: should execute specific type of plugins", () => {
+    it("executePlugins: should execute specific type of plugins", async () => {
       manager.loadPlugins(plugins);
-      const result = manager.executePlugins("foo");
+      const result = await manager.executePlugins("foo");
       const expectedResult = {
         anyname1: 1,
         anyname2: 2

@@ -10,7 +10,7 @@ export type StatePluginFunc = (
 export interface IStateNode {
   getUINode(): IUINode;
   getState(key?: string): IState;
-  renewStates(): IState;
+  renewStates();
   setState(key: string, value: any): IState;
   // loadPlugins(newPlugins?: object);
   // getPlugins(key?: string);

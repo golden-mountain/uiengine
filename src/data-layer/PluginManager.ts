@@ -42,18 +42,18 @@ export default class PluginManager implements IPluginManager {
     return PluginManager.plugins;
   }
 
-  executePlugins(type: string) {
+  async executePlugins(type: string) {
     const plugins: IPlugins = _.get(PluginManager.plugins, type);
-    _.forIn(plugins, (p: IPlugin, k: string) => {
-      console.log("plugin", p);
+    for (let k in plugins) {
+      const p = plugins[k];
       const name = p.name || k;
       try {
-        const result = p.callback.call(this.caller, this.caller);
+        const result = await p.callback.call(this.caller, this.caller);
         _.set(this.result, `${type}.${name}`, result);
       } catch (e) {
         this.setErrorInfo(p.type, name, e.message);
       }
-    });
+    }
     return _.get(this.result, type, {});
   }
 

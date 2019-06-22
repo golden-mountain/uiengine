@@ -1,0 +1,18 @@
+{
+  "id": "template-definition",
+  "component": "lib:DemoElement1",
+  "datasource": "foo:bar",
+  "children": [
+    {
+      "component": "lib:DemoElement2",
+      "id": "id-of-demo-element-2",
+      "datasource": "foo:bar.name",
+      "props": {
+        "name": "demo-element-2"
+      }
+    },
+    {
+      "$template": "state-test.json"
+    }
+  ]
+}

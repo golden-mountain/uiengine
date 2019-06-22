@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { Request, DataNode, Cache, StateNode, PluginManager } from ".";
 import { AxiosPromise } from "axios";
+import * as uiPlugins from "../plugins/ui";
 import {
   IDataNode,
   IStateNode,
@@ -8,7 +9,8 @@ import {
   ILayoutSchema,
   IRequest,
   IErrorInfo,
-  IPluginManager
+  IPluginManager,
+  IPlugins
 } from "../../typings";
 
 export default class UINode implements IUINode {
@@ -17,6 +19,7 @@ export default class UINode implements IUINode {
   private stateNode: IStateNode = new StateNode(this);
   private children: Array<UINode> = [];
   private pluginManager: IPluginManager = new PluginManager(this);
+  private loadDefaultPlugins: boolean = true;
   errorInfo: IErrorInfo = {};
   schema: ILayoutSchema = {};
   rootName: string = "default";
@@ -26,7 +29,8 @@ export default class UINode implements IUINode {
   constructor(
     schema: ILayoutSchema,
     request?: IRequest,
-    root: string = "default"
+    root: string = "default",
+    loadDefaultPlugins: boolean = true
   ) {
     if (request) {
       this.request = request;
@@ -36,6 +40,12 @@ export default class UINode implements IUINode {
     // cache root object if given root name
     if (root) {
       this.rootName = root;
+    }
+
+    // load plugins
+    if (loadDefaultPlugins) {
+      this.loadDefaultPlugins = loadDefaultPlugins;
+      this.pluginManager.loadPlugins(uiPlugins);
     }
   }
 
@@ -60,7 +70,13 @@ export default class UINode implements IUINode {
     return returnSchema;
   }
 
-  getSchema(): ILayoutSchema {
+  getSchema(path?: string): ILayoutSchema {
+    if (_.isEmpty(this.schema)) {
+      console.warn("did you execute loadLayout before using getSchema method?");
+    }
+    if (path) {
+      return _.get(this.schema, path);
+    }
     return this.schema;
   }
 
@@ -78,6 +94,10 @@ export default class UINode implements IUINode {
 
   getPluginManager(): IPluginManager {
     return this.pluginManager;
+  }
+
+  getRequest(): IRequest {
+    return this.request;
   }
 
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {
@@ -130,15 +150,23 @@ export default class UINode implements IUINode {
       }
       this.children = children;
     }
+
     this.schema = liveSchema;
     // load State
-    this.stateNode = new StateNode(this);
-    this.stateNode.renewStates();
+    this.stateNode = new StateNode(this, this.loadDefaultPlugins);
+    await this.stateNode.renewStates();
+
+    // load ui.parser plugin
+    try {
+      await this.pluginManager.executePlugins("ui.parser");
+    } catch (e) {
+      console.log(e.message);
+    }
     return this;
   }
 
   async loadData(source: string) {
-    this.dataNode = new DataNode(source, this.request);
+    this.dataNode = new DataNode(source, this.request, this.loadDefaultPlugins);
     const result = await this.dataNode.loadData();
     return result;
   }
@@ -172,6 +200,11 @@ export default class UINode implements IUINode {
   }
 
   getChildren(route?: Array<Number>) {
+    if (_.isEmpty(this.children)) {
+      console.warn(
+        "did you execute loadLayout before using getChildren method?"
+      );
+    }
     if (route) {
       const path = route.map((v: Number) => {
         return `children[${v}]`;
@@ -254,6 +287,6 @@ export default class UINode implements IUINode {
   }
 
   async updateState() {
-    return this.getStateNode().renewStates();
+    return await this.getStateNode().renewStates();
   }
 }

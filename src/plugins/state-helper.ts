@@ -37,9 +37,9 @@ export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
             if (dep.state && depUINode) {
               const stateNode = depUINode.getStateNode();
               if (stateNode) {
-                const stateBasic = stateNode.getState("basic");
+                const stateBasic = stateNode.getState(stateName);
                 if (stateBasic !== "undefined") {
-                  const depBasic = _.get(dep.state, "basic");
+                  const depBasic = _.get(dep.state, stateName);
                   if (strategy === "and") {
                     result = result && _.isEqual(stateBasic, depBasic);
                     if (!result) return;

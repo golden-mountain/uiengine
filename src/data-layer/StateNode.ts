@@ -12,9 +12,11 @@ export default class StateNode implements IStateNode {
   private plugins: object = statePlugins;
   private pluginManager: IPluginManager = new PluginManager(this);
 
-  constructor(uiNode: IUINode) {
+  constructor(uiNode: IUINode, loadDefaultPlugins: boolean = true) {
     this.uiNode = uiNode;
-    this.pluginManager.loadPlugins(statePlugins);
+    if (loadDefaultPlugins) {
+      this.pluginManager.loadPlugins(statePlugins);
+    }
   }
 
   getUINode() {
@@ -30,8 +32,8 @@ export default class StateNode implements IStateNode {
     return this.plugins;
   }
 
-  renewStates(): IState {
-    this.state = this.pluginManager.executePlugins("state");
+  async renewStates() {
+    this.state = await this.pluginManager.executePlugins("state");
     return this.state;
   }
 

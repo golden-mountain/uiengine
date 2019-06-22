@@ -4,9 +4,7 @@ import { stateDepsResolver } from "../state-helper";
 import { IPluginFunc, IPlugin } from "../../../typings";
 
 const callback: IPluginFunc = (stateNode: IStateNode) => {
-  let result = true;
-  result = stateDepsResolver(stateNode, "valid");
-  return result;
+  return stateDepsResolver(stateNode, "valid");
 };
 
 export const valid: IPlugin = {

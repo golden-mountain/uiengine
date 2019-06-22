@@ -1,3 +1,5 @@
+import { IRequest } from "../Request";
+
 export interface INodeProps {}
 
 export interface ILayoutSchema {
@@ -18,7 +20,7 @@ export interface IUINode {
   loadLayout(schema: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
   loadData(source: string);
-  getSchema(): ILayoutSchema;
+  getSchema(path?: string): ILayoutSchema;
   replaceLayout(newSchema: ILayoutSchema | string);
   updateLayout();
   genLiveLayout(schema: ILayoutSchema, data: any);
@@ -30,5 +32,6 @@ export interface IUINode {
   getStateNode(): IStateNode;
   searchNodes(prop: object, root?: string);
   getPluginManager(): IPluginManager;
+  getRequest(): IRequest;
   // getProps(): INodeProps;
 }

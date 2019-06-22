@@ -21,7 +21,11 @@ export default class DataNode implements IDataNode {
   private rootData?: any;
   private pluginManager: IPluginManager = new PluginManager(this);
 
-  constructor(source: any, request?: IRequest) {
+  constructor(
+    source: any,
+    request?: IRequest,
+    loadDefaultPlugins: boolean = true
+  ) {
     if (request) {
       this.request = request;
     }
@@ -32,6 +36,10 @@ export default class DataNode implements IDataNode {
       this.source = {};
     } else {
       this.source = this.getSchemaInfo(source);
+    }
+
+    if (loadDefaultPlugins) {
+      this.pluginManager.loadPlugins({});
     }
   }
 
