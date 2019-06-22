@@ -80,7 +80,7 @@ describe("Given an instance of my PluginManager library", () => {
         }
       };
       const allPlugins = manager.loadPlugins(extPlugins);
-      expect(_.keys(allPlugins).length).to.equal(3);
+      expect(_.keys(allPlugins).length).to.equal(4);
       const barPlugin = manager.getPlugins("bar");
       expect(_.keys(barPlugin).length).to.equal(1);
 
@@ -101,12 +101,12 @@ describe("Given an instance of my PluginManager library", () => {
       manager.loadPlugins(extPlugins);
       let allPlugins = manager.getPlugins();
       // before remove
-      expect(_.keys(allPlugins).length).to.equal(3);
+      expect(_.keys(allPlugins).length).to.equal(4);
 
       // after remove a type
       manager.unloadPlugins("bar");
       allPlugins = manager.getPlugins();
-      expect(_.keys(allPlugins).length).to.equal(2);
+      expect(_.keys(allPlugins).length).to.equal(3);
 
       // remove a single plugin
       manager.unloadPlugins("foo", "anyname1");

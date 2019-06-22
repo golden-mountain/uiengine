@@ -17,7 +17,7 @@ export interface IUINode {
   rootName: string;
   isLiveChildren: boolean;
   id: string;
-  loadLayout(schema: ILayoutSchema | string);
+  loadLayout(schema?: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
   loadData(source: string);
   getSchema(path?: string): ILayoutSchema;

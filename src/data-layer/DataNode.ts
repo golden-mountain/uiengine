@@ -1,31 +1,34 @@
 import _ from "lodash";
 import { PluginManager } from "./";
-// import { Request } from ".";
-// import { AxiosPromise } from "axios";
+import * as dataPlugins from "../plugins/data";
 import {
   IDataNode,
   IDataSourceInfo,
   IRequest,
-  IRequestConfig,
-  IPluginManager
+  IPluginManager,
+  IUINode
 } from "../../typings";
 import { Request, Cache } from ".";
 
 export default class DataNode implements IDataNode {
   private errorInfo: any = {};
   private request: IRequest = new Request({});
-  private schema?: any;
-  private data: any;
   private source: IDataSourceInfo;
-  private rootSchema?: any;
-  private rootData?: any;
   private pluginManager: IPluginManager = new PluginManager(this);
+  private uiNode: IUINode;
+  private rootData?: any;
+  schema?: any;
+  data: any;
+  updatingData?: any;
 
   constructor(
     source: any,
+    uiNode: IUINode,
     request?: IRequest,
     loadDefaultPlugins: boolean = true
   ) {
+    this.uiNode = uiNode;
+
     if (request) {
       this.request = request;
     }
@@ -39,7 +42,7 @@ export default class DataNode implements IDataNode {
     }
 
     if (loadDefaultPlugins) {
-      this.pluginManager.loadPlugins({});
+      this.pluginManager.loadPlugins(dataPlugins);
     }
   }
 
@@ -76,17 +79,20 @@ export default class DataNode implements IDataNode {
     return path ? _.get(this.data, path, this.data) : this.data;
   }
 
-  getSchema() {
+  getSchema(path?: string) {
+    if (path) {
+      return _.get(this.schema, path);
+    }
     return this.schema;
   }
 
-  getRootSchema() {
-    return this.rootSchema;
-  }
+  // getRootSchema() {
+  //   return this.rootSchema;
+  // }
 
-  getRootData() {
-    return this.rootData;
-  }
+  // getRootData() {
+  //   return this.rootData;
+  // }
 
   getPluginManager(): IPluginManager {
     return this.pluginManager;
@@ -107,10 +113,8 @@ export default class DataNode implements IDataNode {
       this.schema = await this.loadSchema();
       const endpoint = this.getDataEntryPoint("get");
       this.data = await this.loadRemoteData(endpoint);
-    } else {
-      this.schema = null;
-      this.data = null;
     }
+
     return this.data;
   }
 
@@ -126,7 +130,11 @@ export default class DataNode implements IDataNode {
           data = data.data;
         }
       }
-      this.rootData = data;
+
+      // get parent data to assign new data
+      const nameSegs = name.split(".");
+      nameSegs.pop();
+      this.rootData = _.get(data, nameSegs.join("."));
       result = _.get(data, name, null);
     } catch (e) {
       this.errorInfo.data = {
@@ -151,7 +159,7 @@ export default class DataNode implements IDataNode {
           schema = schema.data;
         }
       }
-      this.rootSchema = schema;
+      // this.rootSchema = schema;
       result = _.get(schema, `definition.${name}`);
     } catch (e) {
       this.errorInfo.schema = {
@@ -160,5 +168,29 @@ export default class DataNode implements IDataNode {
     }
     this.schema = result;
     return result;
+  }
+
+  async updateData(value: any, path?: string) {
+    // check data from update plugins
+    this.updatingData = value;
+    const couldUpdate = await this.pluginManager.executePlugins(
+      "data.update.could"
+    );
+    // update this data
+    if (couldUpdate) {
+      if (path) {
+        _.set(this.data, path, value);
+      } else {
+        const { name = "" } = this.source;
+        this.data = value;
+        const nameSegs = name.split(".");
+        const lastName = nameSegs.pop();
+        if (lastName) _.set(this.rootData, lastName, value);
+        // console.log(lastName, value, this.rootData);
+      }
+
+      await this.uiNode.updateLayout();
+      this.updatingData = undefined;
+    }
   }
 }

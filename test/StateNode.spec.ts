@@ -30,7 +30,7 @@ describe("Given an instance of my StateNode library", () => {
       const state = await stateNode.renewStates();
       expect(state).to.have.property("visible");
       expect(stateNode.getState()).to.have.property("visible");
-      // expect(stateNode.getState("visible")).is.not.undefined;
+      expect(stateNode.getState("visible")).is.not.undefined;
     });
 
     it("loadPlugins: should renew all state data", () => {

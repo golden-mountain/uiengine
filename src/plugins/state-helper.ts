@@ -17,11 +17,15 @@ export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
         if (depUINodes.length) {
           // searched the props met the condition
           depUINodes.forEach((depUINode: any) => {
+            console.log(">>>>>", depUINode.getDataNode().getData());
             // match data deps
             if (dep.data !== undefined) {
               const dataNode = depUINode.getDataNode();
+
               if (dataNode) {
                 const data = dataNode.getData();
+                console.log(data, dep.data, "<<<<< depUI");
+
                 if (strategy === "and") {
                   result = result && _.isEqual(data, dep.data);
                   if (!result) return;

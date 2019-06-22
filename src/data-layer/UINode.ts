@@ -119,9 +119,12 @@ export default class UINode implements IUINode {
     return result;
   }
 
-  private async assignSchema(schema: ILayoutSchema) {
+  private async assignSchema(
+    schema: ILayoutSchema,
+    reloadData: boolean = true
+  ) {
     let liveSchema = schema;
-    if (liveSchema["datasource"]) {
+    if (liveSchema["datasource"] && reloadData) {
       await this.loadData(liveSchema["datasource"]);
     }
 
@@ -154,6 +157,7 @@ export default class UINode implements IUINode {
     this.schema = liveSchema;
     // load State
     this.stateNode = new StateNode(this, this.loadDefaultPlugins);
+    console.log("updating states................", this.dataNode.getData());
     await this.stateNode.renewStates();
 
     // load ui.parser plugin
@@ -166,7 +170,12 @@ export default class UINode implements IUINode {
   }
 
   async loadData(source: string) {
-    this.dataNode = new DataNode(source, this.request, this.loadDefaultPlugins);
+    this.dataNode = new DataNode(
+      source,
+      this,
+      this.request,
+      this.loadDefaultPlugins
+    );
     const result = await this.dataNode.loadData();
     return result;
   }
@@ -178,7 +187,7 @@ export default class UINode implements IUINode {
   }
 
   async updateLayout() {
-    const newSchema = await this.loadLayout(this.schema);
+    const newSchema = await this.assignSchema(this.schema, false);
     return newSchema;
   }
 
