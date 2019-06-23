@@ -116,15 +116,9 @@ describe("Given an instance of my DataNode library", () => {
       const dataNode = child.getDataNode();
       const data = dataNode.getData();
       expect(data).to.equal("Zp");
-      console.log(
-        ".....................update node.................................."
-      );
+
       // after updating correct data
       await dataNode.updateData("Zuoping");
-      console.log(
-        ".....................updated node..............................."
-      );
-
       expect(dataNode.getData()).to.equal("Zuoping");
 
       // refresh the state

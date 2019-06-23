@@ -39,10 +39,7 @@ export default class StateNode implements IStateNode {
     const depNodes = this.uiNode.searchDepsNodes();
     for (let key in depNodes) {
       const node = depNodes[key];
-      const status = await node
-        .getStateNode()
-        .getPluginManager()
-        .executePlugins("state");
+      await node.getStateNode().renewStates();
     }
 
     return this.state;
