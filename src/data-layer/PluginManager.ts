@@ -8,7 +8,7 @@ export default class PluginManager implements IPluginManager {
   errorInfo: IErrorInfo = {};
 
   constructor(caller: any, plugins?: IPlugins) {
-    if (plugins && _.isEmpty(PluginManager.plugins)) {
+    if (plugins) {
       this.loadPlugins(plugins);
     }
     this.caller = caller;
@@ -24,11 +24,13 @@ export default class PluginManager implements IPluginManager {
     }
   }
 
-  unloadPlugins(type: string, name?: string) {
-    if (name) {
+  static unloadPlugins(type?: string, name?: string) {
+    if (name && type) {
       _.unset(PluginManager.plugins, `${type}.${name}`);
-    } else {
+    } else if (type) {
       _.unset(PluginManager.plugins, type);
+    } else {
+      PluginManager.plugins = {};
     }
   }
 
@@ -48,7 +50,9 @@ export default class PluginManager implements IPluginManager {
       const p = plugins[k];
       const name = p.name || k;
       try {
+        // console.log("............ executeing plugin, Plugin Manager");
         const result = await p.callback.call(this.caller, this.caller);
+        // console.log(".................end execute plugin", result);
         _.set(this.result, `${type}.${name}`, result);
       } catch (e) {
         this.setErrorInfo(p.type, name, e.message);

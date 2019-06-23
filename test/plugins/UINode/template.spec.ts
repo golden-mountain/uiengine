@@ -22,7 +22,6 @@ describe("Given all the UI plugins", () => {
       const request = new Request(reqConfig);
       const uiNode = new UINode(templateLayout, request);
       const result = await uiNode.loadLayout();
-      console.log(result);
 
       // schema should be loaded
       const theChild = uiNode.getChildren([1]);

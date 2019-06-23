@@ -7,7 +7,7 @@ export default class Cache {
     dataSchema: {},
     data: {},
     layoutSchema: {},
-    layoutRoots: {}
+    uiNodes: {}
   };
 
   // static schema: ICache = {};
@@ -22,16 +22,32 @@ export default class Cache {
     }
   };
 
-  static clearDataCache() {
-    Cache.clearCache("data");
+  static clearDataCache(path?: string) {
+    if (path) {
+      Cache.clearCache("data", path);
+    } else {
+      Cache.clearCache("data");
+    }
   }
 
-  static clearDataSchemaCache() {
-    Cache.clearCache("dataSchema");
+  static clearDataSchemaCache(path?: string) {
+    if (path) {
+      Cache.clearCache("dataSchema", path);
+    } else {
+      Cache.clearCache("dataSchema");
+    }
   }
 
-  static clearLayoutSchemaCache() {
-    Cache.clearCache("layoutSchema");
+  static clearLayoutSchemaCache(path?: string) {
+    if (path) {
+      Cache.clearCache("layoutSchema", path);
+    } else {
+      Cache.clearCache("layoutSchema");
+    }
+  }
+
+  static clearUINodes(obj: IUINode) {
+    Cache.clearCache("uiNodes", obj.id);
   }
 
   static setCache = (
@@ -73,7 +89,7 @@ export default class Cache {
   }
 
   static setUINode(path: string, node: IUINode, replace: boolean = false) {
-    let currentCache = Cache.getCache("layoutRoots", path);
+    let currentCache = Cache.getCache("uiNodes", path);
     if (currentCache) {
       currentCache[node.id] = node;
     } else {
@@ -81,7 +97,7 @@ export default class Cache {
         [node.id]: node
       };
     }
-    Cache.setCache("layoutRoots", path, currentCache, replace);
+    Cache.setCache("uiNodes", path, currentCache, replace);
   }
 
   static getDataSchema(path?: string) {
@@ -97,6 +113,6 @@ export default class Cache {
   }
 
   static getUINode(path?: string) {
-    return Cache.getCache("layoutRoots", path);
+    return Cache.getCache("uiNodes", path);
   }
 }

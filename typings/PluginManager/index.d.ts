@@ -18,7 +18,7 @@ export interface IPluginManager {
   errorInfo: IErrorInfo;
   getPlugins(type?: string, name?: string);
   loadPlugins(plugins: IPlugins): IPlugins;
-  unloadPlugins(type: string, name?: string);
+  //unloadPlugins(type: string, name?: string);
   executePlugins(type: string);
   setErrorInfo(type: string, name: string, key: string, value: any): IErrorInfo;
 }

@@ -34,6 +34,17 @@ export default class StateNode implements IStateNode {
 
   async renewStates() {
     this.state = await this.pluginManager.executePlugins("state");
+
+    // update dependence visible
+    const depNodes = this.uiNode.searchDepsNodes();
+    for (let key in depNodes) {
+      const node = depNodes[key];
+      const status = await node
+        .getStateNode()
+        .getPluginManager()
+        .executePlugins("state");
+    }
+
     return this.state;
   }
 

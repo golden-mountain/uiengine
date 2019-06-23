@@ -93,7 +93,7 @@ describe("Given an instance of my UINode library", () => {
     it("replaceLayout: if bring a new schema on this node, this uiNode should replaced with new", async () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
 
-      const localUINode = new UINode(copyLayout);
+      const localUINode = new UINode(copyLayout, request);
       // await localUINode.loadLayout();
       // local schema
       let schema = await localUINode.replaceLayout(stateTestLayout);
@@ -112,15 +112,15 @@ describe("Given an instance of my UINode library", () => {
       expect(liveChildren).to.deep.equal(expectedResult);
     });
 
-    it("updateLayout: loadLayout should be called", () => {
+    it("updateLayout: loadLayout should be called", async () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
 
       const localUINode = new UINode(copyLayout);
-      const spy = chai.spy.on(localUINode, "loadLayout");
+      // const spy = chai.spy.on(localUINode, "loadLayout");
       // localUINode.loadLayout();
-      localUINode.updateLayout();
+      await localUINode.updateLayout();
       expect(localUINode.getSchema()).to.deep.equal(copyLayout);
-      expect(spy).to.have.been.called.exactly(1);
+      // expect(spy).to.have.been.called.once;
     });
 
     it("getNode: should return correct sub node", async () => {
@@ -195,48 +195,91 @@ describe("Given an instance of my UINode library", () => {
 
     it("searchNodes: should return right node by given prop", async () => {
       let copyLayout = _.cloneDeep(stateTestLayout);
-      const localUINode = new UINode(copyLayout, request, "test-root-name");
+      const root = "test-root-name";
+      const localUINode = new UINode(copyLayout, request, root);
       await localUINode.loadLayout();
-      let nodes = localUINode.searchNodes({
-        // datasource: "foo:bar.baz.$.age"
-        datasource: "foo:bar"
-      });
+      let nodes = localUINode.searchNodes(
+        {
+          // datasource: "foo:bar.baz.$.age"
+          datasource: "foo:bar"
+        },
+        root
+      );
+      // console.log(nodes);
       expect(nodes.length).to.equal(1);
 
-      nodes = localUINode.searchNodes({
-        datasource: "foo:bar.baz.0.age"
-      });
+      nodes = localUINode.searchNodes(
+        {
+          datasource: "foo:bar.baz.0.age"
+        },
+        root
+      );
       expect(nodes.length).to.equal(1);
 
-      nodes = localUINode.searchNodes({
-        component: "lib:DemoLiveElement",
-        datasource: "foo:bar.baz"
-      });
+      nodes = localUINode.searchNodes(
+        {
+          component: "lib:DemoLiveElement",
+          datasource: "foo:bar.baz"
+        },
+        root
+      );
       expect(nodes.length).to.equal(1);
 
       // multiple condition find
-      nodes = localUINode.searchNodes({
-        datasource: "foo:bar.baz.0.age",
-        component: "p"
-      });
+      nodes = localUINode.searchNodes(
+        {
+          datasource: "foo:bar.baz.0.age",
+          component: "p"
+        },
+        root
+      );
       expect(nodes.length).to.equal(1);
 
       // negtive cases
-      nodes = localUINode.searchNodes({
-        datasource: "foo:bar.baz.0.age",
-        component: "div" // not match this line
-      });
+      nodes = localUINode.searchNodes(
+        {
+          datasource: "foo:bar.baz.0.age",
+          component: "div" // not match this line
+        },
+        root
+      );
       expect(nodes.length).to.equal(0);
 
       // from subnode search
       const childNode = localUINode.getChildren([1, 0])[1];
       // console.log(childNode.getSchema());
-      nodes = childNode.searchNodes({
-        component: "lib:DemoElement2",
-        id: "id-of-demo-element-1",
-        datasource: "foo:bar.name"
-      });
+      nodes = childNode.searchNodes(
+        {
+          component: "lib:DemoElement2",
+          id: "id-of-demo-element-1",
+          datasource: "foo:bar.name"
+        },
+        root
+      );
       expect(nodes.length).to.equal(1);
+
+      // search complex prop
+      nodes = childNode.searchNodes(
+        {
+          "state.visible.deps[$].selector.id": "id-of-demo-element-1"
+        },
+        root
+      );
+      expect(nodes.length).to.equal(1);
+    });
+
+    it("searchDepsNode: should return this schema related nodes", async () => {
+      let copyLayout = _.cloneDeep(stateTestLayout);
+      const root = "test-root-name-1";
+      const localUINode = new UINode(copyLayout, request, root);
+      await localUINode.loadLayout();
+      // id = id-of-demo-element-1
+      const child = localUINode.getChildren([0]);
+      let nodes = localUINode.searchDepsNodes(child, root);
+      expect(nodes.length).to.equal(3);
+      expect(nodes[0].getSchema("id")).to.equal("id-of-demo-element-2");
+      expect(nodes[1].getSchema("id")).to.equal("foo.bar.baz.0.age");
+      expect(nodes[2].getSchema("id")).to.equal("foo.bar.baz.1.age");
     });
   });
 });

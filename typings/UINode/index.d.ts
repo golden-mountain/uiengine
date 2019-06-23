@@ -31,6 +31,7 @@ export interface IUINode {
   updateState();
   getStateNode(): IStateNode;
   searchNodes(prop: object, root?: string);
+  searchDepsNodes(myNode?: IUINode, root?: string);
   getPluginManager(): IPluginManager;
   getRequest(): IRequest;
   // getProps(): INodeProps;

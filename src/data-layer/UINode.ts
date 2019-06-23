@@ -56,7 +56,7 @@ export default class UINode implements IUINode {
     // load remote node
     let returnSchema: any = schema;
     if (!returnSchema) returnSchema = this.schema;
-    if (typeof schema === "string") {
+    if (typeof schema === "string" && schema) {
       returnSchema = await this.loadRemoteLayout(schema);
       this.rootName = schema;
     }
@@ -71,9 +71,9 @@ export default class UINode implements IUINode {
   }
 
   getSchema(path?: string): ILayoutSchema {
-    if (_.isEmpty(this.schema)) {
-      console.warn("did you execute loadLayout before using getSchema method?");
-    }
+    // if (_.isEmpty(this.schema)) {
+    //   console.warn("did you execute loadLayout before using getSchema method?");
+    // }
     if (path) {
       return _.get(this.schema, path);
     }
@@ -157,8 +157,15 @@ export default class UINode implements IUINode {
     this.schema = liveSchema;
     // load State
     this.stateNode = new StateNode(this, this.loadDefaultPlugins);
-    console.log("updating states................", this.dataNode.getData());
+    // console.log(
+    //   "updating states at uinode................",
+    //   this.dataNode.getData()
+    // );
     await this.stateNode.renewStates();
+    // console.log(
+    //   "updated states at uinode................",
+    //   this.dataNode.getData()
+    // );
 
     // load ui.parser plugin
     try {
@@ -198,6 +205,7 @@ export default class UINode implements IUINode {
     this.rootName = "";
     this.isLiveChildren = false;
     this.id = "";
+    Cache.clearUINodes(this);
     return this;
   }
 
@@ -209,11 +217,11 @@ export default class UINode implements IUINode {
   }
 
   getChildren(route?: Array<Number>) {
-    if (_.isEmpty(this.children)) {
-      console.warn(
-        "did you execute loadLayout before using getChildren method?"
-      );
-    }
+    // if (_.isEmpty(this.children)) {
+    //   console.warn(
+    //     "did you execute loadLayout before using getChildren method?"
+    //   );
+    // }
     if (route) {
       const path = route.map((v: Number) => {
         return `children[${v}]`;
@@ -234,7 +242,12 @@ export default class UINode implements IUINode {
         let finded = true;
         const schema = target.getSchema();
         _.forIn(prop, (v: any, name: string) => {
-          if (v !== schema[name]) {
+          // handle name with $
+          if (name.indexOf("$") > -1 && schema._index !== undefined) {
+            name = name.replace("$", schema._index);
+          }
+          const schemaValue = _.get(schema, name);
+          if (v !== schemaValue) {
             finded = false;
             return;
           }
@@ -244,6 +257,47 @@ export default class UINode implements IUINode {
         }
       });
     }
+    return nodes;
+  }
+
+  searchDepsNodes(myNode?: IUINode, root?: string) {
+    let schema: ILayoutSchema;
+    if (!myNode) {
+      schema = this.getSchema();
+    } else {
+      schema = myNode.getSchema();
+    }
+
+    let nodes: Array<any> = [];
+    // to fix: rootName should not be empty
+    if (!root) root = this.rootName || "default";
+    let allUINodes = Cache.getUINode(root) as IUINode;
+    _.forIn(allUINodes, (node: IUINode) => {
+      const sch = node.getSchema();
+      if (sch.state) {
+        _.forIn(sch.state, (state: any, key: string) => {
+          if (state.deps) {
+            _.forEach(state.deps, (dep: any) => {
+              if (dep.selector) {
+                let finded = false;
+                //k=id, v:id-of-demo-element-1
+                _.forIn(dep.selector, (v: any, k: any) => {
+                  if (!schema[k] || v !== schema[k]) {
+                    finded = false;
+                    return;
+                  } else {
+                    finded = true;
+                  }
+                });
+                if (finded) {
+                  nodes.push(node);
+                }
+              }
+            });
+          }
+        });
+      }
+    });
     return nodes;
   }
 

@@ -4,7 +4,7 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { DataNode, Request } from "../../../../src";
+import { DataNode, Request, UINode } from "../../../../src";
 // import reqConfig from "./config/request";
 import reqConfig from "../../../config/request";
 
@@ -13,12 +13,13 @@ import reqConfig from "../../../config/request";
 chai.use(chaiSpies);
 const expect = chai.expect;
 const request = new Request(reqConfig);
+const uiNode = new UINode({});
 
 describe("Given all the DataNode validation plugins", () => {
   before(() => {});
   describe("the given validaton plugin ", async () => {
     it("should validate all given number rule", async () => {
-      let dataNode = new DataNode("foo:bar", request);
+      let dataNode = new DataNode("foo:bar", uiNode, request);
       await dataNode.loadData();
       // const schema = dataNode.getSchema("baz");
       // console.log(schema);

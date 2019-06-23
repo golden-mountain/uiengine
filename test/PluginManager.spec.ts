@@ -38,7 +38,6 @@ const plugins = {
   }
 };
 const injector = new PluginInjector();
-const manager = new PluginManager(injector, plugins);
 
 describe("Given an instance of my PluginManager library", () => {
   before(() => {});
@@ -47,7 +46,8 @@ describe("Given an instance of my PluginManager library", () => {
     //   expect(manager.getPlugins()).to.deep.equal(plugins);
     // });
 
-    it("getPlugins: should get plugins by type or no type", () => {
+    it("getPlugins: should get plugins by type or without type", () => {
+      const manager = new PluginManager(injector, plugins);
       let fooPlugins = manager.getPlugins("foo");
       expect(_.keys(fooPlugins).length).to.equal(2);
       fooPlugins = manager.getPlugins("baz");
@@ -70,6 +70,8 @@ describe("Given an instance of my PluginManager library", () => {
     });
 
     it("loadPlugins: should append new loaded plugins and store them by type", () => {
+      PluginManager.unloadPlugins();
+      const manager = new PluginManager(injector, plugins);
       const extPlugins = {
         external_plugin_4: {
           type: "bar",
@@ -80,7 +82,7 @@ describe("Given an instance of my PluginManager library", () => {
         }
       };
       const allPlugins = manager.loadPlugins(extPlugins);
-      expect(_.keys(allPlugins).length).to.equal(4);
+      expect(_.keys(allPlugins).length).to.equal(3);
       const barPlugin = manager.getPlugins("bar");
       expect(_.keys(barPlugin).length).to.equal(1);
 
@@ -89,6 +91,8 @@ describe("Given an instance of my PluginManager library", () => {
     });
 
     it("unloadPlugins: should remove a specific type of plugins", () => {
+      PluginManager.unloadPlugins();
+      const manager = new PluginManager(injector, plugins);
       const extPlugins = {
         external_plugin_4: {
           type: "bar",
@@ -101,20 +105,22 @@ describe("Given an instance of my PluginManager library", () => {
       manager.loadPlugins(extPlugins);
       let allPlugins = manager.getPlugins();
       // before remove
-      expect(_.keys(allPlugins).length).to.equal(4);
-
-      // after remove a type
-      manager.unloadPlugins("bar");
-      allPlugins = manager.getPlugins();
       expect(_.keys(allPlugins).length).to.equal(3);
 
+      // after remove a type
+      PluginManager.unloadPlugins("bar");
+      allPlugins = manager.getPlugins();
+      expect(_.keys(allPlugins).length).to.equal(2);
+
       // remove a single plugin
-      manager.unloadPlugins("foo", "anyname1");
+      PluginManager.unloadPlugins("foo", "anyname1");
       allPlugins = manager.getPlugins("foo");
       expect(_.keys(allPlugins).length).to.equal(1);
     });
 
     it("executePlugins: should execute specific type of plugins", async () => {
+      PluginManager.unloadPlugins();
+      const manager = new PluginManager(injector, plugins);
       manager.loadPlugins(plugins);
       const result = await manager.executePlugins("foo");
       const expectedResult = {

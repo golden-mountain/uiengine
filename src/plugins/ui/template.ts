@@ -11,7 +11,6 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     const reqConfig = uiNode.getRequest().getConfig();
     let path = `${reqConfig.layoutSchemaPrefix}${tplSchemaPath}`;
     result = await uiNode.loadLayout(path);
-    console.log(uiNode.getSchema());
   }
   return result;
 };

@@ -7,24 +7,25 @@ export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
   const schema = uiNode.getSchema();
   const basicCondition = _.get(schema, `state.${stateName}`);
 
+  // console.log("........ visible plugin ..........", schema, stateName);
   // strategy could and|or
   if (typeof basicCondition === "object") {
     const { strategy = "and", deps = [] } = basicCondition;
     // deps condition on UI schema
     deps.forEach((dep: any) => {
+      // console.log(dep, "dep.....");
       if (dep.selector) {
         const depUINodes = uiNode.searchNodes(dep.selector);
+        // console.log("depUINodes:", depUINodes);
         if (depUINodes.length) {
           // searched the props met the condition
           depUINodes.forEach((depUINode: any) => {
-            console.log(">>>>>", depUINode.getDataNode().getData());
             // match data deps
             if (dep.data !== undefined) {
               const dataNode = depUINode.getDataNode();
-
               if (dataNode) {
                 const data = dataNode.getData();
-                console.log(data, dep.data, "<<<<< depUI");
+                // console.log(data, dep.data, "<<<<< depUI");
 
                 if (strategy === "and") {
                   result = result && _.isEqual(data, dep.data);
