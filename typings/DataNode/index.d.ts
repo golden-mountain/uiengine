@@ -22,6 +22,7 @@ export interface IDataNode {
   loadData(): Promise<AxiosPromise> | any;
   loadSchema(): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
+  deleteData(path?: any);
   getData(path?: string): Promise<AxiosPromise> | any;
   getSchema(): Promise<AxiosPromise> | any;
   getSchemaInfo(source: string): IDataSourceInfo;

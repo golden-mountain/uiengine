@@ -107,7 +107,7 @@ describe("Given an instance of my DataNode library", () => {
       expect(errorInfo.code).to.include(errorCode);
     });
 
-    it("updateData: data should be checked, updated, and state should refreshed", async () => {
+    it("updateData: data should be checked, updated, and state should be refreshed", async () => {
       // loading schema from UINode
       Cache.clearDataCache();
       const localUINode = new UINode(uiJSON, request, "test-root-name");
@@ -128,6 +128,27 @@ describe("Given an instance of my DataNode library", () => {
       expect(stateVisibleCol1).to.equal(false);
       const stateVisibleCol2 = rowChild[1].getStateNode().getState("visible");
       expect(stateVisibleCol2).to.equal(false);
+    });
+
+    it("deleteData: data should be deleted by given path, layout and state should be refreshed", async () => {
+      // loading schema from UINode
+      Cache.clearDataCache();
+      const localUINode = new UINode(uiJSON, request, "test-root-name");
+      await localUINode.loadLayout();
+
+      // refresh the state
+      const rowChild = localUINode.getChildren([1]);
+      const dataNode = rowChild.getDataNode();
+      await dataNode.deleteData(0);
+      // console.log(rowChild[0].getSchema("state.visible.deps"));
+      const expectedJson = [
+        {
+          name: "Lifang",
+          age: 30
+        }
+      ];
+      expect(dataNode.getData()).to.deep.equal(expectedJson);
+      expect(rowChild.getChildren().length).to.equal(1);
     });
   });
 });

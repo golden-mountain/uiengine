@@ -193,4 +193,24 @@ export default class DataNode implements IDataNode {
       this.updatingData = undefined;
     }
   }
+
+  async deleteData(path?: any) {
+    const couldDelete = await this.pluginManager.executePlugins(
+      "data.delete.could"
+    );
+    if (couldDelete) {
+      if (path !== undefined) {
+        if ((_.isArray(path) || _.isNumber(path)) && _.isArray(this.data)) {
+          _.remove(this.data, (e: any, index: number) => {
+            return _.isArray(path) ? path.indexOf(index) > -1 : index === path;
+          });
+        } else {
+          _.unset(this.data, path);
+        }
+      } else {
+        this.data = null;
+      }
+      await this.uiNode.updateLayout();
+    }
+  }
 }
