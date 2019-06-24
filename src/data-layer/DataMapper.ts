@@ -13,33 +13,41 @@ import { PluginManager, Cache } from ".";
 export default class DataMapper implements IDataMapper {
   private request: IRequest;
   errorInfo?: IErrorInfo;
-  source: IDataSourceInfo;
+  source: string;
   rootSchema?: IDataSchema;
   pluginManager: IPluginManager = new PluginManager(this);
 
-  constructor(source: IDataSourceInfo, request: IRequest) {
+  constructor(source: string, request: IRequest) {
     this.source = source;
     this.request = request;
   }
 
   getDataEntryPoint(method: string): string {
-    const { schemaPath = "" } = this.source;
-    let schema: any = Cache.getDataSchema(schemaPath);
+    let schema: any = this.rootSchema;
     const defaultEndPoint = _.get(schema, `endpoint.default.path`, "");
-    const endpoint = _.get(schema, `endpoint.${method}.path`, defaultEndPoint);
+    const withoutPath = _.get(schema, `endpoint.${method}`, defaultEndPoint);
+    const endpoint = _.get(schema, `endpoint.${method}.path`, withoutPath);
     const dataURLPrefix = this.request.getConfig("dataPathPrefix");
     return `${dataURLPrefix}${endpoint}`;
   }
 
-  async loadSchema(source?: IDataSourceInfo) {
-    let sourceInfo = source || this.source;
+  async loadSchema(source?: string) {
     let result: any = null;
+    let schemaPath = "";
+    if (source) {
+      schemaPath = source;
+    } else {
+      schemaPath = this.source;
+    }
+
     try {
-      const { name = "", schemaPath = "" } = sourceInfo;
       let schema: any = Cache.getDataSchema(schemaPath);
-      if (!schema) {
-        const dataSchemaPath = this.request.getConfig("dataSchemaPrefix");
-        const path = `${dataSchemaPath}${schemaPath}`;
+      if (_.isEmpty(schema)) {
+        const dataSchemaPrefix = this.request.getConfig("dataSchemaPrefix");
+        let path = schemaPath;
+        if (!_.isEmpty(dataSchemaPrefix)) {
+          path = `${dataSchemaPrefix}${schemaPath}`;
+        }
         schema = await this.request.get(path);
         if (schema.data) {
           Cache.setDataSchema(schemaPath, schema.data);
@@ -50,6 +58,7 @@ export default class DataMapper implements IDataMapper {
       this.rootSchema = schema;
       result = schema;
     } catch (e) {
+      // console.log(e.message);
       this.errorInfo = {
         code: e.message
       };

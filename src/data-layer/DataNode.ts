@@ -18,7 +18,7 @@ export default class DataNode implements IDataNode {
   pluginManager: IPluginManager = new PluginManager(this);
   dataEngine: IDataEngine;
   uiNode: IUINode;
-  source: IDataSourceInfo;
+  source: string;
   rootData?: any;
   schema?: any;
   rootSchema?: any;
@@ -36,9 +36,9 @@ export default class DataNode implements IDataNode {
     if (typeof source === "object") {
       this.data = source;
       this.rootData = source;
-      this.source = {};
+      this.source = "";
     } else {
-      this.source = this.getSchemaInfo(source);
+      this.source = _.trim(source).replace(":", ".");
     }
 
     if (loadDefaultPlugins) {
@@ -50,28 +50,6 @@ export default class DataNode implements IDataNode {
       this.request = request;
     }
     this.dataEngine = new DataEngine(this.source, this.request);
-  }
-
-  getSchemaInfo(source: string) {
-    let [schemaPath, name] = source.split(":");
-    // no  ":"
-    if (!name) {
-      name = schemaPath;
-      const firstDotPos = schemaPath.indexOf(".");
-      schemaPath = schemaPath.substr(
-        0,
-        firstDotPos !== -1 ? firstDotPos : schemaPath.length
-      );
-    }
-
-    if (name.indexOf(schemaPath) === -1) {
-      name = source.replace(":", ".");
-    }
-    return { name, schemaPath: `${schemaPath}.json` };
-  }
-
-  getSource() {
-    return this.source;
   }
 
   getErrorInfo(type?: string) {
@@ -105,9 +83,9 @@ export default class DataNode implements IDataNode {
   }
 
   async loadData() {
-    const { schemaPath = "", name = "" } = this.source;
+    // const { schemaPath = "", name = "" } = this.source;
     let result;
-    if (schemaPath) {
+    if (this.source) {
       const data = await this.dataEngine.loadData();
       const exeConfig: IPluginExecutionConfig = {
         returnLastValue: true
@@ -117,12 +95,13 @@ export default class DataNode implements IDataNode {
         exeConfig
       );
       // get parent data to assign new data
-      const nameSegs = name.split(".");
+      const nameSegs = this.source.split(".");
       nameSegs.pop();
       this.rootData = _.get(data, nameSegs.join("."));
-      result = _.get(data, name, null);
+      result = _.get(data, this.source, null);
+      this.data = result;
     }
-    this.data = result;
+
     return result;
   }
 
@@ -147,9 +126,9 @@ export default class DataNode implements IDataNode {
     if (path) {
       _.set(this.data, path, value);
     } else {
-      const { name = "" } = this.source;
+      // const { name = "" } = this.source;
       this.data = value;
-      const nameSegs = name.split(".");
+      const nameSegs = this.source.split(".");
       const lastName = nameSegs.pop();
       if (lastName) _.set(this.rootData, lastName, value);
       // console.log(lastName, value, this.rootData);

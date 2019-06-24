@@ -19,7 +19,7 @@ export interface IDataNode {
   pluginManager: IPluginManager;
   dataEngine: IDataEngine;
   uiNode: IUINode;
-  source: IDataSourceInfo;
+  source: string;
   rootData?: any;
   schema?: any;
   rootSchema?: any;
@@ -31,11 +31,11 @@ export interface IDataNode {
   deleteData(path?: any);
   getData(path?: string): Promise<AxiosPromise> | any;
   getSchema(): Promise<AxiosPromise> | any;
-  getSchemaInfo(source: string): IDataSourceInfo;
+  // getSchemaName(source: string): string;
   // loadRemoteData(source: string): Promise<AxiosPromise> | any;
   // getDataEntryPoint(method: string = "default"): string;
   getErrorInfo();
-  getSource();
+  // getSource();
   getPluginManager(): IPluginManager;
   getRootSchema();
   getRootData();

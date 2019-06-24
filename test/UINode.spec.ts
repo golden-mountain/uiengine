@@ -137,7 +137,7 @@ describe("Given an instance of my UINode library", () => {
     it("genLiveLayout: follow schema's template field and given data, auto generate layouts", async () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
 
-      const localUINode = new UINode({});
+      const localUINode = new UINode({}, request);
       const schema = await localUINode.genLiveLayout(
         copyLayout.children[1],
         dataNodeJson.foo.bar.baz
@@ -150,7 +150,7 @@ describe("Given an instance of my UINode library", () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
 
       const schemaWithLiveNode: any = copyLayout.children[1];
-      const localUINode = new UINode(schemaWithLiveNode);
+      const localUINode = new UINode(schemaWithLiveNode, request);
       const schema = await localUINode.loadLayout();
       // data shource loaded
       const data = localUINode.getDataNode().getData();
