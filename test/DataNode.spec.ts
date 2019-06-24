@@ -62,50 +62,50 @@ describe("Given an instance of my DataNode library", () => {
       expect(sourceInfo).to.be.deep.equal(expectInfo);
     });
 
-    it("loadSchema: schema should be loaded from remote", async () => {
-      Cache.clearDataSchemaCache();
-      let dataNode = new DataNode("foo:bar", uiNode, request);
-      // expect(dataNode.getSchema()).is.instanceOf(Promise);
-      let schema = await dataNode.loadSchema();
-      const data = _.get(dataSchemaJson, "definition.foo.bar");
-      expect(schema).to.deep.equal(data);
+    // it("loadSchema: schema should be loaded from remote", async () => {
+    //   Cache.clearDataSchemaCache();
+    //   let dataNode = new DataNode("foo:bar", uiNode, request);
+    //   // expect(dataNode.getSchema()).is.instanceOf(Promise);
+    //   let schema = await dataNode.loadSchema();
+    //   const data = _.get(dataSchemaJson, "definition.foo.bar");
+    //   expect(schema).to.deep.equal(data);
 
-      // load from cache
-      schema = dataNode.getSchema();
-      expect(schema).to.deep.equal(data);
+    //   // load from cache
+    //   schema = dataNode.getSchema();
+    //   expect(schema).to.deep.equal(data);
 
-      // error loading
-      dataNode = new DataNode("foola.bar", uiNode, request);
-      schema = await dataNode.loadSchema();
-      const errorCode = "Cannot find module";
-      const errorInfo = dataNode.getErrorInfo("schema");
-      // console.log(errorCode);
-      expect(errorInfo.code).to.include(errorCode);
-    });
+    //   // error loading
+    //   dataNode = new DataNode("foola.bar", uiNode, request);
+    //   schema = await dataNode.loadSchema();
+    //   const errorCode = "Cannot find module";
+    //   const errorInfo = dataNode.getErrorInfo("schema");
+    //   // console.log(errorCode);
+    //   expect(errorInfo.code).to.include(errorCode);
+    // });
 
-    it("loadRemoteData: data should be loaded from remote and be cached", async () => {
-      Cache.clearDataCache();
-      let dataNode = new DataNode("foo:bar", uiNode, request);
-      // expect(dataNode.getSchema()).is.instanceOf(Promise);
-      let schema = await dataNode.loadSchema();
-      let endpoint = dataNode.getDataEntryPoint("get");
-      expect(endpoint).to.equal(`${reqConfig.dataPathPrefix}foo.json`);
-      let data = await dataNode.loadRemoteData(endpoint);
-      let equalData = _.get(dataNodeJson, "foo.bar");
-      expect(data).to.deep.equal(equalData);
-      // load from cache
-      data = dataNode.getData();
-      expect(data).to.deep.equal(equalData);
+    // it("loadRemoteData: data should be loaded from remote and be cached", async () => {
+    //   Cache.clearDataCache();
+    //   let dataNode = new DataNode("foo:bar", uiNode, request);
+    //   // expect(dataNode.getSchema()).is.instanceOf(Promise);
+    //   let schema = await dataNode.loadSchema();
+    //   let endpoint = dataNode.getDataEntryPoint("get");
+    //   expect(endpoint).to.equal(`${reqConfig.dataPathPrefix}foo.json`);
+    //   let data = await dataNode.loadRemoteData(endpoint);
+    //   let equalData = _.get(dataNodeJson, "foo.bar");
+    //   expect(data).to.deep.equal(equalData);
+    //   // load from cache
+    //   data = dataNode.getData();
+    //   expect(data).to.deep.equal(equalData);
 
-      // error loading
-      Cache.clearDataCache();
-      dataNode = new DataNode("foo:bar", uiNode, request);
-      data = await dataNode.loadRemoteData("any.wrong.node");
-      const errorCode = "Cannot find module";
-      const errorInfo = dataNode.getErrorInfo("data");
-      // console.log(errorCode);
-      expect(errorInfo.code).to.include(errorCode);
-    });
+    //   // error loading
+    //   Cache.clearDataCache();
+    //   dataNode = new DataNode("foo:bar", uiNode, request);
+    //   data = await dataNode.loadRemoteData("any.wrong.node");
+    //   const errorCode = "Cannot find module";
+    //   const errorInfo = dataNode.getErrorInfo("data");
+    //   // console.log(errorCode);
+    //   expect(errorInfo.code).to.include(errorCode);
+    // });
 
     it("updateData: data should be checked, updated, and state should be refreshed", async () => {
       // loading schema from UINode

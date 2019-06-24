@@ -17,6 +17,7 @@ export interface IDataSourceInfo {
 export interface IDataNode {
   errorInfo: any;
   pluginManager: IPluginManager;
+  dataEngine: IDataEngine;
   uiNode: IUINode;
   source: IDataSourceInfo;
   rootData?: any;
@@ -25,14 +26,14 @@ export interface IDataNode {
   data: any;
   updatingData?: any;
   loadData(): Promise<AxiosPromise> | any;
-  loadSchema(): Promise<AxiosPromise> | any;
+  // loadSchema(): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
   deleteData(path?: any);
   getData(path?: string): Promise<AxiosPromise> | any;
   getSchema(): Promise<AxiosPromise> | any;
   getSchemaInfo(source: string): IDataSourceInfo;
-  loadRemoteData(source: string): Promise<AxiosPromise> | any;
-  getDataEntryPoint(method: string = "default"): string;
+  // loadRemoteData(source: string): Promise<AxiosPromise> | any;
+  // getDataEntryPoint(method: string = "default"): string;
   getErrorInfo();
   getSource();
   getPluginManager(): IPluginManager;

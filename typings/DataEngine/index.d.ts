@@ -1,15 +1,24 @@
-import { AxiosResponse } from "axios";
-export interface IResponse extends AxiosResponse {}
-
-export interface IDataSchema {}
+export interface IResponse {}
 
 export interface IDataMapper {
-  mapSourceToURL(source: string);
+  schema: IDataSchema;
+  errorInfo?: any;
+  source: IDataSourceInfo;
+  schema?: IDataSchema;
+  rootSchema?: IDataSchema;
+  loadSchema(source?: IDataSourceInfo);
+  getDataEntryPoint(method: string): string;
 }
 
 export interface IDataEngine {
-  loadData(source: string): IResponse;
-  updateData(source: string, data: any): IResponse;
-  replaceData(source: string, data: any): IResponse;
-  deleteData(source: string): IResponse;
+  errorInfo?: any;
+  source: IDataSourceInfo;
+  mapper: IDataMapper;
+  data?: any;
+  pluginManager: IPluginManager;
+
+  loadData(source?: IDataSourceInfo);
+  updateData(source: IDataSourceInfo, data: any);
+  replaceData(source: IDataSourceInfo, data: any);
+  deleteData(source: IDataSourceInfo);
 }

@@ -7,14 +7,16 @@ import {
   IRequest,
   IPluginManager,
   IUINode,
-  IPluginExecutionConfig
+  IPluginExecutionConfig,
+  IDataEngine
 } from "../../typings";
-import { Request, Cache } from ".";
+import { Request, Cache, DataEngine } from ".";
 
 export default class DataNode implements IDataNode {
   private request: IRequest = new Request({});
   errorInfo: any = {};
   pluginManager: IPluginManager = new PluginManager(this);
+  dataEngine: IDataEngine;
   uiNode: IUINode;
   source: IDataSourceInfo;
   rootData?: any;
@@ -31,10 +33,6 @@ export default class DataNode implements IDataNode {
   ) {
     this.uiNode = uiNode;
 
-    if (request) {
-      this.request = request;
-    }
-
     if (typeof source === "object") {
       this.data = source;
       this.rootData = source;
@@ -46,6 +44,12 @@ export default class DataNode implements IDataNode {
     if (loadDefaultPlugins) {
       this.pluginManager.loadPlugins(dataPlugins);
     }
+
+    // initial data engine
+    if (request) {
+      this.request = request;
+    }
+    this.dataEngine = new DataEngine(this.source, this.request);
   }
 
   getSchemaInfo(source: string) {
@@ -89,7 +93,7 @@ export default class DataNode implements IDataNode {
   }
 
   getRootSchema() {
-    return this.rootSchema;
+    return this.dataEngine.mapper.rootSchema;
   }
 
   getRootData() {
@@ -100,81 +104,25 @@ export default class DataNode implements IDataNode {
     return this.pluginManager;
   }
 
-  getDataEntryPoint(method: string): string {
-    const { schemaPath = "" } = this.source;
-    let schema: any = Cache.getDataSchema(schemaPath);
-    const defaultEndPoint = _.get(schema, `endpoint.default.path`, "");
-    const endpoint = _.get(schema, `endpoint.${method}.path`, defaultEndPoint);
-    const dataURLPrefix = this.request.getConfig("dataPathPrefix");
-    return `${dataURLPrefix}${endpoint}`;
-  }
-
   async loadData() {
-    const { schemaPath } = this.source;
+    const { schemaPath = "", name = "" } = this.source;
+    let result;
     if (schemaPath) {
-      this.schema = await this.loadSchema();
-      const endpoint = this.getDataEntryPoint("get");
-      this.data = await this.loadRemoteData(endpoint);
-    }
-
-    return this.data;
-  }
-
-  async loadRemoteData(source: string) {
-    let result: any = null;
-    try {
-      const { schemaPath = "", name = "" } = this.source;
-      let data: any = Cache.getData(schemaPath);
-      if (!data) {
-        data = await this.request.get(source);
-        if (data.data) {
-          Cache.setData(schemaPath, data.data);
-          data = data.data;
-        }
-      }
-
+      const data = await this.dataEngine.loadData();
+      const exeConfig: IPluginExecutionConfig = {
+        returnLastValue: true
+      };
+      this.schema = await this.pluginManager.executePlugins(
+        "data.schema.parser",
+        exeConfig
+      );
       // get parent data to assign new data
       const nameSegs = name.split(".");
       nameSegs.pop();
       this.rootData = _.get(data, nameSegs.join("."));
       result = _.get(data, name, null);
-    } catch (e) {
-      this.errorInfo.data = {
-        code: e.message
-      };
     }
     this.data = result;
-    return result;
-  }
-
-  async loadSchema() {
-    let result: any = null;
-    try {
-      const { name = "", schemaPath = "" } = this.source;
-      let schema: any = Cache.getDataSchema(schemaPath);
-      if (!schema) {
-        const dataSchemaPath = this.request.getConfig("dataSchemaPrefix");
-        const path = `${dataSchemaPath}${schemaPath}`;
-        schema = await this.request.get(path);
-        if (schema.data) {
-          Cache.setDataSchema(schemaPath, schema.data);
-          schema = schema.data;
-        }
-      }
-      this.rootSchema = schema;
-      const exeConfig: IPluginExecutionConfig = {
-        returnLastValue: true
-      };
-      result = await this.pluginManager.executePlugins(
-        "data.schema.parser",
-        exeConfig
-      );
-    } catch (e) {
-      this.errorInfo.schema = {
-        code: e.message
-      };
-    }
-    this.schema = result;
     return result;
   }
 
