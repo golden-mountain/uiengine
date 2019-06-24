@@ -15,22 +15,20 @@
         "defaultValue": "baby"
       },
       "bar": {
-        "baz": [
-          {
-            "name": "age",
+        "baz": {
+          "name": {
             "type": "string",
             "minLength": 1,
             "maxLength": 20,
             "defaultValue": "yoo"
           },
-          {
-            "name": "age",
+          "age": {
             "type": "number",
             "min": 1,
             "max": 120,
             "defaultValue": 3
           }
-        ]
+        }
       }
     }
   }

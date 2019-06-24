@@ -22,9 +22,17 @@ describe("Given all the DataNode validation plugins", () => {
       let dataNode = new DataNode("foo:bar.baz[0].age", uiNode, request);
       await dataNode.loadData();
       // const schema = dataNode.getSchema("baz");
-      // console.log(schema);
-      const couldUpdateData = await dataNode.updateData(121);
+      // negtive cases
+      let couldUpdateData = await dataNode.updateData(121);
       expect(couldUpdateData).to.equal(false);
+      couldUpdateData = await dataNode.updateData(-1);
+      expect(couldUpdateData).to.equal(false);
+
+      // positive cases
+      couldUpdateData = await dataNode.updateData(120);
+      expect(couldUpdateData).to.equal(true);
+      couldUpdateData = await dataNode.updateData(1);
+      expect(couldUpdateData).to.equal(true);
     });
   });
 });

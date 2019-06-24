@@ -3,10 +3,26 @@ import { IPluginFunc, IPlugin, IDataNode } from "../../../../../typings";
 
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   const data = dataNode.updatingData;
-  const schema = dataNode.getRootSchema();
+  const schema = dataNode.getSchema();
+  let result, errorMessage;
+  if (_.get(schema, "type") === "number") {
+    const { min, max } = schema;
 
-  console.log(data, schema);
-  return true;
+    const minMessage = `Data ${data} less than ${min}`;
+    const maxMessage = `Data ${data} max than ${max}`;
+    if (min !== undefined && max !== undefined) {
+      result = data >= min && data <= max;
+      if (!result) errorMessage = `${minMessage}, ${maxMessage}`;
+    } else if (min !== undefined) {
+      result = data >= min;
+      if (!result) errorMessage = minMessage;
+    } else if (max !== undefined) {
+      result = data <= max;
+      if (!result) errorMessage = maxMessage;
+    }
+  }
+
+  return { status: result, code: errorMessage };
 };
 
 export const validate: IPlugin = {

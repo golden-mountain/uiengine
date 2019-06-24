@@ -157,15 +157,7 @@ export default class UINode implements IUINode {
     this.schema = liveSchema;
     // load State
     this.stateNode = new StateNode(this, this.loadDefaultPlugins);
-    // console.log(
-    //   "updating states at uinode................",
-    //   this.dataNode.getData()
-    // );
     await this.stateNode.renewStates();
-    // console.log(
-    //   "updated states at uinode................",
-    //   this.dataNode.getData()
-    // );
 
     // load ui.parser plugin
     try {

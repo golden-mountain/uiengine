@@ -17,7 +17,7 @@ export interface IPlugin {
 export interface IPluginExecutionConfig {
   stopWhenEmpty?: boolean;
   returnLastValue?: boolean;
-  executeOnlyPlugin?: string;
+  executeOnlyPluginName?: string;
 }
 
 export interface IPluginManager {

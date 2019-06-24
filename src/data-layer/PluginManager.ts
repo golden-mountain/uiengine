@@ -62,7 +62,7 @@ export default class PluginManager implements IPluginManager {
 
         // break conditions
         if (_.isEqual(_.get(config, "stopWhenEmpty"), result)) break;
-        if (_.isEqual(_.get(config, "executeOnlyPlugin"), name)) break;
+        if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) break;
       } catch (e) {
         this.setErrorInfo(p.type, name, e.message);
       }

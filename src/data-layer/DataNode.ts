@@ -162,7 +162,13 @@ export default class DataNode implements IDataNode {
         }
       }
       this.rootSchema = schema;
-      result = await this.pluginManager.executePlugins("data.schema.parser");
+      const exeConfig: IPluginExecutionConfig = {
+        returnLastValue: true
+      };
+      result = await this.pluginManager.executePlugins(
+        "data.schema.parser",
+        exeConfig
+      );
     } catch (e) {
       this.errorInfo.schema = {
         code: e.message
@@ -185,30 +191,25 @@ export default class DataNode implements IDataNode {
       exeConfig
     );
 
-    let needUpdate = true;
-    _.forIn(couldUpdate, function(value, key) {
-      if (value === false) {
-        needUpdate = false;
-        return;
-      }
-    });
-    // update this data
-    if (needUpdate) {
-      if (path) {
-        _.set(this.data, path, value);
-      } else {
-        const { name = "" } = this.source;
-        this.data = value;
-        const nameSegs = name.split(".");
-        const lastName = nameSegs.pop();
-        if (lastName) _.set(this.rootData, lastName, value);
-        // console.log(lastName, value, this.rootData);
-      }
-
-      await this.uiNode.updateLayout();
-      this.updatingData = undefined;
+    if (couldUpdate.status === false) {
+      this.errorInfo.data = couldUpdate;
+      return false;
     }
-    return needUpdate;
+    // update this data
+    if (path) {
+      _.set(this.data, path, value);
+    } else {
+      const { name = "" } = this.source;
+      this.data = value;
+      const nameSegs = name.split(".");
+      const lastName = nameSegs.pop();
+      if (lastName) _.set(this.rootData, lastName, value);
+      // console.log(lastName, value, this.rootData);
+    }
+
+    await this.uiNode.updateLayout();
+    this.updatingData = undefined;
+    return true;
   }
 
   async deleteData(path?: any) {

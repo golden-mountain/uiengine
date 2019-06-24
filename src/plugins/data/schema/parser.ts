@@ -9,11 +9,13 @@ import { IPluginFunc, IPlugin, IDataNode } from "../../../../typings";
  */
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   const rootSchema = dataNode.getRootSchema();
-  const { name = "" } = dataNode.source;
+  let { name = "" } = dataNode.source;
+  const regex = /\[\d+\]/;
+  name = name.replace(regex, "");
   return _.get(rootSchema, `definition.${name}`);
 };
 
-export const mock: IPlugin = {
+export const schemaParser: IPlugin = {
   type: "data.schema.parser",
   initialize: false,
   callback,
