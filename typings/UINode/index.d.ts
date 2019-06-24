@@ -12,6 +12,11 @@ export interface ILayoutSchema {
 }
 
 export interface IUINode {
+  dataNode?: any;
+  stateNode: IStateNode = new StateNode(this);
+  children: Array<UINode> = [];
+  pluginManager: IPluginManager = new PluginManager(this);
+  loadDefaultPlugins: boolean = true;
   errorInfo: IErrorInfo;
   schema: ILayoutSchema;
   rootName: string;

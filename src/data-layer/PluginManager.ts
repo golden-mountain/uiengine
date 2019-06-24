@@ -1,5 +1,11 @@
 import _ from "lodash";
-import { IPluginManager, IPlugins, IErrorInfo, IPlugin } from "../../typings";
+import {
+  IPluginManager,
+  IPlugins,
+  IErrorInfo,
+  IPlugin,
+  IPluginExecutionConfig
+} from "../../typings";
 
 export default class PluginManager implements IPluginManager {
   static plugins: IPlugins = {};
@@ -44,19 +50,25 @@ export default class PluginManager implements IPluginManager {
     return PluginManager.plugins;
   }
 
-  async executePlugins(type: string) {
+  async executePlugins(type: string, config?: IPluginExecutionConfig) {
     const plugins: IPlugins = _.get(PluginManager.plugins, type);
+    let result;
     for (let k in plugins) {
       const p = plugins[k];
       const name = p.name || k;
       try {
-        // console.log("............ executeing plugin, Plugin Manager");
-        const result = await p.callback.call(this.caller, this.caller);
-        // console.log(".................end execute plugin", result);
+        result = await p.callback.call(this.caller, this.caller);
         _.set(this.result, `${type}.${name}`, result);
+
+        // break conditions
+        if (_.isEqual(_.get(config, "stopWhenEmpty"), result)) break;
+        if (_.isEqual(_.get(config, "executeOnlyPlugin"), name)) break;
       } catch (e) {
         this.setErrorInfo(p.type, name, e.message);
       }
+    }
+    if (_.get(config, "returnLastValue")) {
+      return result;
     }
     return _.get(this.result, type, {});
   }

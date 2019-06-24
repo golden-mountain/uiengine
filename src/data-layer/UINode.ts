@@ -15,11 +15,11 @@ import {
 
 export default class UINode implements IUINode {
   private request: IRequest = new Request();
-  private dataNode?: any;
-  private stateNode: IStateNode = new StateNode(this);
-  private children: Array<UINode> = [];
-  private pluginManager: IPluginManager = new PluginManager(this);
-  private loadDefaultPlugins: boolean = true;
+  dataNode?: any;
+  stateNode: IStateNode = new StateNode(this);
+  children: Array<UINode> = [];
+  pluginManager: IPluginManager = new PluginManager(this);
+  loadDefaultPlugins: boolean = true;
   errorInfo: IErrorInfo = {};
   schema: ILayoutSchema = {};
   rootName: string = "default";

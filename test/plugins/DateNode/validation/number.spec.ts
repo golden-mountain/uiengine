@@ -17,12 +17,14 @@ const uiNode = new UINode({});
 
 describe("Given all the DataNode validation plugins", () => {
   before(() => {});
-  describe("the given validaton plugin ", async () => {
+  describe("the given validaton plugin ", () => {
     it("should validate all given number rule", async () => {
-      let dataNode = new DataNode("foo:bar", uiNode, request);
+      let dataNode = new DataNode("foo:bar.baz[0].age", uiNode, request);
       await dataNode.loadData();
       // const schema = dataNode.getSchema("baz");
       // console.log(schema);
+      const couldUpdateData = await dataNode.updateData(121);
+      expect(couldUpdateData).to.equal(false);
     });
   });
 });

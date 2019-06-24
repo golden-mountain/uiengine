@@ -6,18 +6,20 @@ import {
   IDataSourceInfo,
   IRequest,
   IPluginManager,
-  IUINode
+  IUINode,
+  IPluginExecutionConfig
 } from "../../typings";
 import { Request, Cache } from ".";
 
 export default class DataNode implements IDataNode {
-  private errorInfo: any = {};
   private request: IRequest = new Request({});
-  private source: IDataSourceInfo;
-  private pluginManager: IPluginManager = new PluginManager(this);
-  private uiNode: IUINode;
-  private rootData?: any;
+  errorInfo: any = {};
+  pluginManager: IPluginManager = new PluginManager(this);
+  uiNode: IUINode;
+  source: IDataSourceInfo;
+  rootData?: any;
   schema?: any;
+  rootSchema?: any;
   data: any;
   updatingData?: any;
 
@@ -86,13 +88,13 @@ export default class DataNode implements IDataNode {
     return this.schema;
   }
 
-  // getRootSchema() {
-  //   return this.rootSchema;
-  // }
+  getRootSchema() {
+    return this.rootSchema;
+  }
 
-  // getRootData() {
-  //   return this.rootData;
-  // }
+  getRootData() {
+    return this.rootData;
+  }
 
   getPluginManager(): IPluginManager {
     return this.pluginManager;
@@ -152,15 +154,15 @@ export default class DataNode implements IDataNode {
       let schema: any = Cache.getDataSchema(schemaPath);
       if (!schema) {
         const dataSchemaPath = this.request.getConfig("dataSchemaPrefix");
-        const path = `${dataSchemaPath}${this.source.schemaPath}`;
+        const path = `${dataSchemaPath}${schemaPath}`;
         schema = await this.request.get(path);
         if (schema.data) {
           Cache.setDataSchema(schemaPath, schema.data);
           schema = schema.data;
         }
       }
-      // this.rootSchema = schema;
-      result = _.get(schema, `definition.${name}`);
+      this.rootSchema = schema;
+      result = await this.pluginManager.executePlugins("data.schema.parser");
     } catch (e) {
       this.errorInfo.schema = {
         code: e.message
@@ -173,11 +175,25 @@ export default class DataNode implements IDataNode {
   async updateData(value: any, path?: string) {
     // check data from update plugins
     this.updatingData = value;
+    const exeConfig: IPluginExecutionConfig = {
+      stopWhenEmpty: true,
+      returnLastValue: true
+    };
     const couldUpdate = await this.pluginManager.executePlugins(
-      "data.update.could"
+      "data.update.could",
+      // when one validation got false value, break; the rest plugins execution
+      exeConfig
     );
+
+    let needUpdate = true;
+    _.forIn(couldUpdate, function(value, key) {
+      if (value === false) {
+        needUpdate = false;
+        return;
+      }
+    });
     // update this data
-    if (couldUpdate) {
+    if (needUpdate) {
       if (path) {
         _.set(this.data, path, value);
       } else {
@@ -192,6 +208,7 @@ export default class DataNode implements IDataNode {
       await this.uiNode.updateLayout();
       this.updatingData = undefined;
     }
+    return needUpdate;
   }
 
   async deleteData(path?: any) {

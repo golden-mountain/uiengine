@@ -6,11 +6,11 @@ import { Cache, PluginManager } from ".";
 import * as statePlugins from "../plugins/state";
 
 export default class StateNode implements IStateNode {
-  private errorInfo: IErrorInfo = {};
-  private state: IState = {};
-  private uiNode: IUINode;
-  private plugins: object = statePlugins;
-  private pluginManager: IPluginManager = new PluginManager(this);
+  errorInfo: IErrorInfo = {};
+  state: IState = {};
+  uiNode: IUINode;
+  plugins: object = statePlugins;
+  pluginManager: IPluginManager = new PluginManager(this);
 
   constructor(uiNode: IUINode, loadDefaultPlugins: boolean = true) {
     this.uiNode = uiNode;

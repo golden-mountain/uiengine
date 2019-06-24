@@ -8,12 +8,14 @@ export type StatePluginFunc = (
 ) => IState;
 
 export interface IStateNode {
+  errorInfo: IErrorInfo;
+  state: IState;
+  uiNode: IUINode;
+  plugins: object;
+  pluginManager: IPluginManager;
   getUINode(): IUINode;
   getState(key?: string): IState;
   renewStates();
   setState(key: string, value: any): IState;
-  // loadPlugins(newPlugins?: object);
-  // getPlugins(key?: string);
-  // setErrorInfo(key: string, value: any): IErrorInfo;
   getPluginManager(): IPluginManager;
 }
