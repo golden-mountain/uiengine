@@ -33,6 +33,7 @@ describe("Given all the DataMapper", () => {
 
     it("getDataEntryPoing: should return the data api path", async () => {
       const dataMapper = new DataMapper(schemaPath, request);
+      await dataMapper.loadSchema();
       let path = dataMapper.getDataEntryPoint("get");
       let dataPathPrefix = reqConfig.dataPathPrefix;
       let expectedPath = `${dataPathPrefix}${schemaPath}`;

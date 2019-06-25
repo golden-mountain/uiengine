@@ -115,7 +115,7 @@ describe("Given an instance of my UINode library", () => {
     it("updateLayout: loadLayout should be called", async () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
 
-      const localUINode = new UINode(copyLayout);
+      const localUINode = new UINode(copyLayout, request);
       // const spy = chai.spy.on(localUINode, "loadLayout");
       // localUINode.loadLayout();
       await localUINode.updateLayout();
@@ -126,7 +126,7 @@ describe("Given an instance of my UINode library", () => {
     it("getNode: should return correct sub node", async () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
 
-      const localUINode = new UINode(copyLayout);
+      const localUINode = new UINode(copyLayout, request);
       const schema = await localUINode.loadLayout();
       // try to get child node
       const subNode: UINode = localUINode.getNode("children[1]");
