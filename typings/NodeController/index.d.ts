@@ -1,6 +1,19 @@
+import { IUINode } from "../UINode";
+import { IErrorInfo } from "../Request";
+
 export interface INodeController {
-  // loadLayout(layout: string): IStateNode
-  // getUINode(path?:string): IUINode
-  // getStateNode(path: string): IStateNode
-  // getDataNode(path: string): IDataNode
+  errorInfo: IErrorInfo;
+  layouts: object;
+  nodes: Array<IUINode>;
+  messager: IMessager;
+  requestConfig: IRequestConfig;
+
+  loadUINode(
+    layout: ILayoutSchema | string,
+    id?: string,
+    autoLoadLayout: boolean = true
+  );
+  deleteUINode(id: string);
+  getUINode(id: string);
+  sendMessage(nodeSelector: INodeProps, data: any, message: string);
 }
