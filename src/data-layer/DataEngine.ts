@@ -2,11 +2,10 @@ import _ from "lodash";
 
 import {
   IDataEngine,
-  IDataSourceInfo,
   IPluginManager,
   IRequest,
   IDataMapper,
-  IErrorInfo
+  IPluginExecutionConfig
 } from "../../typings";
 import { PluginManager, Cache, DataMapper } from ".";
 
@@ -19,6 +18,12 @@ export default class UIEngine implements IDataEngine {
   data?: any;
   pluginManager: IPluginManager = new PluginManager(this);
 
+  /**
+   *
+   * @param source a.b.c
+   * @param request IRequest
+   * @param loadDefaultPlugins whether load default plugins
+   */
   constructor(
     source: string,
     request: IRequest,
@@ -40,68 +45,114 @@ export default class UIEngine implements IDataEngine {
     return `${schemaPath}.json`;
   }
 
-  async loadSchema() {
-    return await this.mapper.loadSchema();
+  async loadSchema(source?: string) {
+    return await this.mapper.loadSchema(source);
   }
 
-  async loadData(source?: string) {
-    let schemaPath = "";
+  async sendRequest(
+    source?: string,
+    data?: any,
+    method: string = "get",
+    cache: boolean = false
+  ) {
+    // clear initial data;
+    this.data = {};
+    this.errorInfo = null;
+    if (!this.request[method] || !_.isFunction(this.request[method])) {
+      this.errorInfo = {
+        status: 1001,
+        code: `Method ${method} did not defined on Request`
+      };
+      return false;
+    }
 
+    let schemaPath = "";
     if (source) {
       schemaPath = this.parseSchemaPath(source);
+      this.source = schemaPath;
     } else {
       schemaPath = this.schemaPath;
     }
 
+    let result = {};
     if (schemaPath) {
-      await this.mapper.loadSchema();
-      const endpoint = this.mapper.getDataEntryPoint("get");
-
-      this.data = await this.loadRemoteData(endpoint);
-    }
-    return this.data;
-  }
-
-  async loadRemoteData(source: string) {
-    let result: any = {};
-    try {
-      // get schema path
-      let dataSource = "";
-      if (source !== undefined) {
-        dataSource = source;
-      } else {
-        dataSource = this.source;
+      const schema = await this.loadSchema(schemaPath);
+      if (schema === null) {
+        this.errorInfo = {
+          status: 2001,
+          code: `Schema for ${schemaPath} not found`
+        };
+        return false;
       }
 
-      // load data from cache/api
-      let data: any = Cache.getData(dataSource);
-      if (!data) {
-        data = await this.request.get(dataSource);
-        if (data.data) {
-          Cache.setData(dataSource, data.data);
-          data = data.data;
+      const endpoint = this.mapper.getDataEntryPoint(method);
+
+      if (!endpoint) {
+        this.errorInfo = {
+          status: 1000,
+          code: "URL not match"
+        };
+        return false;
+      }
+
+      try {
+        let response: any;
+        if (cache) response = Cache.getData(endpoint);
+
+        // could stop the commit
+        const exeConfig: IPluginExecutionConfig = {
+          stopWhenEmpty: true,
+          returnLastValue: true
+        };
+        const couldCommit = await this.pluginManager.executePlugins(
+          "data.request.before",
+          exeConfig
+        );
+        if (couldCommit === false) {
+          this.errorInfo = {
+            status: 1001,
+            code: "Plugins blocked the commit"
+          };
+          return false;
         }
+
+        // handle response
+        if (!response) {
+          response = await this.request[method](endpoint, data);
+          if (response.data) {
+            if (cache) Cache.setData(endpoint, response.data);
+            response = response.data;
+          }
+        }
+        result = response;
+      } catch (e) {
+        // console.log(e.message);
+        this.errorInfo = {
+          code: e.message
+        };
       }
-      result = data;
-    } catch (e) {
-      console.log(e.message);
-      this.errorInfo = {
-        code: e.message
-      };
     }
-    if (result) this.data = result;
+
+    this.data = result;
+
+    // could modify the response
+    await this.pluginManager.executePlugins("data.request.after");
     return result;
   }
 
-  async updateData(source: string, data: any) {
-    return {};
+  async loadData(source?: string, params?: any) {
+    return await this.sendRequest(source, params, "get", true);
   }
 
-  async replaceData(source: string, data: any) {
-    return {};
+  async updateData(source?: string, data?: any) {
+    return await this.sendRequest(source, data, "post");
   }
 
-  async deleteData(source: string) {
-    return {};
+  async replaceData(source?: string, data?: any) {
+    return await this.sendRequest(source, data, "put");
+  }
+
+  async deleteData(source?: string, data?: any) {
+    return await this.sendRequest(source, data, "put");
   }
 }

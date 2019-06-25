@@ -13,10 +13,10 @@ export default class Cache {
   // static schema: ICache = {};
   static clearCache = (type: string, schemaPath?: string) => {
     if (schemaPath) {
-      _.set(Cache.cache, `${type}.${schemaPath}`, {});
+      _.unset(Cache.cache, `${type}.${schemaPath}`);
       //   Cache.cache[type][schemaPath] = {};
     } else if (type) {
-      _.set(Cache.cache, type, {});
+      _.unset(Cache.cache, type);
     } else {
       Cache.cache = {};
     }

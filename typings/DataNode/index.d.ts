@@ -9,11 +9,6 @@ export interface ICache {
   [name: string]: {};
 }
 
-export interface IDataSourceInfo {
-  name?: string;
-  schemaPath?: string;
-}
-
 export interface IDataNode {
   errorInfo: any;
   pluginManager: IPluginManager;

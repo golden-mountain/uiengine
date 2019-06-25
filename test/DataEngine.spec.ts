@@ -37,18 +37,77 @@ describe("Given all the DataEngine", () => {
       expect(path).to.be.deep.equal("any.json");
     });
 
-    it("loadData: data should be loaded from remote and be cached", async () => {
+    // it("loadData: data should be loaded from remote and be cached", async () => {
+    //   Cache.clearDataCache();
+    //   let dataEngine = new DataEngine(schemaPath, request);
+    //   await dataEngine.loadData();
+    //   expect(dataEngine.errorInfo).to.be.undefined;
+    //   expect(dataEngine.data).to.deep.equal(dataJson);
+    //   // cache test
+    //   let result = await dataEngine.loadData();
+    //   expect(result).to.deep.equal(dataJson);
+
+    //   // give a source
+    //   result = await dataEngine.loadData("foo.bar.baz");
+    //   expect(result).to.deep.equal(dataJson);
+    // });
+
+    it("sendRequest: request agent for all api request methods", async () => {
       Cache.clearDataCache();
       let dataEngine = new DataEngine(schemaPath, request);
-      await dataEngine.loadData();
-      expect(dataEngine.data).to.deep.equal(dataJson);
-      // cache test
-      let result = await dataEngine.loadData();
-      expect(result).to.deep.equal(dataJson);
 
-      // give a source
-      result = await dataEngine.loadData("foo.bar.baz");
-      expect(result).to.deep.equal(dataJson);
+      // use default source
+      await dataEngine.sendRequest();
+      expect(dataEngine.errorInfo).to.be.null;
+      expect(dataEngine.data).to.deep.equal(dataJson);
+
+      // use customize source
+      await dataEngine.sendRequest("foo.bar.baz", { str: "query-string-1" });
+      expect(dataEngine.errorInfo).to.be.null;
+      expect(dataEngine.data).to.deep.equal(dataJson);
+
+      // cache test
+      const spy = chai.spy(Cache.setData);
+      await dataEngine.sendRequest("foo.bar.baz", { str: "query-string-1" });
+      expect(spy).to.not.be.called;
+
+      // use undefined request method
+      await dataEngine.sendRequest("foo.bar.baz", null, "nothing");
+      let errorInfo = {
+        status: 1001,
+        code: "Method nothing did not defined on Request"
+      };
+      expect(dataEngine.errorInfo).to.be.deep.equal(errorInfo);
+      expect(dataEngine.data).to.be.empty;
+
+      // load empty path
+      await dataEngine.sendRequest("any.wrong.place");
+      expect(dataEngine.data).to.be.empty;
+      errorInfo = {
+        status: 2001,
+        code: `Schema for any.json not found`
+      };
+      expect(dataEngine.errorInfo).to.deep.equal(errorInfo);
+
+      // blocked by before plugins
+      const plugins = {
+        before_blocker: {
+          type: "data.request.before",
+          initialize: false,
+          callback: () => {
+            return false;
+          },
+          name: "before_blocker"
+        }
+      };
+      dataEngine.pluginManager.loadPlugins(plugins);
+      await dataEngine.sendRequest("foo.bar.baz");
+      errorInfo = {
+        status: 1001,
+        code: "Plugins blocked the commit"
+      };
+      expect(dataEngine.errorInfo).to.be.deep.equal(errorInfo);
+      expect(dataEngine.data).to.be.empty;
     });
   });
 });

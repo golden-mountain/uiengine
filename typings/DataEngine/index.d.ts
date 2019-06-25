@@ -17,9 +17,16 @@ export interface IDataEngine {
   data?: any;
   pluginManager: IPluginManager;
 
-  loadData(source?: string);
-  updateData(source: string, data: any);
-  replaceData(source: string, data: any);
-  deleteData(source: string);
+  sendRequest(
+    source: string,
+    data: any,
+    method: string = "post",
+    cache: boolean = false
+  );
+  loadSchema(source?: string);
+  loadData(source?: string, data?: any);
+  updateData(source?: string, data?: any);
+  replaceData(source?: string, data?: any);
+  deleteData(source?: string, data?: any);
   parseSchemaPath(source: string);
 }

@@ -3,7 +3,6 @@ import { PluginManager } from "./";
 import * as dataPlugins from "../plugins/data";
 import {
   IDataNode,
-  IDataSourceInfo,
   IRequest,
   IPluginManager,
   IUINode,

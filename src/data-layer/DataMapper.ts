@@ -1,7 +1,6 @@
 import _ from "lodash";
 
 import {
-  IDataSourceInfo,
   IDataMapper,
   IDataSchema,
   IRequest,
@@ -39,6 +38,7 @@ export default class DataMapper implements IDataMapper {
     } else {
       schemaPath = this.source;
     }
+    this.source = schemaPath;
 
     try {
       let schema: any = Cache.getDataSchema(schemaPath);
