@@ -3,7 +3,7 @@
 import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
-import { DataNode, Request, Cache, UINode } from "../src";
+import { DataNode, Request, Cache, UINode, PluginManager } from "../src";
 import reqConfig from "./config/request";
 
 import dataNodeJson from "./data/foo.json";
@@ -23,6 +23,7 @@ describe("Given an instance of my DataNode library", () => {
   before(() => {});
   describe("the given data", () => {
     it("constructor: should called getSchemaInfo & loadData", async () => {
+      Cache.clearDataCache();
       const toLoadName = "foo.bar";
       const dataNode = new DataNode(toLoadName, uiNode, request);
       // const source = { name: "foo.bar", schemaPath: "foo.json" };
@@ -56,7 +57,7 @@ describe("Given an instance of my DataNode library", () => {
       Cache.clearDataCache();
       dataNode = new DataNode("any.wrong.node", uiNode, request);
       data = await dataNode.loadData();
-      const errorCode = "Cannot find module";
+      const errorCode = "Schema for any.json not found";
       const errorInfo = dataNode.dataEngine.errorInfo;
       // console.log(errorCode);
       expect(errorInfo.code).to.include(errorCode);
@@ -105,5 +106,10 @@ describe("Given an instance of my DataNode library", () => {
       expect(dataNode.getData()).to.deep.equal(expectedJson);
       expect(rowChild.getChildren().length).to.equal(1);
     });
+  });
+
+  after(() => {
+    Cache.clearCache();
+    PluginManager.unloadPlugins();
   });
 });

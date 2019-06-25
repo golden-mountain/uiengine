@@ -49,4 +49,8 @@ describe("Given all the DataMapper", () => {
       expect(path).to.deep.equal(expectedPath);
     });
   });
+
+  after(() => {
+    Cache.clearCache();
+  });
 });

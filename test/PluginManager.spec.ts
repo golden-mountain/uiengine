@@ -130,4 +130,9 @@ describe("Given an instance of my PluginManager library", () => {
       expect(result).to.deep.equal(expectedResult);
     });
   });
+
+  // clear plugins
+  after(() => {
+    PluginManager.unloadPlugins();
+  });
 });

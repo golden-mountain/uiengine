@@ -21,16 +21,11 @@ export interface IDataNode {
   data: any;
   updatingData?: any;
   loadData(): Promise<AxiosPromise> | any;
-  // loadSchema(): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
   deleteData(path?: any);
   getData(path?: string): Promise<AxiosPromise> | any;
   getSchema(): Promise<AxiosPromise> | any;
-  // getSchemaName(source: string): string;
-  // loadRemoteData(source: string): Promise<AxiosPromise> | any;
-  // getDataEntryPoint(method: string = "default"): string;
   getErrorInfo();
-  // getSource();
   getPluginManager(): IPluginManager;
   getRootSchema();
   getRootData();

@@ -51,10 +51,7 @@ export default class DataNode implements IDataNode {
     this.dataEngine = new DataEngine(this.source, this.request);
   }
 
-  getErrorInfo(type?: string) {
-    if (type) {
-      return this.errorInfo[type];
-    }
+  getErrorInfo() {
     return this.errorInfo;
   }
 
@@ -86,6 +83,10 @@ export default class DataNode implements IDataNode {
     let result;
     if (this.source) {
       const data = await this.dataEngine.loadData();
+      if (data === null) {
+        this.errorInfo = this.dataEngine.errorInfo;
+        return;
+      }
       const exeConfig: IPluginExecutionConfig = {
         returnLastValue: true
       };
@@ -118,7 +119,7 @@ export default class DataNode implements IDataNode {
     );
 
     if (couldUpdate.status === false) {
-      this.errorInfo.data = couldUpdate;
+      this.errorInfo = couldUpdate;
       return false;
     }
     // update this data

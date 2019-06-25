@@ -11,7 +11,7 @@ export default class Cache {
   };
 
   // static schema: ICache = {};
-  static clearCache = (type: string, schemaPath?: string) => {
+  static clearCache = (type?: string, schemaPath?: string) => {
     if (schemaPath) {
       _.unset(Cache.cache, `${type}.${schemaPath}`);
       //   Cache.cache[type][schemaPath] = {};

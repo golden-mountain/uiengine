@@ -4,9 +4,7 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, StateNode } from "../src";
-// import reqConfig from "./config/request";
-import { IStateNode } from "../typings/StateNode";
+import { UINode, StateNode, Cache, PluginManager } from "../src";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -62,5 +60,10 @@ describe("Given an instance of my StateNode library", () => {
       expect(plugins).to.have.property("anyname");
       expect(plugins).to.not.have.property("external_plugin_1");
     });
+  });
+
+  after(() => {
+    Cache.clearCache();
+    PluginManager.unloadPlugins();
   });
 });

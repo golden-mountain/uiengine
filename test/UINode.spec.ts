@@ -4,7 +4,7 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, Request, Cache } from "../src";
+import { UINode, Request, Cache, PluginManager } from "../src";
 import reqConfig from "./config/request";
 // import defaultSchema from "./config/default-schema";
 // import { IUINode } from "../typings/UINode";
@@ -281,5 +281,10 @@ describe("Given an instance of my UINode library", () => {
       expect(nodes[1].getSchema("id")).to.equal("foo.bar.baz.0.age");
       expect(nodes[2].getSchema("id")).to.equal("foo.bar.baz.1.age");
     });
+  });
+
+  after(() => {
+    Cache.clearCache();
+    PluginManager.unloadPlugins();
   });
 });

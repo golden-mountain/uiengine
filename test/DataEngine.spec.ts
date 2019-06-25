@@ -4,9 +4,8 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { DataEngine, Request, Cache, DataMapper } from "../src";
+import { DataEngine, Request, Cache, PluginManager } from "../src";
 import reqConfig from "./config/request";
-import dataSchemaJson from "./data/schema/foo.json";
 import dataJson from "./data/foo.json";
 
 // const uiNodeLayout = {};
@@ -109,5 +108,10 @@ describe("Given all the DataEngine", () => {
       expect(dataEngine.errorInfo).to.be.deep.equal(errorInfo);
       expect(dataEngine.data).to.be.empty;
     });
+  });
+
+  after(() => {
+    Cache.clearCache();
+    PluginManager.unloadPlugins();
   });
 });
