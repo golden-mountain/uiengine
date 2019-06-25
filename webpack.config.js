@@ -1,31 +1,31 @@
 /* global __dirname, require, module*/
 
-const webpack = require('webpack');
-const path = require('path');
-const env = require('yargs').argv.env; // use --env with webpack 2
-const pkg = require('./package.json');
+const webpack = require("webpack");
+const path = require("path");
+const env = require("yargs").argv.env; // use --env with webpack 2
+const pkg = require("./package.json");
 
 let libraryName = pkg.name;
 
 let outputFile, mode;
 
-if (env === 'build') {
-  mode = 'production';
-  outputFile = libraryName + '.min.js';
+if (env === "build") {
+  mode = "production";
+  outputFile = libraryName + ".min.js";
 } else {
-  mode = 'development';
-  outputFile = libraryName + '.js';
+  mode = "development";
+  outputFile = libraryName + ".js";
 }
 
 const config = {
   mode: mode,
-  entry: __dirname + '/src/index.ts',
-  devtool: 'inline-source-map',
+  entry: __dirname + "/src/index.ts",
+  devtool: "inline-source-map",
   output: {
-    path: __dirname + '/lib',
+    path: __dirname + "/lib",
     filename: outputFile,
     library: libraryName,
-    libraryTarget: 'umd',
+    libraryTarget: "umd",
     umdNamedDefine: true,
     globalObject: "typeof self !== 'undefined' ? self : this"
   },
@@ -33,27 +33,27 @@ const config = {
     rules: [
       {
         test: /\.tsx?$/,
-        loader: 'awesome-typescript-loader'
+        loader: "awesome-typescript-loader"
       },
       {
         test: /(\.jsx|\.js)$/,
-        loader: 'babel-loader',
+        loader: "babel-loader",
         exclude: /(node_modules|bower_components)/
       },
       {
         test: /(\.jsx|\.js)$/,
-        loader: 'eslint-loader',
+        loader: "eslint-loader",
         exclude: /node_modules/
       }
     ]
   },
   resolve: {
-    modules: [path.resolve('./node_modules'), path.resolve('./src')],
-    extensions: ['.json', '.js', '.ts']
+    modules: [path.resolve("./node_modules"), path.resolve("./src")],
+    extensions: [".json", ".js", ".ts"]
   },
   externals: {
-    react: 'React',
-    'react-dom': 'ReactDOM'
+    react: "React",
+    "react-dom": "ReactDOM"
   }
 };
 
