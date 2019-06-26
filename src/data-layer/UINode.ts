@@ -1,5 +1,12 @@
 import _ from "lodash";
-import { Request, DataNode, Cache, StateNode, PluginManager } from ".";
+import {
+  Request,
+  DataNode,
+  Cache,
+  StateNode,
+  PluginManager,
+  Messager
+} from ".";
 import { AxiosPromise } from "axios";
 import * as uiPlugins from "../plugins/ui";
 import {
@@ -10,7 +17,7 @@ import {
   IRequest,
   IErrorInfo,
   IPluginManager,
-  IPlugins
+  IMessager
 } from "../../typings";
 
 export default class UINode implements IUINode {
@@ -25,6 +32,7 @@ export default class UINode implements IUINode {
   rootName: string = "default";
   isLiveChildren: boolean = false;
   id: string = "";
+  messager: IMessager;
 
   constructor(
     schema: ILayoutSchema,
@@ -47,6 +55,9 @@ export default class UINode implements IUINode {
       this.loadDefaultPlugins = loadDefaultPlugins;
       this.pluginManager.loadPlugins(uiPlugins);
     }
+
+    // new messager
+    this.messager = new Messager();
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
@@ -58,7 +69,7 @@ export default class UINode implements IUINode {
     if (!returnSchema) returnSchema = this.schema;
     if (typeof schema === "string" && schema) {
       returnSchema = await this.loadRemoteLayout(schema);
-      this.rootName = schema;
+      if (!this.rootName) this.rootName = schema;
     }
     // assign the schema to this and it's children
     if (returnSchema) {
@@ -224,10 +235,10 @@ export default class UINode implements IUINode {
     }
   }
 
-  searchNodes(prop: object, root?: string): any {
+  searchNodes(prop: object, layoutId?: string): any {
     let nodes: Array<any> = [];
 
-    const rootName = root || this.rootName;
+    const rootName = layoutId || this.rootName;
     let allUINodes = Cache.getUINode(rootName) as IUINode;
     if (_.isObject(allUINodes)) {
       _.forIn(allUINodes, (target: any, id: string) => {
@@ -252,7 +263,7 @@ export default class UINode implements IUINode {
     return nodes;
   }
 
-  searchDepsNodes(myNode?: IUINode, root?: string) {
+  searchDepsNodes(myNode?: IUINode, layoutId?: string) {
     let schema: ILayoutSchema;
     if (!myNode) {
       schema = this.getSchema();
@@ -260,6 +271,7 @@ export default class UINode implements IUINode {
       schema = myNode.getSchema();
     }
 
+    let root = layoutId;
     let nodes: Array<any> = [];
     // to fix: rootName should not be empty
     if (!root) root = this.rootName || "default";
@@ -343,5 +355,9 @@ export default class UINode implements IUINode {
 
   async updateState() {
     return await this.getStateNode().renewStates();
+  }
+
+  sendMessage(...args: any) {
+    this.messager.sendMessage(...args);
   }
 }

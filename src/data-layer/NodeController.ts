@@ -14,7 +14,7 @@ import { Messager, UINode, Request } from ".";
 export default class NodeController implements INodeController {
   // layout path
   errorInfo: IErrorInfo = {};
-  layouts: object = {};
+  // layouts: object = {};
   nodes: Array<IUINode> = [];
   messager: IMessager;
   requestConfig: IRequestConfig;
@@ -37,11 +37,14 @@ export default class NodeController implements INodeController {
 
     // get a unique id
     let rootName = "default";
-    if (id) rootName = id;
-    if (_.isObject(layout)) {
-      rootName = _.get(layout, "id", "default");
+    if (id) {
+      rootName = id;
     } else {
-      rootName = layout;
+      if (_.isObject(layout)) {
+        rootName = _.get(layout, "id", "default");
+      } else {
+        rootName = layout;
+      }
     }
 
     // default we load all default plugins
@@ -50,20 +53,31 @@ export default class NodeController implements INodeController {
       await uiNode.loadLayout(layout);
     }
 
-    this.layouts[rootName] = uiNode;
+    this.nodes[rootName] = uiNode;
     return uiNode;
   }
 
   deleteUINode(id: string): boolean {
-    _.unset(this.layouts, id);
+    _.unset(this.nodes, id);
 
     // send message to caller
     return true;
   }
 
   getUINode(id: string) {
-    return _.get(this.layouts, id);
+    return _.get(this.nodes, id);
   }
 
-  sendMessage(nodeSelector: INodeProps, data: any, message: string) {}
+  castMessage(nodeSelector: INodeProps, data: any, ids?: [string]) {
+    let nodes: any = this.nodes;
+    if (ids) {
+      nodes = _.pick(this.nodes, ids);
+    }
+    _.forIn(nodes, (uiNode: IUINode) => {
+      let searchedNodes = uiNode.searchNodes(nodeSelector);
+      _.forEach(searchedNodes, (s: IUINode) => {
+        s.sendMessage(data);
+      });
+    });
+  }
 }
