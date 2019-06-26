@@ -243,6 +243,7 @@ export default class UINode implements IUINode {
     let allUINodes = Cache.getUINode(rootName) as IUINode;
     if (_.isObject(allUINodes)) {
       _.forIn(allUINodes, (target: any, id: string) => {
+        if (!target.getSchema) return;
         let finded = true;
         const schema = target.getSchema();
         _.forIn(prop, (v: any, name: string) => {

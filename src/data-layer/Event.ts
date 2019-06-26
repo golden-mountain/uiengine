@@ -3,9 +3,9 @@ import _ from "lodash";
 import { PluginManager } from "./";
 
 import * as eventPlugins from "../plugins/events";
-import { IPluginManager } from "../../typings";
+import { IPluginManager, IEvent } from "../../typings";
 
-export default class Event {
+export default class Event implements IEvent {
   pluginManager: IPluginManager = new PluginManager(this);
 
   constructor(loadDefaultPlugins: boolean = true) {

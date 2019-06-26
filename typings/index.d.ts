@@ -6,6 +6,7 @@ export * from "./DataNode";
 export * from "./Messager";
 export * from "./StateNode";
 export * from "./Request";
+export * from "./Event";
 
 declare var require: NodeRequire;
 

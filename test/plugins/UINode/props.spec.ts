@@ -25,6 +25,10 @@ describe("Given all the UI plugins", () => {
       // schema should be loaded
       const theChild = uiNode.getChildren([1, 0]);
       expect(theChild[0].props).to.have.property("onChange");
+
+      const onChange = theChild[0].props.onChange;
+      const spy = chai.spy(theChild[0].props.onChange);
+      onChange("asdklfjasdf");
     });
   });
 });

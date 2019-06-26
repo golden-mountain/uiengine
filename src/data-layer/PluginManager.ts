@@ -65,9 +65,11 @@ export default class PluginManager implements IPluginManager {
   async executePlugins(type: string, config?: IPluginExecutionConfig) {
     const plugins: IPlugins = _.get(PluginManager.plugins, type);
     let result;
+
     for (let k in plugins) {
       const p = plugins[k];
       const name = p.name || k;
+      if (!p.callback) continue;
 
       try {
         result = await p.callback.call(this.caller, this.caller);
@@ -77,7 +79,7 @@ export default class PluginManager implements IPluginManager {
         if (_.isEqual(_.get(config, "stopWhenEmpty"), result)) break;
         if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) break;
       } catch (e) {
-        console.error(`plugin [${k}] executed failed:`, e.message);
+        console.error(`plugin [${k}] executed failed:`, e);
         this.setErrorInfo(p.type, name, e.message);
       }
     }
