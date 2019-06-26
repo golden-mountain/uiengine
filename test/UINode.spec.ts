@@ -54,7 +54,7 @@ describe("Given an instance of my UINode library", () => {
       let copyLayout = _.cloneDeep(uiNodeLayout);
       const localUINode = new UINode(copyLayout);
       expect(localUINode.getSchema()).to.deep.equal(copyLayout);
-      expect(localUINode.rootName).to.equal("default");
+      expect(localUINode.rootName).to.be.empty;
     });
 
     it("loadRemoteLayout: if schema is string, should load from remote and same as the loaded", async () => {

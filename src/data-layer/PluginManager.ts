@@ -15,12 +15,16 @@ export default class PluginManager implements IPluginManager {
 
   constructor(caller: any, plugins?: IPlugins) {
     if (plugins) {
-      this.loadPlugins(plugins);
+      PluginManager.loadPlugins(plugins);
     }
     this.caller = caller;
   }
 
   getPlugins(type?: string, name?: string) {
+    return PluginManager.getPlugins(type, name);
+  }
+
+  static getPlugins(type?: string, name?: string) {
     if (name && type) {
       return _.get(PluginManager.plugins, `${type}.${name}`);
     } else if (type) {
@@ -28,6 +32,10 @@ export default class PluginManager implements IPluginManager {
     } else {
       return PluginManager.plugins;
     }
+  }
+
+  unloadPlugins(type?: string, name?: string) {
+    return PluginManager.unloadPlugins(type, name);
   }
 
   static unloadPlugins(type?: string, name?: string) {
@@ -41,6 +49,10 @@ export default class PluginManager implements IPluginManager {
   }
 
   loadPlugins(newPlugins: IPlugins): IPlugins {
+    return PluginManager.loadPlugins(newPlugins);
+  }
+
+  static loadPlugins(newPlugins: IPlugins): IPlugins {
     _.forIn(newPlugins, (p: IPlugin, key: string) => {
       if (p.type) {
         const name = p.name || key;
@@ -65,7 +77,7 @@ export default class PluginManager implements IPluginManager {
         if (_.isEqual(_.get(config, "stopWhenEmpty"), result)) break;
         if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) break;
       } catch (e) {
-        console.log(e.message);
+        console.error(`plugin [${k}] executed failed:`, e.message);
         this.setErrorInfo(p.type, name, e.message);
       }
     }

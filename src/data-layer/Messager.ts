@@ -2,7 +2,7 @@ import _ from "lodash";
 
 export default class Messager {
   caller: any = () => {
-    console.error("please use messager.setStateFunc on each node");
+    console.error("Messager: please use messager.setStateFunc on each node");
   };
 
   sendMessage: any = (...args: any) => {

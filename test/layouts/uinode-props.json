@@ -1,0 +1,53 @@
+{
+  "id": "uinode-props",
+  "component": "lib:DemoElement1",
+  "datasource": "foo:bar",
+  "children": [
+    {
+      "component": "lib:DemoElement2",
+      "id": "id-of-demo-element-2",
+      "datasource": "foo:bar.name",
+      "props": {
+        "name": "demo-element-2",
+        "events": [
+          {
+            "event": "onClick",
+            "action": "routeTo",
+            "options": {
+              "redirect": "#/"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "component": "lib:DemoLiveElement",
+      "datasource": "foo:bar.baz",
+      "$children": [
+        {
+          "component": "p",
+          "datasource": "foo:bar.baz.$.name",
+          "props": {
+            "defaultvalue": "zli",
+            "events": [
+              {
+                "event": "onChange",
+                "action": "change",
+                "options": {
+                  "redirect": "#/"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "component": "p",
+          "datasource": "foo:bar.baz.$.age"
+        }
+      ],
+      "props": {
+        "defaultvalue": "hello"
+      }
+    }
+  ]
+}

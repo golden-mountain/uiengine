@@ -29,15 +29,16 @@ export default class UINode implements IUINode {
   loadDefaultPlugins: boolean = true;
   errorInfo: IErrorInfo = {};
   schema: ILayoutSchema = {};
-  rootName: string = "default";
+  rootName: string = "";
   isLiveChildren: boolean = false;
   id: string = "";
   messager: IMessager;
+  props: object = {};
 
   constructor(
     schema: ILayoutSchema,
     request?: IRequest,
-    root: string = "default",
+    root: string = "",
     loadDefaultPlugins: boolean = true
   ) {
     if (request) {

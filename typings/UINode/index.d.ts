@@ -24,6 +24,7 @@ export interface IUINode {
   isLiveChildren: boolean;
   id: string;
   messager: IMessager;
+  props: object;
 
   loadLayout(schema?: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
