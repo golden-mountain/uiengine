@@ -6,7 +6,7 @@ import chaiSpies from "chai-spies";
 import _ from "lodash";
 import { shallow } from "enzyme";
 
-import { Messager } from "../src";
+import { Messager } from "../../src";
 
 chai.use(chaiSpies);
 const expect = chai.expect;

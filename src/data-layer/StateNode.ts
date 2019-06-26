@@ -2,7 +2,7 @@ import _ from "lodash";
 
 import { IState, IStateNode, IErrorInfo, IPluginManager } from "../../typings";
 import { IUINode } from "../../typings/UINode";
-import { Cache, PluginManager } from ".";
+import { PluginManager } from ".";
 import * as statePlugins from "../plugins/state";
 
 export default class StateNode implements IStateNode {
@@ -42,6 +42,9 @@ export default class StateNode implements IStateNode {
       await node.getStateNode().renewStates();
     }
 
+    const state = { state: this.state };
+    console.log("update visible on State Node: ", state);
+    this.uiNode.messager.sendMessage(state);
     return this.state;
   }
 

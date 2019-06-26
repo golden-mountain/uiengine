@@ -4,7 +4,7 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, StateNode, Cache, PluginManager } from "../src";
+import { UINode, StateNode, Cache, PluginManager } from "../../src";
 
 // const uiNodeLayout = {};
 // chai.expect();

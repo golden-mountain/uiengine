@@ -3,7 +3,6 @@ export { default as NodeController } from "./NodeController";
 export { default as UINode } from "./UINode";
 export { default as DataNode } from "./DataNode";
 export { default as StateNode } from "./StateNode";
-export { default as UIEngine } from "../ui-layer/UIEngine";
 
 export { default as Request } from "./Request";
 export { default as DataEngine } from "./DataEngine";

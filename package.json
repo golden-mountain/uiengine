@@ -70,12 +70,14 @@
     "instrument": false
   },
   "dependencies": {
+    "@types/antd": "^1.0.0",
     "@types/chai": "^4.1.7",
     "@types/lodash": "^4.14.134",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.0.8",
     "@types/react": "^16.8.19",
     "@types/react-dom": "^16.8.4",
+    "antd": "^3.19.8",
     "axios": "^0.19.0",
     "axios-mock-adapter": "^1.16.0",
     "csstype": "^2.6.5",

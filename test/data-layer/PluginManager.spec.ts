@@ -4,7 +4,7 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { PluginManager } from "../src";
+import { PluginManager } from "../../src";
 
 chai.use(chaiSpies);
 const expect = chai.expect;

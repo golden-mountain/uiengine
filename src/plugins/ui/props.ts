@@ -5,17 +5,18 @@ import { IPluginFunc, IPlugin, IUINode, ILayoutSchema } from "../../../typings";
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   const schema = uiNode.getSchema();
   const props = _.get(schema, "props");
-  let result = {};
+  let result = { key: uiNode.id };
   if (props) {
-    let events = {};
-    if (_.has(props, "events")) {
+    const { events, ...rest } = props as any;
+    let eventFuncs = {};
+    if (events) {
       const event = new Event();
-      const eventSchemas = _.get(props, "events");
-      events = await event.loadEvents(eventSchemas);
+      // const eventSchemas = _.get(props, "events");
+      eventFuncs = await event.loadEvents(events);
     }
 
     // assign props to uiNode
-    uiNode.props = { ...props, ...events };
+    uiNode.props = { ...rest, ...eventFuncs, ...result };
   }
   return result;
 };

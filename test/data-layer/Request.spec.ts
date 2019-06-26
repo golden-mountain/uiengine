@@ -1,9 +1,9 @@
 /* global describe, it, before */
 
 import chai from "chai";
-import reqConfig from "./config/request";
-import { Request } from "../src";
-import stateTestJSON from "./layouts/state-test.json";
+import reqConfig from "../config/request";
+import { Request } from "../../src";
+import stateTestJSON from "../layouts/state-test.json";
 
 const expect = chai.expect;
 

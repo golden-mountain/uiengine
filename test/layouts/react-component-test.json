@@ -1,0 +1,54 @@
+{
+  "id": "react-component-test",
+  "component": "test:DivContainer",
+  "datasource": "foo:bar",
+  "props": {
+    "title": "foo:bar"
+  },
+  "children": [
+    {
+      "component": "test:DivContainer",
+      "id": "id-of-demo-element-2",
+      "datasource": "foo:bar.name",
+      "props": {
+        "title": "demo-element-2"
+      }
+    },
+    {
+      "component": "test:DivContainer",
+      "datasource": "foo:bar.baz",
+      "state": {
+        "visible": {
+          "strategy": "and",
+          "deps": [
+            {
+              "selector": {
+                "id": "id-of-demo-element-2"
+              },
+              "data": "Zp"
+            }
+          ]
+        }
+      },
+      "$children": [
+        {
+          "component": "test:PContainer",
+          "datasource": "foo:bar.baz.$.name",
+          "props": {
+            "title": "foo:bar.baz.$.name"
+          }
+        },
+        {
+          "component": "test:PContainer",
+          "datasource": "foo:bar.baz.$.age",
+          "props": {
+            "title": "foo:bar.baz.$.age"
+          }
+        }
+      ],
+      "props": {
+        "title": "hello"
+      }
+    }
+  ]
+}

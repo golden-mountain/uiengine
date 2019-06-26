@@ -6,10 +6,16 @@ import chaiSpies from "chai-spies";
 import { shallow } from "enzyme";
 
 import _ from "lodash";
-import { NodeController, Request, UINode, Cache, PluginManager } from "../src";
-import reqConfig from "./config/request";
+import {
+  NodeController,
+  Request,
+  UINode,
+  Cache,
+  PluginManager
+} from "../../src";
+import reqConfig from "../config/request";
 
-import uiJSON from "./layouts/state-node-basic.json";
+import uiJSON from "../layouts/state-node-basic.json";
 
 // const DataNodeLayout = {};
 // chai.expect();

@@ -3,12 +3,12 @@
 import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
-import { DataNode, Request, Cache, UINode, PluginManager } from "../src";
-import reqConfig from "./config/request";
+import { DataNode, Request, Cache, UINode, PluginManager } from "../../src";
+import reqConfig from "../config/request";
 
-import dataNodeJson from "./data/foo.json";
-import dataSchemaJson from "./data/schema/foo.json";
-import uiJSON from "./layouts/state-node-basic.json";
+import dataNodeJson from "../data/foo.json";
+import dataSchemaJson from "../data/schema/foo.json";
+import uiJSON from "../layouts/state-node-basic.json";
 
 // const DataNodeLayout = {};
 // chai.expect();

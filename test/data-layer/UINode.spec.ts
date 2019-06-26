@@ -4,14 +4,14 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, Request, Cache, PluginManager } from "../src";
-import reqConfig from "./config/request";
+import { UINode, Request, Cache, PluginManager } from "../../src";
+import reqConfig from "../config/request";
 // import defaultSchema from "./config/default-schema";
 // import { IUINode } from "../typings/UINode";
 
-import uiNodeLayout from "./layouts/uinode-basic.json";
-import stateTestLayout from "./layouts/state-node-basic.json";
-import dataNodeJson from "./data/foo.json";
+import uiNodeLayout from "../layouts/uinode-basic.json";
+import stateTestLayout from "../layouts/state-node-basic.json";
+import dataNodeJson from "../data/foo.json";
 
 // const uiNodeLayout = {};
 // chai.expect();

@@ -4,9 +4,9 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { Request, Cache, DataMapper } from "../src";
-import reqConfig from "./config/request";
-import dataSchemaJson from "./data/schema/foo.json";
+import { Request, Cache, DataMapper } from "../../src";
+import reqConfig from "../config/request";
+import dataSchemaJson from "../data/schema/foo.json";
 
 // const uiNodeLayout = {};
 // chai.expect();
