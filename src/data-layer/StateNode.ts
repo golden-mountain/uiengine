@@ -43,7 +43,7 @@ export default class StateNode implements IStateNode {
     }
 
     const state = { state: this.state };
-    console.log("update visible on State Node: ", state);
+    console.log("update visible on State Node: ", " id:", this.uiNode.id);
     this.uiNode.messager.sendMessage(state);
     return this.state;
   }

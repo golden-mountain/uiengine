@@ -46,8 +46,17 @@ export default class Cache {
     }
   }
 
-  static clearUINodes(obj: IUINode) {
-    Cache.clearCache("uiNodes", obj.id);
+  static clearUINodes(rootName: string, parentId?: string) {
+    if (parentId) {
+      const allNodes = Cache.getUINode(rootName);
+      _.forIn(allNodes, (node: any) => {
+        if (node.parent.id === parentId) {
+          Cache.clearCache("uiNodes", `${rootName}.${node.id}`);
+        }
+      });
+    } else {
+      Cache.clearCache("uiNodes", rootName);
+    }
   }
 
   static setCache = (

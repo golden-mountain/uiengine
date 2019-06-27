@@ -14,12 +14,18 @@ export default class Messager {
       _.merge(this.componentState, arg);
     });
 
-    // console.log(this.caller);
+    console.log(
+      _.get(this.context, "props.uiNode.id")
+      // _.get(this.context, "props.uiNode.schema")
+    );
     return this.caller.apply(this.context, this.componentState);
   };
 
   setStateFunc(setState: any, context?: any) {
-    // console.log("state func was set on messager");
+    console.log(
+      "state func was set on messager>>>>>>>>>",
+      context.props.uiNode.id
+    );
     if (_.isFunction(setState)) {
       this.caller = setState;
     }

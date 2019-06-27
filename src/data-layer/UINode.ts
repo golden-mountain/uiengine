@@ -34,12 +34,14 @@ export default class UINode implements IUINode {
   id: string = "";
   messager: IMessager;
   props: object = {};
+  parent?: IUINode;
 
   constructor(
     schema: ILayoutSchema,
     request?: IRequest,
     root: string = "",
-    loadDefaultPlugins: boolean = true
+    loadDefaultPlugins: boolean = true,
+    parent?: IUINode
   ) {
     if (request) {
       this.request = request;
@@ -59,11 +61,22 @@ export default class UINode implements IUINode {
 
     // new messager
     this.messager = new Messager();
+
+    // initial id, the id can't change
+    if (!this.schema._id) {
+      this.schema._id = _.uniqueId();
+    }
+    this.id = this.schema._id;
+
+    // assign parent
+    this.parent = parent;
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
-    // initial id
-    this.id = _.uniqueId();
+    // if (this.parent) {
+    //   console.log("parent id", this.parent.id, "this id", this.id);
+    //   Cache.clearUINodes(this.parent.rootName, parent.id);
+    // }
 
     // load remote node
     let returnSchema: any = schema;
@@ -76,6 +89,11 @@ export default class UINode implements IUINode {
     if (returnSchema) {
       await this.assignSchema(returnSchema);
     }
+    console.log(
+      this.id,
+      "............................ cache length",
+      _.keys(Cache.getUINode(this.rootName)).length
+    );
 
     // cache this node
     Cache.setUINode(this.rootName, this);
@@ -153,12 +171,24 @@ export default class UINode implements IUINode {
         if (_.isArray(s)) {
           node = [];
           for (let i in s) {
-            const subnode = new UINode(s[i], this.request, this.rootName);
+            const subnode = new UINode(
+              s[i],
+              this.request,
+              this.rootName,
+              this.loadDefaultPlugins,
+              this
+            );
             await subnode.loadLayout(s[i]);
             node.push(subnode);
           }
         } else {
-          node = new UINode(s, this.request, this.rootName);
+          node = new UINode(
+            s,
+            this.request,
+            this.rootName,
+            this.loadDefaultPlugins,
+            this
+          );
           await node.loadLayout(s);
         }
         children.push(node);
@@ -203,13 +233,13 @@ export default class UINode implements IUINode {
   }
 
   clearLayout() {
+    Cache.clearUINodes(this.rootName);
     this.schema = {};
     this.errorInfo = {};
     this.children = [];
     this.rootName = "";
     this.isLiveChildren = false;
     this.id = "";
-    Cache.clearUINodes(this);
     return this;
   }
 
