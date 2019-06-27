@@ -2,20 +2,69 @@ import React, { useState } from "react";
 import _ from "lodash";
 
 import { NodeController, ComponentWrapper } from "..";
-import { IUINode, INodeController, IUIEngineProps } from "../../typings";
+import {
+  IUINode,
+  INodeController,
+  IUIEngineProps,
+  IUIEngineStates
+} from "../../typings";
 
-export default (props: IUIEngineProps) => {
-  const nodeController: INodeController = new NodeController(props.reqConfig);
-  const [nodes, setNodes] = useState([]);
+export default class UIEngine extends React.Component<
+  IUIEngineProps,
+  IUIEngineStates
+> {
+  nodes: any = [];
+  state = {
+    nodes: []
+  };
+  nodeController: INodeController;
 
-  const { layouts = [] } = props;
-  for (let layout in layouts) {
-    nodeController.loadUINode(layouts[layout]).then((uiNode: any) => {
-      setNodes(uiNode);
+  constructor(props: IUIEngineProps) {
+    super(props);
+    this.nodeController = new NodeController(props.reqConfig);
+  }
+
+  componentDidMount() {
+    const { layouts = [], test } = this.props;
+    let nodes: any = this.state.nodes;
+
+    for (let layout in layouts) {
+      this.nodes[layout] = this.nodeController
+        .loadUINode(layouts[layout])
+        .then((uiNode: IUINode) => {
+          this.nodeController.messager.setStateFunc(
+            `layout-${layout}`,
+            this.setState
+          );
+          nodes[layout] = uiNode;
+          this.setState({ nodes });
+          return uiNode;
+        });
+    }
+    // for test purpose
+    if (test) {
+      test(Promise.all(this.nodes));
+    }
+  }
+
+  componentWillUnmount() {
+    this.props.layouts.forEach((uiNode: any, layout: any) => {
+      const layoutName = `layout-${layout}`;
+      this.nodeController.messager.removeStateFunc(layoutName);
     });
   }
 
-  return nodes.map((uiNode: IUINode) => {
-    return <ComponentWrapper uiNode={uiNode} {...props} />;
-  });
-};
+  render() {
+    const { layouts, reqConfig, test, ...rest } = this.props;
+
+    return this.state.nodes.map((uiNode: IUINode, layoutKey: number) => {
+      return (
+        <ComponentWrapper
+          uiNode={uiNode}
+          {...rest}
+          key={`layout-${layoutKey}`}
+        />
+      );
+    });
+  }
+}

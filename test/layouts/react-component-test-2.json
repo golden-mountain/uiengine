@@ -1,0 +1,17 @@
+{
+  "id": "react-component-test-2",
+  "component": "test:DivContainer",
+  "datasource": "foo:bar",
+  "props": {
+    "title": "Demo Container"
+  },
+  "children": [
+    {
+      "component": "test:DivContainer",
+      "datasource": "foo:bar.name",
+      "props": {
+        "title": "Demo sub container"
+      }
+    }
+  ]
+}
