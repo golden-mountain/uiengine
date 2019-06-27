@@ -1,5 +1,5 @@
 import { IPlugins } from "../typings";
-import { PluginManager } from "./";
+import { PluginManager } from "./data-layer";
 
 export class UIEngineRegister {
   static componentsLibrary = {};

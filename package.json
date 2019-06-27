@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --env dev && webpack --env build && npm run test",
     "dev": "webpack --progress --colors --watch --env dev",
-    "test": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors ./test/*.spec.ts*",
+    "test": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors ./test/**/*.spec.ts*",
     "test:w": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors --watch-extensions ts,tsx -w ./test/**/*.spec.ts*",
     "test:sw": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors --watch-extensions ts,tsx -w ",
     "test:cover": "cross-env NODE_ENV=test nyc mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors test/*.ts*",
