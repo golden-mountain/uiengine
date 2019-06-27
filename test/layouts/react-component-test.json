@@ -11,12 +11,17 @@
       "id": "id-of-demo-element-2",
       "datasource": "foo:bar.name",
       "props": {
-        "title": "demo-element-2"
+        "title": "demo-element-2",
+        "id": "test-node-abc"
       }
     },
     {
       "component": "test:DivContainer",
       "datasource": "foo:bar.baz",
+      "props": {
+        "id": "foo.bar.baz",
+        "title": "hello"
+      },
       "state": {
         "visible": {
           "strategy": "and",
@@ -45,10 +50,7 @@
             "title": "foo:bar.baz.$.age"
           }
         }
-      ],
-      "props": {
-        "title": "hello"
-      }
+      ]
     }
   ]
 }

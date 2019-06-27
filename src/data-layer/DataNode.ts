@@ -134,7 +134,7 @@ export default class DataNode implements IDataNode {
       // console.log(lastName, value, this.rootData);
     }
 
-    console.log("updating Data on Node...............");
+    // console.log("Data Node:", this.uiNode.id, ":", this.data, "\n");
     await this.uiNode.updateLayout();
     this.updatingData = undefined;
     return true;

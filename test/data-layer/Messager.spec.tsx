@@ -10,6 +10,7 @@ import { Messager } from "../../src";
 
 chai.use(chaiSpies);
 const expect = chai.expect;
+const id = "any-id";
 
 describe("Given an instance of my DataNode library", () => {
   before(() => {});
@@ -18,9 +19,10 @@ describe("Given an instance of my DataNode library", () => {
     it("setState: should set the components state", () => {
       const messager = new Messager();
       const MessageUIComponent = (props: any) => {
-        const [data, setData] = useState("foo");
-        messager.setStateFunc(setData);
-        return <div>{data}</div>;
+        const [data, setData] = useState({ value: "foo" });
+        console.log(data);
+        messager.setStateFunc(id, setData);
+        return <div>{data.value}</div>;
       };
 
       const wrapper = shallow(<MessageUIComponent />);
@@ -31,7 +33,7 @@ describe("Given an instance of my DataNode library", () => {
       expect(actualValue).to.equal(true);
 
       // messager test
-      messager.sendMessage("new foo");
+      messager.sendMessage(id, { value: "new foo" });
       expectedContainedDiv = <div>new foo</div>;
       actualValue = wrapper.contains(expectedContainedDiv);
       expect(actualValue).to.equal(true);
@@ -39,8 +41,8 @@ describe("Given an instance of my DataNode library", () => {
 
     it("removeStateFunc: should remove a func from messager", () => {
       const messager = new Messager();
-      messager.removeStateFunc();
-      expect(messager.caller).to.be.null;
+      messager.removeStateFunc(id);
+      expect(Messager.objectStateFuncMap).to.have.not.property(id);
     });
   });
 });

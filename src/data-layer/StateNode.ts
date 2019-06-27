@@ -24,6 +24,7 @@ export default class StateNode implements IStateNode {
   }
 
   getState(key?: string) {
+    // console.log(this.state, key, "...........");
     if (key) return _.get(this.state, key);
     return this.state;
   }
@@ -34,6 +35,13 @@ export default class StateNode implements IStateNode {
 
   async renewStates() {
     this.state = await this.pluginManager.executePlugins("state");
+    // console.log(
+    //   "state node:",
+    //   this.uiNode.schema.datasource,
+    //   ":",
+    //   this.state,
+    //   "\n"
+    // );
 
     // update dependence visible
     const depNodes = this.uiNode.searchDepsNodes();
@@ -43,7 +51,7 @@ export default class StateNode implements IStateNode {
     }
 
     const state = { state: this.state };
-    console.log("update visible on State Node: ", " id:", this.uiNode.id);
+    // console.log("update visible on State Node: ", " id:", this.uiNode.id);
     this.uiNode.messager.sendMessage(this.uiNode.id, state);
     return this.state;
   }

@@ -82,7 +82,7 @@ describe("Given an instance of my DataNode library", () => {
       // console.log(uiNode.getSchema());
       const searchedNodes = uiNode.searchNodes(selector, id);
       expect(searchedNodes.length).to.equal(1);
-      const spy = chai.spy.on(searchedNodes[0], "sendMessage");
+      const spy = chai.spy.on(searchedNodes[0].messager, "sendMessage");
       nodeController.castMessage(selector, anyValue, [id]);
       expect(spy).to.be.called.once;
     });

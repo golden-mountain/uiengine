@@ -48,8 +48,26 @@ describe("Given an instance of ComponentWrapper library", () => {
     });
 
     it("should hide the component whose visible state is false", async () => {
-      await uiNode.dataNode.updateData("Zuoping");
-      expect(wrapper.find(components.DivContainer)).to.have.lengthOf(2);
+      // update visible to false
+      await uiNode.dataNode.updateData("Zuoping", "name");
+      expect(uiNode.dataNode.getData("name")).to.equal("Zuoping");
+      expect(uiNode.stateNode.getState("visible")).to.equal(true);
+      let childNode = uiNode.getChildren([0]);
+      expect(childNode.stateNode.getState("visible")).to.equal(true);
+      childNode = uiNode.getChildren([1]);
+      expect(childNode.stateNode.getState("visible")).to.equal(false);
+      let expected = "<div>foo:bar<div>demo-element-2</div></div>";
+      expect(wrapper.html()).to.equal(expected);
+
+      // update back to all visible as true
+      await uiNode.dataNode.updateData("Zp", "name");
+      childNode = uiNode.getChildren([0]);
+      expect(childNode.stateNode.getState("visible")).to.equal(true);
+      childNode = uiNode.getChildren([1]);
+      expect(childNode.stateNode.getState("visible")).to.equal(true);
+      expected =
+        "<div>foo:bar<div>demo-element-2</div><div>hello<p>foo:bar.baz.0.name</p><p>foo:bar.baz.0.age</p><p>foo:bar.baz.1.name</p><p>foo:bar.baz.1.age</p></div></div>";
+      expect(wrapper.html()).to.equal(expected);
     });
   });
 });

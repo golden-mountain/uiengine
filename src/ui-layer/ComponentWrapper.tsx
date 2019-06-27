@@ -5,7 +5,7 @@ import { UIEngineRegister } from "..";
 import { IComponentWrapper, IComponentState } from "../../typings";
 
 function setComponentState(this: ComponentWrapper, state: IComponentState) {
-  console.log("node status on Wrapper:", this.props.uiNode.id, state);
+  // console.log("node status on Wrapper:", this.props.uiNode.id, state);
   return this.setState(state);
 }
 
@@ -30,13 +30,13 @@ class ComponentWrapper extends React.Component<
   }
 
   componentWillUpdate() {
-    console.log("state received on Wrapper:", this.props.uiNode.id, this.state);
+    // console.log("state received on Wrapper:", this.props.uiNode.id, this.state);
   }
 
   render() {
     const { uiNode, ...rest } = this.props;
-    if (!_.get(this.state, "state.vislble", true)) {
-      console.log(uiNode.id, "is invisible");
+
+    if (!_.get(this.state, "state.visible", true)) {
       return null;
     }
 

@@ -139,6 +139,13 @@ export default class UINode implements IUINode {
     return result;
   }
 
+  /**
+   * TO DO: need to enhance:
+   * 1. if only state change, on layout gen
+   * 2. if data change, if the changed data has an item different than origin one, should renew the one, if delete one, should also remove the one
+   * @param schema
+   * @param reloadData
+   */
   private async assignSchema(
     schema: ILayoutSchema,
     reloadData: boolean = true
@@ -190,7 +197,11 @@ export default class UINode implements IUINode {
     // load State
     this.stateNode = new StateNode(this, this.loadDefaultPlugins);
     await this.stateNode.renewStates();
-
+    // console.log(
+    //   this.id,
+    //   this.stateNode.state,
+    //   ".......... state on UINODE......"
+    // );
     // load ui.parser plugin
     try {
       await this.pluginManager.executePlugins("ui.parser");

@@ -8,7 +8,7 @@ export default class Messager implements IMessager {
   private componentState: IComponentState = {};
 
   constructor(schemaID?: string) {
-    console.log("registered a messager", schemaID);
+    // console.log("registered a messager", schemaID);
     // if (schemaID) {
     //   Messager.objectStateFuncMap[schemaID] = () => {
     //     console.log("No setState func attached");
