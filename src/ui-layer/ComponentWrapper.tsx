@@ -4,6 +4,11 @@ import _ from "lodash";
 import { UIEngineRegister } from "..";
 import { IComponentWrapper, IComponentState } from "../../typings";
 
+function setComponentState(this: ComponentWrapper, state: IComponentState) {
+  console.log("node status on Wrapper:", this.props.uiNode.id, state);
+  return this.setState(state);
+}
+
 class ComponentWrapper extends React.Component<
   IComponentWrapper,
   IComponentState
@@ -17,18 +22,25 @@ class ComponentWrapper extends React.Component<
     this.state = initialState;
 
     // register setState func
-    uiNode.messager.setStateFunc(this.setState, this);
+    uiNode.messager.setStateFunc(uiNode.id, setComponentState.bind(this));
   }
 
   componentWillUnmount() {
-    this.props.uiNode.messager.removeStateFunc();
+    this.props.uiNode.messager.removeStateFunc(this.props.uiNode.id);
+  }
+
+  componentWillUpdate() {
+    console.log("state received on Wrapper:", this.props.uiNode.id, this.state);
   }
 
   render() {
     const { uiNode, ...rest } = this.props;
-    if (uiNode.schema) {
-      if (!_.get(this.state, "state.visible")) return null;
+    if (!_.get(this.state, "state.vislble", true)) {
+      console.log(uiNode.id, "is invisible");
+      return null;
+    }
 
+    if (uiNode.schema) {
       // render logic
       const componentLine = _.get(uiNode.schema, "component");
       if (!componentLine) return null;

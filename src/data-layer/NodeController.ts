@@ -76,7 +76,7 @@ export default class NodeController implements INodeController {
     _.forIn(nodes, (uiNode: IUINode) => {
       let searchedNodes = uiNode.searchNodes(nodeSelector);
       _.forEach(searchedNodes, (s: IUINode) => {
-        s.sendMessage(data);
+        s.messager.sendMessage(s.id, data);
       });
     });
   }

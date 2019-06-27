@@ -25,6 +25,7 @@ export interface IUINode {
   id: string;
   messager: IMessager;
   props: object;
+  parent?: IUINode;
 
   loadLayout(schema?: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
@@ -43,6 +44,5 @@ export interface IUINode {
   searchDepsNodes(myNode?: IUINode, layoutId?: string);
   getPluginManager(): IPluginManager;
   getRequest(): IRequest;
-  sendMessage(...args: any);
   // getProps(): INodeProps;
 }

@@ -59,25 +59,20 @@ export default class UINode implements IUINode {
       this.pluginManager.loadPlugins(uiPlugins);
     }
 
-    // new messager
-    this.messager = new Messager();
-
     // initial id, the id can't change
     if (!this.schema._id) {
-      this.schema._id = _.uniqueId();
+      this.schema._id = _.uniqueId("node-");
     }
     this.id = this.schema._id;
+
+    // new messager
+    this.messager = new Messager(this.schema._id);
 
     // assign parent
     this.parent = parent;
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
-    // if (this.parent) {
-    //   console.log("parent id", this.parent.id, "this id", this.id);
-    //   Cache.clearUINodes(this.parent.rootName, parent.id);
-    // }
-
     // load remote node
     let returnSchema: any = schema;
     if (!returnSchema) returnSchema = this.schema;
@@ -89,11 +84,6 @@ export default class UINode implements IUINode {
     if (returnSchema) {
       await this.assignSchema(returnSchema);
     }
-    console.log(
-      this.id,
-      "............................ cache length",
-      _.keys(Cache.getUINode(this.rootName)).length
-    );
 
     // cache this node
     Cache.setUINode(this.rootName, this);
@@ -387,9 +377,5 @@ export default class UINode implements IUINode {
 
   async updateState() {
     return await this.getStateNode().renewStates();
-  }
-
-  sendMessage(...args: any) {
-    this.messager.sendMessage(...args);
   }
 }

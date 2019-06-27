@@ -1,41 +1,39 @@
 import _ from "lodash";
-import { IComponentState } from "../../typings";
+import { IComponentState, IUINode, IMessager } from "../../typings";
 
-export default class Messager {
+export default class Messager implements IMessager {
+  static objectStateFuncMap = {
+    // [id]: setState
+  };
   private componentState: IComponentState = {};
-  private context: any;
 
-  caller: any = () => {
-    console.error("Messager: please use messager.setStateFunc on each node");
-  };
+  constructor(schemaID?: string) {
+    console.log("registered a messager", schemaID);
+    // if (schemaID) {
+    //   Messager.objectStateFuncMap[schemaID] = () => {
+    //     console.log("No setState func attached");
+    //   };
+    // }
+  }
 
-  sendMessage: any = (...args: any) => {
-    args.forEach((arg: any) => {
-      _.merge(this.componentState, arg);
-    });
+  sendMessage(schemaID: string, info: any) {
+    _.merge(this.componentState, info);
 
-    console.log(
-      _.get(this.context, "props.uiNode.id")
-      // _.get(this.context, "props.uiNode.schema")
-    );
-    return this.caller.apply(this.context, this.componentState);
-  };
-
-  setStateFunc(setState: any, context?: any) {
-    console.log(
-      "state func was set on messager>>>>>>>>>",
-      context.props.uiNode.id
-    );
+    const setState = Messager.objectStateFuncMap[schemaID];
     if (_.isFunction(setState)) {
-      this.caller = setState;
-    }
-
-    if (context) {
-      this.context = context;
+      return setState(this.componentState);
+    } else {
+      return false;
     }
   }
 
-  removeStateFunc() {
-    this.caller = null;
+  setStateFunc(schemaID: string, setState: any) {
+    if (_.isFunction(setState)) {
+      Messager.objectStateFuncMap[schemaID] = setState;
+    }
+  }
+
+  removeStateFunc(schemaID: string) {
+    _.unset(Messager.objectStateFuncMap, schemaID);
   }
 }
