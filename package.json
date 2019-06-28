@@ -18,11 +18,10 @@
     "url": "https://github.com/zuopingli/UIEngine.git"
   },
   "keywords": [
-    "webpack",
+    "json",
     "es6",
-    "starter",
-    "library",
-    "universal",
+    "framework",
+    "ide",
     "umd",
     "commonjs"
   ],

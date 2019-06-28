@@ -8,7 +8,7 @@ import "./App.css";
 UIEngineRegister.registerComponents(components);
 
 const App: React.FC = () => {
-  const layoutPath = "schema/slb.virtual-server.json";
+  const layoutPath = "schema/ui/slb.virtual-server.json";
   const layouts = [layoutPath];
 
   return <UIEngine layouts={layouts} reqConfig={requestConfig} />;

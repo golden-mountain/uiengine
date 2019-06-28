@@ -52,7 +52,7 @@ const config = {
     extensions: [".json", ".js", ".ts", ".tsx"]
   },
   externals: {
-    react: "React",
+    react: "react",
     "react-dom": "ReactDOM"
   }
 };

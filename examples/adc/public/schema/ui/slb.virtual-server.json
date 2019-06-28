@@ -26,18 +26,18 @@
               "children": [
                 {
                   "component": "antd:FormItem",
-                  "datasource": "slb.virtual-server.name"
+                  "datasource": "slb.virtual-server:name"
                 },
                 {
                   "component": "antd:FormItem",
-                  "datasource": "slb.virtual-server.ipv6-address"
+                  "datasource": "slb.virtual-server:ipv6-address"
                 },
                 {
                   "component": "antd:FormItem",
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.ip-address"
+                      "datasource": "slb.virtual-server:ip-address"
                     }
                   ]
                 },
@@ -46,7 +46,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.netmask"
+                      "datasource": "slb.virtual-server:netmask"
                     }
                   ]
                 },
@@ -55,7 +55,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.dummy-ipv6-acl"
+                      "datasource": "slb.virtual-server:dummy-ipv6-acl"
                     }
                   ]
                 },
@@ -64,7 +64,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.ipv6-acl"
+                      "datasource": "slb.virtual-server:ipv6-acl"
                     }
                   ]
                 },
@@ -73,7 +73,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.p-ipv6-acl"
+                      "datasource": "slb.virtual-server:p-ipv6-acl"
                     }
                   ]
                 },
@@ -82,7 +82,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.shared-partition-ipv6-acl"
+                      "datasource": "slb.virtual-server:shared-partition-ipv6-acl"
                     }
                   ]
                 },
@@ -91,7 +91,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.ipv6-acl-shared"
+                      "datasource": "slb.virtual-server:ipv6-acl-shared"
                     }
                   ]
                 },
@@ -100,7 +100,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.acl"
+                      "datasource": "slb.virtual-server:acl"
                     }
                   ]
                 },
@@ -109,7 +109,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.acl-id"
+                      "datasource": "slb.virtual-server:acl-id"
                     }
                   ]
                 },
@@ -118,7 +118,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.acl-name"
+                      "datasource": "slb.virtual-server:acl-name"
                     }
                   ]
                 },
@@ -127,7 +127,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.p-acl"
+                      "datasource": "slb.virtual-server:p-acl"
                     }
                   ]
                 },
@@ -136,7 +136,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.shared-partition-acl"
+                      "datasource": "slb.virtual-server:shared-partition-acl"
                     }
                   ]
                 },
@@ -145,7 +145,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.acl-id-shared"
+                      "datasource": "slb.virtual-server:acl-id-shared"
                     }
                   ]
                 },
@@ -154,7 +154,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.acl-name-shared"
+                      "datasource": "slb.virtual-server:acl-name-shared"
                     }
                   ]
                 },
@@ -163,7 +163,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.use-if-ip"
+                      "datasource": "slb.virtual-server:use-if-ip"
                     }
                   ]
                 },
@@ -172,7 +172,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.enable-disable-action"
+                      "datasource": "slb.virtual-server:enable-disable-action"
                     }
                   ]
                 }
@@ -189,7 +189,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.ethernet"
+                      "datasource": "slb.virtual-server:ethernet"
                     }
                   ]
                 },
@@ -198,7 +198,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.description"
+                      "datasource": "slb.virtual-server:description"
                     }
                   ]
                 },
@@ -207,7 +207,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.redistribution-flagged"
+                      "datasource": "slb.virtual-server:redistribution-flagged"
                     }
                   ]
                 },
@@ -216,7 +216,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.suppress-internal-loopback"
+                      "datasource": "slb.virtual-server:suppress-internal-loopback"
                     }
                   ]
                 },
@@ -225,7 +225,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.arp-disable"
+                      "datasource": "slb.virtual-server:arp-disable"
                     }
                   ]
                 },
@@ -234,7 +234,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.stats-data-action"
+                      "datasource": "slb.virtual-server:stats-data-action"
                     }
                   ]
                 },
@@ -243,7 +243,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.extended-stats"
+                      "datasource": "slb.virtual-server:extended-stats"
                     }
                   ]
                 },
@@ -252,7 +252,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.vrid"
+                      "datasource": "slb.virtual-server:vrid"
                     }
                   ]
                 },
@@ -261,7 +261,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.disable-vip-adv"
+                      "datasource": "slb.virtual-server:disable-vip-adv"
                     }
                   ]
                 },
@@ -270,7 +270,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.ha-dynamic"
+                      "datasource": "slb.virtual-server:ha-dynamic"
                     }
                   ]
                 },
@@ -279,7 +279,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.redistribute"
+                      "datasource": "slb.virtual-server:redistribute"
                     }
                   ]
                 },
@@ -288,7 +288,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.redistribute-route-map"
+                      "datasource": "slb.virtual-server:redistribute-route-map"
                     }
                   ]
                 }
@@ -305,7 +305,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.template"
+                      "datasource": "slb.virtual-server:template"
                     }
                   ]
                 },
@@ -314,7 +314,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.policy-template"
+                      "datasource": "slb.virtual-server:policy-template"
                     }
                   ]
                 },
@@ -323,7 +323,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.template-policy"
+                      "datasource": "slb.virtual-server:template-policy"
                     }
                   ]
                 },
@@ -332,7 +332,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.p-policy"
+                      "datasource": "slb.virtual-server:p-policy"
                     }
                   ]
                 },
@@ -341,7 +341,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.shared-partition-policy-template"
+                      "datasource": "slb.virtual-server:shared-partition-policy-template"
                     }
                   ]
                 },
@@ -350,7 +350,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.template-policy-shared"
+                      "datasource": "slb.virtual-server:template-policy-shared"
                     }
                   ]
                 },
@@ -359,7 +359,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.template-virtual-server"
+                      "datasource": "slb.virtual-server:template-virtual-server"
                     }
                   ]
                 },
@@ -368,7 +368,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.template-logging"
+                      "datasource": "slb.virtual-server:template-logging"
                     }
                   ]
                 },
@@ -377,7 +377,7 @@
                   "children": [
                     {
                       "component": "antd:Input",
-                      "datasource": "slb.virtual-server.template-scaleout"
+                      "datasource": "slb.virtual-server:template-scaleout"
                     }
                   ]
                 }
@@ -398,18 +398,18 @@
           "$children": [
             {
               "component": "antd:Input",
-              "datasource": "slb.virtual-server.port.$.port-number",
+              "datasource": "slb.virtual-server:port.$.port-number",
               "props": {
                 "title": "Port"
               }
             },
             {
               "component": "antd:Input",
-              "datasource": "slb.virtual-server.port.$.protocol"
+              "datasource": "slb.virtual-server:port.$.protocol"
             },
             {
               "component": "antd:Input",
-              "datasource": "slb.virtual-server.port.$.service-group"
+              "datasource": "slb.virtual-server:port.$.service-group"
             }
           ]
         }
