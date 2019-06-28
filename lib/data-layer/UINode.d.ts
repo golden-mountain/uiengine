@@ -6,7 +6,6 @@ export default class UINode implements IUINode {
     stateNode: IStateNode;
     children: Array<UINode>;
     pluginManager: IPluginManager;
-    loadDefaultPlugins: boolean;
     errorInfo: IErrorInfo;
     schema: ILayoutSchema;
     rootName: string;

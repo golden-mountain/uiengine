@@ -11,7 +11,7 @@ export default class DataNode implements IDataNode {
     rootSchema?: any;
     data: any;
     updatingData?: any;
-    constructor(source: any, uiNode: IUINode, request?: IRequest, loadDefaultPlugins?: boolean);
+    constructor(source: any, uiNode: IUINode, request?: IRequest);
     getErrorInfo(): any;
     getData(path?: string): any;
     getSchema(path?: string): any;

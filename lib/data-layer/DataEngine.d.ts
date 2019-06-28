@@ -13,7 +13,7 @@ export default class UIEngine implements IDataEngine {
      * @param request IRequest
      * @param loadDefaultPlugins whether load default plugins
      */
-    constructor(source: string, request: IRequest, loadDefaultPlugins?: boolean);
+    constructor(source: string, request: IRequest);
     parseSchemaPath(source: string): string;
     loadSchema(source?: string): Promise<any>;
     sendRequest(source?: string, data?: any, method?: string, cache?: boolean): Promise<{}>;

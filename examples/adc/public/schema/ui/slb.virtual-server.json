@@ -33,209 +33,76 @@
               },
               "children": [
                 {
-                  "component": "antd:FormItem",
+                  "component": "a10:FormItem",
                   "props": {
-                    "label": "Name"
+                    "type": "antd:Input"
                   },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:name"
-                    }
-                  ]
+                  "datasource": "slb.virtual-server:name"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "IPv6 Address"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:ipv6-address"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:ipv6-address"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "IP Address"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:ip-address"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:ip-address"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Netmask"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:netmask"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:netmask"
                 },
 
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "IPv6 ACL"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:ipv6-acl"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:ipv6-acl"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Partition IPv6 ACL"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:p-ipv6-acl"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:p-ipv6-acl"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "shared-partition-ipv6-acl"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:shared-partition-ipv6-acl"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:shared-partition-ipv6-acl"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "ipv6-acl-shared"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:ipv6-acl-shared"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:ipv6-acl-shared"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Access List"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:acl"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:acl"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "ACL ID"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:acl-id"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:acl-id"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "ACL Name"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:acl-name"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:acl-name"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "P ACL"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:p-acl"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:p-acl"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "shared-partition-acl"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:shared-partition-acl"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:shared-partition-acl"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "acl-id-shared"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:acl-id-shared"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:acl-id-shared"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "acl-name-shared"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:acl-name-shared"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:acl-name-shared"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "use-if-ip"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:use-if-ip"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:use-if-ip"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "enable-disable-action"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:enable-disable-action"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:enable-disable-action"
                 }
               ]
             },
@@ -246,148 +113,52 @@
               },
               "children": [
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Ethernet"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:ethernet"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:ethernet"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Description"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:description"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:description"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "redistribution-flagged"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:redistribution-flagged"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:redistribution-flagged"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "suppress-internal-loopback"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:suppress-internal-loopback"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:suppress-internal-loopback"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "arp-disable"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:arp-disable"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:arp-disable"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "stats-data-action"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:stats-data-action"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:stats-data-action"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Extended Stats"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:extended-stats"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:extended-stats"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "VRID"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:vrid"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:vrid"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Disable VIP ADV"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:disable-vip-adv"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:disable-vip-adv"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "HA Dynamic"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:ha-dynamic"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:ha-dynamic"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Redistribute"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:redistribute"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:redistribute"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Redistribute Route Map"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:redistribute-route-map"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:redistribute-route-map"
                 }
               ]
             },
@@ -398,112 +169,40 @@
               },
               "children": [
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Template"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:template"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:template"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Policy Template"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:policy-template"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:policy-template"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Template Policy"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:template-policy"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:template-policy"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Partition Policy"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:p-policy"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:p-policy"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Shared Partition Policy Template"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:shared-partition-policy-template"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:shared-partition-policy-template"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Template Policy Shared"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:template-policy-shared"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:template-policy-shared"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Template Virtual Server"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:template-virtual-server"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:template-virtual-server"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Template Logging"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:template-logging"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:template-logging"
                 },
                 {
-                  "component": "antd:FormItem",
-                  "props": {
-                    "label": "Template Scaleout"
-                  },
-                  "children": [
-                    {
-                      "component": "antd:Input",
-                      "datasource": "slb.virtual-server:template-scaleout"
-                    }
-                  ]
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:template-scaleout"
                 }
               ]
             }
@@ -525,14 +224,14 @@
           },
           "$children": [
             {
-              "component": "antd:Input",
+              "component": "a10:FormItem",
               "datasource": "slb.virtual-server:port-list$.port-number",
               "props": {
                 "title": "Port"
               }
             },
             {
-              "component": "antd:Input",
+              "component": "a10:FormItem",
               "props": {
                 "title": "Protocol"
               },
@@ -542,7 +241,7 @@
               "props": {
                 "title": "Service Group"
               },
-              "component": "antd:Input",
+              "component": "a10:FormItem",
               "datasource": "slb.virtual-server:port-list$.service-group"
             }
           ]

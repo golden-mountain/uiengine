@@ -7,8 +7,7 @@ import { UIEngineRegister, UIEngine } from "UIEngine";
 import "./App.css";
 
 UIEngineRegister.registerComponents(components);
-// console.log("registering.............");
-// UIEngineRegister.registerPlugins(plugins);
+UIEngineRegister.registerPlugins(plugins);
 
 const App: React.FC = () => {
   const layoutPath = "schema/ui/slb.virtual-server.json";

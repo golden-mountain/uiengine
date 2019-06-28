@@ -9,11 +9,13 @@ import { IPluginFunc, IPlugin, IDataNode } from "UIEngine/typings";
  */
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   const rootSchema = dataNode.getRootSchema();
-  console.log(rootSchema, "........");
   let name = dataNode.source.replace(":", ".");
   const regex = /\[\d+\]/;
   name = name.replace(regex, "");
-  return _.get(rootSchema, `definition.${name}`);
+  let result = _.get(rootSchema, `fields`, []).filter((schema: any) => {
+    return schema["cm-lineage"] === name;
+  });
+  return result.pop();
 };
 
 export const schemaParser: IPlugin = {
