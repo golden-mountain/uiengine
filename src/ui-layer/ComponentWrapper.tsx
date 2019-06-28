@@ -55,21 +55,24 @@ class ComponentWrapper extends React.Component<
         : componentMap[component];
 
       // map children as components
-      let childrenObjects = uiNode.children.map((child: any) => {
+      let childrenObjects = uiNode.children.map((child: any, key: any) => {
         if (_.isArray(child)) {
-          return child.map((c: any) => {
-            const props = { ...rest, uiNode: c };
+          return child.map((c: any, id: any) => {
+            const props = { ...rest, uiNode: c, key: c.id };
             return <ComponentWrapper {...props} />;
           });
         }
-        const props = { ...rest, uiNode: child };
+        const props = { ...rest, uiNode: child, key: child.id };
         return <ComponentWrapper {...props} />;
       });
 
       if (WrappedComponent) {
         try {
-          const props = { ...rest, ...uiNode.props };
-          console.log(props.key);
+          const props = {
+            ...rest,
+            ...uiNode.props,
+            key: `key-of-child-${uiNode.id}`
+          };
           return uiNode.children.length ? (
             <WrappedComponent {...props}>{childrenObjects}</WrappedComponent>
           ) : (

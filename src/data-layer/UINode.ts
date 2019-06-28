@@ -8,7 +8,6 @@ import {
   Messager
 } from ".";
 import { AxiosPromise } from "axios";
-import * as uiPlugins from "../plugins/ui";
 import {
   IDataNode,
   IStateNode,
@@ -26,7 +25,6 @@ export default class UINode implements IUINode {
   stateNode: IStateNode = new StateNode(this);
   children: Array<UINode> = [];
   pluginManager: IPluginManager = new PluginManager(this);
-  loadDefaultPlugins: boolean = true;
   errorInfo: IErrorInfo = {};
   schema: ILayoutSchema = {};
   rootName: string = "";
@@ -40,7 +38,6 @@ export default class UINode implements IUINode {
     schema: ILayoutSchema,
     request?: IRequest,
     root: string = "",
-    loadDefaultPlugins: boolean = true,
     parent?: IUINode
   ) {
     if (request) {
@@ -54,10 +51,10 @@ export default class UINode implements IUINode {
     }
 
     // load plugins
-    if (loadDefaultPlugins) {
-      this.loadDefaultPlugins = loadDefaultPlugins;
-      this.pluginManager.loadPlugins(uiPlugins);
-    }
+    // if (loadDefaultPlugins) {
+    //   this.loadDefaultPlugins = loadDefaultPlugins;
+    //   // this.pluginManager.loadPlugins(uiPlugins);
+    // }
 
     // initial id, the id can't change
     if (!this.schema._id) {
@@ -168,24 +165,12 @@ export default class UINode implements IUINode {
         if (_.isArray(s)) {
           node = [];
           for (let i in s) {
-            const subnode = new UINode(
-              s[i],
-              this.request,
-              this.rootName,
-              this.loadDefaultPlugins,
-              this
-            );
+            const subnode = new UINode(s[i], this.request, this.rootName, this);
             await subnode.loadLayout(s[i]);
             node.push(subnode);
           }
         } else {
-          node = new UINode(
-            s,
-            this.request,
-            this.rootName,
-            this.loadDefaultPlugins,
-            this
-          );
+          node = new UINode(s, this.request, this.rootName, this);
           await node.loadLayout(s);
         }
         children.push(node);
@@ -195,7 +180,7 @@ export default class UINode implements IUINode {
 
     this.schema = liveSchema;
     // load State
-    this.stateNode = new StateNode(this, this.loadDefaultPlugins);
+    this.stateNode = new StateNode(this);
     await this.stateNode.renewStates();
     // console.log(
     //   this.id,
@@ -212,12 +197,7 @@ export default class UINode implements IUINode {
   }
 
   async loadData(source: string) {
-    this.dataNode = new DataNode(
-      source,
-      this,
-      this.request,
-      this.loadDefaultPlugins
-    );
+    this.dataNode = new DataNode(source, this, this.request);
     const result: any = await this.dataNode.loadData();
     return result;
   }

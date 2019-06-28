@@ -4,10 +4,15 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, Request, Cache, PluginManager } from "../../src";
+import {
+  UINode,
+  Request,
+  Cache,
+  PluginManager,
+  UIEngineRegister
+} from "../../src";
 import reqConfig from "../config/request";
-// import defaultSchema from "./config/default-schema";
-// import { IUINode } from "../typings/UINode";
+import * as plugins from "../../src/plugins";
 
 import uiNodeLayout from "../layouts/uinode-basic.json";
 import stateTestLayout from "../layouts/state-node-basic.json";
@@ -56,7 +61,9 @@ const tableIncludeTest = (liveChildren: any, expectedResult: any) => {
 };
 
 describe("Given an instance of my UINode library", () => {
-  before(() => {});
+  before(() => {
+    UIEngineRegister.registerPlugins(plugins);
+  });
   describe("the given layout schema ", () => {
     it("getSchema: if schema is object, should same as constructor param", () => {
       // expect(uiNode.schema).to.be.equal(uinodeLayout);

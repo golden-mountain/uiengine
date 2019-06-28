@@ -1,6 +1,5 @@
 import _ from "lodash";
 import { PluginManager } from "./";
-import * as dataPlugins from "../plugins/data";
 import {
   IDataNode,
   IRequest,
@@ -24,12 +23,7 @@ export default class DataNode implements IDataNode {
   data: any;
   updatingData?: any;
 
-  constructor(
-    source: any,
-    uiNode: IUINode,
-    request?: IRequest,
-    loadDefaultPlugins: boolean = true
-  ) {
+  constructor(source: any, uiNode: IUINode, request?: IRequest) {
     this.uiNode = uiNode;
 
     if (typeof source === "object") {
@@ -38,10 +32,6 @@ export default class DataNode implements IDataNode {
       this.source = "";
     } else {
       this.source = source;
-    }
-
-    if (loadDefaultPlugins) {
-      this.pluginManager.loadPlugins(dataPlugins);
     }
 
     // initial data engine

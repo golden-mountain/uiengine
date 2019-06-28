@@ -3,20 +3,15 @@ import _ from "lodash";
 import { IState, IStateNode, IErrorInfo, IPluginManager } from "../../typings";
 import { IUINode } from "../../typings/UINode";
 import { PluginManager } from ".";
-import * as statePlugins from "../plugins/state";
 
 export default class StateNode implements IStateNode {
   errorInfo: IErrorInfo = {};
   state: IState = {};
   uiNode: IUINode;
-  plugins: object = statePlugins;
   pluginManager: IPluginManager = new PluginManager(this);
 
-  constructor(uiNode: IUINode, loadDefaultPlugins: boolean = true) {
+  constructor(uiNode: IUINode) {
     this.uiNode = uiNode;
-    if (loadDefaultPlugins) {
-      this.pluginManager.loadPlugins(statePlugins);
-    }
   }
 
   getUINode() {
@@ -27,10 +22,6 @@ export default class StateNode implements IStateNode {
     // console.log(this.state, key, "...........");
     if (key) return _.get(this.state, key);
     return this.state;
-  }
-
-  getPlugins(key?: string) {
-    return this.plugins;
   }
 
   async renewStates() {

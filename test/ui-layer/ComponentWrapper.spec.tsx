@@ -1,10 +1,11 @@
 /* global describe, it, before */
-import React, { useState } from "react";
+import React from "react";
 
 import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 import { mount } from "enzyme";
+import * as plugins from "../../src/plugins";
 
 import {
   UIEngineRegister,
@@ -28,6 +29,7 @@ let uiNode: any, schema: any, wrapper: any;
 describe("Given an instance of ComponentWrapper library", () => {
   before(async () => {
     UIEngineRegister.registerComponents(components);
+    UIEngineRegister.registerPlugins(plugins);
 
     uiNode = new UINode(
       reactComponentTestJson,

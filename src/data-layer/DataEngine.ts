@@ -24,16 +24,9 @@ export default class UIEngine implements IDataEngine {
    * @param request IRequest
    * @param loadDefaultPlugins whether load default plugins
    */
-  constructor(
-    source: string,
-    request: IRequest,
-    loadDefaultPlugins: boolean = true
-  ) {
+  constructor(source: string, request: IRequest) {
     this.request = request;
     this.source = source;
-    if (loadDefaultPlugins) {
-      this.pluginManager.loadPlugins({});
-    }
 
     this.schemaPath = this.parseSchemaPath(source);
     this.mapper = new DataMapper(this.schemaPath, request);

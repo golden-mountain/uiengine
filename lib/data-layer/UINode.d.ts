@@ -15,7 +15,7 @@ export default class UINode implements IUINode {
     messager: IMessager;
     props: object;
     parent?: IUINode;
-    constructor(schema: ILayoutSchema, request?: IRequest, root?: string, loadDefaultPlugins?: boolean, parent?: IUINode);
+    constructor(schema: ILayoutSchema, request?: IRequest, root?: string, parent?: IUINode);
     loadLayout(schema?: ILayoutSchema | string): Promise<any>;
     getSchema(path?: string): ILayoutSchema;
     getErrorInfo(): IErrorInfo;

@@ -11,7 +11,6 @@ export interface IStateNode {
   errorInfo: IErrorInfo;
   state: IState;
   uiNode: IUINode;
-  plugins: object;
   pluginManager: IPluginManager;
   getUINode(): IUINode;
   getState(key?: string): IState;

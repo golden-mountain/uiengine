@@ -4,7 +4,14 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, StateNode, Cache, PluginManager } from "../../src";
+import {
+  UINode,
+  StateNode,
+  Cache,
+  PluginManager,
+  UIEngineRegister
+} from "../../src";
+import * as plugins from "../../src/plugins";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -12,7 +19,9 @@ chai.use(chaiSpies);
 const expect = chai.expect;
 
 describe("Given an instance of my StateNode library", () => {
-  before(() => {});
+  before(() => {
+    UIEngineRegister.registerPlugins(plugins);
+  });
   describe("the given layoutNode and DataNode ", () => {
     it("constructor: StateNode should initialized on UINode creation", () => {
       const uiNode = new UINode({});

@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import _ from "lodash";
+import { NodeController, ComponentWrapper, UIEngineRegister } from "..";
 
-import { NodeController, ComponentWrapper } from "..";
+import * as plugins from "../plugins";
+UIEngineRegister.registerPlugins(plugins);
+
 import {
   IUINode,
   INodeController,

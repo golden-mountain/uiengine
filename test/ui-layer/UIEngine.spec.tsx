@@ -6,7 +6,7 @@ import chaiSpies from "chai-spies";
 import _ from "lodash";
 import { mount } from "enzyme";
 
-import { UIEngineRegister, UIEngine, ComponentWrapper } from "../../src/";
+import { UIEngineRegister, UIEngine } from "../../src/";
 
 import reactComponentTestJson from "../layouts/react-component-test.json";
 import reqConfig from "../config/request";

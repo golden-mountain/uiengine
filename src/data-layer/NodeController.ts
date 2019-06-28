@@ -48,7 +48,7 @@ export default class NodeController implements INodeController {
     }
 
     // default we load all default plugins
-    const uiNode = new UINode({}, request, rootName, true);
+    const uiNode = new UINode({}, request, rootName);
     if (autoLoadLayout) {
       await uiNode.loadLayout(layout);
     }

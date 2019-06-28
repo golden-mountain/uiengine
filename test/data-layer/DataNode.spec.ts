@@ -3,8 +3,17 @@
 import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
-import { DataNode, Request, Cache, UINode, PluginManager } from "../../src";
+import {
+  DataNode,
+  Request,
+  Cache,
+  UINode,
+  PluginManager,
+  UIEngineRegister
+} from "../../src";
 import reqConfig from "../config/request";
+// import { mount } from "enzyme";
+import * as plugins from "../../src/plugins";
 
 import dataNodeJson from "../data/foo.json";
 import dataSchemaJson from "../data/schema/foo.json";
@@ -20,7 +29,9 @@ const request = new Request(reqConfig);
 const uiNode = new UINode({});
 
 describe("Given an instance of my DataNode library", () => {
-  before(() => {});
+  before(() => {
+    UIEngineRegister.registerPlugins(plugins);
+  });
   describe("the given data", () => {
     it("constructor: should called getSchemaInfo & loadData", async () => {
       Cache.clearDataCache();
