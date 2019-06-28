@@ -4,6 +4,7 @@ import { IPluginFunc, IPlugin, IDataNode } from "../../../../../typings";
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   const data = dataNode.updatingData;
   const schema = dataNode.getSchema();
+
   let result, errorMessage;
   if (_.get(schema, "type") === "number") {
     const { min, max } = schema;

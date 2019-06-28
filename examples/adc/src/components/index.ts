@@ -1,17 +1,5 @@
-import { EditableTable } from "./a10/EditableTable";
-
-import {
-  DemoInput,
-  DemoSelect,
-  FormContainer,
-  DemoTable,
-  DemoTd,
-  DemoTr,
-  DemoFormItem,
-  DemoForm,
-  DemoModal,
-  DemoTabPane
-} from "./demo";
+import * as a10 from "./a10";
+import * as demo from "./demo";
 
 import "antd/dist/antd.css";
 
@@ -35,22 +23,8 @@ import {
 } from "antd";
 
 export default {
-  a10: {
-    EditableTable
-  },
-
-  demo: {
-    DemoInput,
-    DemoSelect,
-    FormContainer,
-    DemoTable,
-    DemoTd,
-    DemoTr,
-    DemoFormItem,
-    DemoForm,
-    DemoModal,
-    DemoTabPane
-  },
+  a10,
+  demo,
   antd: {
     Row,
     Col,

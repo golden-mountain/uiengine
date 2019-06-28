@@ -18,7 +18,7 @@ export default class DataNode implements IDataNode {
     getRootSchema(): any;
     getRootData(): any;
     getPluginManager(): IPluginManager;
-    loadData(): Promise<any>;
+    loadData(source?: string): Promise<any>;
     updateData(value: any, path?: string): Promise<boolean>;
     deleteData(path?: any): Promise<void>;
 }

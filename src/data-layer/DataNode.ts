@@ -9,7 +9,7 @@ import {
   IPluginExecutionConfig,
   IDataEngine
 } from "../../typings";
-import { Request, Cache, DataEngine } from ".";
+import { Request, DataEngine } from ".";
 
 export default class DataNode implements IDataNode {
   private request: IRequest = new Request({});
@@ -37,7 +37,7 @@ export default class DataNode implements IDataNode {
       this.rootData = source;
       this.source = "";
     } else {
-      this.source = _.trim(source).replace(":", ".");
+      this.source = source;
     }
 
     if (loadDefaultPlugins) {
@@ -78,11 +78,12 @@ export default class DataNode implements IDataNode {
     return this.pluginManager;
   }
 
-  async loadData() {
+  async loadData(source?: string) {
     // const { schemaPath = "", name = "" } = this.source;
+    if (!source && this.source) source = this.source;
     let result;
-    if (this.source) {
-      const data = await this.dataEngine.loadData();
+    if (source) {
+      const data = await this.dataEngine.loadData(source);
       if (data === null) {
         this.errorInfo = this.dataEngine.errorInfo;
         return;
@@ -95,10 +96,10 @@ export default class DataNode implements IDataNode {
         exeConfig
       );
       // get parent data to assign new data
-      const nameSegs = this.source.split(".");
+      const nameSegs = source.split(".");
       nameSegs.pop();
       this.rootData = _.get(data, nameSegs.join("."));
-      result = _.get(data, this.source, null);
+      result = _.get(data, source.replace(":", "."), null);
       this.data = result;
     }
 
@@ -128,7 +129,7 @@ export default class DataNode implements IDataNode {
     } else {
       // const { name = "" } = this.source;
       this.data = value;
-      const nameSegs = this.source.split(".");
+      const nameSegs = this.source.replace(":", ".").split(".");
       const lastName = nameSegs.pop();
       if (lastName) _.set(this.rootData, lastName, value);
       // console.log(lastName, value, this.rootData);

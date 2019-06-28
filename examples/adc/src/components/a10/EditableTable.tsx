@@ -99,36 +99,35 @@ export class EditableTable extends React.Component<any, any> {
 
   constructor(props: any) {
     super(props);
-    this.columns = props.columns;
-    // [
-    //   {
-    //     title: "name",
-    //     dataIndex: "name",
-    //     width: "30%",
-    //     editable: true
-    //   },
-    //   {
-    //     title: "age",
-    //     dataIndex: "age"
-    //   },
-    //   {
-    //     title: "address",
-    //     dataIndex: "address"
-    //   },
-    //   {
-    //     title: "operation",
-    //     dataIndex: "operation",
-    //     render: (text: any, record: any) =>
-    //       this.state.dataSource.length >= 1 ? (
-    //         <Popconfirm
-    //           title="Sure to delete?"
-    //           onConfirm={() => this.handleDelete(record.key)}
-    //         >
-    //           <a href="javascript:;">Delete</a>
-    //         </Popconfirm>
-    //       ) : null
-    //   }
-    // ];
+    this.columns = [
+      {
+        title: "name",
+        dataIndex: "name",
+        width: "30%",
+        editable: true
+      },
+      {
+        title: "age",
+        dataIndex: "age"
+      },
+      {
+        title: "address",
+        dataIndex: "address"
+      },
+      {
+        title: "operation",
+        dataIndex: "operation",
+        render: (text: any, record: any) =>
+          this.state.dataSource.length >= 1 ? (
+            <Popconfirm
+              title="Sure to delete?"
+              onConfirm={() => this.handleDelete(record.key)}
+            >
+              <div>Delete</div>
+            </Popconfirm>
+          ) : null
+      }
+    ];
 
     const dataSource = props.value;
     // console.log(dataSource);
@@ -176,7 +175,6 @@ export class EditableTable extends React.Component<any, any> {
     });
     const dataSource = { dataSource: newData };
     this.setState(dataSource);
-    console.log(dataSource);
     this.props.modelmanager
       .getStateController()
       .setDataOnNode(this.props.dataSource, dataSource);

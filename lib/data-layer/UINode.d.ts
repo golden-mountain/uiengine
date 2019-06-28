@@ -2,7 +2,7 @@ import { AxiosPromise } from "axios";
 import { IDataNode, IStateNode, IUINode, ILayoutSchema, IRequest, IErrorInfo, IPluginManager, IMessager } from "../../typings";
 export default class UINode implements IUINode {
     private request;
-    dataNode?: any;
+    dataNode: IDataNode;
     stateNode: IStateNode;
     children: Array<UINode>;
     pluginManager: IPluginManager;

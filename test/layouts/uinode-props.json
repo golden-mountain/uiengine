@@ -9,7 +9,7 @@
       "datasource": "foo:bar.name",
       "props": {
         "name": "demo-element-2",
-        "events": [
+        "$events": [
           {
             "event": "onClick",
             "action": "routeTo",
@@ -29,7 +29,7 @@
           "datasource": "foo:bar.baz.$.name",
           "props": {
             "defaultvalue": "zli",
-            "events": [
+            "$events": [
               {
                 "event": "onChange",
                 "action": "change",

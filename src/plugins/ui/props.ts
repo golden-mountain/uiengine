@@ -7,17 +7,18 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
   const props = _.get(schema, "props");
   let result = { key: uiNode.id };
   if (props) {
-    const { events, ...rest } = props as any;
+    const { $events, ...rest } = props as any;
     let eventFuncs = {};
-    if (events) {
+    if ($events) {
       const event = new Event();
       // const eventSchemas = _.get(props, "events");
-      eventFuncs = await event.loadEvents(events);
+      eventFuncs = await event.loadEvents($events);
     }
 
     // assign props to uiNode
-    uiNode.props = { ...rest, ...eventFuncs, ...result };
+    result = { ...rest, ...eventFuncs, ...result };
   }
+  uiNode.props = result;
   return result;
 };
 

@@ -22,7 +22,7 @@ import {
 
 export default class UINode implements IUINode {
   private request: IRequest = new Request();
-  dataNode?: any;
+  dataNode: IDataNode = new DataNode("", this);
   stateNode: IStateNode = new StateNode(this);
   children: Array<UINode> = [];
   pluginManager: IPluginManager = new PluginManager(this);
@@ -104,7 +104,7 @@ export default class UINode implements IUINode {
     return this.errorInfo;
   }
 
-  getDataNode(): IDataNode {
+  getDataNode() {
     return this.dataNode;
   }
 
@@ -155,8 +155,8 @@ export default class UINode implements IUINode {
       await this.loadData(liveSchema["datasource"]);
     }
 
-    if (liveSchema["$children"]) {
-      const data = this.getDataNode().getData();
+    if (liveSchema["$children"] && this.dataNode) {
+      const data = this.dataNode.getData();
       liveSchema = await this.genLiveLayout(schema, data);
     }
 
@@ -218,7 +218,7 @@ export default class UINode implements IUINode {
       this.request,
       this.loadDefaultPlugins
     );
-    const result = await this.dataNode.loadData();
+    const result: any = await this.dataNode.loadData();
     return result;
   }
 
@@ -347,7 +347,7 @@ export default class UINode implements IUINode {
     const updatePropRow = (target: ILayoutSchema, index: string) => {
       if (_.isArray(target)) {
         _.forEach(target, (c: any) => {
-          _.forIn(c, function(value, key) {
+          _.forIn(c, function(value: any, key: string) {
             if (typeof value === "object") {
               updatePropRow(value, index);
             } else if (_.isString(value) && value.indexOf("$") > -1) {
@@ -356,7 +356,7 @@ export default class UINode implements IUINode {
           });
         });
       } else {
-        _.forIn(target, function(value, key) {
+        _.forIn(target, function(value: any, key: string) {
           if (typeof value === "object") {
             updatePropRow(value, index);
           } else if (_.isString(value) && value.indexOf("$") > -1) {

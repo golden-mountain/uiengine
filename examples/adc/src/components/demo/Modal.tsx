@@ -10,17 +10,11 @@ export class DemoModal extends React.Component<any, any> {
   //   });
   // };
 
-  getLayout() {
-    return this.props.layout;
-  }
-
   handleOk = (e: any) => {
     // console.log(e);
     this.setState({
       visible: false
     });
-
-    const layout = this.getLayout();
   };
 
   handleCancel = (e: any) => {
@@ -28,8 +22,6 @@ export class DemoModal extends React.Component<any, any> {
     this.setState({
       visible: false
     });
-
-    const layout = this.getLayout();
   };
 
   render() {

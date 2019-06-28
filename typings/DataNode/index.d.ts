@@ -20,7 +20,7 @@ export interface IDataNode {
   rootSchema?: any;
   data: any;
   updatingData?: any;
-  loadData(): Promise<AxiosPromise> | any;
+  loadData(source?: string): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
   deleteData(path?: any);
   getData(path?: string): Promise<AxiosPromise> | any;
