@@ -1,0 +1,419 @@
+{
+  "component": "antd:Row",
+  "children": [
+    {
+      "component": "antd:Column",
+      "children": [
+        {
+          "component": "autd:Form",
+          "props": {
+            "name": "VIP",
+            "title": {
+              "create": "Add New ${name}",
+              "update": "Edit ${name}"
+            },
+            "description": {
+              "create": "Please provide following information to create a new ${name}",
+              "update": "Please provide following information to edit ${name}"
+            }
+          },
+          "children": [
+            {
+              "component": "a10:Section",
+              "props": {
+                "title": "Basic"
+              },
+              "children": [
+                {
+                  "component": "antd:FormItem",
+                  "datasource": "slb.virtual-server.name"
+                },
+                {
+                  "component": "antd:FormItem",
+                  "datasource": "slb.virtual-server.ipv6-address"
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.ip-address"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.netmask"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.dummy-ipv6-acl"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.ipv6-acl"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.p-ipv6-acl"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.shared-partition-ipv6-acl"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.ipv6-acl-shared"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.acl"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.acl-id"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.acl-name"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.p-acl"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.shared-partition-acl"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.acl-id-shared"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.acl-name-shared"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.use-if-ip"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.enable-disable-action"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "component": "a10:Section",
+              "props": {
+                "title": "Advanced"
+              },
+              "children": [
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.ethernet"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.description"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.redistribution-flagged"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.suppress-internal-loopback"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.arp-disable"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.stats-data-action"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.extended-stats"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.vrid"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.disable-vip-adv"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.ha-dynamic"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.redistribute"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.redistribute-route-map"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "component": "a10:Section",
+              "props": {
+                "title": "Template"
+              },
+              "children": [
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.template"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.policy-template"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.template-policy"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.p-policy"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.shared-partition-policy-template"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.template-policy-shared"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.template-virtual-server"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.template-logging"
+                    }
+                  ]
+                },
+                {
+                  "component": "antd:FormItem",
+                  "children": [
+                    {
+                      "component": "antd:Input",
+                      "datasource": "slb.virtual-server.template-scaleout"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "antd:Column",
+      "children": [
+        {
+          "component": "a10:EditableTable",
+          "props": {
+            "title": "vPorts"
+          },
+          "$children": [
+            {
+              "component": "antd:Input",
+              "datasource": "slb.virtual-server.port.$.port-number",
+              "props": {
+                "title": "Port"
+              }
+            },
+            {
+              "component": "antd:Input",
+              "datasource": "slb.virtual-server.port.$.protocol"
+            },
+            {
+              "component": "antd:Input",
+              "datasource": "slb.virtual-server.port.$.service-group"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

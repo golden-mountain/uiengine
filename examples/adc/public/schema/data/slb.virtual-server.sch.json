@@ -1,0 +1,594 @@
+{
+  "version": "3.0.0#Autoform v1.5",
+  "endpoint": {
+    "default": {
+      "path": "slb.virtual-server.json"
+    }
+  },
+  "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
+  "cm-lineage": "slb.virtual-server",
+  "cm-object-meta": {
+    "obj-occurences": "multi"
+  },
+  "fields": [
+    {
+      "key": "name",
+      "label": "Name",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.name",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mvm",
+        "object-key": true,
+        "range": "1-127",
+        "help": "SLB Virtual Server Name"
+      }
+    },
+    {
+      "key": "ipv6-address",
+      "label": "IPv6 Address",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.ipv6-address",
+      "cm-meta": {
+        "format": "ipv6-address",
+        "flags": "ovi",
+        "condition": "name",
+        "gui-section": "Basic",
+        "help": "IPV6 address",
+        "m-exclusion": ["ip-address", "use-if-ip"]
+      }
+    },
+    {
+      "key": "ip-address",
+      "label": "IP Address",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.ip-address",
+      "cm-meta": {
+        "format": "ipv4-address",
+        "flags": "ovi",
+        "condition": "name",
+        "gui-section": "Basic",
+        "help": "IP Address",
+        "m-exclusion": ["ipv6-address", "use-if-ip"]
+      }
+    },
+    {
+      "key": "netmask",
+      "label": "Netmask",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.netmask",
+      "cm-meta": {
+        "format": "ipv4-netmask-brief",
+        "flags": "ovi",
+        "condition": "ip-address",
+        "modify-ineligible": true,
+        "gui-section": "Basic",
+        "help": "IP subnet mask"
+      }
+    },
+    {
+      "key": "dummy-ipv6-acl",
+      "label": "Dummy IPv6 ACL",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.dummy-ipv6-acl",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "oki",
+        "range": "1-31",
+        "condition": "ipv6-address",
+        "gui-section": "Basic",
+        "help": "ipv6 acl name"
+      }
+    },
+    {
+      "key": "ipv6-acl",
+      "label": "IPv6 ACL",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.ipv6-acl",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mvi",
+        "range": "1-31",
+        "condition": "dummy-ipv6-acl",
+        "obj-association": ["ipv6.access-list"],
+        "modify-ineligible": true,
+        "gui-section": "Basic",
+        "help": "ipv6 acl name",
+        "m-exclusion": ["shared-partition-ipv6-acl"]
+      }
+    },
+    {
+      "key": "p-ipv6-acl",
+      "label": "P IPv6 ACL",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.p-ipv6-acl",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okS",
+        "condition": "dummy-ipv6-acl",
+        "help": "Reference a ipv6 acl from shared partition",
+        "gui-section": "Basic"
+      }
+    },
+    {
+      "key": "shared-partition-ipv6-acl",
+      "label": "Shared Partition IPv6 ACL",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.shared-partition-ipv6-acl",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "p-ipv6-acl",
+        "m-exclusion": ["ipv6-acl"],
+        "help": "Reference a ipv6 acl from shared partition",
+        "gui-section": "Basic"
+      }
+    },
+    {
+      "key": "ipv6-acl-shared",
+      "label": "IPv6 ACL Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.ipv6-acl-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mvi",
+        "range": "1-31",
+        "condition": "shared-partition-ipv6-acl",
+        "obj-association": ["ipv6.access-list"],
+        "modify-ineligible": true,
+        "help": "ipv6 acl name",
+        "gui-section": "Basic"
+      }
+    },
+    {
+      "key": "acl",
+      "label": "ACL",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.acl",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "oki",
+        "condition": "ip-address",
+        "gui-section": "Basic",
+        "help": "acl id"
+      }
+    },
+    {
+      "key": "acl-id",
+      "label": "ACL ID",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.acl-id",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mvi",
+        "range": "1-199",
+        "condition": "acl",
+        "obj-association": ["access-list.standard", "access-list.extended"],
+        "modify-ineligible": true,
+        "gui-section": "Basic",
+        "help": "acl id",
+        "m-exclusion": ["shared-partition-acl"]
+      }
+    },
+    {
+      "key": "acl-name",
+      "label": "ACL Name",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.acl-name",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mbi",
+        "range": "1-16",
+        "condition": "acl",
+        "obj-association": ["ip.access-list"],
+        "modify-ineligible": true,
+        "help": "Access List name",
+        "gui-section": "Basic",
+        "m-exclusion": ["shared-partition-acl"]
+      }
+    },
+    {
+      "key": "p-acl",
+      "label": "P ACL",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.p-acl",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okS",
+        "condition": "acl",
+        "help": "Reference acl from shared partition",
+        "gui-section": "Basic"
+      }
+    },
+    {
+      "key": "shared-partition-acl",
+      "label": "Shared Partition ACL",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.shared-partition-acl",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "p-acl",
+        "m-exclusion": ["acl-id", "acl-name"],
+        "help": "Reference an acl from shared partition",
+        "gui-section": "Basic"
+      }
+    },
+    {
+      "key": "acl-id-shared",
+      "label": "ACL ID Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.acl-id-shared",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mvi",
+        "range": "1-199",
+        "condition": "shared-partition-acl",
+        "obj-association": ["access-list.standard", "access-list.extended"],
+        "modify-ineligible": true,
+        "gui-section": "Basic",
+        "help": "acl id"
+      }
+    },
+    {
+      "key": "acl-name-shared",
+      "label": "ACL Name Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.acl-name-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mbi",
+        "range": "1-16",
+        "condition": "shared-partition-acl",
+        "obj-association": ["ip.access-list"],
+        "modify-ineligible": true,
+        "help": "Access List name",
+        "gui-section": "Basic"
+      }
+    },
+    {
+      "key": "use-if-ip",
+      "label": "Use If IP",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.use-if-ip",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "plat-pos-list": ["aten-sp-mode", "cth"],
+        "m-exclusion": ["ip-address", "ipv6-address"],
+        "condition": "name",
+        "gui-section": "Basic",
+        "help": "Use Interface IP"
+      }
+    },
+    {
+      "key": "ethernet",
+      "label": "Ethernet",
+      "type": "tags",
+      "cm-lineage": "slb.virtual-server.ethernet",
+      "cm-meta": {
+        "format": "interface",
+        "flags": "mb",
+        "plat-pos-list": ["aten-sp-mode", "cth"],
+        "condition": "use-if-ip",
+        "gui-section": "Advanced",
+        "help": "Ethernet interface"
+      }
+    },
+    {
+      "key": "description",
+      "label": "Description",
+      "type": "textarea",
+      "cm-lineage": "slb.virtual-server.description",
+      "cm-meta": {
+        "format": "line",
+        "flags": "mb",
+        "range": "1-63",
+        "gui-section": "Advanced",
+        "help": "Create a description for VIP"
+      }
+    },
+    {
+      "key": "enable-disable-action",
+      "label": "Enable Disable Action",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.enable-disable-action",
+      "cm-meta": {
+        "format": "string",
+        "flags": "ovy",
+        "gui-section": "Basic",
+        "allowed": [
+          {
+            "label": "Enable",
+            "value": "enable",
+            "help": "Enable Virtual Server (default)"
+          },
+          {
+            "label": "Disable",
+            "value": "disable",
+            "help": "Disable Virtual Server"
+          },
+          {
+            "label": "Disable When All Ports Down",
+            "value": "disable-when-all-ports-down",
+            "help": "Disable Virtual Server when all member ports are down"
+          },
+          {
+            "label": "Disable When Any Port Down",
+            "value": "disable-when-any-port-down",
+            "help": "Disable Virtual Server when any member port is down"
+          }
+        ],
+        "default": "enable",
+        "cm-rba-field-oper": true,
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "redistribution-flagged",
+      "label": "Redistribution Flagged",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.redistribution-flagged",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Advanced",
+        "help": "Flag VIP for special redistribution handling"
+      }
+    },
+    {
+      "key": "suppress-internal-loopback",
+      "label": "Suppress Internal Loopback",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.suppress-internal-loopback",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Advanced",
+        "help": "Suppress VIP internal loopback programming"
+      }
+    },
+    {
+      "key": "arp-disable",
+      "label": "ARP Disable",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.arp-disable",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "Disable Respond to Virtual Server ARP request"
+      }
+    },
+    {
+      "key": "template",
+      "label": "Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "gui-section": "Template",
+        "help": "Apply template to virtual server"
+      }
+    },
+    {
+      "key": "policy-template",
+      "label": "Policy Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.policy-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "help": "Policy template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-policy",
+      "label": "Template Policy",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.template-policy",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "policy-template",
+        "help": "Policy template",
+        "obj-association": ["slb.template.policy"],
+        "m-exclusion": ["shared-partition-policy-template"]
+      }
+    },
+    {
+      "key": "p-policy",
+      "label": "P Policy",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.p-policy",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "policy-template",
+        "help": "Reference a policy template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-policy-template",
+      "label": "Shared Partition Policy Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.shared-partition-policy-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-policy",
+        "m-exclusion": ["template-policy"],
+        "help": "Reference a policy template from shared partition"
+      }
+    },
+    {
+      "key": "template-policy-shared",
+      "label": "Template Policy Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.template-policy-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "shared-partition-policy-template",
+        "obj-association": ["slb.template.policy"],
+        "help": "Policy Template Name"
+      }
+    },
+    {
+      "key": "template-virtual-server",
+      "label": "Template Virtual Server",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.template-virtual-server",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "condition": "template",
+        "gui-section": "Template",
+        "help": "Virtual server template",
+        "obj-association": ["slb.template.virtual-server"]
+      }
+    },
+    {
+      "key": "template-logging",
+      "label": "Template Logging",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.template-logging",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "condition": "template",
+        "gui-section": "Template",
+        "help": "NAT Logging template",
+        "range": "1-63",
+        "obj-association": ["ip.nat.template.logging"]
+      }
+    },
+    {
+      "key": "template-scaleout",
+      "label": "Template Scaleout",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.template-scaleout",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "obr",
+        "range": "1-63",
+        "condition": "template",
+        "help": "Scaleout template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "stats-data-action",
+      "label": "Stats Data Action",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.stats-data-action",
+      "cm-meta": {
+        "format": "string",
+        "flags": "ovy",
+        "gui-section": "Advanced",
+        "allowed": [
+          {
+            "label": "Stats Data Enable",
+            "value": "stats-data-enable",
+            "help": "Enable statistical data collection for virtual server"
+          },
+          {
+            "label": "Stats Data Disable",
+            "value": "stats-data-disable",
+            "help": "Disable statistical data collection for virtual server"
+          }
+        ],
+        "default": "stats-data-enable",
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "extended-stats",
+      "label": "Extended Stats",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.extended-stats",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "Enable extended statistics on virtual server"
+      }
+    },
+    {
+      "key": "vrid",
+      "label": "VRID",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.vrid",
+      "cm-meta": {
+        "format": "number",
+        "flags": "obsp",
+        "range": "1-31",
+        "range-in-partition": "1-7",
+        "gui-section": "Advanced",
+        "help": "Join a vrrp group",
+        "obj-association": ["vrrp-a.vrid"]
+      }
+    },
+    {
+      "key": "disable-vip-adv",
+      "label": "Disable VIP Adv",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.disable-vip-adv",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "Disable virtual server GARP"
+      }
+    },
+    {
+      "key": "ha-dynamic",
+      "label": "HA Dynamic",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.ha-dynamic",
+      "cm-meta": {
+        "format": "number",
+        "flags": "ob",
+        "range": "1-255",
+        "gui-section": "Advanced",
+        "help": "Dynamic failover based on vip status"
+      }
+    },
+    {
+      "key": "redistribute",
+      "label": "Redistribute",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.redistribute",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "Set redistribution parameters"
+      }
+    },
+    {
+      "key": "redistribute-route-map",
+      "label": "Redistribute Route Map",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.redistribute-route-map",
+      "cm-meta": {
+        "format": "string",
+        "flags": "mb",
+        "condition": "redistribute",
+        "range": "1-128",
+        "gui-section": "Advanced",
+        "help": "Route map reference"
+      }
+    }
+  ]
+}

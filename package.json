@@ -2,7 +2,8 @@
   "name": "UIEngine",
   "version": "1.0.0",
   "description": "JSON Schema based extendable UI Engine",
-  "main": "lib/UIEngine.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "build": "webpack --env dev && webpack --env build && npm run test",
     "dev": "webpack --progress --colors --watch --env dev",
