@@ -23,10 +23,10 @@ export interface IDataNode {
   loadData(source?: string): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
   deleteData(path?: any);
-  getData(path?: string): Promise<AxiosPromise> | any;
-  getSchema(): Promise<AxiosPromise> | any;
+  getData(path?: string);
+  getSchema(path?: string);
   getErrorInfo();
   getPluginManager(): IPluginManager;
   getRootSchema();
-  getRootData();
+  getRootData(path?: string);
 }

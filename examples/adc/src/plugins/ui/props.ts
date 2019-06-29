@@ -5,10 +5,15 @@ import { IPluginFunc, IPlugin, IUINode } from "UIEngine/typings";
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   const schema = uiNode.getSchema();
   const props = _.get(schema, "props");
+  // load label & type from data schema
   const dataLabel: string = uiNode.dataNode.getSchema("label");
   const inputType: string = uiNode.dataNode.getSchema("type");
 
-  let result = { key: uiNode.id, label: dataLabel, type: inputType };
+  // get data value
+  const value = uiNode.dataNode.getData();
+  console.log(value);
+
+  let result = { key: uiNode.id, label: dataLabel, type: inputType, value };
   if (props) {
     let {
       $events,
@@ -17,10 +22,19 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
       ...rest
     } = props as any;
     let eventFuncs = {};
-    if ($events) {
-      const event = new Event();
-      eventFuncs = await event.loadEvents($events);
+
+    // load event and default event
+    if (!$events) {
+      $events = [
+        {
+          event: "onChange",
+          action: "change"
+        }
+      ];
     }
+    const event = new Event(uiNode);
+    eventFuncs = await event.loadEvents($events);
+
     // assign props to uiNode
     result = { ...rest, ...eventFuncs, ...result, label, type };
   }
@@ -30,7 +44,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
 
 export const props: IPlugin = {
   type: "ui.parser",
-  initialize: false,
+  initialize: 100,
   callback,
   name: "props-parser"
 };

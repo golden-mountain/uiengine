@@ -21,7 +21,7 @@ import {
 
 export default class UINode implements IUINode {
   private request: IRequest = new Request();
-  dataNode: IDataNode = new DataNode("", this);
+  dataNode: IDataNode;
   stateNode: IStateNode = new StateNode(this);
   children: Array<UINode> = [];
   pluginManager: IPluginManager = new PluginManager(this);
@@ -50,12 +50,6 @@ export default class UINode implements IUINode {
       this.rootName = root;
     }
 
-    // load plugins
-    // if (loadDefaultPlugins) {
-    //   this.loadDefaultPlugins = loadDefaultPlugins;
-    //   // this.pluginManager.loadPlugins(uiPlugins);
-    // }
-
     // initial id, the id can't change
     if (!this.schema._id) {
       this.schema._id = _.uniqueId("node-");
@@ -67,6 +61,9 @@ export default class UINode implements IUINode {
 
     // assign parent
     this.parent = parent;
+
+    // data node initial
+    this.dataNode = new DataNode(schema.datasource || "", this, this.request);
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
@@ -148,7 +145,11 @@ export default class UINode implements IUINode {
     reloadData: boolean = true
   ) {
     let liveSchema = schema;
-    if (liveSchema["datasource"] && reloadData) {
+    if (
+      liveSchema["datasource"] &&
+      !_.startsWith(liveSchema["datasource"], "$dummy") &&
+      reloadData
+    ) {
       await this.loadData(liveSchema["datasource"]);
     }
 
@@ -197,8 +198,7 @@ export default class UINode implements IUINode {
   }
 
   async loadData(source: string) {
-    this.dataNode = new DataNode(source, this, this.request);
-    const result: any = await this.dataNode.loadData();
+    const result: any = await this.dataNode.loadData(source);
     return result;
   }
 

@@ -7,6 +7,8 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     if (e.stopPropagation) {
       e.stopPropagation();
     }
+    const data = uiNode.dataNode.getData();
+    console.log("test", data);
   };
 };
 

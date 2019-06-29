@@ -129,8 +129,15 @@ export default class UIEngine implements IDataEngine {
     this.data = result;
 
     // could modify the response
-    await this.pluginManager.executePlugins("data.request.after");
-    return result;
+    const exeConfig: IPluginExecutionConfig = {
+      returnLastValue: true
+    };
+    const afterResult = await this.pluginManager.executePlugins(
+      "data.request.after",
+      exeConfig
+    );
+    if (!_.isEmpty(afterResult)) this.data = afterResult;
+    return this.data;
   }
 
   async loadData(source?: string, params?: any) {

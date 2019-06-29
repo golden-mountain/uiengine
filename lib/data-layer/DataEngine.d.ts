@@ -16,9 +16,9 @@ export default class UIEngine implements IDataEngine {
     constructor(source: string, request: IRequest);
     parseSchemaPath(source: string): string;
     loadSchema(source?: string): Promise<any>;
-    sendRequest(source?: string, data?: any, method?: string, cache?: boolean): Promise<{}>;
-    loadData(source?: string, params?: any): Promise<{}>;
-    updateData(source?: string, data?: any): Promise<{}>;
-    replaceData(source?: string, data?: any): Promise<{}>;
-    deleteData(source?: string, data?: any): Promise<{}>;
+    sendRequest(source?: string, data?: any, method?: string, cache?: boolean): Promise<any>;
+    loadData(source?: string, params?: any): Promise<any>;
+    updateData(source?: string, data?: any): Promise<any>;
+    replaceData(source?: string, data?: any): Promise<any>;
+    deleteData(source?: string, data?: any): Promise<any>;
 }

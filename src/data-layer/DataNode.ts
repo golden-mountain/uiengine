@@ -60,8 +60,8 @@ export default class DataNode implements IDataNode {
     return this.dataEngine.mapper.rootSchema;
   }
 
-  getRootData() {
-    return this.rootData;
+  getRootData(path?: string) {
+    return path ? _.get(this.rootData, path, this.rootData) : this.rootData;
   }
 
   getPluginManager(): IPluginManager {

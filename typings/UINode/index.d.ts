@@ -1,5 +1,6 @@
 import { IRequest } from "../Request";
 import { IMessager } from "../Messager";
+import { IDataNode } from "../DataNode";
 
 export interface INodeProps {}
 
@@ -13,7 +14,7 @@ export interface ILayoutSchema {
 }
 
 export interface IUINode {
-  dataNode?: any;
+  dataNode: IDataNode;
   stateNode: IStateNode = new StateNode(this);
   children: Array<UINode> = [];
   pluginManager: IPluginManager = new PluginManager(this);

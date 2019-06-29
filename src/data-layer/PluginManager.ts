@@ -54,9 +54,16 @@ export default class PluginManager implements IPluginManager {
 
   static loadPlugins(newPlugins: IPlugins): IPlugins {
     _.forIn(newPlugins, (p: IPlugin, key: string) => {
-      if (p.type) {
+      let { type, initialize } = p;
+      if (type) {
         const name = p.name || key;
-        _.set(PluginManager.plugins, `${p.type}.${name}`, p);
+        const originPlugin = _.get(PluginManager.plugins, `${type}.${name}`);
+        if (
+          !originPlugin ||
+          (originPlugin && initialize > originPlugin.initialize)
+        ) {
+          _.set(PluginManager.plugins, `${type}.${name}`, p);
+        }
       }
     });
     return PluginManager.plugins;

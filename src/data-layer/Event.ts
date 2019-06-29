@@ -2,16 +2,13 @@ import _ from "lodash";
 
 import { PluginManager } from "./";
 
-import * as eventPlugins from "../plugins/events";
-import { IPluginManager, IEvent } from "../../typings";
+import { IPluginManager, IEvent, IUINode } from "../../typings";
 
 export default class Event implements IEvent {
-  pluginManager: IPluginManager = new PluginManager(this);
+  pluginManager: IPluginManager;
 
-  constructor(loadDefaultPlugins: boolean = true) {
-    if (loadDefaultPlugins) {
-      this.pluginManager.loadPlugins(eventPlugins);
-    }
+  constructor(caller: IUINode) {
+    this.pluginManager = new PluginManager(caller);
   }
 
   async loadEvents(events: Array<any>) {
@@ -25,7 +22,11 @@ export default class Event implements IEvent {
       if (action && _.has(eventPlugins, action)) {
         eventsBinded[event] = function(this: any, e: any) {
           const callback = _.get(eventPlugins, action);
-          return callback.call(this, e, schemaOptions);
+          try {
+            return callback.call(this, e, schemaOptions);
+          } catch (e) {
+            console.log("Event call error:", e.message);
+          }
         };
       }
     });

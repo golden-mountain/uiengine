@@ -10,7 +10,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     const { $events, ...rest } = props as any;
     let eventFuncs = {};
     if ($events) {
-      const event = new Event();
+      const event = new Event(uiNode);
       // const eventSchemas = _.get(props, "events");
       eventFuncs = await event.loadEvents($events);
     }

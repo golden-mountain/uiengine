@@ -41,52 +41,235 @@
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ipv6-address"
+                  "datasource": "$dummy.wildcard",
+                  "props": {
+                    "type": "antd:Switch",
+                    "label": "Wildcard",
+                    "defaultChecked": true
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ip-address"
+                  "datasource": "$dummy.ip_type",
+                  "props": {
+                    "type": "antd:RadioGroup",
+                    "defaultValue": 1,
+                    "options": [
+                      {
+                        "label": "IPv4",
+                        "value": 1
+                      },
+                      {
+                        "label": "IPv6",
+                        "value": 0
+                      }
+                    ]
+                  },
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": false
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:netmask"
+                  "datasource": "slb.virtual-server:ipv6-address",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.ip_type"
+                          },
+                          "data": 0
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:ip-address",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.ip_type"
+                          },
+                          "data": 1
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "slb.virtual-server:netmask",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.ip_type"
+                          },
+                          "data": 1
+                        }
+                      ]
+                    }
+                  }
                 },
 
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ipv6-acl"
+                  "datasource": "slb.virtual-server:ipv6-acl",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.ip_type"
+                          },
+                          "data": 0
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:p-ipv6-acl"
+                  "datasource": "slb.virtual-server:p-ipv6-acl",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": true
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:shared-partition-ipv6-acl"
+                  "datasource": "slb.virtual-server:shared-partition-ipv6-acl",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": true
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ipv6-acl-shared"
+                  "datasource": "slb.virtual-server:ipv6-acl-shared",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": true
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:acl"
+                  "datasource": "slb.virtual-server:acl",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": true
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:acl-id"
+                  "datasource": "slb.virtual-server:acl-id",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": true
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:acl-name"
+                  "datasource": "slb.virtual-server:acl-name",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": true
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:p-acl"
+                  "datasource": "slb.virtual-server:p-acl",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": true
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:shared-partition-acl"
+                  "datasource": "slb.virtual-server:shared-partition-acl",
+                  "state": {
+                    "visible": {
+                      "deps": [
+                        {
+                          "selector": {
+                            "datasource": "$dummy.wildcard"
+                          },
+                          "data": true
+                        }
+                      ]
+                    }
+                  }
                 },
                 {
                   "component": "a10:FormItem",
