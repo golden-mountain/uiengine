@@ -23,9 +23,7 @@ class ComponentWrapper extends React.Component<
   constructor(props: IComponentWrapper) {
     super(props);
     const { uiNode } = props;
-    const visible = uiNode.stateNode.getState("visible");
-    const data = uiNode.dataNode.getData();
-    const initialState: IComponentState = { state: { visible }, data };
+    const initialState: IComponentState = uiNode.stateInfo;
     this.state = initialState;
 
     // register setState func
@@ -42,7 +40,6 @@ class ComponentWrapper extends React.Component<
 
   render() {
     const { uiNode, ...rest } = this.props;
-
     if (!_.get(this.state, "state.visible", true)) {
       return null;
     }
@@ -85,7 +82,6 @@ class ComponentWrapper extends React.Component<
             key: `key-of-child-${uiNode.id}`,
             ...newProps
           };
-
           return uiNode.children.length ? (
             <WrappedComponent {...props}>{childrenObjects}</WrappedComponent>
           ) : (

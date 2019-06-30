@@ -1,8 +1,14 @@
 import { IRequest } from "../Request";
 import { IMessager } from "../Messager";
 import { IDataNode } from "../DataNode";
+import { IState } from "../StateNode";
 
 export interface INodeProps {}
+
+export interface IStateInfo {
+  data: any;
+  state: IState;
+}
 
 export interface ILayoutSchema {
   component?: string;
@@ -26,6 +32,7 @@ export interface IUINode {
   messager: IMessager;
   props: object;
   parent?: IUINode;
+  stateInfo: IStateInfo;
 
   loadLayout(schema?: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
@@ -44,5 +51,6 @@ export interface IUINode {
   searchDepsNodes(myNode?: IUINode, layoutId?: string);
   getPluginManager(): IPluginManager;
   getRequest(): IRequest;
+  sendMessage();
   // getProps(): INodeProps;
 }

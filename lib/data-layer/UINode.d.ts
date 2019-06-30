@@ -1,5 +1,5 @@
 import { AxiosPromise } from "axios";
-import { IDataNode, IStateNode, IUINode, ILayoutSchema, IRequest, IErrorInfo, IPluginManager, IMessager } from "../../typings";
+import { IDataNode, IStateNode, IUINode, ILayoutSchema, IRequest, IErrorInfo, IPluginManager, IMessager, IStateInfo } from "../../typings";
 export default class UINode implements IUINode {
     private request;
     dataNode: IDataNode;
@@ -14,6 +14,7 @@ export default class UINode implements IUINode {
     messager: IMessager;
     props: object;
     parent?: IUINode;
+    stateInfo: IStateInfo;
     constructor(schema: ILayoutSchema, request?: IRequest, root?: string, parent?: IUINode);
     loadLayout(schema?: ILayoutSchema | string): Promise<any>;
     getSchema(path?: string): ILayoutSchema;
@@ -41,4 +42,5 @@ export default class UINode implements IUINode {
     searchDepsNodes(myNode?: IUINode, layoutId?: string): any[];
     genLiveLayout(schema: ILayoutSchema, data: any): Promise<ILayoutSchema>;
     updateState(): Promise<any>;
+    sendMessage(): void;
 }

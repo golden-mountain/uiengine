@@ -4,7 +4,7 @@ import { IPluginFunc, IPlugin, IUINode } from "UIEngine/typings";
 
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   const schema = uiNode.getSchema();
-  const props = _.get(schema, "props");
+  const props: any = _.get(schema, "props", {});
   // load label & type from data schema
   const dataLabel: string = uiNode.dataNode.getSchema("label");
   const inputType: string = uiNode.dataNode.getSchema("type");
@@ -12,30 +12,39 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
   // get data value
   const value = uiNode.dataNode.getData();
 
-  let result = { key: uiNode.id, label: dataLabel, type: inputType, value };
+  // load event and default event
+  let $events: any = props.$events || [];
+  if (!props.$events) {
+    $events = [
+      {
+        event: "onChange",
+        action: "change"
+      }
+    ];
+  }
+  const event = new Event(uiNode);
+  let eventFuncs = await event.loadEvents($events);
+
+  // assign all default props
+  let result = {
+    key: uiNode.id,
+    label: dataLabel,
+    type: inputType,
+    value,
+    ...eventFuncs
+  };
+
+  // assign user defined props;
   if (props) {
     let {
-      $events,
       label = dataLabel,
       type = inputType,
+      $events,
       ...rest
     } = props as any;
-    let eventFuncs = {};
-
-    // load event and default event
-    if (!$events) {
-      $events = [
-        {
-          event: "onChange",
-          action: "change"
-        }
-      ];
-    }
-    const event = new Event(uiNode);
-    eventFuncs = await event.loadEvents($events);
 
     // assign props to uiNode
-    result = { ...rest, ...eventFuncs, ...result, label, type };
+    result = { ...rest, ...result, label, type };
   }
   uiNode.props = result;
   return result;

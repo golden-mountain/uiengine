@@ -5,7 +5,6 @@ export default class Messager implements IMessager {
   static objectStateFuncMap = {
     // [id]: setState
   };
-  private componentState: IComponentState = {};
 
   constructor(schemaID?: string) {
     // console.log("registered a messager", schemaID);
@@ -17,11 +16,9 @@ export default class Messager implements IMessager {
   }
 
   sendMessage(schemaID: string, info: any) {
-    _.merge(this.componentState, info);
-
     const setState = Messager.objectStateFuncMap[schemaID];
     if (_.isFunction(setState)) {
-      return setState(this.componentState);
+      return setState(info);
     } else {
       return false;
     }

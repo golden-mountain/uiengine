@@ -17,7 +17,7 @@ export default class DataNode implements IDataNode {
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: string;
-  rootData: any = {};
+  rootData?: any;
   schema?: any;
   rootSchema?: any;
   data: any;
@@ -25,14 +25,11 @@ export default class DataNode implements IDataNode {
 
   constructor(source: any, uiNode: IUINode, request?: IRequest) {
     this.uiNode = uiNode;
+    this.source = source;
 
-    if (typeof source === "object") {
-      this.data = source;
-      this.rootData = source;
-      this.source = "";
-    } else {
-      this.source = source;
-    }
+    // give default data
+    this.data = _.get(uiNode.schema, "defaultvalue");
+    this.rootData = {};
 
     // initial data engine
     if (request) {
@@ -70,7 +67,11 @@ export default class DataNode implements IDataNode {
 
   async loadData(source?: string) {
     // const { schemaPath = "", name = "" } = this.source;
-    if (!source && this.source) source = this.source;
+    if (source) {
+      this.source = source;
+    } else {
+      source = this.source;
+    }
     let result;
     if (source) {
       const data = await this.dataEngine.loadData(source);
@@ -114,24 +115,23 @@ export default class DataNode implements IDataNode {
       this.errorInfo = couldUpdate;
       return false;
     }
+
     // update this data
     if (path) {
       _.set(this.data, path, value);
     } else {
       // const { name = "" } = this.source;
       this.data = value;
-      const nameSegs = this.source.replace(":", ".").split(".");
+      const nameSegs = this.source.split(/\.|\:/);
       const lastName = nameSegs.pop();
       if (lastName) {
-        if (this.rootData !== undefined) {
-          _.set(this.rootData, lastName, value);
-        }
-      } else {
-        this.rootData = value;
+        _.set(this.rootData, lastName, value);
       }
     }
 
-    await this.uiNode.updateLayout();
+    // update state without sending message
+    await this.uiNode.stateNode.renewStates();
+    // this.uiNode.sendMessage();
     this.updatingData = undefined;
     return true;
   }
@@ -152,7 +152,11 @@ export default class DataNode implements IDataNode {
       } else {
         this.data = null;
       }
-      await this.uiNode.updateLayout();
+      // await this.uiNode.updateLayout();
+
+      // update state without sending message
+      await this.uiNode.stateNode.renewStates();
+      // this.uiNode.sendMessage();
     }
   }
 }

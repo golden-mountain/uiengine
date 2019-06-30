@@ -34,13 +34,8 @@ export default class StateNode implements IStateNode {
       await node.getStateNode().renewStates();
     }
 
-    const state = {
-      state: this.uiNode.stateNode.state,
-      data: this.uiNode.dataNode.data
-    };
-    // console.log("update visible on State Node: ", " id:", this.uiNode.id);
-    this.uiNode.messager.sendMessage(this.uiNode.id, state);
-    return state;
+    this.uiNode.sendMessage();
+    return this.state;
   }
 
   setState(key: string, value: any): IState {

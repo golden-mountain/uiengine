@@ -6,7 +6,7 @@ export default class DataNode implements IDataNode {
     dataEngine: IDataEngine;
     uiNode: IUINode;
     source: string;
-    rootData: any;
+    rootData?: any;
     schema?: any;
     rootSchema?: any;
     data: any;

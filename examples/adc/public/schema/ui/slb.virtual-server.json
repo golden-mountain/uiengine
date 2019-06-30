@@ -51,9 +51,9 @@
                 {
                   "component": "a10:FormItem",
                   "datasource": "$dummy.ip_type",
+                  "defaultvalue": 1,
                   "props": {
                     "type": "antd:RadioGroup",
-                    "defaultValue": 1,
                     "options": [
                       {
                         "label": "IPv4",

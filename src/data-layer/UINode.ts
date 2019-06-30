@@ -16,7 +16,8 @@ import {
   IRequest,
   IErrorInfo,
   IPluginManager,
-  IMessager
+  IMessager,
+  IStateInfo
 } from "../../typings";
 
 export default class UINode implements IUINode {
@@ -33,6 +34,10 @@ export default class UINode implements IUINode {
   messager: IMessager;
   props: object = {};
   parent?: IUINode;
+  stateInfo: IStateInfo = {
+    data: null,
+    state: {}
+  };
 
   constructor(
     schema: ILayoutSchema,
@@ -63,7 +68,9 @@ export default class UINode implements IUINode {
     this.parent = parent;
 
     // data node initial
-    this.dataNode = new DataNode(schema.datasource || "", this, this.request);
+    const emptyDataNodeName = `$dummy.${this.id}`;
+    if (!schema.datasource) schema.datasource = emptyDataNodeName;
+    this.dataNode = new DataNode(schema.datasource, this, this.request);
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
@@ -195,6 +202,8 @@ export default class UINode implements IUINode {
     } catch (e) {
       console.log(e.message);
     }
+
+    // state info default
     return this;
   }
 
@@ -321,9 +330,9 @@ export default class UINode implements IUINode {
   }
 
   async genLiveLayout(schema: ILayoutSchema, data: any) {
-    if (schema.datasource) {
-      data = await this.loadData(schema.datasource);
-    }
+    // if (schema.datasource) {
+    //   data = await this.loadData(schema.datasource);
+    // }
 
     // replace $ to row number
     const updatePropRow = (target: ILayoutSchema, index: string) => {
@@ -358,5 +367,16 @@ export default class UINode implements IUINode {
 
   async updateState() {
     return await this.getStateNode().renewStates();
+  }
+
+  sendMessage() {
+    const newState = {
+      data: _.clone(this.dataNode.data),
+      state: _.clone(this.stateNode.state)
+    };
+    if (!_.isEqual(newState, this.stateInfo)) {
+      this.stateInfo = newState;
+      this.messager.sendMessage(this.id, this.stateInfo);
+    }
   }
 }
