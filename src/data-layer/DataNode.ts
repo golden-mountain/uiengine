@@ -25,10 +25,15 @@ export default class DataNode implements IDataNode {
 
   constructor(source: any, uiNode: IUINode, request?: IRequest) {
     this.uiNode = uiNode;
-    this.source = source;
 
-    // give default data
-    this.data = _.get(uiNode.schema, "defaultvalue");
+    if (_.isObject(source)) {
+      this.data = source;
+      this.source = "";
+    } else {
+      // give default data
+      this.data = _.get(uiNode.schema, "defaultvalue");
+      this.source = source;
+    }
     this.rootData = {};
 
     // initial data engine
@@ -99,6 +104,11 @@ export default class DataNode implements IDataNode {
   }
 
   async updateData(value: any, path?: string) {
+    let noUpdateLayout = true;
+    if (_.isArray(value) && this.uiNode.schema.$children) {
+      noUpdateLayout = _.isEqual(value, this.data);
+    }
+
     // check data from update plugins
     this.updatingData = value;
     const exeConfig: IPluginExecutionConfig = {
@@ -130,7 +140,12 @@ export default class DataNode implements IDataNode {
     }
 
     // update state without sending message
-    await this.uiNode.stateNode.renewStates();
+    if (noUpdateLayout) {
+      await this.uiNode.stateNode.renewStates();
+    } else {
+      await this.uiNode.updateLayout();
+    }
+
     // this.uiNode.sendMessage();
     this.updatingData = undefined;
     return true;
@@ -140,9 +155,15 @@ export default class DataNode implements IDataNode {
     const couldDelete = await this.pluginManager.executePlugins(
       "data.delete.could"
     );
+    let noUpdateLayout = true;
+
     if (couldDelete) {
       if (path !== undefined) {
         if ((_.isArray(path) || _.isNumber(path)) && _.isArray(this.data)) {
+          if (this.uiNode.schema.$children) {
+            noUpdateLayout = false;
+          }
+
           _.remove(this.data, (e: any, index: number) => {
             return _.isArray(path) ? path.indexOf(index) > -1 : index === path;
           });
@@ -152,10 +173,13 @@ export default class DataNode implements IDataNode {
       } else {
         this.data = null;
       }
-      // await this.uiNode.updateLayout();
 
       // update state without sending message
-      await this.uiNode.stateNode.renewStates();
+      if (noUpdateLayout) {
+        await this.uiNode.stateNode.renewStates();
+      } else {
+        await this.uiNode.updateLayout();
+      }
       // this.uiNode.sendMessage();
     }
   }

@@ -17,7 +17,9 @@ const request = new Request(reqConfig);
 const schemaPath = "foo.bar";
 
 describe("Given all the DataEngine", () => {
-  before(() => {});
+  before(() => {
+    Cache.clearDataCache();
+  });
   describe("the given source", () => {
     it("constructor: should return the schema path with request info appended", async () => {
       const dataEngine = new DataEngine(schemaPath, request);
@@ -52,7 +54,6 @@ describe("Given all the DataEngine", () => {
     // });
 
     it("sendRequest: request agent for all api request methods", async () => {
-      Cache.clearDataCache();
       let dataEngine = new DataEngine(schemaPath, request);
 
       // use default source

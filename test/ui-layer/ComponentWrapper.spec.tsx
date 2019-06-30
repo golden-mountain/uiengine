@@ -11,7 +11,8 @@ import {
   UIEngineRegister,
   ComponentWrapper,
   UINode,
-  Request
+  Request,
+  Cache
 } from "../../src/";
 import reactComponentTestJson from "../layouts/react-component-test.json";
 import reqConfig from "../config/request";
@@ -28,6 +29,7 @@ let uiNode: any, schema: any, wrapper: any;
 // https://airbnb.io/enzyme/docs/api/ShallowWrapper/html.html
 describe("Given an instance of ComponentWrapper library", () => {
   before(async () => {
+    Cache.clearCache();
     UIEngineRegister.registerComponents(components);
     UIEngineRegister.registerPlugins(plugins);
 
@@ -51,10 +53,10 @@ describe("Given an instance of ComponentWrapper library", () => {
 
     it("should hide the component whose visible state is false", async () => {
       // update visible to false
-      await uiNode.dataNode.updateData("Zuoping", "name");
-      expect(uiNode.dataNode.getData("name")).to.equal("Zuoping");
       expect(uiNode.stateNode.getState("visible")).to.equal(true);
       let childNode = uiNode.getChildren([0]);
+      await childNode.dataNode.updateData("Zuoping");
+      expect(childNode.dataNode.getData()).to.equal("Zuoping");
       expect(childNode.stateNode.getState("visible")).to.equal(true);
       childNode = uiNode.getChildren([1]);
       expect(childNode.stateNode.getState("visible")).to.equal(false);
@@ -65,8 +67,8 @@ describe("Given an instance of ComponentWrapper library", () => {
       expect(wrapper.html()).to.equal(expected);
 
       // update back to all visible as true
-      await uiNode.dataNode.updateData("Zp", "name");
       childNode = uiNode.getChildren([0]);
+      await childNode.dataNode.updateData("Zp");
       expect(childNode.stateNode.getState("visible")).to.equal(true);
       childNode = uiNode.getChildren([1]);
       expect(childNode.stateNode.getState("visible")).to.equal(true);
