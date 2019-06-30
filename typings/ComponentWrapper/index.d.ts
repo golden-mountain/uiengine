@@ -5,3 +5,9 @@ export interface IComponentWrapper {
   key?: string;
   [anyKey: string]: any;
 }
+
+// used cross modules
+export interface IComponentState {
+  state?: IState;
+  data?: any;
+}

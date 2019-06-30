@@ -11,7 +11,6 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
 
   // get data value
   const value = uiNode.dataNode.getData();
-  console.log(value);
 
   let result = { key: uiNode.id, label: dataLabel, type: inputType, value };
   if (props) {

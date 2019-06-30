@@ -24,7 +24,7 @@ export default class StateNode implements IStateNode {
     return this.state;
   }
 
-  async renewStates() {
+  async renewStates(uiNode?: IUINode) {
     this.state = await this.pluginManager.executePlugins("state");
     // console.log(
     //   "state node:",
@@ -34,17 +34,25 @@ export default class StateNode implements IStateNode {
     //   "\n"
     // );
 
-    // update dependence visible
-    const depNodes = this.uiNode.searchDepsNodes();
+    if (!uiNode) uiNode = this.uiNode;
+
+    // update children
+    for (let i in uiNode.children) {
+      const child = uiNode.children[i];
+      await child.stateNode.renewStates();
+    }
+
+    // update dependence state
+    const depNodes = uiNode.searchDepsNodes();
     for (let key in depNodes) {
       const node = depNodes[key];
       await node.getStateNode().renewStates();
     }
 
-    const state = { state: this.state };
+    const state = { state: uiNode.stateNode.state, data: uiNode.dataNode.data };
     // console.log("update visible on State Node: ", " id:", this.uiNode.id);
-    this.uiNode.messager.sendMessage(this.uiNode.id, state);
-    return this.state;
+    uiNode.messager.sendMessage(uiNode.id, state);
+    return state;
   }
 
   setState(key: string, value: any): IState {

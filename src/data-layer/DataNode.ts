@@ -17,7 +17,7 @@ export default class DataNode implements IDataNode {
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: string;
-  rootData?: any;
+  rootData: any = {};
   schema?: any;
   rootSchema?: any;
   data: any;
@@ -86,10 +86,11 @@ export default class DataNode implements IDataNode {
         exeConfig
       );
       // get parent data to assign new data
+      source = source.replace(":", ".");
       const nameSegs = source.split(".");
       nameSegs.pop();
-      this.rootData = _.get(data, nameSegs.join("."));
-      result = _.get(data, source.replace(":", "."), null);
+      this.rootData = _.get(data, nameSegs);
+      result = _.get(data, source, null);
       this.data = result;
     }
 
@@ -121,11 +122,15 @@ export default class DataNode implements IDataNode {
       this.data = value;
       const nameSegs = this.source.replace(":", ".").split(".");
       const lastName = nameSegs.pop();
-      if (lastName) _.set(this.rootData, lastName, value);
-      // console.log(lastName, value, this.rootData);
+      if (lastName) {
+        if (this.rootData !== undefined) {
+          _.set(this.rootData, lastName, value);
+        }
+      } else {
+        this.rootData = value;
+      }
     }
 
-    // console.log("Data Node:", this.uiNode.id, ":", this.data, "\n");
     await this.uiNode.updateLayout();
     this.updatingData = undefined;
     return true;

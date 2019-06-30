@@ -8,7 +8,10 @@ export default class StateNode implements IStateNode {
     constructor(uiNode: IUINode);
     getUINode(): IUINode;
     getState(key?: string): any;
-    renewStates(): Promise<IState>;
+    renewStates(uiNode?: IUINode): Promise<{
+        state: any;
+        data: any;
+    }>;
     setState(key: string, value: any): IState;
     getPluginManager(): IPluginManager;
 }

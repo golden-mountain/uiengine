@@ -408,7 +408,7 @@
           "$children": [
             {
               "component": "a10:FormItem",
-              "datasource": "slb.virtual-server:port-list$.port-number",
+              "datasource": "slb.virtual-server:port-list.$.port-number",
               "props": {
                 "title": "Port"
               }
@@ -418,14 +418,14 @@
               "props": {
                 "title": "Protocol"
               },
-              "datasource": "slb.virtual-server:port-list$.protocol"
+              "datasource": "slb.virtual-server:port-list.$.protocol"
             },
             {
               "props": {
                 "title": "Service Group"
               },
               "component": "a10:FormItem",
-              "datasource": "slb.virtual-server:port-list$.service-group"
+              "datasource": "slb.virtual-server:port-list.$.service-group"
             }
           ]
         },

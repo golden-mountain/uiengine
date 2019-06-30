@@ -184,8 +184,8 @@ describe("Given an instance of my UINode library", () => {
       tableIncludeTest(liveschema.children, expectedResult);
 
       // children generated
-      const children = localUINode.getChildren([1]);
-      const firstChildren = children[0] as UINode;
+      const children = localUINode.getChildren([1, 0]);
+      const firstChildren = children as UINode;
 
       expect(firstChildren).is.instanceOf(UINode);
 
@@ -270,7 +270,7 @@ describe("Given an instance of my UINode library", () => {
       expect(nodes.length).to.equal(0);
 
       // from subnode search
-      const childNode = localUINode.getChildren([1, 0])[1];
+      const childNode = localUINode.getChildren([1, 0, 1]);
       // console.log(childNode.getSchema());
       nodes = childNode.searchNodes(
         {

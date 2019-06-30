@@ -18,6 +18,7 @@ export interface IPluginExecutionConfig {
   stopWhenEmpty?: boolean;
   returnLastValue?: boolean;
   executeOnlyPluginName?: string;
+  async?: boolean;
 }
 
 export interface IPluginManager {
@@ -27,5 +28,6 @@ export interface IPluginManager {
   loadPlugins(plugins: IPlugins): IPlugins;
   //unloadPlugins(type: string, name?: string);
   executePlugins(type: string, stopWhenEqual?: IPluginExecutionConfig);
+  executeSyncPlugins(type: string, stopWhenEqual?: IPluginExecutionConfig);
   setErrorInfo(type: string, name: string, key: string, value: any): IErrorInfo;
 }

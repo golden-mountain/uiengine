@@ -89,11 +89,12 @@ describe("Given an instance of my DataNode library", () => {
       expect(dataNode.getData()).to.equal("Zuoping");
 
       // refresh the state
-      const rowChild = localUINode.getChildren([1, 0]);
-      const stateVisibleCol1 = rowChild[0].getStateNode().getState("visible");
+      let rowChild = localUINode.getChildren([1, 0, 0]);
+      const stateVisibleCol1 = rowChild.getStateNode().getState("visible");
       // console.log(rowChild[0].getSchema("state.visible.deps"));
       expect(stateVisibleCol1).to.equal(false);
-      const stateVisibleCol2 = rowChild[1].getStateNode().getState("visible");
+      rowChild = localUINode.getChildren([1, 0, 1]);
+      const stateVisibleCol2 = rowChild.getStateNode().getState("visible");
       expect(stateVisibleCol2).to.equal(false);
     });
 

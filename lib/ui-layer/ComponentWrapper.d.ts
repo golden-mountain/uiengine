@@ -1,6 +1,7 @@
 import React from "react";
-import { IComponentWrapper, IComponentState } from "../../typings";
+import { IComponentWrapper, IComponentState, IPluginManager } from "../../typings";
 declare class ComponentWrapper extends React.Component<IComponentWrapper, IComponentState> {
+    pluginManager: IPluginManager;
     constructor(props: IComponentWrapper);
     componentWillUnmount(): void;
     componentWillUpdate(): void;

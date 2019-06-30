@@ -16,9 +16,3 @@ declare module "*.json" {
   const value: any;
   export default value;
 }
-
-// used cross modules
-export interface IComponentState {
-  state?: IState;
-  data?: any;
-}

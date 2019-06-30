@@ -96,6 +96,34 @@ export default class PluginManager implements IPluginManager {
     return _.get(this.result, type, {});
   }
 
+  executeSyncPlugins(type: string, config?: IPluginExecutionConfig) {
+    const plugins: IPlugins = _.get(PluginManager.plugins, type);
+    let result;
+
+    for (let k in plugins) {
+      const p = plugins[k];
+      const name = p.name || k;
+      if (!p.callback) continue;
+
+      try {
+        result = p.callback.call(this.caller, this.caller);
+        _.set(this.result, `${type}.${name}`, result);
+
+        // break conditions
+        if (_.isEqual(_.get(config, "stopWhenEmpty"), result)) break;
+        if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) break;
+      } catch (e) {
+        console.error(`plugin [${k}] executed failed:`, e);
+        this.setErrorInfo(p.type, name, e.message);
+      }
+    }
+
+    if (_.get(config, "returnLastValue")) {
+      return result;
+    }
+    return _.get(this.result, type, {});
+  }
+
   setErrorInfo(type: string, name: string, value: any): IErrorInfo {
     _.set(this.errorInfo, `${type}.${name}`, value);
     return this.errorInfo;

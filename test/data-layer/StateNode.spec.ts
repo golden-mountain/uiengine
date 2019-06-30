@@ -35,7 +35,7 @@ describe("Given an instance of my StateNode library", () => {
       const uiNode = new UINode({});
       const stateNode = uiNode.getStateNode();
       const state = await stateNode.renewStates();
-      expect(state).to.have.property("visible");
+      expect(state).to.have.property("state");
       expect(stateNode.getState()).to.have.property("visible");
       expect(stateNode.getState("visible")).is.not.undefined;
     });

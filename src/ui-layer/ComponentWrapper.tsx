@@ -1,8 +1,13 @@
 import React from "react";
 import _ from "lodash";
 
-import { UIEngineRegister } from "..";
-import { IComponentWrapper, IComponentState } from "../../typings";
+import { UIEngineRegister, PluginManager } from "..";
+import {
+  IComponentWrapper,
+  IComponentState,
+  IPluginManager,
+  IPluginExecutionConfig
+} from "../../typings";
 
 function setComponentState(this: ComponentWrapper, state: IComponentState) {
   // console.log("node status on Wrapper:", this.props.uiNode.id, state);
@@ -13,6 +18,8 @@ class ComponentWrapper extends React.Component<
   IComponentWrapper,
   IComponentState
 > {
+  pluginManager: IPluginManager = new PluginManager(this);
+
   constructor(props: IComponentWrapper) {
     super(props);
     const { uiNode } = props;
@@ -43,36 +50,42 @@ class ComponentWrapper extends React.Component<
     if (uiNode.schema) {
       // render logic
       const componentLine = _.get(uiNode.schema, "component");
+      let WrappedComponent: any;
       if (!componentLine) {
-        return null;
+        WrappedComponent = (props: any) => props.children;
+      } else {
+        // get registered component
+        const componentMap = UIEngineRegister.componentsLibrary;
+        const [packageName, component] = componentLine.split(":");
+        WrappedComponent = componentMap[packageName]
+          ? componentMap[packageName][component]
+          : componentMap[component];
       }
-
-      // get registered component
-      const componentMap = UIEngineRegister.componentsLibrary;
-      const [packageName, component] = componentLine.split(":");
-      const WrappedComponent: any = componentMap[packageName]
-        ? componentMap[packageName][component]
-        : componentMap[component];
 
       // map children as components
       let childrenObjects = uiNode.children.map((child: any, key: any) => {
-        if (_.isArray(child)) {
-          return child.map((c: any, id: any) => {
-            const props = { ...rest, uiNode: c, key: c.id };
-            return <ComponentWrapper {...props} />;
-          });
-        }
         const props = { ...rest, uiNode: child, key: child.id };
         return <ComponentWrapper {...props} />;
       });
 
       if (WrappedComponent) {
         try {
-          const props = {
+          const exeConfig: IPluginExecutionConfig = {
+            returnLastValue: true
+          };
+
+          let newProps: any = this.pluginManager.executeSyncPlugins(
+            "component.props.get",
+            exeConfig
+          );
+
+          let props = {
             ...rest,
             ...uiNode.props,
-            key: `key-of-child-${uiNode.id}`
+            key: `key-of-child-${uiNode.id}`,
+            ...newProps
           };
+
           return uiNode.children.length ? (
             <WrappedComponent {...props}>{childrenObjects}</WrappedComponent>
           ) : (

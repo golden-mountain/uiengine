@@ -155,7 +155,7 @@ export default class UINode implements IUINode {
 
     if (liveSchema["$children"] && this.dataNode) {
       const data = this.dataNode.getData();
-      liveSchema = await this.genLiveLayout(schema, data);
+      liveSchema = await this.genLiveLayout(liveSchema, data);
     }
 
     if (liveSchema.children) {
@@ -164,11 +164,11 @@ export default class UINode implements IUINode {
         let node: any;
         let s: any = liveSchema.children[index];
         if (_.isArray(s)) {
-          node = [];
+          node = new UINode({}, this.request, this.rootName, this);
           for (let i in s) {
             const subnode = new UINode(s[i], this.request, this.rootName, this);
             await subnode.loadLayout(s[i]);
-            node.push(subnode);
+            node.children.push(subnode);
           }
         } else {
           node = new UINode(s, this.request, this.rootName, this);
@@ -185,6 +185,7 @@ export default class UINode implements IUINode {
     await this.stateNode.renewStates();
     // console.log(
     //   this.id,
+    //   this.dataNode.data,
     //   this.stateNode.state,
     //   ".......... state on UINODE......"
     // );
@@ -325,25 +326,13 @@ export default class UINode implements IUINode {
 
     // replace $ to row number
     const updatePropRow = (target: ILayoutSchema, index: string) => {
-      if (_.isArray(target)) {
-        _.forEach(target, (c: any) => {
-          _.forIn(c, function(value: any, key: string) {
-            if (typeof value === "object") {
-              updatePropRow(value, index);
-            } else if (_.isString(value) && value.indexOf("$") > -1) {
-              _.set(c, key, value.replace("$", index));
-            }
-          });
-        });
-      } else {
-        _.forIn(target, function(value: any, key: string) {
-          if (typeof value === "object") {
-            updatePropRow(value, index);
-          } else if (_.isString(value) && value.indexOf("$") > -1) {
-            _.set(target, key, value.replace("$", index));
-          }
-        });
-      }
+      _.forIn(target, function(value: any, key: string) {
+        if (typeof value === "object") {
+          updatePropRow(value, index);
+        } else if (_.isString(value) && value.indexOf("$") > -1) {
+          _.set(target, key, value.replace("$", index));
+        }
+      });
     };
 
     const liveSchema = schema;
