@@ -307,6 +307,7 @@ export default class UINode implements IUINode {
                     finded = true;
                   }
                 });
+
                 if (finded) {
                   nodes.push(node);
                 }

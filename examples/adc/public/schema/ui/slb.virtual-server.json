@@ -89,6 +89,14 @@
                             "datasource": "$dummy.ip_type"
                           },
                           "data": 0
+                        },
+                        {
+                          "selector": {
+                            "datasource": "$dummy.ip_type"
+                          },
+                          "state": {
+                            "visible": true
+                          }
                         }
                       ]
                     }
@@ -105,6 +113,14 @@
                             "datasource": "$dummy.ip_type"
                           },
                           "data": 1
+                        },
+                        {
+                          "selector": {
+                            "datasource": "$dummy.ip_type"
+                          },
+                          "state": {
+                            "visible": true
+                          }
                         }
                       ]
                     }
@@ -121,6 +137,14 @@
                             "datasource": "$dummy.ip_type"
                           },
                           "data": 1
+                        },
+                        {
+                          "selector": {
+                            "datasource": "$dummy.ip_type"
+                          },
+                          "state": {
+                            "visible": true
+                          }
                         }
                       ]
                     }
@@ -138,6 +162,14 @@
                             "datasource": "$dummy.ip_type"
                           },
                           "data": 0
+                        },
+                        {
+                          "selector": {
+                            "datasource": "$dummy.ip_type"
+                          },
+                          "state": {
+                            "visible": true
+                          }
                         }
                       ]
                     }

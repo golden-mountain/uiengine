@@ -58,7 +58,10 @@ describe("Given an instance of ComponentWrapper library", () => {
       expect(childNode.stateNode.getState("visible")).to.equal(true);
       childNode = uiNode.getChildren([1]);
       expect(childNode.stateNode.getState("visible")).to.equal(false);
-      let expected = "<div>foo:bar<div>demo-element-2</div></div>";
+      // sub children visible
+      childNode = uiNode.getChildren([2]);
+      expect(childNode.stateNode.getState("visible")).to.equal(true);
+      let expected = "<div>foo:bar<div>demo-element-2</div><div></div></div>";
       expect(wrapper.html()).to.equal(expected);
 
       // update back to all visible as true
@@ -67,6 +70,8 @@ describe("Given an instance of ComponentWrapper library", () => {
       expect(childNode.stateNode.getState("visible")).to.equal(true);
       childNode = uiNode.getChildren([1]);
       expect(childNode.stateNode.getState("visible")).to.equal(true);
+      childNode = uiNode.getChildren([2]);
+      expect(childNode.stateNode.getState("visible")).to.equal(false);
       expected =
         "<div>foo:bar<div>demo-element-2</div><div>hello<p>foo:bar.baz.0.name</p><p>foo:bar.baz.0.age</p><p>foo:bar.baz.1.name</p><p>foo:bar.baz.1.age</p></div></div>";
       expect(wrapper.html()).to.equal(expected);

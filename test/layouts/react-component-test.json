@@ -51,6 +51,25 @@
           }
         }
       ]
+    },
+    {
+      "component": "test:DivContainer",
+      "id": "id-of-demo-element-3",
+      "datasource": "$dummy.any",
+      "state": {
+        "visible": {
+          "deps": [
+            {
+              "selector": {
+                "datasource": "foo:bar.baz"
+              },
+              "state": {
+                "visible": false
+              }
+            }
+          ]
+        }
+      }
     }
   ]
 }

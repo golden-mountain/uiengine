@@ -1,5 +1,68 @@
 import _ from "lodash";
-import { IStateNode } from "../../typings/StateNode";
+import { IUINode, IStateNode, IState } from "../../typings";
+
+function compareDataLogic(data1: any, data2: any, strategy: string = "and") {
+  let result = true;
+  let thisResult = true;
+  if (_.isObject(data2) && _.isObject(data1)) {
+    _.forIn(data2, (value: any, k: string) => {
+      thisResult = thisResult && _.isEqual(value, data1[k]);
+      if (!thisResult) return;
+    });
+  } else {
+    thisResult = _.isEqual(data1, data2);
+  }
+
+  if (strategy === "and") {
+    result = result && thisResult;
+  } else {
+    result = result || thisResult;
+  }
+  return result;
+}
+
+function compareStateLogic(state1: IState, state2: IState, strategy = "and") {
+  let result = true;
+  if (strategy === "and") {
+    result = result && _.isEqual(state1, state2);
+  } else {
+    // or
+    result = result || _.isEqual(state1, state2);
+  }
+  return result;
+}
+
+function stateCompare(
+  target: IUINode,
+  deps: any,
+  name: string,
+  strategy: string = "and"
+) {
+  let result = true;
+  const stateNode = target.getStateNode();
+  if (stateNode) {
+    const stateBasic = stateNode.getState(name);
+    if (stateBasic !== "undefined") {
+      const depBasic = _.get(deps, name);
+      result = compareStateLogic(depBasic, stateBasic, strategy);
+    } else {
+      // TO FIX: Need a case to improve this
+      // recursively find other UI Node
+      result = stateDepsResolver(stateNode, name);
+    }
+  }
+
+  return result;
+}
+
+function dataCompare(target: IUINode, deps: any, strategy: string = "and") {
+  let result = true;
+  const dataNode = target.getDataNode();
+  if (dataNode) {
+    result = compareDataLogic(dataNode.getData(), deps, strategy);
+  }
+  return result;
+}
 
 export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
   let result = true;
@@ -7,69 +70,24 @@ export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
   const schema = uiNode.getSchema();
   const basicCondition = _.get(schema, `state.${stateName}`);
 
-  // console.log("........ visible plugin ..........", schema, stateName);
-  // strategy could and|or
   if (typeof basicCondition === "object") {
     const { strategy = "and", deps = [] } = basicCondition;
-    // deps condition on UI schema
     deps.forEach((dep: any) => {
-      // console.log(dep, "dep.....");
       if (dep.selector) {
+        // depends on which node?
         const depTargetNodes = uiNode.searchNodes(dep.selector);
-        // console.log("depUINodes:", depUINodes);
         if (depTargetNodes.length) {
           // searched the props met the condition
           depTargetNodes.forEach((depTargetNode: any) => {
-            // match data deps
             if (dep.data !== undefined) {
-              const dataNode = depTargetNode.getDataNode();
-              if (dataNode) {
-                const data = dataNode.getData();
-                // console.log(depTargetNode.schema, "<<<<< depUI");
-                // for handling dep data like { name: 'Zp', other: 'false'}
-                let thisResult = true;
-                if (_.isObject(dep.data) && _.isObject(data)) {
-                  _.forIn(dep.data, (value: any, k: string) => {
-                    thisResult = thisResult && _.isEqual(value, data[k]);
-                    if (!thisResult) return;
-                  });
-                } else {
-                  thisResult = _.isEqual(data, dep.data);
-                }
-
-                if (strategy === "and") {
-                  result = result && thisResult;
-                  // console.log("state-helper:", result, dep.data, data);
-                  if (!result) return;
-                } else {
-                  // or
-                  result = result || thisResult;
-                  if (result) return;
-                }
-              }
+              result = result && dataCompare(depTargetNode, dep.data, strategy);
             }
 
             // state deps
             if (dep.state && depTargetNode) {
-              const stateNode = depTargetNode.getStateNode();
-              if (stateNode) {
-                const stateBasic = stateNode.getState(stateName);
-                if (stateBasic !== "undefined") {
-                  const depBasic = _.get(dep.state, stateName);
-                  if (strategy === "and") {
-                    result = result && _.isEqual(stateBasic, depBasic);
-                    if (!result) return;
-                  } else {
-                    // or
-                    result = result || _.isEqual(stateBasic, depBasic);
-                    if (!result) return;
-                  }
-                } else {
-                  // TO FIX: Need a case to improve this
-                  // recursively find other UI Node
-                  result = stateDepsResolver(stateNode, stateName);
-                }
-              }
+              result =
+                result &&
+                stateCompare(depTargetNode, dep.state, stateName, strategy);
             }
           });
         } else {
