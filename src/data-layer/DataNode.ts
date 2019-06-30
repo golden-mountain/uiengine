@@ -21,7 +21,6 @@ export default class DataNode implements IDataNode {
   schema?: any;
   rootSchema?: any;
   data: any;
-  updatingData?: any;
 
   constructor(source: any, uiNode: IUINode, request?: IRequest) {
     this.uiNode = uiNode;
@@ -109,23 +108,6 @@ export default class DataNode implements IDataNode {
       noUpdateLayout = _.isEqual(value, this.data);
     }
 
-    // check data from update plugins
-    this.updatingData = value;
-    const exeConfig: IPluginExecutionConfig = {
-      stopWhenEmpty: true,
-      returnLastValue: true
-    };
-    const couldUpdate = await this.pluginManager.executePlugins(
-      "data.update.could",
-      // when one validation got false value, break; the rest plugins execution
-      exeConfig
-    );
-
-    if (couldUpdate.status === false) {
-      this.errorInfo = couldUpdate;
-      return false;
-    }
-
     // update this data
     if (path) {
       _.set(this.data, path, value);
@@ -139,15 +121,26 @@ export default class DataNode implements IDataNode {
       }
     }
 
+    // check data from update plugins
+    const exeConfig: IPluginExecutionConfig = {
+      stopWhenEmpty: true,
+      returnLastValue: true
+    };
+    this.errorInfo = await this.pluginManager.executePlugins(
+      "data.update.could",
+      // when one validation got false value, break; the rest plugins execution
+      exeConfig
+    );
+
     // update state without sending message
     if (noUpdateLayout) {
+      await this.uiNode.pluginManager.executePlugins("ui.parser");
       await this.uiNode.stateNode.renewStates();
     } else {
       await this.uiNode.updateLayout();
     }
 
     // this.uiNode.sendMessage();
-    this.updatingData = undefined;
     return true;
   }
 
@@ -176,11 +169,14 @@ export default class DataNode implements IDataNode {
 
       // update state without sending message
       if (noUpdateLayout) {
+        // for update props purpose
+        await this.uiNode.pluginManager.executePlugins("ui.parser");
         await this.uiNode.stateNode.renewStates();
       } else {
         await this.uiNode.updateLayout();
       }
-      // this.uiNode.sendMessage();
+
+      this.uiNode.sendMessage();
     }
   }
 }

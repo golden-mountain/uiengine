@@ -25,12 +25,16 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
   const event = new Event(uiNode);
   let eventFuncs = await event.loadEvents($events);
 
+  // get error validation info
+  const errorInfo = uiNode.dataNode.errorInfo;
+
   // assign all default props
   let result = {
     key: uiNode.id,
     label: dataLabel,
     type: inputType,
     value,
+    errorInfo,
     ...eventFuncs
   };
 

@@ -10,7 +10,6 @@ export default class DataNode implements IDataNode {
     schema?: any;
     rootSchema?: any;
     data: any;
-    updatingData?: any;
     constructor(source: any, uiNode: IUINode, request?: IRequest);
     getErrorInfo(): any;
     getData(path?: string): any;

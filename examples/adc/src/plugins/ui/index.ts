@@ -1,2 +1,1 @@
-export * from "./props";
-export * from "./component";
+export * from "./parser";

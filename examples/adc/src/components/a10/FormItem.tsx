@@ -7,7 +7,7 @@ import { UIEngineRegister } from "UIEngine";
 const { Item } = Form;
 
 export const FormItem = (props: any) => {
-  let { children, type, ...rest } = props;
+  let { children, type, errorInfo, ...rest } = props;
   let element: any = children;
   if (type) {
     if (type.indexOf(":") === -1) type = "antd:" + _.upperFirst(type);
@@ -23,5 +23,17 @@ export const FormItem = (props: any) => {
     }
   }
 
-  return <Item {...rest}>{element}</Item>;
+  let error = {};
+  if (!_.get(errorInfo, "status", true)) {
+    error = {
+      validateStatus: _.isString(errorInfo.status) ? errorInfo.status : "error",
+      help: errorInfo.code
+    };
+  }
+
+  return (
+    <Item {...rest} {...error}>
+      {element}
+    </Item>
+  );
 };
