@@ -1,5 +1,9 @@
 import React from "react";
+import _ from "lodash";
 import { Table, Input, Button, Popconfirm, Form } from "antd";
+import { A10Modal } from "./Modal";
+
+import { UIEngineContext } from "UIEngine";
 
 const EditableContext = React.createContext({});
 
@@ -96,6 +100,7 @@ class EditableCell extends React.Component<any, any> {
 
 export class EditableTable extends React.Component<any, any> {
   private columns: any;
+  static contextType = UIEngineContext;
 
   constructor(props: any) {
     super(props);
@@ -146,8 +151,7 @@ export class EditableTable extends React.Component<any, any> {
       //     address: 'London, Park Lane no. 1',
       //   },
       // ],
-      dataSource,
-      count: 2
+      show_popup: false
     };
   }
 
@@ -156,13 +160,13 @@ export class EditableTable extends React.Component<any, any> {
     this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
   };
 
-  handleAdd = () => {
-    const { count, dataSource } = this.state;
-    const newData = Object.assign({}, dataSource[0]);
-    this.setState({
-      dataSource: [...dataSource, newData],
-      count: count + 1
-    });
+  handleAdd = () => {};
+  openModal = () => {
+    if (_.has(this.props, "modal.layout")) {
+      this.setState({ show_popup: true });
+    } else {
+      console.error("popup layout not provided on schema");
+    }
   };
 
   handleSave = (row: any) => {
@@ -180,9 +184,13 @@ export class EditableTable extends React.Component<any, any> {
       .setDataOnNode(this.props.dataSource, dataSource);
   };
 
+  closeModal = () => {
+    this.setState({ show_popup: false });
+  };
+
   render() {
-    // console.log(this.props);
     const { dataSource } = this.state;
+    const { modal } = this.props;
     const components = {
       body: {
         row: EditableFormRow,
@@ -213,6 +221,14 @@ export class EditableTable extends React.Component<any, any> {
         >
           Add a row
         </Button>
+
+        <Button
+          onClick={this.openModal}
+          type="danger"
+          style={{ marginBottom: 16 }}
+        >
+          Full Fill a Port
+        </Button>
         <Table
           components={components}
           rowClassName={() => "editable-row"}
@@ -220,6 +236,9 @@ export class EditableTable extends React.Component<any, any> {
           dataSource={dataSource}
           columns={columns}
         />
+        {this.state.show_popup ? (
+          <A10Modal {...modal} close={this.closeModal.bind(this)} />
+        ) : null}
       </div>
     );
   }

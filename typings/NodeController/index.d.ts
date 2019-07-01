@@ -7,6 +7,7 @@ export interface INodeController {
   nodes: Array<IUINode>;
   messager: IMessager;
   requestConfig: IRequestConfig;
+  activeLayout: string;
 
   loadUINode(
     layout: ILayoutSchema | string,

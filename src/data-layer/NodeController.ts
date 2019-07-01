@@ -18,6 +18,7 @@ export default class NodeController implements INodeController {
   nodes: Array<IUINode> = [];
   messager: IMessager;
   requestConfig: IRequestConfig;
+  activeLayout: string = "";
 
   constructor(requestConfig: any) {
     this.messager = new Messager();
@@ -54,6 +55,7 @@ export default class NodeController implements INodeController {
     }
 
     this.nodes[rootName] = uiNode;
+    this.activeLayout = rootName;
     return uiNode;
   }
 

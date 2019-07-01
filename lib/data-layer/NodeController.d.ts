@@ -5,6 +5,7 @@ export default class NodeController implements INodeController {
     nodes: Array<IUINode>;
     messager: IMessager;
     requestConfig: IRequestConfig;
+    activeLayout: string;
     constructor(requestConfig: any);
     /**
      * Load a layout from remote or local

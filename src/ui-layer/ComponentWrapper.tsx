@@ -23,7 +23,10 @@ class ComponentWrapper extends React.Component<
   constructor(props: IComponentWrapper) {
     super(props);
     const { uiNode } = props;
-    const initialState: IComponentState = uiNode.stateInfo;
+    const initialState: IComponentState = {
+      state: uiNode.stateNode.state,
+      data: uiNode.dataNode.data
+    };
     this.state = initialState;
 
     // register setState func

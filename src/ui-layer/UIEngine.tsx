@@ -1,6 +1,11 @@
 import React from "react";
 import _ from "lodash";
-import { NodeController, ComponentWrapper, UIEngineRegister } from "..";
+import {
+  NodeController,
+  ComponentWrapper,
+  UIEngineRegister,
+  UIEngineContext
+} from "..";
 
 import * as plugins from "../plugins";
 UIEngineRegister.registerPlugins(plugins);
@@ -18,7 +23,8 @@ export default class UIEngine extends React.Component<
 > {
   nodes: any = [];
   state = {
-    nodes: []
+    nodes: [],
+    activeNodeID: ""
   };
   nodeController: INodeController;
 
@@ -59,15 +65,21 @@ export default class UIEngine extends React.Component<
 
   render() {
     const { layouts, reqConfig, test, ...rest } = this.props;
-
-    return this.state.nodes.map((uiNode: IUINode, layoutKey: number) => {
-      return (
-        <ComponentWrapper
-          uiNode={uiNode}
-          {...rest}
-          key={`layout-${layoutKey}`}
-        />
-      );
-    });
+    const context = {
+      controller: this.nodeController
+    };
+    return (
+      <UIEngineContext.Provider value={context}>
+        {this.state.nodes.map((uiNode: IUINode, layoutKey: number) => {
+          return (
+            <ComponentWrapper
+              uiNode={uiNode}
+              {...rest}
+              key={`layout-${layoutKey}`}
+            />
+          );
+        })}
+      </UIEngineContext.Provider>
+    );
   }
 }

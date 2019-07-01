@@ -1,7 +1,7 @@
 import { IUINode } from "../UINode";
 
 export interface IComponentWrapper {
-  uiNode: IUINode;
+  uiNode?: IUINode;
   key?: string;
   [anyKey: string]: any;
 }

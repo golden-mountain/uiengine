@@ -435,7 +435,11 @@
           "component": "a10:EditableTable",
           "datasource": "slb.virtual-server:port-list",
           "props": {
-            "title": "vPorts"
+            "modal": {
+              "layout": "schema/ui/slb.virtual-server.port.json",
+              "title": "Create Virtual Port",
+              "width": "80%"
+            }
           },
           "$children": [
             {

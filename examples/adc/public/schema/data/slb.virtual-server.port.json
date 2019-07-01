@@ -1,0 +1,4425 @@
+{
+  "version": "3.0.0#Autoform v1.5",
+  "axapi": "slb/virtual-server/{name}/port/{port-number}+{protocol}",
+  "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
+  "cm-lineage": "slb.virtual-server.port",
+  "cm-object-meta": {
+    "obj-occurences": "multi"
+  },
+  "fields": [
+    {
+      "key": "port-number",
+      "label": "Port Number",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.port-number",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mvm",
+        "object-key": true,
+        "range": "0-65534",
+        "gui-section": "Basic",
+        "help": "Port"
+      }
+    },
+    {
+      "key": "protocol",
+      "label": "Protocol",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.protocol",
+      "cm-meta": {
+        "format": "string",
+        "flags": "mvy",
+        "object-key": true,
+        "condition": "port-number",
+        "gui-section": "Basic",
+        "allowed": [
+          {
+            "label": "TCP",
+            "value": "tcp",
+            "help": "TCP LB service"
+          },
+          {
+            "label": "UDP",
+            "value": "udp",
+            "help": "UDP Port"
+          },
+          {
+            "label": "Others",
+            "value": "others",
+            "help": "for no tcp/udp protocol, do IP load balancing"
+          },
+          {
+            "label": "Diameter",
+            "value": "diameter",
+            "help": "diameter port"
+          },
+          {
+            "label": "DNS TCP",
+            "value": "dns-tcp",
+            "help": "DNS service over TCP"
+          },
+          {
+            "label": "DNS UDP",
+            "value": "dns-udp",
+            "help": "DNS service over UDP"
+          },
+          {
+            "label": "Fast HTTP",
+            "value": "fast-http",
+            "help": "Fast HTTP Port"
+          },
+          {
+            "label": "FIX",
+            "value": "fix",
+            "help": "FIX Port"
+          },
+          {
+            "label": "FTP",
+            "value": "ftp",
+            "help": "File Transfer Protocol Port"
+          },
+          {
+            "label": "FTP Proxy",
+            "value": "ftp-proxy",
+            "help": "ftp proxy port"
+          },
+          {
+            "label": "HTTP",
+            "value": "http",
+            "help": "HTTP Port"
+          },
+          {
+            "label": "HTTPS",
+            "value": "https",
+            "help": "HTTPS port"
+          },
+          {
+            "label": "Http2",
+            "value": "http2",
+            "help": "[Deprecated] HTTP2 Port"
+          },
+          {
+            "label": "Http2s",
+            "value": "http2s",
+            "help": "[Deprecated] HTTP2 SSL port"
+          },
+          {
+            "label": "IMAP",
+            "value": "imap",
+            "help": "imap proxy port"
+          },
+          {
+            "label": "Mlb",
+            "value": "mlb",
+            "help": "Message based load balancing"
+          },
+          {
+            "label": "Mms",
+            "value": "mms",
+            "help": "Microsoft Multimedia Service Port"
+          },
+          {
+            "label": "Mysql",
+            "value": "mysql",
+            "help": "mssql port"
+          },
+          {
+            "label": "Mssql",
+            "value": "mssql",
+            "help": "mssql"
+          },
+          {
+            "label": "POP3",
+            "value": "pop3",
+            "help": "pop3 proxy port"
+          },
+          {
+            "label": "Radius",
+            "value": "radius",
+            "help": "RADIUS Port"
+          },
+          {
+            "label": "RTSP",
+            "value": "rtsp",
+            "help": "Real Time Streaming Protocol Port"
+          },
+          {
+            "label": "SIP",
+            "value": "sip",
+            "help": "Session initiation protocol over UDP"
+          },
+          {
+            "label": "SIP TCP",
+            "value": "sip-tcp",
+            "help": "Session initiation protocol over TCP"
+          },
+          {
+            "label": "Sips",
+            "value": "sips",
+            "help": "Session initiation protocol over TLS"
+          },
+          {
+            "label": "SMPP TCP",
+            "value": "smpp-tcp",
+            "help": "SMPP service over TCP"
+          },
+          {
+            "label": "Spdy",
+            "value": "spdy",
+            "help": "spdy port"
+          },
+          {
+            "label": "Spdys",
+            "value": "spdys",
+            "help": "spdys port"
+          },
+          {
+            "label": "SMTP",
+            "value": "smtp",
+            "help": "SMTP Port"
+          },
+          {
+            "label": "SSL Proxy",
+            "value": "ssl-proxy",
+            "help": "Generic SSL proxy"
+          },
+          {
+            "label": "SSLi",
+            "value": "ssli",
+            "help": "SSL insight"
+          },
+          {
+            "label": "SSH",
+            "value": "ssh",
+            "help": "SSH Port"
+          },
+          {
+            "label": "TCP Proxy",
+            "value": "tcp-proxy",
+            "help": "Generic TCP proxy"
+          },
+          {
+            "label": "TFTP",
+            "value": "tftp",
+            "help": "TFTP Port"
+          },
+          {
+            "label": "Fast FIX",
+            "value": "fast-fix",
+            "help": "Fast FIX port"
+          }
+        ],
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "range",
+      "label": "Range",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.range",
+      "cm-meta": {
+        "format": "number",
+        "flags": "ob",
+        "range": "0-254",
+        "modify-ineligible": true,
+        "default": "0",
+        "gui-section": "Basic",
+        "condition": "protocol",
+        "disabled": [
+          "protocol",
+          [
+            "others",
+            "diameter",
+            "ftp",
+            "ftp-proxy",
+            "mlb",
+            "mms",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "tftp",
+            "mysql",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "ssli",
+            "mssql"
+          ]
+        ],
+        "help": "Virtual Port range",
+        "m-exclusion": ["alternate-port"]
+      }
+    },
+    {
+      "key": "alternate-port",
+      "label": "Alternate Port",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.alternate-port",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "protocol",
+        "modify-ineligible": true,
+        "m-exclusion": ["range"],
+        "disabled": [
+          "protocol",
+          [
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "mysql",
+            "mssql",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "fix",
+            "fast-fix",
+            "ssli",
+            "ssh"
+          ]
+        ],
+        "gui-section": "Basic",
+        "help": "Alternate Virtual Port"
+      }
+    },
+    {
+      "key": "proxy-layer",
+      "label": "Proxy Layer",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.proxy-layer",
+      "cm-meta": {
+        "format": "string",
+        "flags": "ob",
+        "enabled": ["protocol", ["http", "https"]],
+        "allowed": [
+          {
+            "label": "V1",
+            "value": "v1",
+            "help": "Force using old proxy"
+          },
+          {
+            "label": "V2",
+            "value": "v2",
+            "help": "Force using new proxy"
+          }
+        ],
+        "gui-section": "Advanced",
+        "help": "Force Proxy-layer Version",
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "optimization-level",
+      "label": "Optimization Level",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.optimization-level",
+      "cm-meta": {
+        "format": "string",
+        "flags": "ob",
+        "enabled": ["protocol", ["http"]],
+        "allowed": [
+          {
+            "label": "0",
+            "value": "0",
+            "help": "No optimization"
+          },
+          {
+            "label": "1",
+            "value": "1",
+            "help": "Optimization level 1 (Experimental)"
+          }
+        ],
+        "default": "0",
+        "gui-section": "Advanced",
+        "help": "Set http optimization level",
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "support-http2",
+      "label": "Support Http2",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.support-http2",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "enabled": ["protocol", ["http", "https"]],
+        "gui-section": "Advanced",
+        "help": "Support HTTP2"
+      }
+    },
+    {
+      "key": "name",
+      "label": "Name",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.port.name",
+      "cm-meta": {
+        "format": "long-string-rlx",
+        "flags": "obr",
+        "range": "1-127",
+        "gui-section": "Advanced",
+        "help": "SLB Virtual Service Name"
+      }
+    },
+    {
+      "key": "conn-limit",
+      "label": "Connection Limit",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.conn-limit",
+      "cm-meta": {
+        "format": "number",
+        "flags": "oby",
+        "range": "1-64000000",
+        "default": "64000000",
+        "gui-section": "Basic",
+        "help": "Connection Limit"
+      }
+    },
+    {
+      "key": "reset",
+      "label": "Reset",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.reset",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "conn-limit",
+        "gui-section": "Advanced",
+        "help": "Send client reset when connection number over limit"
+      }
+    },
+    {
+      "key": "no-logging",
+      "label": "No Logging",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.no-logging",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "conn-limit",
+        "gui-section": "Advanced",
+        "help": "Do not log connection over limit event"
+      }
+    },
+    {
+      "key": "use-alternate-port",
+      "label": "Use Alternate Port",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.use-alternate-port",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "disabled": [
+          "protocol",
+          [
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "mysql",
+            "mssql",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "fix",
+            "fast-fix",
+            "ssh"
+          ]
+        ],
+        "help": "Use alternate virtual port"
+      }
+    },
+    {
+      "key": "alternate-port-number",
+      "label": "Alternate Port Number",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.alternate-port-number",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mb",
+        "range": "0-65534",
+        "condition": "use-alternate-port",
+        "help": "Virtual Port",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "alt-protocol1",
+      "label": "Alt Protocol1",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.alt-protocol1",
+      "cm-meta": {
+        "format": "string",
+        "flags": "mvy",
+        "allowed": [
+          {
+            "label": "HTTP",
+            "value": "http",
+            "help": "HTTP Port"
+          }
+        ],
+        "gui-section": "Advanced",
+        "condition": "alternate-port-number",
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "serv-sel-fail",
+      "label": "Serv Sel Fail",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.serv-sel-fail",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "alt-protocol1",
+        "gui-section": "Advanced",
+        "help": "Use alternate virtual port when server selection failure"
+      }
+    },
+    {
+      "key": "when-down",
+      "label": "When Down",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.when-down",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "alt-protocol1",
+        "gui-section": "Advanced",
+        "help": "Use alternate virtual port when down"
+      }
+    },
+    {
+      "key": "alt-protocol2",
+      "label": "Alt Protocol2",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.alt-protocol2",
+      "cm-meta": {
+        "format": "string",
+        "flags": "mvy",
+        "allowed": [
+          {
+            "label": "TCP",
+            "value": "tcp",
+            "help": "TCP LB service"
+          }
+        ],
+        "gui-section": "Advanced",
+        "condition": "alternate-port-number",
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "req-fail",
+      "label": "Request Fail",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.req-fail",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "alt-protocol2",
+        "gui-section": "Advanced",
+        "help": "Use alternate virtual port when L7 request fail"
+      }
+    },
+    {
+      "key": "when-down-protocol2",
+      "label": "When Down Protocol2",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.when-down-protocol2",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "alt-protocol2",
+        "gui-section": "Advanced",
+        "help": "Use alternate virtual port when down"
+      }
+    },
+    {
+      "key": "action",
+      "label": "Action",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.action",
+      "cm-meta": {
+        "format": "string",
+        "flags": "ovy",
+        "gui-section": "Advanced",
+        "allowed": [
+          {
+            "label": "Enable",
+            "value": "enable",
+            "help": "Enable"
+          },
+          {
+            "label": "Disable",
+            "value": "disable",
+            "help": "Disable"
+          }
+        ],
+        "default": "enable",
+        "cm-rba-field-oper": true,
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "l7-service-chain",
+      "label": "L7 Service Chain",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.l7-service-chain",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "mlb",
+            "mms",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "ssh"
+          ]
+        ]
+      }
+    },
+    {
+      "key": "def-selection-if-pref-failed",
+      "label": "Def Selection If Pref Failed",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.def-selection-if-pref-failed",
+      "cm-meta": {
+        "format": "enum",
+        "flags": "ovy",
+        "allowed": [
+          {
+            "label": "Def Selection If Pref Failed",
+            "value": "def-selection-if-pref-failed",
+            "help": "Use default server selection method if prefer method failed"
+          },
+          {
+            "label": "Def Selection If Pref Failed Disable",
+            "value": "def-selection-if-pref-failed-disable",
+            "help": "Stop using default server selection method if prefer method failed"
+          }
+        ],
+        "gui-section": "Basic",
+        "default": "def-selection-if-pref-failed"
+      }
+    },
+    {
+      "key": "ha-conn-mirror",
+      "label": "HA Connection Mirror",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.ha-conn-mirror",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mky",
+        "disabled": [
+          "protocol",
+          [
+            "dns-udp",
+            "dns-tcp",
+            "fix",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mysql",
+            "mssql",
+            "pop3",
+            "sip-tcp",
+            "sips",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "ssli",
+            "ssh"
+          ]
+        ],
+        "help": "Enable for HA Conn sync",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "on-syn",
+      "label": "On Syn",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.on-syn",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "ha-conn-mirror",
+        "disabled": [
+          "protocol",
+          [
+            "others",
+            "tftp",
+            "fast-http",
+            "sip",
+            "udp",
+            "diameter",
+            "dns-udp",
+            "dns-tcp",
+            "fix",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mysql",
+            "mssql",
+            "pop3",
+            "sip-tcp",
+            "sips",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "ssli",
+            "ssh"
+          ]
+        ],
+        "gui-section": "Advanced",
+        "help": "Enable for HA Conn sync for l4 tcp sessions on SYN"
+      }
+    },
+    {
+      "key": "skip-rev-hash",
+      "label": "Skip Receive Hash",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.skip-rev-hash",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "Skip rev tuple hash insertion",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "message-switching",
+      "label": "Message Switching",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.message-switching",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "Message switching",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "force-routing-mode",
+      "label": "Force Routing Mode",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.force-routing-mode",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "Force routing mode",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "rate-limit-pr-log",
+      "label": "Rate Limit PR Log",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.rate-limit-pr-log",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "gui-section": "Advanced",
+        "help": "Apply a rate limiter to Per Request logging"
+      }
+    },
+    {
+      "key": "rate",
+      "label": "Rate",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.rate",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mv",
+        "condition": "rate-limit-pr-log",
+        "gui-section": "Advanced",
+        "help": "Specify the log message rate"
+      }
+    },
+    {
+      "key": "per",
+      "label": "Per",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.per",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "rate",
+        "gui-section": "Advanced",
+        "help": "Specify the time interval over which the rate applies"
+      }
+    },
+    {
+      "key": "secs",
+      "label": "Secs",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.secs",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mv",
+        "condition": "per",
+        "range": "1-100",
+        "gui-section": "Advanced",
+        "help": "Specify the interval in seconds"
+      }
+    },
+    {
+      "key": "reset-on-server-selection-fail",
+      "label": "Reset On Server Selection Fail",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.reset-on-server-selection-fail",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "disabled": ["protocol", ["udp", "dns-udp", "tftp"]],
+        "gui-section": "Advanced",
+        "help": "Send client reset when server selection fails"
+      }
+    },
+    {
+      "key": "clientip-sticky-nat",
+      "label": "Clientip Sticky NAT",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.clientip-sticky-nat",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "Prefer to use same source NAT address for a client"
+      }
+    },
+    {
+      "key": "extended-stats",
+      "label": "Extended Stats",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.extended-stats",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "Enable extended statistics on virtual port",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "gslb-enable",
+      "label": "GSLB Enable",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.gslb-enable",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "oky",
+        "plat-neg-list": ["fireeye"],
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "others",
+            "diameter",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "ssli",
+            "ssh"
+          ]
+        ],
+        "help": "Enable Global Server Load Balancing",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "view",
+      "label": "View",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.view",
+      "cm-meta": {
+        "format": "number",
+        "flags": "ob",
+        "range": "1-31",
+        "condition": "gslb-enable",
+        "gui-section": "Advanced",
+        "help": "Specify a GSLB View"
+      }
+    },
+    {
+      "key": "snat-on-vip",
+      "label": "SNAT On VIP",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.snat-on-vip",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "Enable source NAT traffic against VIP",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "stats-data-action",
+      "label": "Stats Data Action",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.stats-data-action",
+      "cm-meta": {
+        "format": "string",
+        "flags": "ovy",
+        "allowed": [
+          {
+            "label": "Stats Data Enable",
+            "value": "stats-data-enable",
+            "help": "Enable statistical data collection for virtual port"
+          },
+          {
+            "label": "Stats Data Disable",
+            "value": "stats-data-disable",
+            "help": "Disable statistical data collection for virtual port"
+          }
+        ],
+        "default": "stats-data-enable",
+        "gui-section": "Advanced",
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "syn-cookie",
+      "label": "Syn Cookie",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.syn-cookie",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "oky",
+        "disabled": [
+          "protocol",
+          ["udp", "fast-http", "dns-udp", "radius", "sip"]
+        ],
+        "help": "Enable syn-cookie",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "expand",
+      "label": "Expand",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.expand",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "syn-cookie",
+        "disabled": [
+          "protocol",
+          [
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "pop3",
+            "ssl-proxy",
+            "smtp",
+            "sip-tcp",
+            "sips",
+            "tcp-proxy",
+            "diameter",
+            "dns-tcp",
+            "mysql",
+            "mssql",
+            "fix",
+            "fast-fix",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "ftp-proxy",
+            "ssli",
+            "ssh"
+          ]
+        ],
+        "help": "expand syn-cookie with timestamp and wscale",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "access-list",
+      "label": "Access List",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.access-list",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "help": "Apply ACL rules to this Virtual Port",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "acl-id-list",
+      "label": "ACL ID List",
+      "type": "table",
+      "cm-lineage": "slb.virtual-server.port.acl-id-list",
+      "cm-meta": {
+        "format": "fields",
+        "start": true,
+        "multi": true,
+        "gui-section": "Advanced",
+        "condition": "access-list"
+      },
+      "fields": [
+        {
+          "key": "acl-id",
+          "label": "ACL ID",
+          "type": "select",
+          "cm-lineage": "slb.virtual-server.port.acl-id-list.acl-id",
+          "cm-meta": {
+            "format": "number",
+            "flags": "mv",
+            "multi-field-key": true,
+            "max-elements": "199",
+            "range": "1-199",
+            "obj-association": ["access-list.standard", "access-list.extended"],
+            "help": "ACL id VPORT",
+            "condition": "access-list",
+            "gui-section": "Advanced"
+          }
+        },
+        {
+          "key": "nat-pool-id",
+          "label": "NAT Pool ID",
+          "type": "dummy",
+          "cm-lineage": "slb.virtual-server.port.acl-id-list.nat-pool-id",
+          "cm-meta": {
+            "format": "dummy",
+            "flags": "ok",
+            "condition": "acl-id",
+            "help": "Policy based Source NAT",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Source NAT Pool"
+        },
+        {
+          "key": "acl-id-src-nat-pool",
+          "label": "ACL ID Source NAT Pool",
+          "type": "select",
+          "cm-lineage": "slb.virtual-server.port.acl-id-list.acl-id-src-nat-pool",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "mv",
+            "range": "1-63",
+            "condition": "nat-pool-id",
+            "multi-field-key": true,
+            "obj-association": [
+              "ip.nat.pool",
+              "ipv6.nat.pool",
+              "ip.nat.pool-group",
+              "ipv6.nat.pool-group"
+            ],
+            "help": "Policy based Source NAT",
+            "m-exclusion": ["shared-partition-pool-id"],
+            "gui-section": "Advanced"
+          },
+          "name-label": "Source NAT Pool"
+        },
+        {
+          "key": "acl-id-seq-num",
+          "label": "ACL ID Sequence Number",
+          "type": "input-number",
+          "cm-lineage": "slb.virtual-server.port.acl-id-list.acl-id-seq-num",
+          "cm-meta": {
+            "format": "number",
+            "flags": "obr",
+            "range": "1-32",
+            "condition": "acl-id-src-nat-pool",
+            "help": "Specify ACL precedence",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Sequence Number"
+        },
+        {
+          "key": "p-pool-id",
+          "label": "P Pool ID",
+          "type": "dummy",
+          "cm-lineage": "slb.virtual-server.port.acl-id-list.p-pool-id",
+          "cm-meta": {
+            "format": "dummy",
+            "flags": "okS",
+            "condition": "nat-pool-id",
+            "help": "Policy based Source NAT from shared partition",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Partition"
+        },
+        {
+          "key": "shared-partition-pool-id",
+          "label": "Shared Partition Pool ID",
+          "type": "switch",
+          "cm-lineage": "slb.virtual-server.port.acl-id-list.shared-partition-pool-id",
+          "cm-meta": {
+            "format": "flag",
+            "flags": "mk",
+            "condition": "p-pool-id",
+            "m-exclusion": ["acl-id-src-nat-pool"],
+            "help": "Policy based Source NAT from shared partition",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Shared"
+        },
+        {
+          "key": "acl-id-src-nat-pool-shared",
+          "label": "ACL ID Source NAT Pool Shared",
+          "type": "select",
+          "cm-lineage": "slb.virtual-server.port.acl-id-list.acl-id-src-nat-pool-shared",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "mv",
+            "range": "1-63",
+            "condition": "shared-partition-pool-id",
+            "multi-field-key": true,
+            "obj-association": [
+              "ip.nat.pool",
+              "ipv6.nat.pool",
+              "ip.nat.pool-group",
+              "ipv6.nat.pool-group"
+            ],
+            "help": "Policy based Source NAT",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Source NAT Pool"
+        },
+        {
+          "key": "acl-id-seq-num-shared",
+          "label": "ACL ID Sequence Number Shared",
+          "type": "input-number",
+          "cm-lineage": "slb.virtual-server.port.acl-id-list.acl-id-seq-num-shared",
+          "cm-meta": {
+            "format": "number",
+            "flags": "obr",
+            "range": "1-32",
+            "condition": "acl-id-src-nat-pool-shared",
+            "help": "Specify ACL precedence",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Sequence Number"
+        }
+      ]
+    },
+    {
+      "key": "acl-name-list",
+      "label": "ACL Name List",
+      "type": "table",
+      "cm-lineage": "slb.virtual-server.port.acl-name-list",
+      "cm-meta": {
+        "format": "fields",
+        "start": true,
+        "multi": true,
+        "gui-section": "Advanced",
+        "condition": "access-list"
+      },
+      "fields": [
+        {
+          "key": "acl-name",
+          "label": "ACL Name",
+          "type": "select",
+          "cm-lineage": "slb.virtual-server.port.acl-name-list.acl-name",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "mb",
+            "multi-field-key": true,
+            "max-elements": "100",
+            "range": "1-16",
+            "condition": "access-list",
+            "obj-association": ["ip.access-list", "ipv6.access-list"],
+            "help": "Apply an access list name",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Name"
+        },
+        {
+          "key": "nat-pool-name",
+          "label": "NAT Pool Name",
+          "type": "dummy",
+          "cm-lineage": "slb.virtual-server.port.acl-name-list.nat-pool-name",
+          "cm-meta": {
+            "format": "dummy",
+            "flags": "ok",
+            "condition": "acl-name",
+            "help": "Policy based Source NAT",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Source NAT Pool"
+        },
+        {
+          "key": "acl-name-src-nat-pool",
+          "label": "ACL Name Source NAT Pool",
+          "type": "select",
+          "cm-lineage": "slb.virtual-server.port.acl-name-list.acl-name-src-nat-pool",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "mv",
+            "range": "1-63",
+            "condition": "nat-pool-name",
+            "multi-field-key": true,
+            "help": "Policy based Source NAT",
+            "obj-association": [
+              "ip.nat.pool",
+              "ipv6.nat.pool",
+              "ip.nat.pool-group",
+              "ipv6.nat.pool-group"
+            ],
+            "m-exclusion": ["shared-partition-pool-name"],
+            "gui-section": "Advanced"
+          },
+          "name-label": "Source NAT Pool"
+        },
+        {
+          "key": "acl-name-seq-num",
+          "label": "ACL Name Sequence Number",
+          "type": "input-number",
+          "cm-lineage": "slb.virtual-server.port.acl-name-list.acl-name-seq-num",
+          "cm-meta": {
+            "format": "number",
+            "flags": "obr",
+            "range": "1-32",
+            "condition": "acl-name-src-nat-pool",
+            "help": "Specify ACL precedence",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Sequence Number"
+        },
+        {
+          "key": "p-pool-name",
+          "label": "P Pool Name",
+          "type": "dummy",
+          "cm-lineage": "slb.virtual-server.port.acl-name-list.p-pool-name",
+          "cm-meta": {
+            "format": "dummy",
+            "flags": "okS",
+            "condition": "nat-pool-name",
+            "help": "Policy based Source NAT from shared partition",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Partition"
+        },
+        {
+          "key": "shared-partition-pool-name",
+          "label": "Shared Partition Pool Name",
+          "type": "switch",
+          "cm-lineage": "slb.virtual-server.port.acl-name-list.shared-partition-pool-name",
+          "cm-meta": {
+            "format": "flag",
+            "flags": "mk",
+            "condition": "p-pool-name",
+            "m-exclusion": ["acl-name-src-nat-pool"],
+            "help": "Policy based Source NAT from shared partition",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Shared"
+        },
+        {
+          "key": "acl-name-src-nat-pool-shared",
+          "label": "ACL Name Source NAT Pool Shared",
+          "type": "select",
+          "cm-lineage": "slb.virtual-server.port.acl-name-list.acl-name-src-nat-pool-shared",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "mv",
+            "range": "1-63",
+            "condition": "shared-partition-pool-name",
+            "multi-field-key": true,
+            "help": "Policy based Source NAT",
+            "obj-association": [
+              "ip.nat.pool",
+              "ipv6.nat.pool",
+              "ip.nat.pool-group",
+              "ipv6.nat.pool-group"
+            ],
+            "gui-section": "Advanced"
+          },
+          "name-label": "Source NAT Pool"
+        },
+        {
+          "key": "acl-name-seq-num-shared",
+          "label": "ACL Name Sequence Number Shared",
+          "type": "input-number",
+          "cm-lineage": "slb.virtual-server.port.acl-name-list.acl-name-seq-num-shared",
+          "cm-meta": {
+            "format": "number",
+            "flags": "obr",
+            "range": "1-32",
+            "condition": "acl-name-src-nat-pool-shared",
+            "help": "Specify ACL precedence",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Sequence Number"
+        }
+      ]
+    },
+    {
+      "key": "template",
+      "label": "Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "help": "Applying Templates to Virtual Port",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "policy-template",
+      "label": "Policy Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.policy-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "disabled": [
+          "protocol",
+          ["diameter", "fix", "fast-fix", "tftp", "mysql", "mssql"]
+        ],
+        "help": "Policy Template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-policy",
+      "label": "Template Policy",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-policy",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "policy-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.policy"],
+        "help": "Policy Template",
+        "m-exclusion": ["shared-partition-policy-template"]
+      }
+    },
+    {
+      "key": "p-policy",
+      "label": "P Policy",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-policy",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "policy-template",
+        "help": "Reference a policy template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-policy-template",
+      "label": "Shared Partition Policy Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-policy-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-policy",
+        "m-exclusion": ["template-policy"],
+        "help": "Reference a policy template from shared partition"
+      }
+    },
+    {
+      "key": "template-policy-shared",
+      "label": "Template Policy Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-policy-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-policy-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.policy"],
+        "help": "Policy Template Name"
+      }
+    },
+    {
+      "key": "aflex-dummy",
+      "label": "Aflex Dummy",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.aflex-dummy",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "Bind aFlex Script to the Virtual Port"
+      }
+    },
+    {
+      "key": "aflex-scripts",
+      "label": "Aflex Scripts",
+      "type": "table",
+      "cm-lineage": "slb.virtual-server.port.aflex-scripts",
+      "cm-meta": {
+        "format": "fields",
+        "start": true,
+        "multi": true,
+        "condition": "aflex-dummy",
+        "gui-section": "Advanced"
+      },
+      "fields": [
+        {
+          "key": "aflex",
+          "label": "Aflex",
+          "type": "input",
+          "cm-lineage": "slb.virtual-server.port.aflex-scripts.aflex",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "mv",
+            "multi-field-key": true,
+            "max-elements": "128",
+            "range": "1-63",
+            "condition": "aflex-dummy",
+            "disabled": [
+              "protocol",
+              [
+                "tftp",
+                "pop3",
+                "imap",
+                "rtsp",
+                "smpp-tcp",
+                "spdy",
+                "spdys",
+                "ssli"
+              ]
+            ],
+            "help": "aFleX Script Name",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Aflex Name"
+        },
+        {
+          "key": "aflex-partition",
+          "label": "Aflex Partition",
+          "type": "dummy",
+          "cm-lineage": "slb.virtual-server.port.aflex-scripts.aflex-partition",
+          "cm-meta": {
+            "format": "dummy",
+            "flags": "okS",
+            "condition": "aflex-dummy",
+            "help": "Reference aFleX from shared partition",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Partition"
+        },
+        {
+          "key": "shared-partition",
+          "label": "Shared Partition",
+          "type": "dummy",
+          "cm-lineage": "slb.virtual-server.port.aflex-scripts.shared-partition",
+          "cm-meta": {
+            "format": "dummy",
+            "flags": "mk",
+            "condition": "aflex-partition",
+            "help": "Reference aFleX from shared partition",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Shared"
+        },
+        {
+          "key": "aflex-shared",
+          "label": "Aflex Shared",
+          "type": "input",
+          "cm-lineage": "slb.virtual-server.port.aflex-scripts.aflex-shared",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "mv",
+            "multi-field-key": true,
+            "max-elements": "128",
+            "range": "1-63",
+            "condition": "shared-partition",
+            "disabled": [
+              "protocol",
+              [
+                "tftp",
+                "pop3",
+                "imap",
+                "rtsp",
+                "smpp-tcp",
+                "spdy",
+                "spdys",
+                "ssli"
+              ]
+            ],
+            "help": "aFleX Script Name",
+            "gui-section": "Advanced"
+          },
+          "name-label": "Aflex Partition Shared"
+        }
+      ]
+    },
+    {
+      "key": "no-auto-up-on-aflex",
+      "label": "No Auto Up On Aflex",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.no-auto-up-on-aflex",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "Don't automatically mark vport up when aFleX is bound",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "enable-scaleout",
+      "label": "Enable Scaleout",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.enable-scaleout",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "scaleout-bucket-count",
+      "label": "Scaleout Bucket Count",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.scaleout-bucket-count",
+      "cm-meta": {
+        "format": "number",
+        "flags": "ob",
+        "default": "32",
+        "range": "1-256",
+        "gui-section": "Advanced",
+        "help": "Number of traffic buckets"
+      }
+    },
+    {
+      "key": "scaleout-device-group",
+      "label": "Scaleout Device Group",
+      "type": "input-number",
+      "cm-lineage": "slb.virtual-server.port.scaleout-device-group",
+      "cm-meta": {
+        "format": "number",
+        "flags": "ob",
+        "range": "1-16",
+        "gui-section": "Advanced",
+        "help": "Device group id"
+      }
+    },
+    {
+      "key": "source-nat",
+      "label": "Source NAT",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.source-nat",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "Source NAT"
+      }
+    },
+    {
+      "key": "nat-pool",
+      "label": "NAT Pool",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.nat-pool",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "source-nat",
+        "help": "Specify NAT pool or pool group",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "pool",
+      "label": "Pool",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.pool",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-63",
+        "condition": "nat-pool",
+        "obj-association": [
+          "ip.nat.pool",
+          "ipv6.nat.pool",
+          "ip.nat.pool-group",
+          "ipv6.nat.pool-group"
+        ],
+        "gui-section": "Advanced",
+        "help": "Specify NAT pool or pool group",
+        "m-exclusion": ["shared-partition-pool"]
+      }
+    },
+    {
+      "key": "p-pool",
+      "label": "P Pool",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-pool",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okS",
+        "condition": "nat-pool",
+        "help": "Specify NAT pool or pool group from shared partition",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "shared-partition-pool",
+      "label": "Shared Partition Pool",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-pool",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "condition": "p-pool",
+        "m-exclusion": ["pool"],
+        "help": "Specify NAT pool or pool group from shared partition",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "pool-shared",
+      "label": "Pool Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.pool-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-63",
+        "condition": "shared-partition-pool",
+        "obj-association": [
+          "ip.nat.pool",
+          "ipv6.nat.pool",
+          "ip.nat.pool-group",
+          "ipv6.nat.pool-group"
+        ],
+        "help": "Specify NAT pool or pool group",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "auto",
+      "label": "Auto",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.auto",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mky",
+        "condition": "source-nat",
+        "gui-section": "Advanced",
+        "help": "Configure auto NAT for the vport"
+      }
+    },
+    {
+      "key": "precedence",
+      "label": "Precedence",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.precedence",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "condition": "auto",
+        "gui-section": "Advanced",
+        "help": "Set auto NAT pool as higher precedence for source NAT"
+      }
+    },
+    {
+      "key": "use-cgnv6",
+      "label": "Use CGNv6",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.use-cgnv6",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "enabled": ["protocol", ["http", "https", "tcp-proxy"]],
+        "condition": "source-nat",
+        "gui-section": "Advanced",
+        "help": "Follow CGNv6 source NAT configuration"
+      }
+    },
+    {
+      "key": "enable-playerid-check",
+      "label": "Enable Playerid Check",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.enable-playerid-check",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "enabled": ["protocol", ["udp"]],
+        "gui-section": "Advanced",
+        "help": "Enable playerid checks on UDP packets once the AX is in active mode"
+      }
+    },
+    {
+      "key": "service-group",
+      "label": "Service Group",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.service-group",
+      "cm-meta": {
+        "format": "long-string-rlx",
+        "flags": "ob",
+        "obj-association": ["slb.service-group"],
+        "gui-section": "Basic",
+        "help": "Bind a Service Group to this Virtual Server"
+      }
+    },
+    {
+      "key": "ipinip",
+      "label": "IP in IP",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.ipinip",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "Enable IP in IP"
+      }
+    },
+    {
+      "key": "rtp-sip-call-id-match",
+      "label": "RTP SIP Call ID Match",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.rtp-sip-call-id-match",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Advanced",
+        "help": "rtp traffic try to match the real server of sip smp call-id session"
+      }
+    },
+    {
+      "key": "use-rcv-hop-for-resp",
+      "label": "Use RCV Hop For Resp",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.use-rcv-hop-for-resp",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "oky",
+        "gui-section": "Advanced",
+        "help": "Use receive hop for response to client(For packets on default-vlan, also config \"vlan-global enable-def-vlan-l2-forwarding\".)"
+      }
+    },
+    {
+      "key": "persist-type",
+      "label": "Persist Type",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.persist-type",
+      "cm-meta": {
+        "format": "string",
+        "flags": "ovy",
+        "gui-section": "Advanced",
+        "allowed": [
+          {
+            "label": "Source Destination IP Swap Persist",
+            "value": "src-dst-ip-swap-persist",
+            "help": "Create persist session after source IP and destination IP swap"
+          },
+          {
+            "label": "Use Source IP For Destination Persist",
+            "value": "use-src-ip-for-dst-persist",
+            "help": "Use the source IP to create a destination persist session"
+          },
+          {
+            "label": "Use Destination IP For Source Persist",
+            "value": "use-dst-ip-for-src-persist",
+            "help": "Use the destination IP to create source IP persist session"
+          }
+        ],
+        "condition": "use-rcv-hop-for-resp",
+        "range": "1-128"
+      }
+    },
+    {
+      "key": "redirect-fwd",
+      "label": "Redirect Forward",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.redirect-fwd",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "disabled": ["protocol", ["http2", "http2s"]],
+        "help": "L2 redirect packets to an interface/trunk in fwd direction",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "eth-fwd",
+      "label": "Ethernet Forward",
+      "type": "tags",
+      "cm-lineage": "slb.virtual-server.port.eth-fwd",
+      "cm-meta": {
+        "format": "interface",
+        "flags": "mb",
+        "condition": "redirect-fwd",
+        "gui-section": "Advanced",
+        "help": "Ethernet interface number",
+        "m-exclusion": ["trunk-fwd"]
+      }
+    },
+    {
+      "key": "trunk-fwd",
+      "label": "Trunk Forward",
+      "type": "tags",
+      "cm-lineage": "slb.virtual-server.port.trunk-fwd",
+      "cm-meta": {
+        "format": "interface",
+        "flags": "mb",
+        "condition": "redirect-fwd",
+        "m-exclusion": ["eth-fwd"],
+        "help": "Trunk interface number",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "redirect-rev",
+      "label": "Redirect Receive",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.redirect-rev",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "disabled": ["protocol", ["http2", "http2s"]],
+        "help": "L2 redirect packets to an interface/trunk in rev direction",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "eth-rev",
+      "label": "Ethernet Receive",
+      "type": "tags",
+      "cm-lineage": "slb.virtual-server.port.eth-rev",
+      "cm-meta": {
+        "format": "interface",
+        "flags": "mb",
+        "condition": "redirect-rev",
+        "gui-section": "Advanced",
+        "help": "Ethernet interface number",
+        "m-exclusion": ["trunk-rev"]
+      }
+    },
+    {
+      "key": "trunk-rev",
+      "label": "Trunk Receive",
+      "type": "tags",
+      "cm-lineage": "slb.virtual-server.port.trunk-rev",
+      "cm-meta": {
+        "format": "interface",
+        "flags": "mb",
+        "condition": "redirect-rev",
+        "m-exclusion": ["eth-rev"],
+        "help": "Trunk interface number",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "template-sip",
+      "label": "Template SIP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-sip",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "smtp",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "condition": "template",
+        "obj-association": ["slb.template.sip"],
+        "help": "SIP template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-smpp",
+      "label": "Template SMPP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-smpp",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "enabled": ["protocol", ["smpp-tcp"]],
+        "condition": "template",
+        "obj-association": ["slb.template.smpp"],
+        "help": "SMPP template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-dblb",
+      "label": "Template DBLB",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-dblb",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "fix",
+            "fast-fix",
+            "ftp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "pop3",
+            "mlb",
+            "mms",
+            "others",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smpp-tcp",
+            "smtp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp",
+            "tcp-proxy",
+            "tftp",
+            "udp",
+            "ssh"
+          ]
+        ],
+        "condition": "template",
+        "obj-association": ["slb.template.dblb"],
+        "help": "DBLB Template"
+      }
+    },
+    {
+      "key": "connection-reuse-template",
+      "label": "Connection Reuse Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.connection-reuse-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "ftp",
+            "ftp-proxy",
+            "imap",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "condition": "template",
+        "help": "Connection Reuse Template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-connection-reuse",
+      "label": "Template Connection Reuse",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-connection-reuse",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "connection-reuse-template",
+        "obj-association": ["slb.template.connection-reuse"],
+        "help": "Connection Reuse Template",
+        "m-exclusion": ["shared-partition-connection-reuse-template"]
+      }
+    },
+    {
+      "key": "p-connection-reuse",
+      "label": "P Connection Reuse",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-connection-reuse",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "connection-reuse-template",
+        "help": "Reference a connection reuse template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-connection-reuse-template",
+      "label": "Shared Partition Connection Reuse Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-connection-reuse-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-connection-reuse",
+        "m-exclusion": ["template-connection-reuse"],
+        "help": "Reference a connection reuse template from shared partition"
+      }
+    },
+    {
+      "key": "template-connection-reuse-shared",
+      "label": "Template Connection Reuse Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-connection-reuse-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-connection-reuse-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.connection-reuse"],
+        "help": "Connection Reuse Template Name"
+      }
+    },
+    {
+      "key": "dns-template",
+      "label": "DNS Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.dns-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "others",
+            "diameter",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "condition": "template",
+        "help": "DNS template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-dns",
+      "label": "Template DNS",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-dns",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "dns-template",
+        "obj-association": ["slb.template.dns"],
+        "help": "DNS template",
+        "m-exclusion": ["shared-partition-dns-template"]
+      }
+    },
+    {
+      "key": "p-dns",
+      "label": "P DNS",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-dns",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "dns-template",
+        "help": "Reference a dns template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-dns-template",
+      "label": "Shared Partition DNS Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-dns-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-dns",
+        "m-exclusion": ["template-dns"],
+        "help": "Reference a dns template from shared partition"
+      }
+    },
+    {
+      "key": "template-dns-shared",
+      "label": "Template DNS Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-dns-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "gui-section": "Template",
+        "range": "1-127",
+        "condition": "shared-partition-dns-template",
+        "obj-association": ["slb.template.dns"],
+        "help": "DNS Template Name"
+      }
+    },
+    {
+      "key": "dynamic-service-template",
+      "label": "Dynamic Service Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.dynamic-service-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "disabled": ["protocol", ["mlb"]],
+        "help": "Dynamic Service Template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-dynamic-service",
+      "label": "Template Dynamic Service",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-dynamic-service",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "dynamic-service-template",
+        "obj-association": ["slb.template.dynamic-service"],
+        "help": "Dynamic Service Template",
+        "m-exclusion": ["shared-partition-dynamic-service-template"]
+      }
+    },
+    {
+      "key": "p-dynamic-service",
+      "label": "P Dynamic Service",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-dynamic-service",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "dynamic-service-template",
+        "help": "Reference a dynamic service template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-dynamic-service-template",
+      "label": "Shared Partition Dynamic Service Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-dynamic-service-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-dynamic-service",
+        "m-exclusion": ["template-dynamic-service"],
+        "help": "Reference a dynamic service template from shared partition"
+      }
+    },
+    {
+      "key": "template-dynamic-service-shared",
+      "label": "Template Dynamic Service Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-dynamic-service-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-dynamic-service-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.dynamic-service"],
+        "help": "Dynamic Service Template Name"
+      }
+    },
+    {
+      "key": "persist",
+      "label": "Persist",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.persist",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "gui-section": "Template",
+        "disabled": ["protocol", ["fix", "fast-fix"]],
+        "help": "Persistence Template"
+      }
+    },
+    {
+      "key": "persist-source-ip-template",
+      "label": "Persist Source IP Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.persist-source-ip-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "persist",
+        "help": "Source IP persistence template",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-persist-source-ip",
+      "label": "Template Persist Source IP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-persist-source-ip",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "persist-source-ip-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.persist.source-ip"],
+        "help": "Source IP persistence",
+        "m-exclusion": ["shared-partition-persist-source-ip-template"]
+      }
+    },
+    {
+      "key": "p-persist-source-ip",
+      "label": "P Persist Source IP",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-persist-source-ip",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "persist-source-ip-template",
+        "help": "Reference a persist source ip template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-persist-source-ip-template",
+      "label": "Shared Partition Persist Source IP Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-persist-source-ip-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-persist-source-ip",
+        "m-exclusion": ["template-persist-source-ip"],
+        "help": "Reference a persist source ip template from shared partition"
+      }
+    },
+    {
+      "key": "template-persist-source-ip-shared",
+      "label": "Template Persist Source IP Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-persist-source-ip-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-persist-source-ip-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.persist.source-ip"],
+        "help": "Source IP Persistence Template Name"
+      }
+    },
+    {
+      "key": "persist-destination-ip-template",
+      "label": "Persist Destination IP Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.persist-destination-ip-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "persist",
+        "gui-section": "Template",
+        "help": "Destination IP persistence template"
+      }
+    },
+    {
+      "key": "template-persist-destination-ip",
+      "label": "Template Persist Destination IP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-persist-destination-ip",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "persist-destination-ip-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.persist.destination-ip"],
+        "help": "Destination IP persistence",
+        "m-exclusion": ["shared-partition-persist-destination-ip-template"]
+      }
+    },
+    {
+      "key": "p-persist-destination-ip",
+      "label": "P Persist Destination IP",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-persist-destination-ip",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "persist-destination-ip-template",
+        "help": "Reference a persist destination ip template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-persist-destination-ip-template",
+      "label": "Shared Partition Persist Destination IP Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-persist-destination-ip-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-persist-destination-ip",
+        "m-exclusion": ["template-persist-destination-ip"],
+        "help": "Reference a persist destination ip template from shared partition"
+      }
+    },
+    {
+      "key": "template-persist-destination-ip-shared",
+      "label": "Template Persist Destination IP Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-persist-destination-ip-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-persist-destination-ip-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.persist.destination-ip"],
+        "help": "Destination IP Persistence Template Name"
+      }
+    },
+    {
+      "key": "persist-ssl-sid-template",
+      "label": "Persist SSL SID Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.persist-ssl-sid-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "persist",
+        "gui-section": "Template",
+        "help": "SSL SID persistence template"
+      }
+    },
+    {
+      "key": "template-persist-ssl-sid",
+      "label": "Template Persist SSL SID",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-persist-ssl-sid",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "persist-ssl-sid-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.persist.ssl-sid"],
+        "help": "SSL SID persistence",
+        "m-exclusion": ["shared-partition-persist-ssl-sid-template"]
+      }
+    },
+    {
+      "key": "p-persist-ssl-sid",
+      "label": "P Persist SSL SID",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-persist-ssl-sid",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "persist-ssl-sid-template",
+        "help": "Reference a persist SSL SID template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-persist-ssl-sid-template",
+      "label": "Shared Partition Persist SSL SID Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-persist-ssl-sid-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-persist-ssl-sid",
+        "m-exclusion": ["template-persist-ssl-sid"],
+        "help": "Reference a persist SSL SID template from shared partition"
+      }
+    },
+    {
+      "key": "template-persist-ssl-sid-shared",
+      "label": "Template Persist SSL SID Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-persist-ssl-sid-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-persist-ssl-sid-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.persist.ssl-sid"],
+        "help": "SSL SID Persistence Template Name"
+      }
+    },
+    {
+      "key": "persist-cookie-template",
+      "label": "Persist Cookie Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.persist-cookie-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "persist",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "ftp",
+            "ftp-proxy",
+            "mlb",
+            "mms",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "mysql",
+            "mssql",
+            "tftp",
+            "ssh"
+          ]
+        ],
+        "help": "Cookie persistence template"
+      }
+    },
+    {
+      "key": "template-persist-cookie",
+      "label": "Template Persist Cookie",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-persist-cookie",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "persist-cookie-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.persist.cookie"],
+        "help": "Cookie persistence",
+        "m-exclusion": ["shared-partition-persist-cookie-template"]
+      }
+    },
+    {
+      "key": "p-persist-cookie",
+      "label": "P Persist Cookie",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-persist-cookie",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "persist-cookie-template",
+        "help": "Reference a persist cookie template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-persist-cookie-template",
+      "label": "Shared Partition Persist Cookie Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-persist-cookie-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-persist-cookie",
+        "m-exclusion": ["template-persist-cookie"],
+        "help": "Reference a persist cookie template from shared partition"
+      }
+    },
+    {
+      "key": "template-persist-cookie-shared",
+      "label": "Template Persist Cookie Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-persist-cookie-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-persist-cookie-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.persist.cookie"],
+        "help": "Cookie Persistence Template Name"
+      }
+    },
+    {
+      "key": "template-imap-pop3",
+      "label": "Template IMAP POP3",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-imap-pop3",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "ob",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "mlb",
+            "mms",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "smpp-tcp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql"
+          ]
+        ],
+        "range": "1-127",
+        "condition": "template",
+        "obj-association": ["slb.template.imap-pop3"],
+        "help": "IMAP/POP3 Template"
+      }
+    },
+    {
+      "key": "template-smtp",
+      "label": "Template SMTP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-smtp",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "ob",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "smpp-tcp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "range": "1-127",
+        "condition": "template",
+        "obj-association": ["slb.template.smtp"],
+        "help": "SMTP Template"
+      }
+    },
+    {
+      "key": "http-template",
+      "label": "HTTP Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.http-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "ftp",
+            "ftp-proxy",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "condition": "template",
+        "help": "HTTP Template"
+      }
+    },
+    {
+      "key": "template-http",
+      "label": "Template HTTP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-http",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "http-template",
+        "obj-association": ["slb.template.http"],
+        "help": "HTTP Template Name",
+        "m-exclusion": ["shared-partition-http-template"]
+      }
+    },
+    {
+      "key": "p-http",
+      "label": "P HTTP",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-http",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "gui-section": "Template",
+        "condition": "http-template",
+        "help": "Reference a HTTP template from shared partition"
+      }
+    },
+    {
+      "key": "shared-partition-http-template",
+      "label": "Shared Partition HTTP Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-http-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "condition": "p-http",
+        "gui-section": "Template",
+        "m-exclusion": ["template-http"],
+        "help": "Reference a HTTP template from shared partition"
+      }
+    },
+    {
+      "key": "template-http-shared",
+      "label": "Template HTTP Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-http-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "shared-partition-http-template",
+        "obj-association": ["slb.template.http"],
+        "help": "HTTP Template Name"
+      }
+    },
+    {
+      "key": "http-policy-template",
+      "label": "HTTP Policy Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.http-policy-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "mysql",
+            "mssql"
+          ]
+        ],
+        "range": "1-127",
+        "condition": "template",
+        "help": "http-policy template"
+      }
+    },
+    {
+      "key": "template-http-policy",
+      "label": "Template HTTP Policy",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-http-policy",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "http-policy-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.http-policy"],
+        "help": "http-policy template",
+        "m-exclusion": ["shared-partition-http-policy-template"]
+      }
+    },
+    {
+      "key": "p-http-policy",
+      "label": "P HTTP Policy",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-http-policy",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "http-policy-template",
+        "help": "Reference a http policy template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-http-policy-template",
+      "label": "Shared Partition HTTP Policy Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-http-policy-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-http-policy",
+        "m-exclusion": ["template-http-policy"],
+        "help": "Reference a http policy template from shared partition"
+      }
+    },
+    {
+      "key": "template-http-policy-shared",
+      "label": "Template HTTP Policy Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-http-policy-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-http-policy-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.http-policy"],
+        "help": "Http Policy Template Name"
+      }
+    },
+    {
+      "key": "redirect-to-https",
+      "label": "Redirect To HTTPS",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.redirect-to-https",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "ftp",
+            "ftp-proxy",
+            "https",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "help": "Redirect HTTP to HTTPS"
+      }
+    },
+    {
+      "key": "external-service-template",
+      "label": "External Service Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.external-service-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "smpp-tcp",
+            "sips",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "condition": "template",
+        "help": "External service template"
+      }
+    },
+    {
+      "key": "template-external-service",
+      "label": "Template External Service",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-external-service",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "external-service-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.external-service"],
+        "help": "External service template",
+        "m-exclusion": ["shared-partition-external-service-template"]
+      }
+    },
+    {
+      "key": "p-external-service",
+      "label": "P External Service",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-external-service",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "external-service-template",
+        "help": "Reference a external service template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-external-service-template",
+      "label": "Shared Partition External Service Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-external-service-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-external-service",
+        "m-exclusion": ["template-external-service"],
+        "help": "Reference a external service template from shared partition"
+      }
+    },
+    {
+      "key": "template-external-service-shared",
+      "label": "Template External Service Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-external-service-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-external-service-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.external-service"],
+        "help": "External Service Template Name"
+      }
+    },
+    {
+      "key": "template-reqmod-icap",
+      "label": "Template Reqmod ICAP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-reqmod-icap",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "smpp-tcp",
+            "sips",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "range": "1-127",
+        "condition": "template",
+        "obj-association": ["slb.template.reqmod-icap"],
+        "help": "ICAP reqmod template",
+        "feat-license": "slb",
+        "plat-neg-list": ["fireeye"]
+      }
+    },
+    {
+      "key": "template-respmod-icap",
+      "label": "Template Respmod ICAP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-respmod-icap",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "smpp-tcp",
+            "sips",
+            "smtp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "range": "1-127",
+        "condition": "template",
+        "obj-association": ["slb.template.respmod-icap"],
+        "help": "ICAP respmod service template",
+        "feat-license": "slb",
+        "plat-neg-list": ["fireeye"]
+      }
+    },
+    {
+      "key": "template-file-inspection",
+      "label": "Template File Inspection",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-file-inspection",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "smpp-tcp",
+            "sips",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "range": "1-127",
+        "condition": "template",
+        "obj-association": ["file-inspection.template"],
+        "help": "File Inspection service template",
+        "feat-license": "cylance"
+      }
+    },
+    {
+      "key": "server-ssl-template",
+      "label": "Server SSL Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.server-ssl-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "smpp-tcp",
+            "radius",
+            "rtsp",
+            "sip",
+            "tftp",
+            "fix",
+            "ssh"
+          ]
+        ],
+        "help": "Server Side SSL Template"
+      }
+    },
+    {
+      "key": "template-server-ssl",
+      "label": "Template Server SSL",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-server-ssl",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "server-ssl-template",
+        "obj-association": ["slb.template.server-ssl"],
+        "help": "Server Side SSL Template Name",
+        "m-exclusion": ["shared-partition-server-ssl-template"],
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "p-server-ssl",
+      "label": "P Server SSL",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-server-ssl",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "server-ssl-template",
+        "gui-section": "Template",
+        "help": "Reference a SSL Server template from shared partition"
+      }
+    },
+    {
+      "key": "shared-partition-server-ssl-template",
+      "label": "Shared Partition Server SSL Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-server-ssl-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "condition": "p-server-ssl",
+        "gui-section": "Template",
+        "m-exclusion": ["template-server-ssl"],
+        "help": "Reference a SSL Server template from shared partition"
+      }
+    },
+    {
+      "key": "template-server-ssl-shared",
+      "label": "Template Server SSL Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-server-ssl-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "gui-section": "Template",
+        "range": "1-127",
+        "condition": "shared-partition-server-ssl-template",
+        "obj-association": ["slb.template.server-ssl"],
+        "help": "Server SSL Template Name"
+      }
+    },
+    {
+      "key": "client-ssl-template",
+      "label": "Client SSL Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.client-ssl-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "mlb",
+            "mms",
+            "radius",
+            "rtsp",
+            "smpp-tcp",
+            "sip",
+            "sip-tcp",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "ssh"
+          ]
+        ],
+        "help": "Client SSL Template"
+      }
+    },
+    {
+      "key": "template-client-ssl",
+      "label": "Template Client SSL",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-client-ssl",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "client-ssl-template",
+        "obj-association": ["slb.template.client-ssl"],
+        "help": "Client SSL Template Name",
+        "m-exclusion": ["shared-partition-client-ssl-template"]
+      }
+    },
+    {
+      "key": "p-client-ssl",
+      "label": "P Client SSL",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-client-ssl",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "client-ssl-template",
+        "gui-section": "Template",
+        "help": "Reference a Client SSL template from shared partition"
+      }
+    },
+    {
+      "key": "shared-partition-client-ssl-template",
+      "label": "Shared Partition Client SSL Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-client-ssl-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "condition": "p-client-ssl",
+        "m-exclusion": ["template-client-ssl"],
+        "gui-section": "Template",
+        "help": "Reference a Client SSL template from shared partition"
+      }
+    },
+    {
+      "key": "template-client-ssl-shared",
+      "label": "Template Client SSL Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-client-ssl-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "shared-partition-client-ssl-template",
+        "obj-association": ["slb.template.client-ssl"],
+        "help": "Client SSL Template Name"
+      }
+    },
+    {
+      "key": "template-server-ssh",
+      "label": "Template Server SSH",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-server-ssh",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "template",
+        "disabled": ["protocol", ["ssh"]],
+        "enabled": ["protocol", ["tcp-proxy"]],
+        "obj-association": ["slb.template.server-ssh"],
+        "help": "Server SSH Template"
+      }
+    },
+    {
+      "key": "template-client-ssh",
+      "label": "Template Client SSH",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-client-ssh",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "condition": "template",
+        "gui-section": "Template",
+        "enabled": ["protocol", ["ssh"]],
+        "obj-association": ["slb.template.client-ssh"],
+        "help": "Client SSH Template"
+      }
+    },
+    {
+      "key": "udp-template",
+      "label": "UDP Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.udp-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "diameter",
+            "dns-tcp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "imap",
+            "http",
+            "https",
+            "mlb",
+            "mms",
+            "pop3",
+            "rtsp",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "fix",
+            "mysql",
+            "mssql",
+            "ssli",
+            "ssh"
+          ]
+        ],
+        "help": "L4 UDP Template"
+      }
+    },
+    {
+      "key": "template-udp",
+      "label": "Template UDP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-udp",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "udp-template",
+        "obj-association": ["slb.template.udp"],
+        "help": "L4 UDP Template",
+        "m-exclusion": ["shared-partition-udp"],
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "p-udp",
+      "label": "P UDP",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-udp",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "udp-template",
+        "gui-section": "Template",
+        "help": "Reference a UDP template from shared partition"
+      }
+    },
+    {
+      "key": "shared-partition-udp",
+      "label": "Shared Partition UDP",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-udp",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "condition": "p-udp",
+        "gui-section": "Template",
+        "m-exclusion": ["template-udp"],
+        "help": "Reference a UDP template from shared partition"
+      }
+    },
+    {
+      "key": "template-udp-shared",
+      "label": "Template UDP Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-udp-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "shared-partition-udp",
+        "obj-association": ["slb.template.udp"],
+        "help": "UDP Template Name"
+      }
+    },
+    {
+      "key": "tcp-template",
+      "label": "TCP Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.tcp-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "udp",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "imap",
+            "pop3",
+            "radius",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "fix",
+            "tftp",
+            "mysql",
+            "mssql",
+            "mlb",
+            "ssli",
+            "ssh"
+          ]
+        ],
+        "help": "L4 TCP Template"
+      }
+    },
+    {
+      "key": "template-tcp",
+      "label": "Template TCP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-tcp",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "tcp-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.tcp"],
+        "help": "TCP Template Name",
+        "m-exclusion": ["shared-partition-tcp"]
+      }
+    },
+    {
+      "key": "p-tcp",
+      "label": "P TCP",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-tcp",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "tcp-template",
+        "gui-section": "Template",
+        "help": "Reference a tcp template from shared partition"
+      }
+    },
+    {
+      "key": "shared-partition-tcp",
+      "label": "Shared Partition TCP",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-tcp",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "condition": "p-tcp",
+        "gui-section": "Template",
+        "m-exclusion": ["template-tcp"],
+        "help": "Reference a tcp template from shared partition"
+      }
+    },
+    {
+      "key": "template-tcp-shared",
+      "label": "Template TCP Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-tcp-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "shared-partition-tcp",
+        "obj-association": ["slb.template.tcp"],
+        "help": "TCP Template Name"
+      }
+    },
+    {
+      "key": "virtual-port-template",
+      "label": "Virtual Port Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.virtual-port-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "template",
+        "help": "Virtual port template"
+      }
+    },
+    {
+      "key": "template-virtual-port",
+      "label": "Template Virtual Port",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-virtual-port",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "virtual-port-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.virtual-port"],
+        "help": "Virtual port template",
+        "m-exclusion": ["shared-partition-virtual-port-template"]
+      }
+    },
+    {
+      "key": "p-virtual-port",
+      "label": "P Virtual Port",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-virtual-port",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "virtual-port-template",
+        "help": "Reference a virtual port template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-virtual-port-template",
+      "label": "Shared Partition Virtual Port Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-virtual-port-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-virtual-port",
+        "m-exclusion": ["template-virtual-port"],
+        "help": "Reference a Virtual Port template from shared partition"
+      }
+    },
+    {
+      "key": "template-virtual-port-shared",
+      "label": "Template Virtual Port Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-virtual-port-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "gui-section": "Template",
+        "range": "1-127",
+        "condition": "shared-partition-virtual-port-template",
+        "obj-association": ["slb.template.virtual-port"],
+        "help": "Virtual Port Template Name"
+      }
+    },
+    {
+      "key": "template-ftp",
+      "label": "Template FTP",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-ftp",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "obj-association": ["slb.template.ftp"],
+        "help": "FTP port template"
+      }
+    },
+    {
+      "key": "diameter-template",
+      "label": "Diameter Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.diameter-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "fast-fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "help": "Diameter Template"
+      }
+    },
+    {
+      "key": "template-diameter",
+      "label": "Template Diameter",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-diameter",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "diameter-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.diameter"],
+        "help": "Diameter Template",
+        "m-exclusion": ["shared-partition-diameter-template"]
+      }
+    },
+    {
+      "key": "p-diameter",
+      "label": "P Diameter",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-diameter",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "diameter-template",
+        "help": "Reference a Diameter template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-diameter-template",
+      "label": "Shared Partition Diameter Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-diameter-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-diameter",
+        "m-exclusion": ["template-diameter"],
+        "help": "Reference a Diameter template from shared partition"
+      }
+    },
+    {
+      "key": "template-diameter-shared",
+      "label": "Template Diameter Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-diameter-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-diameter-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.diameter"],
+        "help": "Diameter Template Name"
+      }
+    },
+    {
+      "key": "cache-template",
+      "label": "Cache Template",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.cache-template",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "mk",
+        "condition": "template",
+        "gui-section": "Template",
+        "range": "1-127",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "http2",
+            "http2s",
+            "ftp",
+            "ftp-proxy",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "help": "RAM caching template"
+      }
+    },
+    {
+      "key": "template-cache",
+      "label": "Template Cache",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-cache",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "condition": "cache-template",
+        "range": "1-127",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.cache"],
+        "help": "RAM caching template",
+        "m-exclusion": ["shared-partition-cache-template"]
+      }
+    },
+    {
+      "key": "p-cache",
+      "label": "P Cache",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-cache",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "cache-template",
+        "help": "Reference a Cache template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-cache-template",
+      "label": "Shared Partition Cache Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-cache-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "gui-section": "Template",
+        "condition": "p-cache",
+        "m-exclusion": ["template-cache"],
+        "help": "Reference a Cache template from shared partition"
+      }
+    },
+    {
+      "key": "template-cache-shared",
+      "label": "Template Cache Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-cache-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-cache-template",
+        "gui-section": "Template",
+        "obj-association": ["slb.template.cache"],
+        "help": "Cache Template Name"
+      }
+    },
+    {
+      "key": "template-ram-cache",
+      "label": "Template Ram Cache",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-ram-cache",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "obr",
+        "condition": "template",
+        "range": "1-127",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "http",
+            "https",
+            "ftp",
+            "ftp-proxy",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "smpp-tcp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "mysql",
+            "mssql"
+          ]
+        ],
+        "obj-association": ["slb.template.cache"],
+        "help": "RAM caching template"
+      }
+    },
+    {
+      "key": "template-fix",
+      "label": "Template FIX",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-fix",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "ob",
+        "condition": "template",
+        "range": "1-127",
+        "gui-section": "Template",
+        "enabled": ["protocol", ["fix", "fast-fix"]],
+        "obj-association": ["slb.template.fix"],
+        "help": "FIX template"
+      }
+    },
+    {
+      "key": "waf-template",
+      "label": "Waf Template",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.waf-template",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "obr",
+        "plat-neg-list": ["fireeye"],
+        "gui-section": "Template",
+        "condition": "template",
+        "range": "1-127",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "ftp-proxy",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "spdy",
+            "spdys",
+            "smpp-tcp",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "fix",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "obj-association": ["waf.template"],
+        "feat-license": "waf",
+        "help": "WAF template"
+      }
+    },
+    {
+      "key": "template-ssli",
+      "label": "Template SSLi",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-ssli",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "ob",
+        "condition": "template",
+        "range": "1-127",
+        "gui-section": "Template",
+        "enabled": ["protocol", ["ssli"]],
+        "obj-association": ["slb.template.ssli"],
+        "help": "SSLi template",
+        "feat-license": "ssli"
+      }
+    },
+    {
+      "key": "tcp-proxy",
+      "label": "TCP Proxy",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.tcp-proxy",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "ok",
+        "condition": "template",
+        "gui-section": "Template",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "dns-udp",
+            "fast-http",
+            "ftp",
+            "mms",
+            "radius",
+            "rtsp",
+            "sip",
+            "tftp",
+            "fast-fix"
+          ]
+        ],
+        "help": "TCP Proxy Template",
+        "default": "default"
+      }
+    },
+    {
+      "key": "template-tcp-proxy-client",
+      "label": "Template TCP Proxy Client",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-tcp-proxy-client",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "tcp-proxy",
+        "obj-association": ["slb.template.tcp-proxy"],
+        "help": "TCP Proxy Config Client"
+      }
+    },
+    {
+      "key": "template-tcp-proxy-server",
+      "label": "Template TCP Proxy Server",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-tcp-proxy-server",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mb",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "tcp-proxy",
+        "obj-association": ["slb.template.tcp-proxy"],
+        "help": "TCP Proxy Config Server"
+      }
+    },
+    {
+      "key": "template-tcp-proxy",
+      "label": "Template TCP Proxy",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-tcp-proxy",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "tcp-proxy",
+        "obj-association": ["slb.template.tcp-proxy"],
+        "help": "TCP Proxy Template Name",
+        "m-exclusion": ["shared-partition-tcp-proxy-template"]
+      }
+    },
+    {
+      "key": "p-tcp-proxy",
+      "label": "P TCP Proxy",
+      "type": "dummy",
+      "cm-lineage": "slb.virtual-server.port.p-tcp-proxy",
+      "cm-meta": {
+        "format": "dummy",
+        "flags": "okpS",
+        "condition": "tcp-proxy",
+        "help": "Reference a TCP Proxy template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "shared-partition-tcp-proxy-template",
+      "label": "Shared Partition TCP Proxy Template",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.shared-partition-tcp-proxy-template",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "mk",
+        "condition": "p-tcp-proxy",
+        "m-exclusion": ["template-tcp-proxy"],
+        "help": "Reference a TCP Proxy template from shared partition",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "template-tcp-proxy-shared",
+      "label": "Template TCP Proxy Shared",
+      "type": "select",
+      "cm-lineage": "slb.virtual-server.port.template-tcp-proxy-shared",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mv",
+        "range": "1-127",
+        "condition": "shared-partition-tcp-proxy-template",
+        "obj-association": ["slb.template.tcp-proxy"],
+        "help": "TCP Proxy Template name",
+        "gui-section": "Template"
+      }
+    },
+    {
+      "key": "use-default-if-no-server",
+      "label": "Use Default If No Server",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.use-default-if-no-server",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Template",
+        "disabled": ["protocol", ["fast-http", "http", "http2", "tftp", "mlb"]],
+        "help": "Use default forwarding if server selection failed"
+      }
+    },
+    {
+      "key": "template-scaleout",
+      "label": "Template Scaleout",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.port.template-scaleout",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "obr",
+        "range": "1-127",
+        "gui-section": "Template",
+        "condition": "template",
+        "disabled": ["protocol", ["ftp", "rtsp", "sip"]],
+        "help": "Scaleout template"
+      }
+    },
+    {
+      "key": "no-dest-nat",
+      "label": "No Destination NAT",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.no-dest-nat",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "oky",
+        "gui-section": "Basic",
+        "disabled": ["protocol", ["sip", "sips", "sip-tcp"]],
+        "help": "Disable destination NAT, this option only supports in wildcard VIP or when a connection is operated in SSLi + EP mode"
+      }
+    },
+    {
+      "key": "port-translation",
+      "label": "Port Translation",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.port-translation",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "gui-section": "Basic",
+        "condition": "no-dest-nat",
+        "help": "Enable port translation under no-dest-nat"
+      }
+    },
+    {
+      "key": "l7-hardware-assist",
+      "label": "L7 Hardware Assist",
+      "type": "switch",
+      "cm-lineage": "slb.virtual-server.port.l7-hardware-assist",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "disabled": [
+          "protocol",
+          [
+            "tcp",
+            "udp",
+            "others",
+            "diameter",
+            "dns-tcp",
+            "dns-udp",
+            "ftp",
+            "ftp-proxy",
+            "http",
+            "https",
+            "http2",
+            "http2s",
+            "imap",
+            "mlb",
+            "mms",
+            "pop3",
+            "radius",
+            "rtsp",
+            "sip",
+            "sip-tcp",
+            "sips",
+            "smtp",
+            "spdy",
+            "spdys",
+            "ssl-proxy",
+            "tcp-proxy",
+            "tftp",
+            "mysql",
+            "mssql",
+            "ssh"
+          ]
+        ],
+        "plat-neg-list": ["non-fpga", "soft-ax"],
+        "help": "FPGA assist L7 packet parsing",
+        "gui-section": "Advanced"
+      }
+    },
+    {
+      "key": "auth-cfg",
+      "label": "Auth CFG",
+      "type": "dummy-object",
+      "cm-lineage": "slb.virtual-server.port.auth-cfg",
+      "cm-meta": {
+        "format": "fields",
+        "start": true,
+        "gui-section": "Advanced"
+      },
+      "fields": [
+        {
+          "key": "aaa-policy",
+          "label": "AAA Policy",
+          "type": "select",
+          "cm-lineage": "slb.virtual-server.port.auth-cfg.aaa-policy",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "mbr",
+            "plat-neg-list": ["fireeye"],
+            "range": "1-63",
+            "disabled": [
+              "protocol",
+              [
+                "tcp",
+                "udp",
+                "others",
+                "diameter",
+                "dns-tcp",
+                "dns-udp",
+                "fast-http",
+                "fix",
+                "fast-fix",
+                "ftp",
+                "http2",
+                "http2s",
+                "imap",
+                "mlb",
+                "mms",
+                "pop3",
+                "mysql",
+                "radius",
+                "rtsp",
+                "sip",
+                "sip-tcp",
+                "sips",
+                "smpp-tcp",
+                "spdy",
+                "spdys",
+                "smtp",
+                "ssl-proxy",
+                "ssli",
+                "tcp-proxy",
+                "tftp",
+                "ssh"
+              ]
+            ],
+            "obj-association": ["aam.aaa-policy"],
+            "help": "Specify AAA policy name to bind to the virtual port"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -4,10 +4,11 @@ export default class UIEngine extends React.Component<IUIEngineProps, IUIEngineS
     nodes: any;
     state: {
         nodes: never[];
+        activeNodeID: string;
     };
     nodeController: INodeController;
     constructor(props: IUIEngineProps);
     componentDidMount(): void;
     componentWillUnmount(): void;
-    render(): JSX.Element[];
+    render(): JSX.Element;
 }

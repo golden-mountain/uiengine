@@ -7,5 +7,6 @@ export interface IUIEngineProps {
 
 export interface IUIEngineStates {
   nodes: Array<IUINode>;
+  activeNodeID: string;
   [anyKey: string]: any;
 }
