@@ -12,28 +12,33 @@ const expect = chai.expect;
 class PluginInjector {
   name = "plugin-demo";
 }
-
+const callSeq: any = [];
 const plugins = {
   external_plugin_1: {
     type: "foo",
-    initialize: false,
+    weight: 3,
     callback: () => {
+      callSeq.push(1);
       return 1;
     },
     name: "anyname1"
   },
   external_plugin_2: {
     type: "foo",
-    initialize: false,
+    weight: 2,
     callback: () => {
+      callSeq.push(2);
       return 2;
     },
     name: "anyname2"
   },
   external_plugin_3: {
     type: "baz",
-    initialize: false,
-    callback: () => {},
+    weight: 1,
+    callback: () => {
+      callSeq.push(3);
+      return 3;
+    },
     name: "anyname3"
   }
 };
@@ -128,6 +133,10 @@ describe("Given an instance of my PluginManager library", () => {
         anyname2: 2
       };
       expect(result).to.deep.equal(expectedResult);
+
+      // execute order
+      const expectOrder = [2, 1];
+      expect(expectOrder).to.deep.equal(callSeq);
     });
   });
 

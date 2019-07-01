@@ -1,16 +1,51 @@
 import _ from "lodash";
 import { IUINode, IStateNode, IState } from "../../typings";
 
-function compareDataLogic(data1: any, data2: any, strategy: string = "and") {
+// not, is, or,  regexp
+function compareRule(expected: any, actual: any, rule: string = "is") {
+  const map = {
+    not: () => {
+      return !_.isEqual(expected, actual);
+    },
+    is: () => {
+      return _.isEqual(expected, actual);
+    },
+    or: () => {
+      return expected || actual;
+    },
+    empty: () => {
+      return _.isEmpty(actual);
+    },
+    notempty: () => {
+      return !_.isEmpty(actual);
+    },
+    regexp: () => {
+      const regexp = new RegExp(expected);
+      return regexp.test(actual);
+    }
+  };
+  if (_.isFunction(map[rule])) {
+    return map[rule]();
+  } else {
+    return _.isEqual(expected, actual);
+  }
+}
+
+function compareDataLogic(
+  expected: any,
+  actual: any,
+  strategy: string = "and",
+  rule: string = "is"
+) {
   let result = true;
   let thisResult = true;
-  if (_.isObject(data2) && _.isObject(data1)) {
-    _.forIn(data2, (value: any, k: string) => {
-      thisResult = thisResult && _.isEqual(value, data1[k]);
+  if (_.isObject(actual) && _.isObject(expected)) {
+    _.forIn(expected, (value: any, k: string) => {
+      thisResult = thisResult && compareRule(actual[k], value, rule);
       if (!thisResult) return;
     });
   } else {
-    thisResult = _.isEqual(data1, data2);
+    thisResult = compareRule(expected, actual, rule);
   }
 
   if (strategy === "and") {
@@ -21,13 +56,18 @@ function compareDataLogic(data1: any, data2: any, strategy: string = "and") {
   return result;
 }
 
-function compareStateLogic(state1: IState, state2: IState, strategy = "and") {
+function compareStateLogic(
+  expected: IState,
+  actual: IState,
+  strategy = "and",
+  rule = "is"
+) {
   let result = true;
   if (strategy === "and") {
-    result = result && _.isEqual(state1, state2);
+    result = result && compareRule(expected, actual, rule);
   } else {
     // or
-    result = result || _.isEqual(state1, state2);
+    result = result || compareRule(expected, actual, rule);
   }
   return result;
 }
@@ -36,15 +76,16 @@ function stateCompare(
   target: IUINode,
   deps: any,
   name: string,
-  strategy: string = "and"
+  strategy: string = "and",
+  rule: string = "is"
 ) {
   let result = true;
   const stateNode = target.getStateNode();
   if (stateNode) {
-    const stateBasic = stateNode.getState(name);
-    if (stateBasic !== "undefined") {
-      const depBasic = _.get(deps, name);
-      result = compareStateLogic(depBasic, stateBasic, strategy);
+    const actual = stateNode.getState(name);
+    if (actual !== "undefined") {
+      const expected = _.get(deps, name);
+      result = compareStateLogic(expected, actual, strategy);
     } else {
       // TO FIX: Need a case to improve this
       // recursively find other UI Node
@@ -55,11 +96,16 @@ function stateCompare(
   return result;
 }
 
-function dataCompare(target: IUINode, deps: any, strategy: string = "and") {
+function dataCompare(
+  target: IUINode,
+  expected: any,
+  strategy: string = "and",
+  rule: string = "is"
+) {
   let result = true;
   const dataNode = target.getDataNode();
   if (dataNode) {
-    result = compareDataLogic(dataNode.getData(), deps, strategy);
+    result = compareDataLogic(expected, dataNode.getData(), strategy, rule);
   }
   return result;
 }
@@ -80,14 +126,22 @@ export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
           // searched the props met the condition
           depTargetNodes.forEach((depTargetNode: any) => {
             if (dep.data !== undefined) {
-              result = result && dataCompare(depTargetNode, dep.data, strategy);
+              result =
+                result &&
+                dataCompare(depTargetNode, dep.data, strategy, dep.comparerule);
             }
 
             // state deps
             if (dep.state && depTargetNode) {
               result =
                 result &&
-                stateCompare(depTargetNode, dep.state, stateName, strategy);
+                stateCompare(
+                  depTargetNode,
+                  dep.state,
+                  stateName,
+                  strategy,
+                  dep.comparerule
+                );
             }
           });
         } else {

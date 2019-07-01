@@ -7,6 +7,7 @@ import { IPluginFunc, IPlugin, IDataNode } from "UIEngine/typings";
  * @param dataNode
  */
 const callback: IPluginFunc = (dataNode: IDataNode) => {
+  console.log("executed on data schema parser");
   const rootSchema = dataNode.getRootSchema();
   let name = dataNode.source.replace(":", ".");
   const regex = /\[\d+\]/;
@@ -16,8 +17,9 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
   });
 
   // parse data schema deps
-
-  return result.pop();
+  result = result.pop();
+  dataNode.schema = result;
+  return result;
 };
 
 export const schemaParser: IPlugin = {

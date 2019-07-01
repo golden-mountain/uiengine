@@ -81,27 +81,27 @@ export default class PluginManager implements IPluginManager {
   executeSyncPlugins(type: string, config?: IPluginExecutionConfig) {
     const plugins: IPlugins = _.get(PluginManager.plugins, type);
     let result;
-
     // sort by weight asc
-    _.sortBy(plugins, ["weight"]);
+    let sortedPlugins = _.values(plugins);
+    sortedPlugins = _.sortBy(sortedPlugins, ["weight"]);
+    // console.log(sortedPlugins);
 
-    for (let k in plugins) {
-      const p = plugins[k];
-      const name = p.name || k;
-      if (!p.callback) continue;
+    sortedPlugins.forEach((p: IPlugin, k: number) => {
+      const name = p.name;
+      if (!p.callback) return;
 
       try {
         result = p.callback.call(this.caller, this.caller);
         _.set(this.result, `${type}.${name}`, result);
 
         // break conditions
-        if (_.get(config, "stopWhenEmpty") && _.isEmpty(result)) break;
-        if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) break;
+        if (_.get(config, "stopWhenEmpty") && _.isEmpty(result)) return;
+        if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) return;
       } catch (e) {
         console.error(`plugin [${k}] executed failed:`, e);
         this.setErrorInfo(p.type, name, e.message);
       }
-    }
+    });
 
     if (_.get(config, "returnLastValue")) {
       return result;
