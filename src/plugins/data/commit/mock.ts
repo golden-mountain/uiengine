@@ -9,7 +9,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const mock: IPlugin = {
   type: "data.commit",
-  initialize: false,
+  weight: 0,
   callback,
   name: "mock-data"
 };

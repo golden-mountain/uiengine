@@ -18,7 +18,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const ipv4: IPlugin = {
   type: "data.update.could",
-  initialize: false,
+  weight: 100,
   callback,
   name: "ipv4"
 };

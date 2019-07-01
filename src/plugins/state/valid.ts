@@ -8,8 +8,8 @@ const callback: IPluginFunc = (stateNode: IStateNode) => {
 };
 
 export const valid: IPlugin = {
-  type: "state",
-  initialize: false,
+  type: "state.resolver",
+  weight: 0,
   callback,
   name: "valid"
 };

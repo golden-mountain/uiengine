@@ -17,7 +17,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
 
 export const template: IPlugin = {
   type: "ui.parser",
-  initialize: false,
+  weight: 0,
   callback,
   name: "template"
 };

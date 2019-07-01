@@ -7,7 +7,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const remoteValidate: IPlugin = {
   type: "data.commit",
-  initialize: false,
+  weight: 0,
   callback,
   name: "remote-validate"
 };

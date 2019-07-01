@@ -98,7 +98,7 @@ export default class UIEngine implements IDataEngine {
           returnLastValue: true
         };
         const couldCommit = await this.pluginManager.executePlugins(
-          "data.request.before",
+          "data.request.could",
           exeConfig
         );
         if (couldCommit === false) {

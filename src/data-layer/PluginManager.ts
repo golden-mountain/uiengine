@@ -54,14 +54,11 @@ export default class PluginManager implements IPluginManager {
 
   static loadPlugins(newPlugins: IPlugins): IPlugins {
     _.forIn(newPlugins, (p: IPlugin, key: string) => {
-      let { type, initialize } = p;
+      let { type, weight } = p;
       if (type) {
         const name = p.name || key;
         const originPlugin = _.get(PluginManager.plugins, `${type}.${name}`);
-        if (
-          !originPlugin ||
-          (originPlugin && initialize > originPlugin.initialize)
-        ) {
+        if (!originPlugin || (originPlugin && weight > originPlugin.weight)) {
           _.set(PluginManager.plugins, `${type}.${name}`, p);
         }
       }
@@ -70,35 +67,23 @@ export default class PluginManager implements IPluginManager {
   }
 
   async executePlugins(type: string, config?: IPluginExecutionConfig) {
-    const plugins: IPlugins = _.get(PluginManager.plugins, type);
-    let result;
-
-    for (let k in plugins) {
-      const p = plugins[k];
-      const name = p.name || k;
-      if (!p.callback) continue;
-
-      try {
-        result = await p.callback.call(this.caller, this.caller);
-        _.set(this.result, `${type}.${name}`, result);
-
-        // break conditions
-        if (_.isEqual(_.get(config, "stopWhenEmpty"), result)) break;
-        if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) break;
-      } catch (e) {
-        console.error(`plugin [${k}] executed failed:`, e);
-        this.setErrorInfo(p.type, name, e.message);
-      }
-    }
+    let result = this.executeSyncPlugins(type, config);
     if (_.get(config, "returnLastValue")) {
+      return await result;
+    } else {
+      for (let name in result) {
+        result[name] = await result[name];
+      }
       return result;
     }
-    return _.get(this.result, type, {});
   }
 
   executeSyncPlugins(type: string, config?: IPluginExecutionConfig) {
     const plugins: IPlugins = _.get(PluginManager.plugins, type);
     let result;
+
+    // sort by weight asc
+    _.sortBy(plugins, ["weight"]);
 
     for (let k in plugins) {
       const p = plugins[k];
@@ -110,7 +95,7 @@ export default class PluginManager implements IPluginManager {
         _.set(this.result, `${type}.${name}`, result);
 
         // break conditions
-        if (_.isEqual(_.get(config, "stopWhenEmpty"), result)) break;
+        if (_.get(config, "stopWhenEmpty") && _.isEmpty(result)) break;
         if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) break;
       } catch (e) {
         console.error(`plugin [${k}] executed failed:`, e);

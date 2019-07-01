@@ -25,7 +25,7 @@ const callback: IPluginFunc = (dataEngine: IDataEngine) => {
 
 export const malform: IPlugin = {
   type: "data.request.after",
-  initialize: 100,
+  weight: 100,
   callback,
   name: "malform"
 };

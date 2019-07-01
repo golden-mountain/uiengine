@@ -24,7 +24,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
 
 export const props: IPlugin = {
   type: "ui.parser",
-  initialize: false,
+  weight: 0,
   callback,
   name: "props-parser"
 };

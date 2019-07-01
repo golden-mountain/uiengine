@@ -7,8 +7,8 @@ const callback: IPluginFunc = async (stateNode: IStateNode) => {
 };
 
 export const visible: IPlugin = {
-  type: "state",
-  initialize: false,
+  type: "state.resolver",
+  weight: 0,
   callback,
   name: "visible"
 };

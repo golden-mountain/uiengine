@@ -17,7 +17,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const schemaParser: IPlugin = {
   type: "data.schema.parser",
-  initialize: false,
+  weight: 0,
   callback,
   name: "parse-schema"
 };

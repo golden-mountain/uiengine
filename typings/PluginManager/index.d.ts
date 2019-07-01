@@ -8,7 +8,7 @@ export interface IPlugins {
 
 export interface IPlugin {
   type: string;
-  initialize: number | boolean;
+  weight: number;
   callback: IPluginFunc;
   name: string;
 }

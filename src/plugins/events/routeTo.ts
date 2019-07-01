@@ -12,7 +12,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
 
 export const routeTo: IPlugin = {
   type: "ui.parser.event",
-  initialize: false,
+  weight: 0,
   callback,
   name: "routeTo"
 };

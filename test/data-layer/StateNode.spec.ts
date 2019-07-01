@@ -27,7 +27,7 @@ describe("Given an instance of my StateNode library", () => {
       const uiNode = new UINode({});
       const stateNode = uiNode.getStateNode();
       expect(stateNode).is.instanceOf(StateNode);
-      const plugins = stateNode.getPluginManager().getPlugins("state");
+      const plugins = stateNode.getPluginManager().getPlugins("state.resolver");
       expect(plugins).to.have.property("visible");
     });
 
@@ -44,7 +44,7 @@ describe("Given an instance of my StateNode library", () => {
       const uiNode = new UINode({});
       const stateNode = uiNode.getStateNode();
       stateNode.getPluginManager().loadPlugins();
-      let plugins = stateNode.getPluginManager().getPlugins("state");
+      let plugins = stateNode.getPluginManager().getPlugins("state.resolver");
 
       // have buildin plugin value
       expect(plugins).to.have.property("visible");

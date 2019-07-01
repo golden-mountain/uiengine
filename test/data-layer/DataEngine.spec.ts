@@ -92,7 +92,7 @@ describe("Given all the DataEngine", () => {
       // blocked by before plugins
       const plugins = {
         before_blocker: {
-          type: "data.request.before",
+          type: "data.request.could",
           initialize: false,
           callback: () => {
             return false;
