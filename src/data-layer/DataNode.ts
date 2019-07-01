@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { PluginManager } from "./";
+import { PluginManager, Cache } from "./";
 import {
   IDataNode,
   IRequest,
@@ -39,7 +39,11 @@ export default class DataNode implements IDataNode {
     if (request) {
       this.request = request;
     }
-    this.dataEngine = new DataEngine(this.source, this.request);
+    this.dataEngine = new DataEngine(
+      this.uiNode.rootName,
+      this.source,
+      this.request
+    );
   }
 
   getErrorInfo() {
@@ -97,6 +101,7 @@ export default class DataNode implements IDataNode {
       this.rootData = _.get(data, nameSegs);
       result = _.get(data, source, null);
       this.data = result;
+      Cache.setData(this.uiNode.rootName, source, result);
     }
 
     return result;
@@ -140,7 +145,7 @@ export default class DataNode implements IDataNode {
       await this.uiNode.updateLayout();
     }
 
-    // this.uiNode.sendMessage();
+    Cache.setData(this.uiNode.rootName, this.source, this.data);
     return true;
   }
 
@@ -176,7 +181,16 @@ export default class DataNode implements IDataNode {
         await this.uiNode.updateLayout();
       }
 
-      this.uiNode.sendMessage();
+      Cache.setData(this.uiNode.rootName, this.source, this.data);
     }
+  }
+
+  submit(dataSources: Array<string>, extra?: any, connectWith: string = "") {
+    const data = Cache.getData(this.uiNode.rootName);
+    // if (data) {
+    //   if (connect) {
+    //     _
+    //   }
+    // }
   }
 }

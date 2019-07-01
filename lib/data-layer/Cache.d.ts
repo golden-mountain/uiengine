@@ -10,11 +10,11 @@ export default class Cache {
     static setCache: (type: string, schemaPath: string, data: any, replace?: boolean) => void;
     static getCache(type: string, schemaPath?: string): {};
     static setDataSchema(path: string, data: any): void;
-    static setData(path: string, data: any): void;
+    static setData(rootName: string, path: string, data: any): void;
     static setLayoutSchema(path: string, data: any): void;
     static setUINode(path: string, node: IUINode, replace?: boolean): void;
     static getDataSchema(path?: string): {};
-    static getData(path?: string): {};
+    static getData(rootName: string, path?: string): {};
     static getLayoutSchema(path?: string): {};
     static getUINode(path?: string): {};
 }

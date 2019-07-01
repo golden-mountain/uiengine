@@ -65,21 +65,19 @@ export default class Cache {
     data: any,
     replace: boolean = true
   ) => {
-    let path = schemaPath.replace(".", "-");
     if (replace) {
-      _.set(Cache.cache, `${type}.${path}`, data);
+      _.set(Cache.cache, `${type}.${schemaPath}`, data);
     } else {
       const cache = Cache.getCache(type, schemaPath);
       if (!cache) {
-        _.set(Cache.cache, `${type}.${path}`, data);
+        _.set(Cache.cache, `${type}.${schemaPath}`, data);
       }
     }
   };
 
   static getCache(type: string, schemaPath?: string) {
     if (schemaPath) {
-      let path = schemaPath.replace(".", "-");
-      return _.get(Cache.cache, `${type}.${path}`);
+      return _.get(Cache.cache, `${type}.${schemaPath}`);
     } else {
       return _.get(Cache.cache, type);
     }
@@ -89,8 +87,10 @@ export default class Cache {
     Cache.setCache("dataSchema", path, data);
   }
 
-  static setData(path: string, data: any) {
-    Cache.setCache("data", path, data);
+  static setData(rootName: string, path: string, data: any) {
+    if (path.indexOf(".json") > -1 || path.indexOf("/") > -1) return;
+    path = path.replace(":", ".");
+    Cache.setCache("data", `${rootName}.${path}`, data);
   }
 
   static setLayoutSchema(path: string, data: any) {
@@ -113,8 +113,12 @@ export default class Cache {
     return Cache.getCache("dataSchema", path);
   }
 
-  static getData(path?: string) {
-    return Cache.getCache("data", path);
+  static getData(rootName: string, path?: string) {
+    if (path) {
+      path = path.replace(":", ".");
+      return Cache.getCache("data", `${rootName}.${path}`);
+    }
+    return Cache.getCache("data", rootName);
   }
 
   static getLayoutSchema(path?: string) {

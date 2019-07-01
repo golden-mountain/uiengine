@@ -52,7 +52,7 @@ export default class UINode implements IUINode {
 
     // cache root object if given root name
     if (root) {
-      this.rootName = root;
+      this.rootName = _.camelCase(root);
     }
 
     // initial id, the id can't change
@@ -79,7 +79,7 @@ export default class UINode implements IUINode {
     if (!returnSchema) returnSchema = this.schema;
     if (typeof schema === "string" && schema) {
       returnSchema = await this.loadRemoteLayout(schema);
-      if (!this.rootName) this.rootName = schema;
+      if (!this.rootName) this.rootName = _.camelCase(schema);
     }
     // assign the schema to this and it's children
     if (returnSchema) {
@@ -297,7 +297,7 @@ export default class UINode implements IUINode {
     let root = layoutId;
     let nodes: Array<any> = [];
     // to fix: rootName should not be empty
-    if (!root) root = this.rootName || "default";
+    if (!root) root = this.rootName || _.uniqueId("default-root-name-");
     let allUINodes = Cache.getUINode(root) as IUINode;
     _.forIn(allUINodes, (node: IUINode) => {
       const sch = node.getSchema();

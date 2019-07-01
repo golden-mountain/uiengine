@@ -29,4 +29,5 @@ export interface IDataNode {
   getPluginManager(): IPluginManager;
   getRootSchema();
   getRootData(path?: string);
+  submit(dataSources: Array<string>, extra?: any);
 }

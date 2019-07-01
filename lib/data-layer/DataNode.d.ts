@@ -20,4 +20,5 @@ export default class DataNode implements IDataNode {
     loadData(source?: string): Promise<any>;
     updateData(value: any, path?: string): Promise<boolean>;
     deleteData(path?: any): Promise<void>;
+    submit(dataSources: Array<string>, extra?: any, connectWith?: string): void;
 }

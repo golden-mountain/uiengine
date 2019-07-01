@@ -7,13 +7,14 @@ export default class UIEngine implements IDataEngine {
     mapper: IDataMapper;
     data?: any;
     pluginManager: IPluginManager;
+    rootName: string;
     /**
      *
      * @param source a.b.c
      * @param request IRequest
      * @param loadDefaultPlugins whether load default plugins
      */
-    constructor(source: string, request: IRequest);
+    constructor(rootName: string, source: string, request: IRequest);
     parseSchemaPath(source: string): string;
     loadSchema(source?: string): Promise<any>;
     sendRequest(source?: string, data?: any, method?: string, cache?: boolean): Promise<any>;

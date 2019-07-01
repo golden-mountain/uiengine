@@ -16,6 +16,7 @@ export interface IDataEngine {
   mapper: IDataMapper;
   data?: any;
   pluginManager: IPluginManager;
+  rootName: string;
 
   sendRequest(
     source: string,

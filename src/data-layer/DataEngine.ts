@@ -17,6 +17,7 @@ export default class UIEngine implements IDataEngine {
   mapper: IDataMapper;
   data?: any;
   pluginManager: IPluginManager = new PluginManager(this);
+  rootName: string;
 
   /**
    *
@@ -24,9 +25,10 @@ export default class UIEngine implements IDataEngine {
    * @param request IRequest
    * @param loadDefaultPlugins whether load default plugins
    */
-  constructor(source: string, request: IRequest) {
+  constructor(rootName: string, source: string, request: IRequest) {
     this.request = request;
     this.source = source;
+    this.rootName = rootName;
 
     this.schemaPath = this.parseSchemaPath(source);
     this.mapper = new DataMapper(this.schemaPath, request);
@@ -113,7 +115,7 @@ export default class UIEngine implements IDataEngine {
         if (!response) {
           response = await this.request[method](endpoint, data);
           if (response.data) {
-            if (cache) Cache.setData(endpoint, response.data);
+            if (cache) Cache.setData(this.rootName, endpoint, response.data);
             response = response.data;
           }
         }
