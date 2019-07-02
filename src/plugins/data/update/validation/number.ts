@@ -2,10 +2,10 @@ import _ from "lodash";
 import { IPluginFunc, IPlugin, IDataNode } from "../../../../../typings";
 
 const callback: IPluginFunc = (dataNode: IDataNode) => {
-  const data = dataNode.updatingData;
+  const data = dataNode.data;
   const schema = dataNode.getSchema();
-
-  let result, errorMessage;
+  let result = true,
+    errorMessage = "";
   if (_.get(schema, "type") === "number") {
     const { min, max } = schema;
 
@@ -22,7 +22,6 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
       if (!result) errorMessage = maxMessage;
     }
   }
-
   return { status: result, code: errorMessage };
 };
 

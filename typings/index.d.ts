@@ -3,6 +3,7 @@ export * from "./PluginManager";
 export * from "./NodeController";
 export * from "./DataEngine";
 export * from "./DataNode";
+export * from "./DataPool";
 export * from "./Messager";
 export * from "./StateNode";
 export * from "./Request";

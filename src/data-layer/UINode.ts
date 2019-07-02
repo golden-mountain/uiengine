@@ -52,7 +52,7 @@ export default class UINode implements IUINode {
 
     // cache root object if given root name
     if (root) {
-      this.rootName = _.camelCase(root);
+      this.rootName = root;
     }
 
     // initial id, the id can't change
@@ -73,14 +73,20 @@ export default class UINode implements IUINode {
     this.dataNode = new DataNode(schema.datasource, this, this.request);
   }
 
+  private setRootName(root: string) {
+    root = root.replace(".json", "");
+    this.rootName = _.snakeCase(root);
+  }
+
   async loadLayout(schema?: ILayoutSchema | string) {
     // load remote node
     let returnSchema: any = schema;
     if (!returnSchema) returnSchema = this.schema;
     if (typeof schema === "string" && schema) {
       returnSchema = await this.loadRemoteLayout(schema);
-      if (!this.rootName) this.rootName = _.camelCase(schema);
+      this.setRootName(schema);
     }
+
     // assign the schema to this and it's children
     if (returnSchema) {
       await this.assignSchema(returnSchema);
@@ -122,13 +128,14 @@ export default class UINode implements IUINode {
   }
 
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {
-    let result: any = Cache.getLayoutSchema(url);
+    this.setRootName(url);
+    let result: any = Cache.getLayoutSchema(this.rootName);
     if (!result) {
       try {
         let response: any = await this.request.get(url);
         if (response.data) {
           result = response.data;
-          Cache.setLayoutSchema(url, result);
+          Cache.setLayoutSchema(this.rootName, result);
         }
       } catch (e) {
         this.errorInfo = {

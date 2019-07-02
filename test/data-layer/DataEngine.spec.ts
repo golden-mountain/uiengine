@@ -22,13 +22,12 @@ describe("Given all the DataEngine", () => {
   });
   describe("the given source", () => {
     it("constructor: should return the schema path with request info appended", async () => {
-      const dataEngine = new DataEngine(schemaPath, request);
-      expect(dataEngine.source).to.equal(schemaPath);
-      expect(dataEngine.schemaPath).to.be.deep.equal("foo.json");
+      // const dataEngine = new DataEngine(request);
+      // expect(dataEngine.cacheID).to.equal("any-root-name");
     });
 
     it("parseSchemaPath: should return the schema path with request info appended", async () => {
-      const dataEngine = new DataEngine(schemaPath, request);
+      const dataEngine = new DataEngine(request);
       // with :
       let path = dataEngine.parseSchemaPath("any.test:bar");
       expect(path).to.be.deep.equal("any.test.json");
@@ -54,10 +53,10 @@ describe("Given all the DataEngine", () => {
     // });
 
     it("sendRequest: request agent for all api request methods", async () => {
-      let dataEngine = new DataEngine(schemaPath, request);
+      let dataEngine = new DataEngine(request);
 
       // use default source
-      await dataEngine.sendRequest();
+      await dataEngine.sendRequest(schemaPath);
       expect(dataEngine.errorInfo).to.be.null;
       expect(dataEngine.data).to.deep.equal(dataJson);
 

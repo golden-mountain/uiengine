@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { Event } from "../../data-layer";
-import { IPluginFunc, IPlugin, IUINode, ILayoutSchema } from "../../../typings";
+import { IPluginFunc, IPlugin, IUINode } from "../../../typings";
 
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   const schema = uiNode.getSchema();
@@ -11,7 +11,6 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     let eventFuncs = {};
     if ($events) {
       const event = new Event(uiNode);
-      // const eventSchemas = _.get(props, "events");
       eventFuncs = await event.loadEvents($events);
     }
 

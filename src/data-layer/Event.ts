@@ -15,7 +15,6 @@ export default class Event implements IEvent {
     const eventPlugins = await this.pluginManager.executePlugins(
       "ui.parser.event"
     );
-
     const eventsBinded: any = {};
     events.forEach((v: any) => {
       const { action, event, ...schemaOptions } = v;

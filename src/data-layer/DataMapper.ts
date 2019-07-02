@@ -12,12 +12,12 @@ import { PluginManager, Cache } from ".";
 export default class DataMapper implements IDataMapper {
   private request: IRequest;
   errorInfo?: IErrorInfo;
-  source: string;
+  source: string = "";
   rootSchema?: IDataSchema;
   pluginManager: IPluginManager = new PluginManager(this);
+  cacheID: string = "";
 
-  constructor(source: string, request: IRequest) {
-    this.source = source;
+  constructor(request: IRequest) {
     this.request = request;
   }
 
@@ -30,27 +30,22 @@ export default class DataMapper implements IDataMapper {
     return `${dataURLPrefix}${endpoint}`;
   }
 
-  async loadSchema(source?: string) {
+  async loadSchema(source: string) {
     let result: any = null;
-    let schemaPath = "";
-    if (source) {
-      schemaPath = source;
-    } else {
-      schemaPath = this.source;
-    }
-    this.source = schemaPath;
+    this.source = source;
+    this.cacheID = _.snakeCase(source);
 
     try {
-      let schema: any = Cache.getDataSchema(schemaPath);
+      let schema: any = Cache.getDataSchema(this.cacheID);
       if (_.isEmpty(schema)) {
         const dataSchemaPrefix = this.request.getConfig("dataSchemaPrefix");
-        let path = schemaPath;
+        let path = source;
         if (!_.isEmpty(dataSchemaPrefix)) {
-          path = `${dataSchemaPrefix}${schemaPath}`;
+          path = `${dataSchemaPrefix}${source}`;
         }
         schema = await this.request.get(path);
         if (schema.data) {
-          Cache.setDataSchema(schemaPath, schema.data);
+          Cache.setDataSchema(this.cacheID, schema.data);
           schema = schema.data;
         }
       }

@@ -107,7 +107,9 @@ describe("Given an instance of my DataNode library", () => {
       // refresh the state
       const rowChild = localUINode.getChildren([1]);
       const dataNode = rowChild.getDataNode();
+      console.log("deleting data>>>>>");
       await dataNode.deleteData(0);
+      console.log("deleted data:", dataNode.getData());
       // console.log(rowChild[0].getSchema("state.visible.deps"));
       const expectedJson = [
         {

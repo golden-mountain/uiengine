@@ -203,9 +203,10 @@ describe("Given an instance of my UINode library", () => {
       const schemaPath = `${reqConfig.layoutSchemaPrefix}uinode-basic`;
       const uinode = new UINode({}, request);
       const layoutName = `${schemaPath}.json`;
+      const layoutId = _.snakeCase(schemaPath);
       let schema = await uinode.loadLayout(layoutName);
       expect(uinode.id).is.not.empty;
-      expect(uinode.rootName).to.equal(layoutName);
+      expect(uinode.rootName).to.equal(layoutId);
 
       const liveChildren = _.get(uinode, "children[1]");
       schema = liveChildren.getSchema().children;
@@ -213,13 +214,12 @@ describe("Given an instance of my UINode library", () => {
       tableIncludeTest(schema, expectedResult);
 
       // root schemas exists
-      const path = `${schemaPath}-json`;
-      expect(Cache.getLayoutSchema(path)).to.deep.equal(uinode.getSchema());
+      expect(Cache.getLayoutSchema(layoutId)).to.deep.equal(uinode.getSchema());
     });
 
     it("searchNodes: should return right node by given prop", async () => {
       let copyLayout = _.cloneDeep(stateTestLayout);
-      const root = "test-root-name";
+      const root = "test_root_name";
       const localUINode = new UINode(copyLayout, request, root);
       await localUINode.loadLayout();
       let nodes = localUINode.searchNodes(

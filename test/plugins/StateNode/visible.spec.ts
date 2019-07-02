@@ -4,10 +4,11 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, Request, Cache } from "../../../src";
+import { UINode, Request, Cache, UIEngineRegister } from "../../../src";
 // import reqConfig from "./config/request";
 import stateNodeBasicLayout from "../../layouts/state-node-basic.json";
 import reqConfig from "../../config/request";
+import * as plugins from "../../../src/plugins";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -15,10 +16,12 @@ chai.use(chaiSpies);
 const expect = chai.expect;
 
 describe("Given all the default plugins", () => {
-  before(() => {});
+  before(() => {
+    Cache.clearDataCache();
+    UIEngineRegister.registerPlugins(plugins);
+  });
   describe("the given plugins ", () => {
     it("visiblization should be caculated on the first initial", async () => {
-      Cache.clearDataCache();
       const request = new Request(reqConfig);
       const uiNode = new UINode(
         stateNodeBasicLayout,
@@ -40,13 +43,13 @@ describe("Given all the default plugins", () => {
       expect(visible).to.equal(true);
 
       // children 1, 0
-      child = uiNode.getChildren([1, 0]);
-      visible = child[0].getStateNode().getState("visible");
+      child = child.getChildren([1, 0]);
+      visible = child.getStateNode().getState("visible");
       // console.log(child[0].getSchema("state.visible.deps"));
       expect(visible).to.equal(true);
 
       // children 1, 1
-      visible = child[1].getStateNode().getState("visible");
+      visible = child.getStateNode().getState("visible");
       expect(visible).to.equal(true);
     });
 

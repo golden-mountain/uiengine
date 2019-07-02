@@ -4,9 +4,10 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { DataNode, Request, UINode } from "../../../../src";
+import { DataNode, Request, UINode, UIEngineRegister } from "../../../../src";
 // import reqConfig from "./config/request";
 import reqConfig from "../../../config/request";
+import * as plugins from "../../../../src/plugins";
 
 // const uiNodeLayout = {};
 // chai.expect();
@@ -16,7 +17,9 @@ const request = new Request(reqConfig);
 const uiNode = new UINode({});
 
 describe("Given all the DataNode validation plugins", () => {
-  before(() => {});
+  before(() => {
+    UIEngineRegister.registerPlugins(plugins);
+  });
   describe("the given validaton plugin ", () => {
     it("should validate all given number rule", async () => {
       let dataNode = new DataNode("foo:bar.baz[0].age", uiNode, request);

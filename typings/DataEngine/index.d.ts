@@ -1,22 +1,23 @@
 export interface IResponse {}
 
 export interface IDataMapper {
-  schema: IDataSchema;
+  schema?: IDataSchema;
   errorInfo?: any;
-  source: string;
+  source?: string;
   schema?: IDataSchema;
   rootSchema?: IDataSchema;
+  cacheID: string;
   loadSchema(source?: string);
   getDataEntryPoint(method: string): string;
 }
 
 export interface IDataEngine {
   errorInfo?: any;
-  source: string;
+  source?: string;
   mapper: IDataMapper;
   data?: any;
   pluginManager: IPluginManager;
-  rootName: string;
+  cacheID: string;
 
   sendRequest(
     source: string,

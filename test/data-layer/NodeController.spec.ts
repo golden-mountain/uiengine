@@ -6,13 +6,7 @@ import chaiSpies from "chai-spies";
 import { shallow } from "enzyme";
 
 import _ from "lodash";
-import {
-  NodeController,
-  Request,
-  UINode,
-  Cache,
-  PluginManager
-} from "../../src";
+import { NodeController, UINode, Cache, PluginManager } from "../../src";
 import reqConfig from "../config/request";
 
 import uiJSON from "../layouts/state-node-basic.json";
@@ -79,8 +73,7 @@ describe("Given an instance of my DataNode library", () => {
       };
 
       const anyValue = "any.value";
-      // console.log(uiNode.getSchema());
-      const searchedNodes = uiNode.searchNodes(selector, id);
+      const searchedNodes = uiNode.searchNodes(selector);
       expect(searchedNodes.length).to.equal(1);
       const spy = chai.spy.on(searchedNodes[0].messager, "sendMessage");
       nodeController.castMessage(selector, anyValue, [id]);

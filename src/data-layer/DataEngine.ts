@@ -12,12 +12,12 @@ import { PluginManager, Cache, DataMapper } from ".";
 export default class UIEngine implements IDataEngine {
   private request: IRequest;
   errorInfo?: any;
-  source: string;
-  schemaPath: string;
+  source?: string;
+  schemaPath?: string;
   mapper: IDataMapper;
   data?: any;
   pluginManager: IPluginManager = new PluginManager(this);
-  rootName: string;
+  cacheID: string = "";
 
   /**
    *
@@ -25,13 +25,9 @@ export default class UIEngine implements IDataEngine {
    * @param request IRequest
    * @param loadDefaultPlugins whether load default plugins
    */
-  constructor(rootName: string, source: string, request: IRequest) {
+  constructor(request: IRequest) {
     this.request = request;
-    this.source = source;
-    this.rootName = rootName;
-
-    this.schemaPath = this.parseSchemaPath(source);
-    this.mapper = new DataMapper(this.schemaPath, request);
+    this.mapper = new DataMapper(this.request);
   }
 
   parseSchemaPath(source: string) {
@@ -40,16 +36,19 @@ export default class UIEngine implements IDataEngine {
     return `${schemaPath}.json`;
   }
 
-  async loadSchema(source?: string) {
+  async loadSchema(source: string) {
+    this.schemaPath = this.parseSchemaPath(source);
     return await this.mapper.loadSchema(source);
   }
 
   async sendRequest(
-    source?: string,
+    source: string,
     data?: any,
     method: string = "get",
     cache: boolean = false
   ) {
+    this.cacheID = _.snakeCase(source);
+
     // clear initial data;
     this.data = {};
     this.errorInfo = null;
@@ -62,15 +61,15 @@ export default class UIEngine implements IDataEngine {
     }
 
     let schemaPath = "";
-    if (source) {
-      schemaPath = this.parseSchemaPath(source);
-      this.source = schemaPath;
-    } else {
-      schemaPath = this.schemaPath;
-    }
+    schemaPath = this.parseSchemaPath(source);
+    this.source = schemaPath;
 
     let result = {};
     if (schemaPath) {
+      if (source != this.source) {
+        Cache.clearDataSchemaCache(this.cacheID);
+      }
+
       const schema = await this.loadSchema(schemaPath);
       if (schema === null) {
         this.errorInfo = {
@@ -81,7 +80,6 @@ export default class UIEngine implements IDataEngine {
       }
 
       const endpoint = this.mapper.getDataEntryPoint(method);
-
       if (!endpoint) {
         this.errorInfo = {
           status: 1000,
@@ -92,7 +90,7 @@ export default class UIEngine implements IDataEngine {
 
       try {
         let response: any;
-        if (cache) response = Cache.getData(endpoint);
+        if (cache) response = Cache.getData(this.cacheID);
 
         // could stop the commit
         const exeConfig: IPluginExecutionConfig = {
@@ -115,13 +113,12 @@ export default class UIEngine implements IDataEngine {
         if (!response) {
           response = await this.request[method](endpoint, data);
           if (response.data) {
-            if (cache) Cache.setData(this.rootName, endpoint, response.data);
+            if (cache) Cache.setData(this.cacheID, endpoint, response.data);
             response = response.data;
           }
         }
         result = response;
       } catch (e) {
-        // console.log(e.message);
         this.errorInfo = {
           code: e.message
         };
@@ -142,19 +139,19 @@ export default class UIEngine implements IDataEngine {
     return this.data;
   }
 
-  async loadData(source?: string, params?: any) {
+  async loadData(source: string, params?: any) {
     return await this.sendRequest(source, params, "get", true);
   }
 
-  async updateData(source?: string, data?: any) {
+  async updateData(source: string, data?: any) {
     return await this.sendRequest(source, data, "post");
   }
 
-  async replaceData(source?: string, data?: any) {
+  async replaceData(source: string, data?: any) {
     return await this.sendRequest(source, data, "put");
   }
 
-  async deleteData(source?: string, data?: any) {
+  async deleteData(source: string, data?: any) {
     return await this.sendRequest(source, data, "put");
   }
 }

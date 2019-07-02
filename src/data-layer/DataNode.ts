@@ -12,7 +12,10 @@ import { Request, DataEngine } from ".";
 
 export default class DataNode implements IDataNode {
   private request: IRequest = new Request({});
-  errorInfo: any = {};
+  errorInfo: any = {
+    status: undefined,
+    code: ""
+  };
   pluginManager: IPluginManager = new PluginManager(this);
   dataEngine: IDataEngine;
   uiNode: IUINode;
@@ -21,6 +24,7 @@ export default class DataNode implements IDataNode {
   schema?: any;
   rootSchema?: any;
   data: any;
+  cacheID: string;
 
   constructor(source: any, uiNode: IUINode, request?: IRequest) {
     this.uiNode = uiNode;
@@ -39,11 +43,18 @@ export default class DataNode implements IDataNode {
     if (request) {
       this.request = request;
     }
-    this.dataEngine = new DataEngine(
-      this.uiNode.rootName,
-      this.source,
-      this.request
-    );
+
+    // get id
+    this.cacheID = this.formatCacheID(source);
+    this.dataEngine = new DataEngine(this.request);
+  }
+
+  formatCacheID(id: any) {
+    if (id && _.isString(id)) {
+      return _.snakeCase(id);
+    } else {
+      return _.uniqueId("data-");
+    }
   }
 
   getErrorInfo() {
@@ -77,10 +88,12 @@ export default class DataNode implements IDataNode {
     // const { schemaPath = "", name = "" } = this.source;
     if (source) {
       this.source = source;
+      this.cacheID = this.formatCacheID(source);
     } else {
       source = this.source;
     }
     let result;
+
     if (source) {
       const data = await this.dataEngine.loadData(source);
       if (data === null) {
@@ -101,7 +114,7 @@ export default class DataNode implements IDataNode {
       this.rootData = _.get(data, nameSegs);
       result = _.get(data, source, null);
       this.data = result;
-      Cache.setData(this.uiNode.rootName, source, result);
+      Cache.setData(this.cacheID, source, result);
     }
 
     return result;
@@ -145,17 +158,26 @@ export default class DataNode implements IDataNode {
       await this.uiNode.updateLayout();
     }
 
-    Cache.setData(this.uiNode.rootName, this.source, this.data);
-    return true;
+    const status = _.get(this.errorInfo, "status", true);
+    if (status) {
+      Cache.setData(this.cacheID, this.source, this.data);
+    }
+    return status;
   }
 
   async deleteData(path?: any) {
-    const couldDelete = await this.pluginManager.executePlugins(
-      "data.delete.could"
+    const exeConfig: IPluginExecutionConfig = {
+      stopWhenEmpty: true,
+      returnLastValue: true
+    };
+    this.errorInfo = await this.pluginManager.executePlugins(
+      "data.delete.could",
+      exeConfig
     );
     let noUpdateLayout = true;
 
-    if (couldDelete) {
+    const status = _.get(this.errorInfo, "status", true);
+    if (status) {
       if (path !== undefined) {
         if ((_.isArray(path) || _.isNumber(path)) && _.isArray(this.data)) {
           if (this.uiNode.schema.$children) {
@@ -172,6 +194,7 @@ export default class DataNode implements IDataNode {
         this.data = null;
       }
 
+      Cache.setData(this.cacheID, this.source, this.data);
       // update state without sending message
       if (noUpdateLayout) {
         // for update props purpose
@@ -180,13 +203,12 @@ export default class DataNode implements IDataNode {
       } else {
         await this.uiNode.updateLayout();
       }
-
-      Cache.setData(this.uiNode.rootName, this.source, this.data);
     }
+    return status;
   }
 
   submit(dataSources: Array<string>, extra?: any, connectWith: string = "") {
-    const data = Cache.getData(this.uiNode.rootName);
+    const data = Cache.getData(this.cacheID);
     // if (data) {
     //   if (connect) {
     //     _
