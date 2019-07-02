@@ -22,8 +22,8 @@ export default class DataPool implements IDataPool {
   }
 
   get(paths?: Array<string>, withKey: boolean = true) {
-    let results = [];
-    if (paths) {
+    let results: any = [];
+    if (_.isArray(paths) && paths.length) {
       results = paths.map(path => {
         let result = _.get(this.data, path);
         if (withKey) {
@@ -32,7 +32,7 @@ export default class DataPool implements IDataPool {
         return result;
       });
     } else {
-      results.push(this.data);
+      results = this.data;
     }
     return results;
   }

@@ -230,15 +230,15 @@ export default class DataNode implements IDataNode {
     method: string = "post",
     connectWith?: string
   ) {
-    const result = {}; //this.dataPool.get();
+    const result = {};
     let responses: any = [];
     dataSources.forEach((source: string) => {
       const line = this.formatSource(source);
       const data = Cache.getData(this.cacheID, line);
       _.set(result, line, data);
-
       // remote?
       if (connectWith === undefined) {
+        _.merge(result, this.dataPool.get());
         responses.push(
           this.dataEngine.sendRequest(source, result, method, false)
         );

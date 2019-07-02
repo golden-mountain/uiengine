@@ -10,6 +10,11 @@ export interface ICache {
   [name: string]: {};
 }
 
+export interface IDataConnector {
+  from?: string;
+  to: string;
+}
+
 export interface IDataNode {
   errorInfo: any;
   pluginManager: IPluginManager;
