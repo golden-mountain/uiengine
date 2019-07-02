@@ -9,7 +9,8 @@ import {
   Cache,
   UINode,
   PluginManager,
-  UIEngineRegister
+  UIEngineRegister,
+  DataPool
 } from "../../src";
 import reqConfig from "../config/request";
 // import { mount } from "enzyme";
@@ -107,9 +108,8 @@ describe("Given an instance of my DataNode library", () => {
       // refresh the state
       const rowChild = localUINode.getChildren([1]);
       const dataNode = rowChild.getDataNode();
-      console.log("deleting data>>>>>");
       await dataNode.deleteData(0);
-      console.log("deleted data:", dataNode.getData());
+
       // console.log(rowChild[0].getSchema("state.visible.deps"));
       const expectedJson = [
         {
@@ -119,6 +119,36 @@ describe("Given an instance of my DataNode library", () => {
       ];
       expect(dataNode.getData()).to.deep.equal(expectedJson);
       expect(rowChild.getChildren().length).to.equal(1);
+    });
+
+    it("submit: should submit the data pool's data into remote or connect to data pool", async () => {
+      Cache.clearDataCache();
+      const dataPool = DataPool.getInstance();
+      dataPool.clear();
+      // commit to remote using data engine
+      let dataNode = new DataNode("foo:bar", uiNode, request);
+      await dataNode.loadData();
+
+      let expectedResult = [dataNodeJson];
+
+      // remote commit
+      let dataSources = ["foo:bar"];
+      let result = await dataNode.submit(dataSources, "get");
+      expect(result).to.deep.equal(expectedResult);
+
+      // local commit
+      let expectedResult2 = {
+        data: {
+          foo: {
+            bar: {
+              name: "Zp",
+              baz: [{ name: "Rui", age: 30 }, { name: "Lifang", age: 30 }]
+            }
+          }
+        }
+      };
+      result = await dataNode.submit(dataSources, "", "data");
+      expect(dataNode.dataPool.data).to.deep.equal(expectedResult2);
     });
   });
 

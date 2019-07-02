@@ -1,4 +1,5 @@
 import { AxiosPromise } from "axios";
+import { IDataPool } from "../DataPool";
 
 export interface IDataSchema {
   endpoint: {};
@@ -20,6 +21,8 @@ export interface IDataNode {
   rootSchema?: any;
   data: any;
   updatingData?: any;
+  dataPool: IDataPool;
+
   loadData(source?: string): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
   deleteData(path?: any);
@@ -29,5 +32,5 @@ export interface IDataNode {
   getPluginManager(): IPluginManager;
   getRootSchema();
   getRootData(path?: string);
-  submit(dataSources: Array<string>, extra?: any);
+  submit(dataSources: Array<string>, method: string, connectWith?: string);
 }

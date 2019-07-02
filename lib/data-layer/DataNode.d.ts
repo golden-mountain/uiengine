@@ -1,4 +1,4 @@
-import { IDataNode, IRequest, IPluginManager, IUINode, IDataEngine } from "../../typings";
+import { IDataNode, IRequest, IPluginManager, IUINode, IDataEngine, IDataPool } from "../../typings";
 export default class DataNode implements IDataNode {
     private request;
     errorInfo: any;
@@ -11,7 +11,9 @@ export default class DataNode implements IDataNode {
     rootSchema?: any;
     data: any;
     cacheID: string;
+    dataPool: IDataPool;
     constructor(source: any, uiNode: IUINode, request?: IRequest);
+    formatSource(source: string): string;
     formatCacheID(id: any): string;
     getErrorInfo(): any;
     getData(path?: string): any;
@@ -22,5 +24,5 @@ export default class DataNode implements IDataNode {
     loadData(source?: string): Promise<any>;
     updateData(value: any, path?: string): Promise<any>;
     deleteData(path?: any): Promise<any>;
-    submit(dataSources: Array<string>, extra?: any, connectWith?: string): void;
+    submit(dataSources: Array<string>, method?: string, connectWith?: string): Promise<any>;
 }

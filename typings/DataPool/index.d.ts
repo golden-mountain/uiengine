@@ -1,7 +1,6 @@
 export interface IDataPool {
   data: object;
-  pluginManager: IPluginManager;
   set(data: any, path?: string);
-  get(paths: Array<string>);
-  clear();
+  get(paths?: Array<string>, withKey?: boolean);
+  clear(path?: string);
 }

@@ -1,7 +1,7 @@
-import { DataEngine, PluginManager } from "../";
-import { IDataPool, IDataEngine, IPluginManager } from "../../typings";
+import _ from "lodash";
+import { IDataPool } from "../../typings";
 
-export default class DataPool {
+export default class DataPool implements IDataPool {
   static instance: IDataPool;
   static getInstance = () => {
     if (!DataPool.instance) {
@@ -10,12 +10,38 @@ export default class DataPool {
     return DataPool.instance as DataPool;
   };
 
-  data: object = {};
-  pluginManager: IPluginManager = new PluginManager(this);
+  data: any = {};
 
-  set(data: any, path?: string) {}
+  set(data: any, path?: string) {
+    if (path) {
+      _.set(this.data, path, data);
+    } else {
+      _.merge(this.data, data);
+    }
+    return this.data;
+  }
 
-  get(paths: Array<string>) {}
+  get(paths?: Array<string>, withKey: boolean = true) {
+    let results = [];
+    if (paths) {
+      results = paths.map(path => {
+        let result = _.get(this.data, path);
+        if (withKey) {
+          return _.set({}, path, result);
+        }
+        return result;
+      });
+    } else {
+      results.push(this.data);
+    }
+    return results;
+  }
 
-  clear() {}
+  clear(path?: string) {
+    if (path) {
+      _.unset(this.data, path);
+    } else {
+      this.data = {};
+    }
+  }
 }

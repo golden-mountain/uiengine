@@ -1,12 +1,13 @@
 import _ from "lodash";
-import { PluginManager, Cache } from "./";
+import { PluginManager, Cache, DataPool } from "./";
 import {
   IDataNode,
   IRequest,
   IPluginManager,
   IUINode,
   IPluginExecutionConfig,
-  IDataEngine
+  IDataEngine,
+  IDataPool
 } from "../../typings";
 import { Request, DataEngine } from ".";
 
@@ -25,6 +26,7 @@ export default class DataNode implements IDataNode {
   rootSchema?: any;
   data: any;
   cacheID: string;
+  dataPool: IDataPool;
 
   constructor(source: any, uiNode: IUINode, request?: IRequest) {
     this.uiNode = uiNode;
@@ -47,13 +49,22 @@ export default class DataNode implements IDataNode {
     // get id
     this.cacheID = this.formatCacheID(source);
     this.dataEngine = new DataEngine(this.request);
+
+    // get instance of data pool
+    this.dataPool = DataPool.getInstance();
+  }
+
+  formatSource(source: string) {
+    return source.replace(":", ".");
   }
 
   formatCacheID(id: any) {
     if (id && _.isString(id)) {
-      return _.snakeCase(id);
+      const splitter = id.indexOf(":") > -1 ? ":" : ".";
+      let [schemaPath] = id.split(splitter);
+      return _.snakeCase(schemaPath);
     } else {
-      return _.uniqueId("data-");
+      return "$dummy";
     }
   }
 
@@ -88,36 +99,43 @@ export default class DataNode implements IDataNode {
     // const { schemaPath = "", name = "" } = this.source;
     if (source) {
       this.source = source;
+      source = this.formatSource(source);
       this.cacheID = this.formatCacheID(source);
     } else {
       source = this.source;
     }
-    let result;
 
     if (source) {
-      const data = await this.dataEngine.loadData(source);
-      if (data === null) {
-        this.errorInfo = this.dataEngine.errorInfo;
-        return;
+      let result = Cache.getData(this.cacheID, source);
+      if (result === undefined) {
+        let data = await this.dataEngine.loadData(source);
+
+        if (data === null) {
+          this.errorInfo = this.dataEngine.errorInfo;
+          return;
+        }
+
+        const exeConfig: IPluginExecutionConfig = {
+          returnLastValue: true
+        };
+        this.schema = await this.pluginManager.executePlugins(
+          "data.schema.parser",
+          exeConfig
+        );
+        // get parent data to assign new data
+        source = this.formatSource(source);
+        const nameSegs = source.split(".");
+        nameSegs.pop();
+        this.rootData = _.get(data, nameSegs);
+        result = _.get(data, source, null);
+        this.data = result;
+        Cache.setData(this.cacheID, source, result);
+      } else {
+        this.data = result;
       }
-      const exeConfig: IPluginExecutionConfig = {
-        returnLastValue: true
-      };
-      this.schema = await this.pluginManager.executePlugins(
-        "data.schema.parser",
-        exeConfig
-      );
-      // get parent data to assign new data
-      source = source.replace(":", ".");
-      const nameSegs = source.split(".");
-      nameSegs.pop();
-      this.rootData = _.get(data, nameSegs);
-      result = _.get(data, source, null);
-      this.data = result;
-      Cache.setData(this.cacheID, source, result);
     }
 
-    return result;
+    return this.data;
   }
 
   async updateData(value: any, path?: string) {
@@ -160,7 +178,7 @@ export default class DataNode implements IDataNode {
 
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
-      Cache.setData(this.cacheID, this.source, this.data);
+      Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
     }
     return status;
   }
@@ -194,7 +212,7 @@ export default class DataNode implements IDataNode {
         this.data = null;
       }
 
-      Cache.setData(this.cacheID, this.source, this.data);
+      Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
       // update state without sending message
       if (noUpdateLayout) {
         // for update props purpose
@@ -207,12 +225,33 @@ export default class DataNode implements IDataNode {
     return status;
   }
 
-  submit(dataSources: Array<string>, extra?: any, connectWith: string = "") {
-    const data = Cache.getData(this.cacheID);
-    // if (data) {
-    //   if (connect) {
-    //     _
-    //   }
-    // }
+  async submit(
+    dataSources: Array<string>,
+    method: string = "post",
+    connectWith?: string
+  ) {
+    const result = {}; //this.dataPool.get();
+    let responses: any = [];
+    dataSources.forEach((source: string) => {
+      const line = this.formatSource(source);
+      const data = Cache.getData(this.cacheID, line);
+      _.set(result, line, data);
+
+      // remote?
+      if (connectWith === undefined) {
+        responses.push(
+          this.dataEngine.sendRequest(source, result, method, false)
+        );
+      } else {
+        this.dataPool.set(result, connectWith);
+      }
+    });
+
+    if (connectWith === undefined) {
+      responses = await Promise.all(responses);
+      this.dataPool.clear();
+      return responses;
+    }
+    return result;
   }
 }
