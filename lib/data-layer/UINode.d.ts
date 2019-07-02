@@ -16,6 +16,7 @@ export default class UINode implements IUINode {
     parent?: IUINode;
     stateInfo: IStateInfo;
     constructor(schema: ILayoutSchema, request?: IRequest, root?: string, parent?: IUINode);
+    private setRootName;
     loadLayout(schema?: ILayoutSchema | string): Promise<any>;
     getSchema(path?: string): ILayoutSchema;
     getErrorInfo(): IErrorInfo;

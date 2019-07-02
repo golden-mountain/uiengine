@@ -10,7 +10,9 @@ export default class DataNode implements IDataNode {
     schema?: any;
     rootSchema?: any;
     data: any;
+    cacheID: string;
     constructor(source: any, uiNode: IUINode, request?: IRequest);
+    formatCacheID(id: any): string;
     getErrorInfo(): any;
     getData(path?: string): any;
     getSchema(path?: string): any;
@@ -18,7 +20,7 @@ export default class DataNode implements IDataNode {
     getRootData(path?: string): any;
     getPluginManager(): IPluginManager;
     loadData(source?: string): Promise<any>;
-    updateData(value: any, path?: string): Promise<boolean>;
-    deleteData(path?: any): Promise<void>;
+    updateData(value: any, path?: string): Promise<any>;
+    deleteData(path?: any): Promise<any>;
     submit(dataSources: Array<string>, extra?: any, connectWith?: string): void;
 }

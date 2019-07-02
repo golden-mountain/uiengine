@@ -9,7 +9,7 @@ export class A10Modal extends React.Component<any, any> {
   state = { uiNode: new UINode({}), visible: false };
 
   componentDidMount() {
-    const result = this.context.controller
+    this.context.controller
       .loadUINode(this.props.layout)
       .then((node: IUINode) => {
         this.setState({ uiNode: node, visible: true });

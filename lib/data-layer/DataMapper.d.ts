@@ -5,7 +5,8 @@ export default class DataMapper implements IDataMapper {
     source: string;
     rootSchema?: IDataSchema;
     pluginManager: IPluginManager;
-    constructor(source: string, request: IRequest);
+    cacheID: string;
+    constructor(request: IRequest);
     getDataEntryPoint(method: string): string;
-    loadSchema(source?: string): Promise<any>;
+    loadSchema(source: string): Promise<any>;
 }

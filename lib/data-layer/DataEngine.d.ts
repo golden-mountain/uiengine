@@ -2,24 +2,24 @@ import { IDataEngine, IPluginManager, IRequest, IDataMapper } from "../../typing
 export default class UIEngine implements IDataEngine {
     private request;
     errorInfo?: any;
-    source: string;
-    schemaPath: string;
+    source?: string;
+    schemaPath?: string;
     mapper: IDataMapper;
     data?: any;
     pluginManager: IPluginManager;
-    rootName: string;
+    cacheID: string;
     /**
      *
      * @param source a.b.c
      * @param request IRequest
      * @param loadDefaultPlugins whether load default plugins
      */
-    constructor(rootName: string, source: string, request: IRequest);
+    constructor(request: IRequest);
     parseSchemaPath(source: string): string;
-    loadSchema(source?: string): Promise<any>;
-    sendRequest(source?: string, data?: any, method?: string, cache?: boolean): Promise<any>;
-    loadData(source?: string, params?: any): Promise<any>;
-    updateData(source?: string, data?: any): Promise<any>;
-    replaceData(source?: string, data?: any): Promise<any>;
-    deleteData(source?: string, data?: any): Promise<any>;
+    loadSchema(source: string): Promise<any>;
+    sendRequest(source: string, data?: any, method?: string, cache?: boolean): Promise<any>;
+    loadData(source: string, params?: any): Promise<any>;
+    updateData(source: string, data?: any): Promise<any>;
+    replaceData(source: string, data?: any): Promise<any>;
+    deleteData(source: string, data?: any): Promise<any>;
 }
