@@ -156,15 +156,16 @@ export default class UINode implements IUINode {
    */
   private async assignSchema(
     schema: ILayoutSchema,
-    reloadData: boolean = true
+    loadData: string = "all" // all or schema
   ) {
     let liveSchema = schema;
     if (
       liveSchema["datasource"] &&
       !_.startsWith(liveSchema["datasource"], "$dummy") &&
-      reloadData
+      loadData
     ) {
-      await this.loadData(liveSchema["datasource"]);
+      const schemaOnly = loadData === "schema";
+      await this.loadData(liveSchema["datasource"], schemaOnly);
     }
 
     if (liveSchema["$children"] && this.dataNode) {
@@ -214,9 +215,8 @@ export default class UINode implements IUINode {
     return this;
   }
 
-  async loadData(source: string) {
-    const result: any = await this.dataNode.loadData(source);
-    return result;
+  async loadData(source: string, schemaOnly = false) {
+    return await this.dataNode.loadData(source, schemaOnly);
   }
 
   async replaceLayout(newSchema: ILayoutSchema | string) {
@@ -225,8 +225,8 @@ export default class UINode implements IUINode {
     return schemaReplaced;
   }
 
-  async updateLayout() {
-    const newSchema = await this.assignSchema(this.schema, false);
+  async updateLayout(loadData: string = "all") {
+    const newSchema = await this.assignSchema(this.schema, loadData);
     return newSchema;
   }
 

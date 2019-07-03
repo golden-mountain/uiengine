@@ -15,8 +15,8 @@ export default class DataPool implements IDataPool {
   set(data: any, path?: string) {
     if (path) {
       let p = path.replace("[]", "");
-      const d = _.get(this.data, p, path.indexOf("[]") > -1 ? [] : null);
-      if (_.isArray(d)) {
+      let d = _.get(this.data, p, path.indexOf("[]") > -1 ? [] : null);
+      if (_.isArray(d) && !_.isArray(data)) {
         d.push(data);
         _.set(this.data, p, d);
       } else {

@@ -33,9 +33,9 @@ export default class UINode implements IUINode {
      * @param reloadData
      */
     private assignSchema;
-    loadData(source: string): Promise<any>;
+    loadData(source: string, schemaOnly?: boolean): Promise<any>;
     replaceLayout(newSchema: ILayoutSchema | string): Promise<any>;
-    updateLayout(): Promise<this>;
+    updateLayout(loadData?: string): Promise<this>;
     clearLayout(): this;
     getNode(path?: string): any;
     getChildren(route?: Array<Number>): any;

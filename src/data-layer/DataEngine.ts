@@ -61,13 +61,8 @@ export default class UIEngine implements IDataEngine {
     let schemaPath = "";
     schemaPath = this.parseSchemaPath(source);
     this.source = schemaPath;
-
     let result = {};
     if (schemaPath) {
-      // if (source != this.source) {
-      //   Cache.clearDataSchemaCache(this.cacheID);
-      // }
-
       const schema = await this.loadSchema(schemaPath);
       if (schema === null) {
         this.errorInfo = {
@@ -112,7 +107,6 @@ export default class UIEngine implements IDataEngine {
         // handle response
         if (!response) {
           response = await this.request[method](endpoint, data);
-
           if (response.data) {
             if (cache) {
               Cache.setData(this.cacheID, endpoint, response.data);
@@ -138,6 +132,7 @@ export default class UIEngine implements IDataEngine {
       "data.request.after",
       exeConfig
     );
+
     if (!_.isEmpty(afterResult)) this.data = afterResult;
     return this.data;
   }

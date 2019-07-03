@@ -106,18 +106,15 @@ export class EditableTable extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
     // console.log(this.props.uinode.dataNode.data);
-
-    this.columns = this.props.uinode
-      .getChildren([0])
-      .children.map((node: any) => {
-        return {
-          title: node.props.title,
-          dataIndex: node.schema.datasource.split(".").pop(),
-          node,
-          width: "30%",
-          editable: true
-        };
-      });
+    this.columns = props.uinode.schema.$children.map((node: any) => {
+      return {
+        title: node.props.title,
+        dataIndex: node.datasource.split(".").pop(),
+        node,
+        width: "30%",
+        editable: true
+      };
+    });
 
     this.columns.push({
       title: "operation",

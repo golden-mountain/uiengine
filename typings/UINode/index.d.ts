@@ -36,10 +36,10 @@ export interface IUINode {
 
   loadLayout(schema?: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
-  loadData(source: string);
+  loadData(source: string, loadData?: boolean);
   getSchema(path?: string): ILayoutSchema;
   replaceLayout(newSchema: ILayoutSchema | string);
-  updateLayout();
+  updateLayout(loadData?: string);
   genLiveLayout(schema: ILayoutSchema, data: any);
   clearLayout();
   getChildren(route?: Array<Number>);

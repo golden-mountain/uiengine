@@ -21,7 +21,6 @@ export default class DataNode implements IDataNode {
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: string;
-  // rootData?: any;
   schema?: any;
   rootSchema?: any;
   data: any;
@@ -40,7 +39,6 @@ export default class DataNode implements IDataNode {
       this.source = source;
       this.cacheID = this.formatCacheID(source);
     }
-    // this.rootData = {};
 
     // initial data engine
     if (request) {
@@ -88,18 +86,14 @@ export default class DataNode implements IDataNode {
   }
 
   getRootSchema() {
-    return this.dataEngine.mapper.rootSchema;
+    return this.rootSchema;
   }
-
-  // getRootData(path?: string) {
-  //   return path ? _.get(this.rootData, path, this.rootData) : this.rootData;
-  // }
 
   getPluginManager(): IPluginManager {
     return this.pluginManager;
   }
 
-  async loadData(source?: string) {
+  async loadData(source?: string, schemaOnly: boolean = false) {
     // const { schemaPath = "", name = "" } = this.source;
     if (source) {
       this.source = source;
@@ -108,37 +102,38 @@ export default class DataNode implements IDataNode {
       source = this.source;
     }
 
-    // let result = Cache.getData(this.cacheID, source);
     let s = this.formatSource(source, this.cacheID);
     let result; // = this.dataPool.get(s, false);
 
-    if (!result) {
-      // let result = this.dataPool.get(s, false);
+    // if (!result) {
+    // let result = this.dataPool.get(s, false);
+    if (schemaOnly) {
+      await this.dataEngine.loadSchema(source);
+      this.data = null;
+    } else {
       let data = await this.dataEngine.loadData(source);
       if (data === null) {
         this.errorInfo = this.dataEngine.errorInfo;
         return;
       }
-
-      const exeConfig: IPluginExecutionConfig = {
-        returnLastValue: true
-      };
-      this.schema = await this.pluginManager.executePlugins(
-        "data.schema.parser",
-        exeConfig
-      );
-      // get parent data to assign new data
-      // const nameSegs = source.split(".");
-      // nameSegs.pop();
-      // this.rootData = _.get(data, nameSegs);
       let formattedSource = this.formatSource(source);
       result = _.get(data, formattedSource, null);
       this.data = result;
-      // Cache.setData(this.cacheID, source, result);
       this.dataPool.set(result, s);
-    } else {
-      this.data = result;
     }
+
+    // assign root schema
+    this.rootSchema = this.dataEngine.mapper.rootSchema;
+
+    // load this node schema
+    const exeConfig: IPluginExecutionConfig = {
+      returnLastValue: true
+    };
+    this.schema = await this.pluginManager.executePlugins(
+      "data.schema.parser",
+      exeConfig
+    );
+    // }
 
     return this.data;
   }
@@ -153,13 +148,7 @@ export default class DataNode implements IDataNode {
     if (path) {
       _.set(this.data, path, value);
     } else {
-      // const { name = "" } = this.source;
       this.data = value;
-      // const nameSegs = this.source.split(/\.|\:/);
-      // const lastName = nameSegs.pop();
-      // if (lastName) {
-      //   _.set(this.rootData, lastName, value);
-      // }
     }
 
     // check data from update plugins
@@ -186,7 +175,6 @@ export default class DataNode implements IDataNode {
         this.data,
         this.formatSource(this.source, this.cacheID)
       );
-      // Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
     }
     return status;
   }
@@ -220,7 +208,7 @@ export default class DataNode implements IDataNode {
         this.data = null;
       }
 
-      // Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
+      // not array, can't delete directly
       if (typeof this.data !== "object") {
         this.dataPool.set(
           this.data,
@@ -249,8 +237,7 @@ export default class DataNode implements IDataNode {
     dataSources.forEach((source: string) => {
       const cacheID = this.formatCacheID(source);
       const line = this.formatSource(source, cacheID);
-      // const data = Cache.getData(this.cacheID, line);
-      // _.merge(result, data);
+
       result = _.merge(result, this.dataPool.get(line, true));
       // remote?
       if (connectWith === undefined) {

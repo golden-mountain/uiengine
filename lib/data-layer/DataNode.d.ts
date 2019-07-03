@@ -19,7 +19,7 @@ export default class DataNode implements IDataNode {
     getSchema(path?: string): any;
     getRootSchema(): any;
     getPluginManager(): IPluginManager;
-    loadData(source?: string): Promise<any>;
+    loadData(source?: string, schemaOnly?: boolean): Promise<any>;
     updateData(value: any, path?: string): Promise<any>;
     deleteData(path?: any): Promise<any>;
     submit(dataSources: Array<string>, method?: string, connectWith?: string): Promise<any>;

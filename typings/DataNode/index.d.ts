@@ -6,6 +6,11 @@ export interface IDataSchema {
   definition: {};
 }
 
+export interface IDataSource {
+  source: string;
+  defaultValue?: any;
+}
+
 export interface ICache {
   [name: string]: {};
 }
@@ -21,14 +26,13 @@ export interface IDataNode {
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: string;
-  // rootData?: any;
   schema?: any;
   rootSchema?: any;
   data: any;
   updatingData?: any;
   dataPool: IDataPool;
 
-  loadData(source?: string): Promise<AxiosPromise> | any;
+  loadData(source?: string, schemaOnly?: boolean): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
   deleteData(path?: any);
   getData(path?: string);
@@ -36,6 +40,5 @@ export interface IDataNode {
   getErrorInfo();
   getPluginManager(): IPluginManager;
   getRootSchema();
-  // getRootData(path?: string);
   submit(dataSources: Array<string>, method: string, connectWith?: string);
 }

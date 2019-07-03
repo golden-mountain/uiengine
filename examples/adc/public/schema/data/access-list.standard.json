@@ -1,0 +1,165 @@
+{
+  "version": "3.0.0#Autoform v1.5",
+  "endpoint": {
+    "default": {
+      "path": "access-list.standard.json"
+    }
+  },
+  "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
+  "cm-lineage": "access-list.standard",
+  "cm-object-meta": {
+    "obj-occurences": "multi"
+  },
+  "fields": [
+    {
+      "key": "std",
+      "label": "Std",
+      "type": "input-number",
+      "cm-lineage": "access-list.standard.std",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mv",
+        "range": "1-99",
+        "gui-section": "Basic",
+        "help": "IP standard access list",
+        "object-key": true
+      }
+    },
+    {
+      "key": "stdrules",
+      "label": "Stdrules",
+      "type": "table",
+      "cm-lineage": "access-list.standard.stdrules",
+      "cm-meta": {
+        "format": "fields",
+        "start": true,
+        "multi": true,
+        "gui-section": "Options"
+      },
+      "fields": [
+        {
+          "key": "seq-num",
+          "label": "Sequence Number",
+          "type": "input-number",
+          "cm-lineage": "access-list.standard.stdrules.seq-num",
+          "cm-meta": {
+            "format": "number",
+            "flags": "ovdh",
+            "range": "1-8192",
+            "help": "Sequence number"
+          }
+        },
+        {
+          "key": "std-remark",
+          "label": "Std Remark",
+          "type": "input",
+          "cm-lineage": "access-list.standard.stdrules.std-remark",
+          "cm-meta": {
+            "format": "string-rlx",
+            "flags": "ob",
+            "range": "1-63",
+            "help": "Access list entry comment"
+          },
+          "name-label": "Remark"
+        },
+        {
+          "key": "action",
+          "label": "Action",
+          "type": "select",
+          "cm-lineage": "access-list.standard.stdrules.action",
+          "cm-meta": {
+            "format": "string",
+            "flags": "mvdy",
+            "allowed": [
+              {
+                "label": "Deny",
+                "value": "deny",
+                "help": "Deny"
+              },
+              {
+                "label": "Permit",
+                "value": "permit",
+                "help": "Permit"
+              },
+              {
+                "label": "L3 VLAN Forward Disable",
+                "value": "l3-vlan-fwd-disable",
+                "help": "Disable L3 forwarding between VLANs"
+              }
+            ],
+            "range": "1-128"
+          }
+        },
+        {
+          "key": "any",
+          "label": "Any",
+          "type": "switch",
+          "cm-lineage": "access-list.standard.stdrules.any",
+          "cm-meta": {
+            "format": "flag",
+            "flags": "mk",
+            "help": "Any source host",
+            "m-exclusion": ["host", "subnet"]
+          }
+        },
+        {
+          "key": "host",
+          "label": "Host",
+          "type": "input",
+          "cm-lineage": "access-list.standard.stdrules.host",
+          "cm-meta": {
+            "format": "ipv4-address",
+            "flags": "ob",
+            "m-exclusion": ["any", "subnet"],
+            "help": "A single source host"
+          }
+        },
+        {
+          "key": "subnet",
+          "label": "Subnet",
+          "type": "input",
+          "cm-lineage": "access-list.standard.stdrules.subnet",
+          "cm-meta": {
+            "format": "ipv4-address",
+            "flags": "ov",
+            "m-exclusion": ["any", "host"],
+            "help": "Source Address"
+          }
+        },
+        {
+          "key": "rev-subnet-mask",
+          "label": "Receive Subnet Mask",
+          "type": "input",
+          "cm-lineage": "access-list.standard.stdrules.rev-subnet-mask",
+          "cm-meta": {
+            "format": "ipv4-rev-netmask",
+            "flags": "mv",
+            "help": "Network Mask 0=apply 255=ignore"
+          }
+        },
+        {
+          "key": "log",
+          "label": "Log",
+          "type": "switch",
+          "cm-lineage": "access-list.standard.stdrules.log",
+          "cm-meta": {
+            "format": "flag",
+            "flags": "oki",
+            "help": "Log matches against this entry"
+          }
+        },
+        {
+          "key": "transparent-session-only",
+          "label": "Transparent Session Only",
+          "type": "switch",
+          "cm-lineage": "access-list.standard.stdrules.transparent-session-only",
+          "cm-meta": {
+            "format": "flag",
+            "flags": "oki",
+            "help": "Only log transparent sessions"
+          }
+        }
+      ]
+    }
+  ]
+}

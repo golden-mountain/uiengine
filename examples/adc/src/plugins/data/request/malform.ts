@@ -9,7 +9,7 @@ const callback: IPluginFunc = (dataEngine: IDataEngine) => {
   const data = dataEngine.data;
   // console.log(data, dataEngine.source);
   if (dataEngine.source !== undefined) {
-    const sourceSegs = dataEngine.source.split(/[.|/]/);
+    const sourceSegs = dataEngine.source.replace(".json", "").split(/[.|/]/);
     let result: any = {};
     let validSegs: any = [];
     let validData: any = {};
@@ -20,6 +20,8 @@ const callback: IPluginFunc = (dataEngine: IDataEngine) => {
         break;
       }
     }
+
+    if (_.isEmpty(validData)) validData = data;
     _.set(result, validSegs, validData);
     return result;
   }
