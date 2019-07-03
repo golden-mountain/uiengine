@@ -12,15 +12,27 @@ export default class DataPool implements IDataPool {
 
   data: any = {};
 
+  getDomainName(id: any) {
+    if (id && _.isString(id)) {
+      const splitter = id.indexOf(":") > -1 ? ":" : ".";
+      let [schemaPath] = id.split(splitter);
+      return _.snakeCase(schemaPath);
+    } else {
+      return "$dummy";
+    }
+  }
+
   set(data: any, path?: string) {
     if (path) {
+      const domainName = this.getDomainName(path);
+      const domainData = _.get(this.data, domainName);
       let p = path.replace("[]", "");
-      let d = _.get(this.data, p, path.indexOf("[]") > -1 ? [] : null);
+      let d = _.get(domainData, p, path.indexOf("[]") > -1 ? [] : null);
       if (_.isArray(d) && !_.isArray(data)) {
         d.push(data);
         _.set(this.data, p, d);
       } else {
-        _.set(this.data, path, data);
+        _.set(this.data, p, data);
       }
     } else {
       _.merge(this.data, data);
@@ -32,6 +44,8 @@ export default class DataPool implements IDataPool {
     let results: any = [];
     if (_.isArray(paths) && paths.length) {
       results = paths.map(path => {
+        const domainName = this.getDomainName(path);
+        let p = `${domainName}.${path}`;
         let result = _.get(this.data, path);
         if (withKey) {
           return _.set({}, path, result);
@@ -40,6 +54,8 @@ export default class DataPool implements IDataPool {
       });
     } else {
       if (_.isString(paths)) {
+        const domainName = this.getDomainName(paths);
+        let p = `${domainName}.${paths}`;
         results = _.get(this.data, paths);
       } else {
         results = this.data;
@@ -50,6 +66,8 @@ export default class DataPool implements IDataPool {
 
   clear(path?: string) {
     if (path) {
+      const domainName = this.getDomainName(path);
+      let p = `${domainName}.${path}`;
       _.unset(this.data, path);
     } else {
       this.data = {};

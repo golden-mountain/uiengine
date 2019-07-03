@@ -29,6 +29,7 @@ describe("Given all the DataPool", () => {
       const dataPool2 = DataPool.getInstance();
       expect(dataPool).to.equal(dataPool2);
       dataPool2.set(dataPartialTwo, "baz");
+      console.log(dataPool2.data);
       expect(dataPool2.data).to.deep.equal(expectedValue);
     });
 

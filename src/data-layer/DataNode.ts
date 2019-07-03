@@ -24,7 +24,7 @@ export default class DataNode implements IDataNode {
   schema?: any;
   rootSchema?: any;
   data: any;
-  cacheID: string = "";
+  // cacheID: string = "";
   dataPool: IDataPool;
 
   constructor(source: any, uiNode: IUINode, request?: IRequest) {
@@ -37,7 +37,7 @@ export default class DataNode implements IDataNode {
       // give default data
       this.data = _.get(uiNode.schema, "defaultvalue");
       this.source = source;
-      this.cacheID = this.formatCacheID(source);
+      // this.cacheID = this.formatCacheID(source);
     }
 
     // initial data engine
@@ -58,16 +58,6 @@ export default class DataNode implements IDataNode {
       return `${prefix}.${formatted}`;
     }
     return formatted;
-  }
-
-  formatCacheID(id: any) {
-    if (id && _.isString(id)) {
-      const splitter = id.indexOf(":") > -1 ? ":" : ".";
-      let [schemaPath] = id.split(splitter);
-      return _.snakeCase(schemaPath);
-    } else {
-      return "$dummy";
-    }
   }
 
   getErrorInfo() {
@@ -97,12 +87,12 @@ export default class DataNode implements IDataNode {
     // const { schemaPath = "", name = "" } = this.source;
     if (source) {
       this.source = source;
-      this.cacheID = this.formatCacheID(source);
+      // this.cacheID = this.formatCacheID(source);
     } else {
       source = this.source;
     }
 
-    let s = this.formatSource(source, this.cacheID);
+    let s = this.formatSource(source);
     let result; // = this.dataPool.get(s, false);
 
     // if (!result) {
@@ -171,10 +161,7 @@ export default class DataNode implements IDataNode {
 
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
-      this.dataPool.set(
-        this.data,
-        this.formatSource(this.source, this.cacheID)
-      );
+      this.dataPool.set(this.data, this.formatSource(this.source));
     }
     return status;
   }
@@ -210,10 +197,7 @@ export default class DataNode implements IDataNode {
 
       // not array, can't delete directly
       if (typeof this.data !== "object") {
-        this.dataPool.set(
-          this.data,
-          this.formatSource(this.source, this.cacheID)
-        );
+        this.dataPool.set(this.data, this.formatSource(this.source));
       }
       // update state without sending message
       if (noUpdateLayout) {
@@ -235,8 +219,8 @@ export default class DataNode implements IDataNode {
     let result = {};
     let responses: any = [];
     dataSources.forEach((source: string) => {
-      const cacheID = this.formatCacheID(source);
-      const line = this.formatSource(source, cacheID);
+      // const cacheID = this.formatCacheID(source);
+      const line = this.formatSource(source);
 
       result = _.merge(result, this.dataPool.get(line, true));
       // remote?
@@ -245,8 +229,7 @@ export default class DataNode implements IDataNode {
           this.dataEngine.sendRequest(source, result, method, false)
         );
       } else {
-        const cacheID = this.formatCacheID(connectWith);
-        const s = this.formatSource(connectWith, cacheID);
+        const s = this.formatSource(connectWith);
         this.dataPool.set(result, s);
       }
     });
