@@ -6,7 +6,6 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
   const format = dataNode.getSchema("cm-meta.format");
   let result = true,
     errorMessage = "";
-  console.log("data", data);
   const validationRules = (data: any, reg: RegExp, errorMsg: string) => {
     if (data) {
       result = reg.test(data);
@@ -29,21 +28,12 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
       );
       break;
   }
-  //console.log(typeof(/^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)))
-
-  // if (format === "ipv4-address") {
-  //   result = /^((25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(25[0-5]|2[0-4]\d|[01]?\d\d?)$/.test(
-  //     data
-  //   );
-  //   if (!result) errorMessage = `Error input ipv4`;
-  // }
-
   return { status: result, code: errorMessage };
 };
 
-export const ipv4: IPlugin = {
+export const ipAddr: IPlugin = {
   type: "data.update.could",
   weight: 100,
   callback,
-  name: "ipv4"
+  name: "ipAddr"
 };
