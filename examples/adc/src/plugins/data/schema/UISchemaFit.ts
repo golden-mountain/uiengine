@@ -29,7 +29,15 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
     // // merge ui schema
     // const uiSchema = dataNode.uiNode.schema;
     // _.merge(uiSchema, toMergeSchema);
+    /**new start */
+    const toMergeSchema = {};
+    let associations = _.get(schema, "cm-meta.obj-association");
+    _.set(toMergeSchema, "props.associations", associations);
+    // merge ui schema
+    const uiSchema = dataNode.uiNode.schema;
+    _.merge(uiSchema, toMergeSchema);
   }
+
   return schema;
 };
 

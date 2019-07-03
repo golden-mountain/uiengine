@@ -1,0 +1,23 @@
+{
+  "standard-list": [{
+      "std": 1,
+      "stdrules": [{
+        "seq-num": 1,
+        "action": "deny",
+        "any": 1
+      }],
+      "uuid": "4d6e3270-9378-11e9-b55f-ab4ea9bb3ce0",
+      "a10-url": "/axapi/v3/access-list/standard/1"
+    },
+    {
+      "std": 2,
+      "stdrules": [{
+        "seq-num": 2,
+        "action": "deny",
+        "any": 1
+      }],
+      "uuid": "74bae990-939b-11e9-b55f-ab4ea9bb3ce0",
+      "a10-url": "/axapi/v3/access-list/standard/2"
+    }
+  ]
+}

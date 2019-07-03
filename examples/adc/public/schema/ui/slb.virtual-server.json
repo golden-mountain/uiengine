@@ -215,6 +215,9 @@
               {
                 "component": "a10:FormItem",
                 "datasource": "slb.virtual-server:acl-id",
+                "props": {
+                  "type": "a10:DataSelect"
+                },
                 "state": {
                   "visible": {
                     "deps": [{

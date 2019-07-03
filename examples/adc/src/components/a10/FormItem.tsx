@@ -10,6 +10,7 @@ export const FormItem = (props: any) => {
   let { children, type, error, ...rest } = props;
   let element: any = children;
   if (type) {
+    console.log(type);
     if (type.indexOf(":") === -1) type = "antd:" + _.upperFirst(type);
     const componentMap: any = UIEngineRegister.componentsLibrary;
     const [packageName, component] = type.split(":");

@@ -37,7 +37,6 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     error: errorInfo,
     ...eventFuncs
   };
-
   // assign user defined props;
   if (props) {
     let {

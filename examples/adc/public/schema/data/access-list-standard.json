@@ -1,0 +1,33 @@
+{
+  "version": "3.0.0#Autoform v1.5",
+  "endpoint": {
+    "default": {
+      "path": "access-list-standard.json"
+    }
+
+  },
+  "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
+  "cm-lineage": "slb.virtual-server",
+  "cm-object-meta": {
+    "obj-occurences": "multi"
+  },
+
+  "fields": [{
+
+    "key": "acl-id",
+    "label": "ACL ID",
+    "type": "select",
+    "cm-lineage": "slb.virtual-server.acl-id",
+    "cm-meta": {
+      "format": "number",
+      "flags": "mvi",
+      "range": "1-199",
+      "condition": "acl",
+      "obj-association": ["access-list.standard", "access-list.extended"],
+      "modify-ineligible": true,
+      "gui-section": "Basic",
+      "help": "acl id",
+      "m-exclusion": ["shared-partition-acl"]
+    }
+  }]
+}
