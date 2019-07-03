@@ -138,17 +138,14 @@ describe("Given an instance of my DataNode library", () => {
 
       // local commit
       let expectedResult2 = {
-        data: {
-          foo: {
-            bar: {
-              name: "Zp",
-              baz: [{ name: "Rui", age: 30 }, { name: "Lifang", age: 30 }]
-            }
-          }
-        }
+        name: "Zp",
+        baz: [{ name: "Rui", age: 30 }, { name: "Lifang", age: 30 }]
       };
-      result = await dataNode.submit(dataSources, "", "data");
-      expect(dataNode.dataPool.data).to.deep.equal(expectedResult2);
+
+      result = await dataNode.submit(dataSources, "", "data:any");
+      expect(dataNode.dataPool.get("data.data.any")).to.deep.equal(
+        expectedResult2
+      );
     });
   });
 

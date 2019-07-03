@@ -21,11 +21,11 @@ export default class DataNode implements IDataNode {
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: string;
-  rootData?: any;
+  // rootData?: any;
   schema?: any;
   rootSchema?: any;
   data: any;
-  cacheID: string;
+  cacheID: string = "";
   dataPool: IDataPool;
 
   constructor(source: any, uiNode: IUINode, request?: IRequest) {
@@ -38,8 +38,9 @@ export default class DataNode implements IDataNode {
       // give default data
       this.data = _.get(uiNode.schema, "defaultvalue");
       this.source = source;
+      this.cacheID = this.formatCacheID(source);
     }
-    this.rootData = {};
+    // this.rootData = {};
 
     // initial data engine
     if (request) {
@@ -47,7 +48,6 @@ export default class DataNode implements IDataNode {
     }
 
     // get id
-    this.cacheID = this.formatCacheID(source);
     this.dataEngine = new DataEngine(this.request);
 
     // get instance of data pool
@@ -91,9 +91,9 @@ export default class DataNode implements IDataNode {
     return this.dataEngine.mapper.rootSchema;
   }
 
-  getRootData(path?: string) {
-    return path ? _.get(this.rootData, path, this.rootData) : this.rootData;
-  }
+  // getRootData(path?: string) {
+  //   return path ? _.get(this.rootData, path, this.rootData) : this.rootData;
+  // }
 
   getPluginManager(): IPluginManager {
     return this.pluginManager;
@@ -103,16 +103,16 @@ export default class DataNode implements IDataNode {
     // const { schemaPath = "", name = "" } = this.source;
     if (source) {
       this.source = source;
-      // source = this.formatSource(source);
       this.cacheID = this.formatCacheID(source);
     } else {
       source = this.source;
     }
 
-    if (source) {
-      // let result = Cache.getData(this.cacheID, source);
-      let s = this.formatSource(source, this.formatCacheID(source));
-      let result;
+    // let result = Cache.getData(this.cacheID, source);
+    let s = this.formatSource(source, this.cacheID);
+    let result = this.dataPool.get(s, false);
+
+    if (!result) {
       // let result = this.dataPool.get(s, false);
       let data = await this.dataEngine.loadData(source);
       if (data === null) {
@@ -128,14 +128,16 @@ export default class DataNode implements IDataNode {
         exeConfig
       );
       // get parent data to assign new data
-      const nameSegs = source.split(".");
-      nameSegs.pop();
-      this.rootData = _.get(data, nameSegs);
+      // const nameSegs = source.split(".");
+      // nameSegs.pop();
+      // this.rootData = _.get(data, nameSegs);
       let formattedSource = this.formatSource(source);
       result = _.get(data, formattedSource, null);
       this.data = result;
       // Cache.setData(this.cacheID, source, result);
       this.dataPool.set(result, s);
+    } else {
+      this.data = result;
     }
 
     return this.data;
@@ -153,11 +155,11 @@ export default class DataNode implements IDataNode {
     } else {
       // const { name = "" } = this.source;
       this.data = value;
-      const nameSegs = this.source.split(/\.|\:/);
-      const lastName = nameSegs.pop();
-      if (lastName) {
-        _.set(this.rootData, lastName, value);
-      }
+      // const nameSegs = this.source.split(/\.|\:/);
+      // const lastName = nameSegs.pop();
+      // if (lastName) {
+      //   _.set(this.rootData, lastName, value);
+      // }
     }
 
     // check data from update plugins
@@ -170,7 +172,6 @@ export default class DataNode implements IDataNode {
       // when one validation got false value, break; the rest plugins execution
       exeConfig
     );
-
     // update state without sending message
     if (noUpdateLayout) {
       await this.uiNode.pluginManager.executePlugins("ui.parser");
@@ -220,10 +221,12 @@ export default class DataNode implements IDataNode {
       }
 
       // Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
-      this.dataPool.set(
-        this.data,
-        this.formatSource(this.source, this.cacheID)
-      );
+      if (typeof this.data !== "object") {
+        this.dataPool.set(
+          this.data,
+          this.formatSource(this.source, this.cacheID)
+        );
+      }
       // update state without sending message
       if (noUpdateLayout) {
         // for update props purpose
@@ -241,15 +244,14 @@ export default class DataNode implements IDataNode {
     method: string = "post",
     connectWith?: string
   ) {
-    const result = {};
+    let result = {};
     let responses: any = [];
     dataSources.forEach((source: string) => {
       const cacheID = this.formatCacheID(source);
       const line = this.formatSource(source, cacheID);
       // const data = Cache.getData(this.cacheID, line);
       // _.merge(result, data);
-      _.merge(result, this.dataPool.get(line, true));
-
+      result = _.merge(result, this.dataPool.get(line, true));
       // remote?
       if (connectWith === undefined) {
         responses.push(

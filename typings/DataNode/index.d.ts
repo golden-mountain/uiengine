@@ -21,7 +21,7 @@ export interface IDataNode {
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: string;
-  rootData?: any;
+  // rootData?: any;
   schema?: any;
   rootSchema?: any;
   data: any;
@@ -36,6 +36,6 @@ export interface IDataNode {
   getErrorInfo();
   getPluginManager(): IPluginManager;
   getRootSchema();
-  getRootData(path?: string);
+  // getRootData(path?: string);
   submit(dataSources: Array<string>, method: string, connectWith?: string);
 }
