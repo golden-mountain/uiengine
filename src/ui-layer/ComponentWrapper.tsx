@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 
-import { UIEngineRegister, PluginManager } from "..";
+import { PluginManager, getComponent } from "..";
 import {
   IComponentWrapper,
   IComponentState,
@@ -50,17 +50,7 @@ class ComponentWrapper extends React.Component<
     if (uiNode.schema) {
       // render logic
       const componentLine = _.get(uiNode.schema, "component");
-      let WrappedComponent: any;
-      if (!componentLine) {
-        WrappedComponent = (props: any) => props.children;
-      } else {
-        // get registered component
-        const componentMap = UIEngineRegister.componentsLibrary;
-        const [packageName, component] = componentLine.split(":");
-        WrappedComponent = componentMap[packageName]
-          ? componentMap[packageName][component]
-          : componentMap[component];
-      }
+      const WrappedComponent = getComponent(componentLine);
 
       // map children as components
       let childrenObjects = uiNode.children.map((child: any, key: any) => {

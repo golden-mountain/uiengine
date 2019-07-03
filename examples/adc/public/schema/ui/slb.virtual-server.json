@@ -1,368 +1,416 @@
 {
-  "component": "antd:Row",
-  "props": {
-    "span": 12,
-    "gutter": 16
-  },
+  "component": "div",
   "children": [
     {
-      "component": "antd:Col",
+      "component": "antd:Row",
       "props": {
-        "span": 12
+        "span": 12,
+        "gutter": 16
       },
       "children": [
         {
-          "component": "antd:Form",
+          "component": "antd:Col",
           "props": {
-            "name": "VIP",
-            "title": {
-              "create": "Add New ${name}",
-              "update": "Edit ${name}"
-            },
-            "description": {
-              "create": "Please provide following information to create a new ${name}",
-              "update": "Please provide following information to edit ${name}"
-            }
+            "span": 12
           },
           "children": [
             {
-              "component": "a10:Section",
+              "component": "antd:Form",
               "props": {
-                "title": "Basic",
-                "defaultActiveKey": ["1"]
+                "name": "VIP",
+                "title": {
+                  "create": "Add New ${name}",
+                  "update": "Edit ${name}"
+                },
+                "description": {
+                  "create": "Please provide following information to create a new ${name}",
+                  "update": "Please provide following information to edit ${name}"
+                }
               },
               "children": [
                 {
-                  "component": "a10:FormItem",
+                  "component": "a10:Section",
                   "props": {
-                    "type": "antd:Input"
+                    "title": "Basic",
+                    "defaultActiveKey": ["1"]
                   },
-                  "datasource": "slb.virtual-server:name"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "$dummy.wildcard",
-                  "defaultvalue": true,
-                  "props": {
-                    "type": "antd:Switch",
-                    "label": "Wildcard",
-                    "defaultChecked": true
-                  }
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "$dummy.ip_type",
-                  "defaultvalue": 1,
-                  "props": {
-                    "type": "antd:RadioGroup",
-                    "options": [
-                      {
-                        "label": "IPv4",
-                        "value": 1
+                  "children": [
+                    {
+                      "component": "a10:FormItem",
+                      "props": {
+                        "type": "antd:Input"
                       },
-                      {
-                        "label": "IPv6",
-                        "value": 0
-                      }
-                    ]
-                  },
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "$dummy.wildcard"
-                          },
-                          "data": false
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ipv6-address",
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "data": 0
-                        },
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "state": {
-                            "visible": true
-                          }
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ip-address",
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "data": 1
-                        },
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "state": {
-                            "visible": true
-                          }
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:netmask",
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "data": 1
-                        },
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "state": {
-                            "visible": true
-                          }
-                        }
-                      ]
-                    }
-                  }
-                },
-
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ipv6-acl",
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "data": 0
-                        },
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "state": {
-                            "visible": true
-                          }
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ipv6-acl-shared",
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "$dummy.wildcard"
-                          },
-                          "data": true
-                        },
-                        {
-                          "selector": {
-                            "datasource": "$dummy.ip_type"
-                          },
-                          "data": 0
-                        }
-                      ]
-                    }
-                  }
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:enable-disable-action"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:acl-id",
-                  "props": {
-                    "type": "a10:DataSelect",
-                    "select": {
-                      "datasource": "access-list.standard:standard-list",
-                      "optionmap": {
-                        "title": "std",
-                        "value": "std"
+                      "datasource": "slb.virtual-server:name"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "$dummy.wildcard",
+                      "defaultvalue": true,
+                      "props": {
+                        "type": "antd:Switch",
+                        "label": "Wildcard",
+                        "defaultChecked": true
                       }
                     },
-                    "$events": [
-                      {
-                        "event": "onSelect",
-                        "action": "change"
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "$dummy.ip_type",
+                      "defaultvalue": 1,
+                      "props": {
+                        "type": "antd:Radio.Group",
+                        "options": [
+                          {
+                            "label": "IPv4",
+                            "value": 1
+                          },
+                          {
+                            "label": "IPv6",
+                            "value": 0
+                          }
+                        ]
+                      },
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "$dummy.wildcard"
+                              },
+                              "data": false
+                            }
+                          ]
+                        }
                       }
-                    ]
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:ipv6-address",
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "data": 0
+                            },
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "state": {
+                                "visible": true
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:ip-address",
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "data": 1
+                            },
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "state": {
+                                "visible": true
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:netmask",
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "data": 1
+                            },
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "state": {
+                                "visible": true
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:ipv6-acl",
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "data": 0
+                            },
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "state": {
+                                "visible": true
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:ipv6-acl-shared",
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "$dummy.wildcard"
+                              },
+                              "data": true
+                            },
+                            {
+                              "selector": {
+                                "datasource": "$dummy.ip_type"
+                              },
+                              "data": 0
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:enable-disable-action"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:acl-id",
+                      "props": {
+                        "type": "a10:DataSelect",
+                        "select": {
+                          "datasource": "access-list.standard:standard-list",
+                          "optionmap": {
+                            "title": "std",
+                            "value": "std"
+                          }
+                        },
+                        "$events": [
+                          {
+                            "event": "onSelect",
+                            "action": "change"
+                          }
+                        ]
+                      },
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "$dummy.wildcard"
+                              },
+                              "data": true
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:acl-name",
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "$dummy.wildcard"
+                              },
+                              "data": true
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:acl-id-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:acl-name-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:use-if-ip"
+                    }
+                  ]
+                },
+                {
+                  "component": "a10:Section",
+                  "props": {
+                    "title": "Advanced"
                   },
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "$dummy.wildcard"
-                          },
-                          "data": true
-                        }
-                      ]
+                  "children": [
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:arp-disable"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:stats-data-action"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:extended-stats"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:redistribute"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:redistribute-route-map"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:redistribution-flagged"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:vrid"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:ethernet"
+                    },
+
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:suppress-internal-loopback"
+                    },
+
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:disable-vip-adv"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:ha-dynamic"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:description"
                     }
-                  }
+                  ]
                 },
                 {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:acl-name",
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "$dummy.wildcard"
-                          },
-                          "data": true
+                  "component": "a10:Section",
+                  "props": {
+                    "title": "Template"
+                  },
+                  "children": [
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:template-policy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:shared-partition-policy-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:template-policy-shared",
+                      "state": {
+                        "visible": {
+                          "deps": [
+                            {
+                              "selector": {
+                                "datasource": "slb.virtual-server:shared-partition-policy-template"
+                              },
+                              "data": true
+                            }
+                          ]
                         }
-                      ]
+                      }
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:template-virtual-server"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:template-logging"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server:template-scaleout"
                     }
-                  }
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:acl-id-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:acl-name-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:use-if-ip"
+                  ]
                 }
               ]
-            },
+            }
+          ]
+        },
+        {
+          "component": "antd:Col",
+          "props": {
+            "span": 12
+          },
+          "children": [
             {
-              "component": "a10:Section",
+              "component": "a10:EditableTable",
+              "datasource": "slb.virtual-server:port-list",
               "props": {
-                "title": "Advanced"
-              },
-              "children": [
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:arp-disable"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:stats-data-action"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:extended-stats"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:redistribute"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:redistribute-route-map"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:redistribution-flagged"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:vrid"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ethernet"
-                },
-
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:suppress-internal-loopback"
-                },
-
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:disable-vip-adv"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:ha-dynamic"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:description"
+                "modal": {
+                  "layout": "schema/ui/slb.virtual-server.port.json",
+                  "title": "Create Virtual Port",
+                  "width": "80%",
+                  "connect": "slb.virtual-server:port-list"
                 }
-              ]
-            },
-            {
-              "component": "a10:Section",
-              "props": {
-                "title": "Template"
               },
-              "children": [
+              "$children": [
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:template-policy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:shared-partition-policy-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:template-policy-shared",
-                  "state": {
-                    "visible": {
-                      "deps": [
-                        {
-                          "selector": {
-                            "datasource": "slb.virtual-server:shared-partition-policy-template"
-                          },
-                          "data": true
-                        }
-                      ]
-                    }
+                  "datasource": "slb.virtual-server:port-list.$.port-number",
+                  "props": {
+                    "title": "Port"
                   }
                 },
                 {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:template-virtual-server"
+                  "component": "antd:Input",
+                  "props": {
+                    "title": "Protocol"
+                  },
+                  "datasource": "slb.virtual-server:port-list.$.protocol"
                 },
                 {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:template-logging"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:template-scaleout"
+                  "props": {
+                    "title": "Service Group"
+                  },
+                  "component": "antd:Input",
+                  "datasource": "slb.virtual-server:port-list.$.service-group"
                 }
               ]
             }
@@ -370,59 +418,22 @@
         }
       ]
     },
+
     {
-      "component": "antd:Col",
+      "component": "antd:Row",
       "props": {
-        "span": 12
+        "type": "flex",
+        "justify": "center"
       },
       "children": [
         {
-          "component": "a10:EditableTable",
-          "datasource": "slb.virtual-server:port-list",
-          "props": {
-            "modal": {
-              "layout": "schema/ui/slb.virtual-server.port.json",
-              "title": "Create Virtual Port",
-              "width": "80%",
-              "connect": "slb.virtual-server:port-list"
-            }
-          },
-          "$children": [
-            {
-              "component": "a10:FormItem",
-              "datasource": "slb.virtual-server:port-list.$.port-number",
-              "props": {
-                "title": "Port"
-              }
-            },
-            {
-              "component": "antd:Input",
-              "props": {
-                "title": "Protocol"
-              },
-              "datasource": "slb.virtual-server:port-list.$.protocol"
-            },
-            {
-              "props": {
-                "title": "Service Group"
-              },
-              "component": "antd:Input",
-              "datasource": "slb.virtual-server:port-list.$.service-group"
-            }
-          ]
-        },
-        {
-          "component": "antd:FormItem",
-          "props": {
-            "wrapperCol": {
-              "span": 24,
-              "offset": 18
-            }
-          },
+          "component": "antd:Col",
+          "props": {},
           "children": [
             {
               "component": "a10:Button",
               "props": {
+                "size": "large",
                 "type": "primary",
                 "htmlType": "submit",
                 "text": "Submit",
@@ -442,6 +453,7 @@
             {
               "component": "a10:Button",
               "props": {
+                "size": "large",
                 "type": "secondary",
                 "text": "Cancel",
                 "$events": [
