@@ -19,7 +19,12 @@ export class A10Modal extends React.Component<any, any> {
   handleOk = (e: any) => {
     if (this.state.uiNode !== undefined) {
       const uiNode: any = this.state.uiNode;
-      console.log(uiNode.dataNode.submit(["slb"]));
+      uiNode.dataNode.submit(
+        ["slb.virtual-server.port:"],
+        "",
+        "slb.virtual-server:port-list[]"
+      );
+      console.log(uiNode.dataNode.dataPool.data);
     }
 
     // console.log(e);

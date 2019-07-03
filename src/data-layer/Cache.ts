@@ -88,7 +88,7 @@ export default class Cache {
   }
 
   static setData(rootName: string, path: string, data: any) {
-    if (path.indexOf(".json") > -1 || path.indexOf("/") > -1) return;
+    // if (path.indexOf(".json") > -1 || path.indexOf("/") > -1) return;
     path = path.replace(":", ".");
     Cache.setCache("data", `${rootName}.${path}`, data);
   }

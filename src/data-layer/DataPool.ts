@@ -14,14 +14,21 @@ export default class DataPool implements IDataPool {
 
   set(data: any, path?: string) {
     if (path) {
-      _.set(this.data, path, data);
+      let p = path.replace("[]", "");
+      const d = _.get(this.data, p, path.indexOf("[]") > -1 ? [] : null);
+      if (_.isArray(d)) {
+        d.push(data);
+        _.set(this.data, p, d);
+      } else {
+        _.set(this.data, path, data);
+      }
     } else {
       _.merge(this.data, data);
     }
     return this.data;
   }
 
-  get(paths?: Array<string>, withKey: boolean = true) {
+  get(paths?: any, withKey: boolean = true) {
     let results: any = [];
     if (_.isArray(paths) && paths.length) {
       results = paths.map(path => {
@@ -32,7 +39,11 @@ export default class DataPool implements IDataPool {
         return result;
       });
     } else {
-      results = this.data;
+      if (_.isString(paths)) {
+        results = _.get(this.data, paths);
+      } else {
+        results = this.data;
+      }
     }
     return results;
   }

@@ -54,8 +54,12 @@ export default class DataNode implements IDataNode {
     this.dataPool = DataPool.getInstance();
   }
 
-  formatSource(source: string) {
-    return source.replace(":", ".");
+  formatSource(source: string, prefix?: string) {
+    const formatted = _.trim(source.replace(":", "."), ".");
+    if (prefix) {
+      return `${prefix}.${formatted}`;
+    }
+    return formatted;
   }
 
   formatCacheID(id: any) {
@@ -99,40 +103,39 @@ export default class DataNode implements IDataNode {
     // const { schemaPath = "", name = "" } = this.source;
     if (source) {
       this.source = source;
-      source = this.formatSource(source);
+      // source = this.formatSource(source);
       this.cacheID = this.formatCacheID(source);
     } else {
       source = this.source;
     }
 
     if (source) {
-      let result = Cache.getData(this.cacheID, source);
-      if (result === undefined) {
-        let data = await this.dataEngine.loadData(source);
-
-        if (data === null) {
-          this.errorInfo = this.dataEngine.errorInfo;
-          return;
-        }
-
-        const exeConfig: IPluginExecutionConfig = {
-          returnLastValue: true
-        };
-        this.schema = await this.pluginManager.executePlugins(
-          "data.schema.parser",
-          exeConfig
-        );
-        // get parent data to assign new data
-        source = this.formatSource(source);
-        const nameSegs = source.split(".");
-        nameSegs.pop();
-        this.rootData = _.get(data, nameSegs);
-        result = _.get(data, source, null);
-        this.data = result;
-        Cache.setData(this.cacheID, source, result);
-      } else {
-        this.data = result;
+      // let result = Cache.getData(this.cacheID, source);
+      let s = this.formatSource(source, this.formatCacheID(source));
+      let result;
+      // let result = this.dataPool.get(s, false);
+      let data = await this.dataEngine.loadData(source);
+      if (data === null) {
+        this.errorInfo = this.dataEngine.errorInfo;
+        return;
       }
+
+      const exeConfig: IPluginExecutionConfig = {
+        returnLastValue: true
+      };
+      this.schema = await this.pluginManager.executePlugins(
+        "data.schema.parser",
+        exeConfig
+      );
+      // get parent data to assign new data
+      const nameSegs = source.split(".");
+      nameSegs.pop();
+      this.rootData = _.get(data, nameSegs);
+      let formattedSource = this.formatSource(source);
+      result = _.get(data, formattedSource, null);
+      this.data = result;
+      // Cache.setData(this.cacheID, source, result);
+      this.dataPool.set(result, s);
     }
 
     return this.data;
@@ -178,7 +181,11 @@ export default class DataNode implements IDataNode {
 
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
-      Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
+      this.dataPool.set(
+        this.data,
+        this.formatSource(this.source, this.cacheID)
+      );
+      // Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
     }
     return status;
   }
@@ -212,7 +219,11 @@ export default class DataNode implements IDataNode {
         this.data = null;
       }
 
-      Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
+      // Cache.setData(this.cacheID, this.formatSource(this.source), this.data);
+      this.dataPool.set(
+        this.data,
+        this.formatSource(this.source, this.cacheID)
+      );
       // update state without sending message
       if (noUpdateLayout) {
         // for update props purpose
@@ -233,23 +244,26 @@ export default class DataNode implements IDataNode {
     const result = {};
     let responses: any = [];
     dataSources.forEach((source: string) => {
-      const line = this.formatSource(source);
-      const data = Cache.getData(this.cacheID, line);
-      _.set(result, line, data);
+      const cacheID = this.formatCacheID(source);
+      const line = this.formatSource(source, cacheID);
+      // const data = Cache.getData(this.cacheID, line);
+      // _.merge(result, data);
+      _.merge(result, this.dataPool.get(line, true));
+
       // remote?
       if (connectWith === undefined) {
-        _.merge(result, this.dataPool.get());
         responses.push(
           this.dataEngine.sendRequest(source, result, method, false)
         );
       } else {
-        this.dataPool.set(result, connectWith);
+        const cacheID = this.formatCacheID(connectWith);
+        const s = this.formatSource(connectWith, cacheID);
+        this.dataPool.set(result, s);
       }
     });
 
     if (connectWith === undefined) {
       responses = await Promise.all(responses);
-      this.dataPool.clear();
       return responses;
     }
     return result;

@@ -13,7 +13,7 @@ export default class DataNode implements IDataNode {
     cacheID: string;
     dataPool: IDataPool;
     constructor(source: any, uiNode: IUINode, request?: IRequest);
-    formatSource(source: string): string;
+    formatSource(source: string, prefix?: string): string;
     formatCacheID(id: any): string;
     getErrorInfo(): any;
     getData(path?: string): any;

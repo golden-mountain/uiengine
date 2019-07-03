@@ -4,6 +4,6 @@ export default class DataPool implements IDataPool {
     static getInstance: () => DataPool;
     data: any;
     set(data: any, path?: string): any;
-    get(paths?: Array<string>, withKey?: boolean): any[];
+    get(paths?: any, withKey?: boolean): any;
     clear(path?: string): void;
 }

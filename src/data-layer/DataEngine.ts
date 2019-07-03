@@ -17,7 +17,7 @@ export default class UIEngine implements IDataEngine {
   mapper: IDataMapper;
   data?: any;
   pluginManager: IPluginManager = new PluginManager(this);
-  cacheID: string = "";
+  cacheID: string = "response";
 
   /**
    *
@@ -47,8 +47,6 @@ export default class UIEngine implements IDataEngine {
     method: string = "get",
     cache: boolean = false
   ) {
-    this.cacheID = _.snakeCase(source);
-
     // clear initial data;
     this.data = {};
     this.errorInfo = null;
@@ -66,9 +64,9 @@ export default class UIEngine implements IDataEngine {
 
     let result = {};
     if (schemaPath) {
-      if (source != this.source) {
-        Cache.clearDataSchemaCache(this.cacheID);
-      }
+      // if (source != this.source) {
+      //   Cache.clearDataSchemaCache(this.cacheID);
+      // }
 
       const schema = await this.loadSchema(schemaPath);
       if (schema === null) {
@@ -90,7 +88,6 @@ export default class UIEngine implements IDataEngine {
 
       try {
         let response: any;
-        if (cache) response = Cache.getData(this.cacheID);
 
         // could stop the commit
         const exeConfig: IPluginExecutionConfig = {
@@ -109,11 +106,17 @@ export default class UIEngine implements IDataEngine {
           return false;
         }
 
+        if (cache) {
+          response = Cache.getData(this.cacheID, endpoint);
+        }
         // handle response
         if (!response) {
           response = await this.request[method](endpoint, data);
+
           if (response.data) {
-            if (cache) Cache.setData(this.cacheID, endpoint, response.data);
+            if (cache) {
+              Cache.setData(this.cacheID, endpoint, response.data);
+            }
             response = response.data;
           }
         }
