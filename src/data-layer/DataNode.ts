@@ -110,7 +110,7 @@ export default class DataNode implements IDataNode {
 
     // let result = Cache.getData(this.cacheID, source);
     let s = this.formatSource(source, this.cacheID);
-    let result = this.dataPool.get(s, false);
+    let result; // = this.dataPool.get(s, false);
 
     if (!result) {
       // let result = this.dataPool.get(s, false);

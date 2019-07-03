@@ -444,14 +444,14 @@
           },
           "$children": [
             {
-              "component": "a10:FormItem",
+              "component": "antd:Input",
               "datasource": "slb.virtual-server:port-list.$.port-number",
               "props": {
                 "title": "Port"
               }
             },
             {
-              "component": "a10:FormItem",
+              "component": "antd:Input",
               "props": {
                 "title": "Protocol"
               },
@@ -461,7 +461,7 @@
               "props": {
                 "title": "Service Group"
               },
-              "component": "a10:FormItem",
+              "component": "antd:Input",
               "datasource": "slb.virtual-server:port-list.$.service-group"
             }
           ]

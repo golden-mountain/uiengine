@@ -83,7 +83,8 @@ class ComponentWrapper extends React.Component<
             ...rest,
             ...uiNode.props,
             key: `key-of-child-${uiNode.id}`,
-            ...newProps
+            ...newProps,
+            uinode: uiNode
           };
           return uiNode.children.length ? (
             <WrappedComponent {...props}>{childrenObjects}</WrappedComponent>

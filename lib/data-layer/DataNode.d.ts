@@ -6,7 +6,6 @@ export default class DataNode implements IDataNode {
     dataEngine: IDataEngine;
     uiNode: IUINode;
     source: string;
-    rootData?: any;
     schema?: any;
     rootSchema?: any;
     data: any;
@@ -19,7 +18,6 @@ export default class DataNode implements IDataNode {
     getData(path?: string): any;
     getSchema(path?: string): any;
     getRootSchema(): any;
-    getRootData(path?: string): any;
     getPluginManager(): IPluginManager;
     loadData(source?: string): Promise<any>;
     updateData(value: any, path?: string): Promise<any>;

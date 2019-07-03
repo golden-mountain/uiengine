@@ -16,7 +16,7 @@ export class A10Modal extends React.Component<any, any> {
       });
   }
 
-  handleOk = (e: any) => {
+  handleOk = async (e: any) => {
     if (this.state.uiNode !== undefined) {
       const uiNode: any = this.state.uiNode;
       uiNode.dataNode.submit(
@@ -28,6 +28,7 @@ export class A10Modal extends React.Component<any, any> {
     }
 
     // console.log(e);
+    await this.props.uinode.updateLayout();
     this.props.close();
   };
 
@@ -37,8 +38,7 @@ export class A10Modal extends React.Component<any, any> {
   };
 
   render() {
-    const { layout, ...rest } = this.props;
-
+    const { layout, uinode, ...rest } = this.props;
     return this.state.visible ? (
       <Modal
         {...rest}

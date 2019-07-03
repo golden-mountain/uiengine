@@ -34,7 +34,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     label: dataLabel,
     type: inputType,
     value,
-    errorInfo,
+    error: errorInfo,
     ...eventFuncs
   };
 

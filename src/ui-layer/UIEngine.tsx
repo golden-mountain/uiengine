@@ -65,21 +65,21 @@ export default class UIEngine extends React.Component<
 
   render() {
     const { layouts, reqConfig, test, ...rest } = this.props;
-    const context = {
-      controller: this.nodeController
-    };
-    return (
-      <UIEngineContext.Provider value={context}>
-        {this.state.nodes.map((uiNode: IUINode, layoutKey: number) => {
-          return (
-            <ComponentWrapper
-              uiNode={uiNode}
-              {...rest}
-              key={`layout-${layoutKey}`}
-            />
-          );
-        })}
-      </UIEngineContext.Provider>
-    );
+
+    return this.state.nodes.map((uiNode: IUINode, layoutKey: number) => {
+      const context = {
+        controller: this.nodeController,
+        uiNode
+      };
+      return (
+        <UIEngineContext.Provider value={context}>
+          <ComponentWrapper
+            uiNode={uiNode}
+            {...rest}
+            key={`layout-${layoutKey}`}
+          />
+        </UIEngineContext.Provider>
+      );
+    });
   }
 }

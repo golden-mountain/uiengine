@@ -4,6 +4,7 @@ import { Table, Input, Button, Popconfirm, Form } from "antd";
 import { A10Modal } from "./Modal";
 
 import { UIEngineContext } from "UIEngine";
+import { IUINode } from "UIEngine/typings";
 
 const EditableContext = React.createContext({});
 
@@ -104,53 +105,36 @@ export class EditableTable extends React.Component<any, any> {
 
   constructor(props: any) {
     super(props);
-    this.columns = [
-      {
-        title: "name",
-        dataIndex: "name",
-        width: "30%",
-        editable: true
-      },
-      {
-        title: "age",
-        dataIndex: "age"
-      },
-      {
-        title: "address",
-        dataIndex: "address"
-      },
-      {
-        title: "operation",
-        dataIndex: "operation",
-        render: (text: any, record: any) =>
-          this.state.dataSource.length >= 1 ? (
-            <Popconfirm
-              title="Sure to delete?"
-              onConfirm={() => this.handleDelete(record.key)}
-            >
-              <div>Delete</div>
-            </Popconfirm>
-          ) : null
-      }
-    ];
+    // console.log(this.props.uinode.dataNode.data);
 
-    const dataSource = props.value;
-    // console.log(dataSource);
+    this.columns = this.props.uinode
+      .getChildren([0])
+      .children.map((node: any) => {
+        return {
+          title: node.props.title,
+          dataIndex: node.schema.datasource.split(".").pop(),
+          node,
+          width: "30%",
+          editable: true
+        };
+      });
+
+    this.columns.push({
+      title: "operation",
+      dataIndex: "operation",
+      render: (text: any, record: any) =>
+        this.state.dataSource.length >= 1 ? (
+          <Popconfirm
+            title="Sure to delete?"
+            onConfirm={() => this.handleDelete(record.key)}
+          >
+            <div>Delete</div>
+          </Popconfirm>
+        ) : null
+    });
+
     this.state = {
-      // dataSource: [
-      //   {
-      //     key: '0',
-      //     name: 'Edward King 0',
-      //     age: '32',
-      //     address: 'London, Park Lane no. 0',
-      //   },
-      //   {
-      //     key: '1',
-      //     name: 'Edward King 1',
-      //     age: '32',
-      //     address: 'London, Park Lane no. 1',
-      //   },
-      // ],
+      dataSource: this.props.uinode.dataNode.data,
       show_popup: false
     };
   }
@@ -170,27 +154,21 @@ export class EditableTable extends React.Component<any, any> {
   };
 
   handleSave = (row: any) => {
-    const newData = [...this.state.dataSource];
-    const index = newData.findIndex(item => row.key === item.key);
-    const item = newData[index];
-    newData.splice(index, 1, {
-      ...item,
-      ...row
-    });
+    const newData = this.props.uinode.dataNode.data;
     const dataSource = { dataSource: newData };
     this.setState(dataSource);
-    this.props.modelmanager
-      .getStateController()
-      .setDataOnNode(this.props.dataSource, dataSource);
   };
 
   closeModal = () => {
-    this.setState({ show_popup: false });
+    this.setState({
+      show_popup: false,
+      dataSource: this.props.uinode.dataNode.data
+    });
   };
 
   render() {
     const { dataSource } = this.state;
-    const { modal } = this.props;
+    const { modal, uinode } = this.props;
     const components = {
       body: {
         row: EditableFormRow,
@@ -227,7 +205,7 @@ export class EditableTable extends React.Component<any, any> {
           type="danger"
           style={{ marginBottom: 16 }}
         >
-          Full Fill a Port
+          Advance Create...
         </Button>
         <Table
           components={components}
@@ -237,7 +215,11 @@ export class EditableTable extends React.Component<any, any> {
           columns={columns}
         />
         {this.state.show_popup ? (
-          <A10Modal {...modal} close={this.closeModal.bind(this)} />
+          <A10Modal
+            {...modal}
+            close={this.closeModal.bind(this)}
+            uinode={uinode}
+          />
         ) : null}
       </div>
     );
