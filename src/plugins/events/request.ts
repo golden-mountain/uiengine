@@ -9,7 +9,11 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     }
 
     let target = `${options.target}:`;
-    console.log(options, uiNode.dataNode.dataPool.get(target, false));
+    // console.log(options, uiNode.dataNode.dataPool.get(target, false));
+    // const data = uiNode.dataNode.dataPool.get(target, false);
+    uiNode.dataNode.submit([target], "post").then((result: any) => {
+      console.log(result);
+    });
   };
 };
 

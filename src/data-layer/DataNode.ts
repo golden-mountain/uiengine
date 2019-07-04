@@ -208,6 +208,17 @@ export default class DataNode implements IDataNode {
     method: string = "post",
     connectWith?: string
   ) {
+    const exeConfig: IPluginExecutionConfig = {
+      stopWhenEmpty: true,
+      returnLastValue: true
+    };
+    const couldSubmit = await this.uiNode.pluginManager.executePlugins(
+      "data.submit.could",
+      exeConfig
+    );
+    if (couldSubmit !== undefined && !couldSubmit.status) {
+      return couldSubmit;
+    }
     let result = {};
     let responses: any = [];
     dataSources.forEach((source: string) => {

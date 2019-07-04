@@ -76,7 +76,6 @@ class RequestDev extends RequestAbstract {
   private mockRequest(url: string, parmas: any, method: string = "Get") {
     const path: string = `${this.pathPrefix}/${url}`;
     const data = require(path);
-    // console.log(path, data);
     const methodName = `on${method}`;
     this.mock[methodName](url, parmas).reply(200, data);
   }
