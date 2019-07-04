@@ -8,11 +8,8 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
       e.stopPropagation();
     }
 
-    console.log(
-      options,
-      e,
-      uiNode.dataNode.dataPool.get(options.target, false)
-    );
+    let target = `${options.target}:`;
+    console.log(options, uiNode.dataNode.dataPool.get(target, false));
   };
 };
 

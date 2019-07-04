@@ -17,12 +17,12 @@ export default class Event implements IEvent {
     );
     const eventsBinded: any = {};
     events.forEach((v: any) => {
-      const { action, event, ...schemaOptions } = v;
+      const { action, event, options } = v;
       if (action && _.has(eventPlugins, action)) {
         eventsBinded[event] = function(this: any, e: any) {
           const callback = _.get(eventPlugins, action);
           try {
-            return callback.call(this, e, schemaOptions);
+            return callback.call(this, e, options);
           } catch (e) {
             console.log("Event call error:", e.message);
           }

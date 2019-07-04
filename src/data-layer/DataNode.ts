@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { PluginManager, Cache, DataPool } from "./";
+import { PluginManager, DataPool, formatSource } from "../";
 import {
   IDataNode,
   IRequest,
@@ -52,14 +52,6 @@ export default class DataNode implements IDataNode {
     this.dataPool = DataPool.getInstance();
   }
 
-  formatSource(source: string, prefix?: string) {
-    const formatted = _.trim(source.replace(":", "."), ".");
-    if (prefix) {
-      return `${prefix}.${formatted}`;
-    }
-    return formatted;
-  }
-
   getErrorInfo() {
     return this.errorInfo;
   }
@@ -92,7 +84,7 @@ export default class DataNode implements IDataNode {
       source = this.source;
     }
 
-    let s = this.formatSource(source);
+    // let s = this.formatSource(source);
     let result; // = this.dataPool.get(s, false);
 
     // if (!result) {
@@ -106,10 +98,10 @@ export default class DataNode implements IDataNode {
         this.errorInfo = this.dataEngine.errorInfo;
         return;
       }
-      let formattedSource = this.formatSource(source);
+      let formattedSource = formatSource(source);
       result = _.get(data, formattedSource, null);
       this.data = result;
-      this.dataPool.set(result, s);
+      this.dataPool.set(result, source);
     }
 
     // assign root schema
@@ -161,7 +153,7 @@ export default class DataNode implements IDataNode {
 
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
-      this.dataPool.set(this.data, this.formatSource(this.source));
+      this.dataPool.set(this.data, this.source);
     }
     return status;
   }
@@ -197,7 +189,7 @@ export default class DataNode implements IDataNode {
 
       // not array, can't delete directly
       if (typeof this.data !== "object") {
-        this.dataPool.set(this.data, this.formatSource(this.source));
+        this.dataPool.set(this.data, this.source);
       }
       // update state without sending message
       if (noUpdateLayout) {
@@ -220,17 +212,14 @@ export default class DataNode implements IDataNode {
     let responses: any = [];
     dataSources.forEach((source: string) => {
       // const cacheID = this.formatCacheID(source);
-      const line = this.formatSource(source);
-
-      result = _.merge(result, this.dataPool.get(line, true));
+      result = _.merge(result, this.dataPool.get(source, true));
       // remote?
       if (connectWith === undefined) {
         responses.push(
           this.dataEngine.sendRequest(source, result, method, false)
         );
       } else {
-        const s = this.formatSource(connectWith);
-        this.dataPool.set(result, s);
+        this.dataPool.set(result, connectWith);
       }
     });
 

@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { formatSource, getDomainName } from "../";
 import { IDataPool } from "../../typings";
 
 export default class DataPool implements IDataPool {
@@ -12,31 +13,21 @@ export default class DataPool implements IDataPool {
 
   data: any = {};
 
-  getDomainName(id: any) {
-    if (id && _.isString(id)) {
-      const splitter = id.indexOf(":") > -1 ? ":" : ".";
-      let [schemaPath] = id.split(splitter);
-      return _.snakeCase(schemaPath);
-    } else {
-      return "$dummy";
-    }
-  }
+  set(data: any, path: string) {
+    const domainName = getDomainName(path);
+    const domainData = _.get(this.data, domainName);
+    path = formatSource(path);
+    let p = path.replace("[]", "");
+    let d = _.get(domainData, p, path.indexOf("[]") > -1 ? [] : null);
 
-  set(data: any, path?: string) {
-    if (path) {
-      const domainName = this.getDomainName(path);
-      const domainData = _.get(this.data, domainName);
-      let p = path.replace("[]", "");
-      let d = _.get(domainData, p, path.indexOf("[]") > -1 ? [] : null);
-      if (_.isArray(d) && !_.isArray(data)) {
-        d.push(data);
-        _.set(this.data, p, d);
-      } else {
-        _.set(this.data, p, data);
-      }
+    p = `${domainName}.${p}`;
+    if (_.isArray(d) && !_.isArray(data)) {
+      d.push(data);
+      _.set(this.data, p, d);
     } else {
-      _.merge(this.data, data);
+      _.set(this.data, p, data);
     }
+
     return this.data;
   }
 
@@ -44,19 +35,21 @@ export default class DataPool implements IDataPool {
     let results: any = [];
     if (_.isArray(paths) && paths.length) {
       results = paths.map(path => {
-        const domainName = this.getDomainName(path);
+        const domainName = getDomainName(path);
+        path = formatSource(path);
         let p = `${domainName}.${path}`;
-        let result = _.get(this.data, path);
+        let result = _.get(this.data, p);
         if (withKey) {
-          return _.set({}, path, result);
+          return _.set({}, p, result);
         }
         return result;
       });
     } else {
       if (_.isString(paths)) {
-        const domainName = this.getDomainName(paths);
+        const domainName = getDomainName(paths);
+        paths = formatSource(paths);
         let p = `${domainName}.${paths}`;
-        results = _.get(this.data, paths);
+        results = _.get(this.data, p);
       } else {
         results = this.data;
       }
@@ -66,9 +59,10 @@ export default class DataPool implements IDataPool {
 
   clear(path?: string) {
     if (path) {
-      const domainName = this.getDomainName(path);
+      const domainName = getDomainName(path);
+      path = formatSource(path);
       let p = `${domainName}.${path}`;
-      _.unset(this.data, path);
+      _.unset(this.data, p);
     } else {
       this.data = {};
     }

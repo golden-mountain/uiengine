@@ -11,7 +11,6 @@ export default class DataNode implements IDataNode {
     data: any;
     dataPool: IDataPool;
     constructor(source: any, uiNode: IUINode, request?: IRequest);
-    formatSource(source: string, prefix?: string): string;
     getErrorInfo(): any;
     getData(path?: string): any;
     getSchema(path?: string): any;

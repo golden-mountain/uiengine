@@ -1,6 +1,6 @@
 import React from "react";
 import _ from "lodash";
-import { UIEngineRegister } from "./";
+import { UIEngineRegister } from "../";
 
 export function getComponent(componentLine?: string) {
   let WrappedComponent: any;
