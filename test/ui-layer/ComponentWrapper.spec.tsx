@@ -5,7 +5,6 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 import { mount } from "enzyme";
-import * as plugins from "../../src/plugins";
 
 import {
   UIEngineRegister,
@@ -19,6 +18,7 @@ import reqConfig from "../config/request";
 
 // import components
 import components from "../components";
+import * as plugins from "../../src/plugins";
 
 chai.use(chaiSpies);
 const expect = chai.expect;
@@ -44,8 +44,8 @@ describe("Given an instance of ComponentWrapper library", () => {
 
   describe("the given ui nodes", () => {
     it("should rendered as UI", async () => {
-      expect(wrapper.find(components.DivContainer)).to.have.lengthOf(3);
-      expect(wrapper.find(components.PContainer)).to.have.lengthOf(4);
+      expect(wrapper.find(components.test.DivContainer)).to.have.lengthOf(3);
+      expect(wrapper.find(components.test.PContainer)).to.have.lengthOf(4);
       const expectedHTML =
         "<div>foo:bar<div>demo-element-2</div><div>hello<p>foo:bar.baz.0.name</p><p>foo:bar.baz.0.age</p><p>foo:bar.baz.1.name</p><p>foo:bar.baz.1.age</p></div></div>";
       expect(wrapper.html()).to.equal(expectedHTML);
