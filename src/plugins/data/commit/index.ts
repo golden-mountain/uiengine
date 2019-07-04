@@ -1,2 +1,1 @@
-export * from "./remote-validate";
-export * from "./mock";
+export * from "./submit";

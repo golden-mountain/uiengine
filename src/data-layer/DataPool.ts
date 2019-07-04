@@ -12,6 +12,7 @@ export default class DataPool implements IDataPool {
   };
 
   data: any = {};
+  errors: any = {};
 
   set(data: any, path: string) {
     const domainName = getDomainName(path);
@@ -66,5 +67,13 @@ export default class DataPool implements IDataPool {
     } else {
       this.data = {};
     }
+  }
+
+  setError(source: string, error: any) {
+    this.errors[source] = error;
+  }
+
+  clearError(source: any) {
+    _.unset(this.errors, source);
   }
 }

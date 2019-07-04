@@ -154,6 +154,9 @@ export default class DataNode implements IDataNode {
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
       this.dataPool.set(this.data, this.source);
+      this.dataPool.clearError(this.source);
+    } else {
+      this.dataPool.setError(this.source, this.errorInfo);
     }
     return status;
   }
@@ -190,6 +193,7 @@ export default class DataNode implements IDataNode {
       // not array, can't delete directly
       if (typeof this.data !== "object") {
         this.dataPool.set(this.data, this.source);
+        this.dataPool.clearError(this.source);
       }
       // update state without sending message
       if (noUpdateLayout) {
@@ -199,6 +203,8 @@ export default class DataNode implements IDataNode {
       } else {
         await this.uiNode.updateLayout();
       }
+    } else {
+      this.dataPool.setError(this.source, this.errorInfo);
     }
     return status;
   }
@@ -212,8 +218,8 @@ export default class DataNode implements IDataNode {
       stopWhenEmpty: true,
       returnLastValue: true
     };
-    const couldSubmit = await this.uiNode.pluginManager.executePlugins(
-      "data.submit.could",
+    const couldSubmit = await this.pluginManager.executePlugins(
+      "data.commit.could",
       exeConfig
     );
     if (couldSubmit !== undefined && !couldSubmit.status) {
