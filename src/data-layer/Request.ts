@@ -36,16 +36,6 @@ class RequestAbstract {
     this.axios = axios.create(config);
   }
 
-  // request(requestConfig: any) {
-  //   try {
-  //     const response = this.axios.request(requestConfig);
-  //     console.log(response);
-  //     return response;
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // }
-
   get(url: string, params?: any) {
     return this.axios.get(url, params);
   }

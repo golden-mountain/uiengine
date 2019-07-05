@@ -76,7 +76,13 @@ class ComponentWrapper extends React.Component<
             ...newProps,
             uinode: uiNode
           };
-          return uiNode.children.length ? (
+
+          // simple text
+          if (uiNode.schema.content) {
+            childrenObjects.push(uiNode.schema.content);
+          }
+
+          return childrenObjects.length ? (
             <WrappedComponent {...props}>{childrenObjects}</WrappedComponent>
           ) : (
             <WrappedComponent {...props} />

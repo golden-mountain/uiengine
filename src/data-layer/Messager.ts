@@ -1,19 +1,10 @@
 import _ from "lodash";
-import { IComponentState, IUINode, IMessager } from "../../typings";
+import { IMessager } from "../../typings";
 
 export default class Messager implements IMessager {
   static objectStateFuncMap = {
     // [id]: setState
   };
-
-  constructor(schemaID?: string) {
-    // console.log("registered a messager", schemaID);
-    // if (schemaID) {
-    //   Messager.objectStateFuncMap[schemaID] = () => {
-    //     console.log("No setState func attached");
-    //   };
-    // }
-  }
 
   sendMessage(schemaID: string, info: any) {
     const setState = Messager.objectStateFuncMap[schemaID];
