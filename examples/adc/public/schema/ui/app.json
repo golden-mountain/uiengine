@@ -1,5 +1,10 @@
 {
   "component": "div",
+  "props": {
+    "style": {
+      "padding": "10px"
+    }
+  },
   "children": [
     {
       "component": "a10:Router",

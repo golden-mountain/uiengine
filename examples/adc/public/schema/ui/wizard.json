@@ -1,0 +1,11 @@
+{
+  "component": "a10:WizardSteps",
+  "props": {
+    "templates": [
+      "schema/ui/step1.json",
+      "schema/ui/step2.json",
+      "schema/ui/step3.json",
+      "schema/ui/step4.json"
+    ]
+  }
+}

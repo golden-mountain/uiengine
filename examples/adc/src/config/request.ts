@@ -6,7 +6,7 @@ const reqConfig = {
   // customize config
   devMode: false,
   dataSchemaPrefix: "schema/data/",
-  dataPathPrefix: "mock-data/",
+  dataPathPrefix: "",
   layoutSchemaPrefix: "schema/ui/"
 };
 

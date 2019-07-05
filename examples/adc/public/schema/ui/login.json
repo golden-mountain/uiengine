@@ -1,0 +1,24 @@
+{
+  "component": "antd:Form",
+  "props": {
+    "title": "Login"
+  },
+  "children": [
+    {
+      "component": "a10:FormItem",
+      "datasource": "auth.username",
+      "defaultvalue": "admin",
+      "props": {
+        "type": "antd:Input"
+      }
+    },
+    {
+      "component": "a10:FormItem",
+      "datasource": "auth.password",
+      "defaultvalue": "a10",
+      "props": {
+        "type": "antd:Input.Password"
+      }
+    }
+  ]
+}

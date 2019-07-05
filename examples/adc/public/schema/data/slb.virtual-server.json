@@ -2,16 +2,17 @@
   "version": "3.0.0#Autoform v1.5",
   "endpoint": {
     "default": {
-      "path": "slb.virtual-server.json"
-    }
-
+      "path": "mock-data/slb.virtual-server.json"
+    },
+    "post": "slb/virtual-server/{name}"
   },
   "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
   "cm-lineage": "slb.virtual-server",
   "cm-object-meta": {
     "obj-occurences": "multi"
   },
-  "fields": [{
+  "fields": [
+    {
       "key": "name",
       "label": "Name",
       "type": "input",
@@ -297,7 +298,8 @@
         "format": "string",
         "flags": "ovy",
         "gui-section": "Basic",
-        "allowed": [{
+        "allowed": [
+          {
             "label": "Enable",
             "value": "enable",
             "help": "Enable Virtual Server (default)"
@@ -495,7 +497,8 @@
         "format": "string",
         "flags": "ovy",
         "gui-section": "Advanced",
-        "allowed": [{
+        "allowed": [
+          {
             "label": "Stats Data Enable",
             "value": "stats-data-enable",
             "help": "Enable statistical data collection for virtual server"
