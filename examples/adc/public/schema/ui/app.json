@@ -1,0 +1,20 @@
+{
+  "component": "div",
+  "children": [
+    {
+      "component": "a10:Router",
+      "props": {
+        "path": "/virtual-server",
+        "layouts": ["schema/ui/slb.virtual-server.json"]
+      }
+    },
+    {
+      "component": "a10:Router",
+      "props": {
+        "exact": true,
+        "path": "/virtual-port",
+        "layouts": ["schema/ui/slb.virtual-server.port.json"]
+      }
+    }
+  ]
+}
