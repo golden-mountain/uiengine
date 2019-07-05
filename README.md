@@ -1,5 +1,27 @@
 # UI Engine
 
+## Directories
+
+| doc
+Architecture UML and docs
+| examples
+| lib
+distination folder
+| src
+UIEngine framework source code
+| typings
+UIEngine type define
+| test
+all UIEngine test code
+
+## Start the Example
+
+```
+cd examples/adc
+npm install
+npm start
+```
+
 ## TODO: DEBUG TOOL
 
 Add a debug component to access all the debug info, structure like

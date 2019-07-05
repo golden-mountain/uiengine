@@ -62,7 +62,7 @@ export default class UINode implements IUINode {
     this.id = this.schema._id;
 
     // new messager
-    this.messager = new Messager(this.schema._id);
+    this.messager = new Messager();
 
     // assign parent
     this.parent = parent;

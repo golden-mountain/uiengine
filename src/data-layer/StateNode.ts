@@ -19,7 +19,6 @@ export default class StateNode implements IStateNode {
   }
 
   getState(key?: string) {
-    // console.log(this.state, key, "...........");
     if (key) return _.get(this.state, key);
     return this.state;
   }
