@@ -44,8 +44,10 @@
                     },
                     {
                       "component": "a10:FormItem",
-                      "datasource": "$dummy.wildcard",
-                      "defaultvalue": true,
+                      "datasource": {
+                        "source": "$dummy.wildcard",
+                        "defaultValue": true
+                      },
                       "props": {
                         "type": "antd:Switch",
                         "label": "Wildcard",
@@ -54,8 +56,10 @@
                     },
                     {
                       "component": "a10:FormItem",
-                      "datasource": "$dummy.ip_type",
-                      "defaultvalue": 1,
+                      "datasource": {
+                        "source": "$dummy.ip_type",
+                        "defaultValue": 1
+                      },
                       "props": {
                         "type": "antd:Radio.Group",
                         "options": [
@@ -74,7 +78,7 @@
                           "deps": [
                             {
                               "selector": {
-                                "datasource": "$dummy.wildcard"
+                                "datasource.source": "$dummy.wildcard"
                               },
                               "data": false
                             }
@@ -90,13 +94,13 @@
                           "deps": [
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "data": 0
                             },
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "state": {
                                 "visible": true
@@ -114,13 +118,13 @@
                           "deps": [
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "data": 1
                             },
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "state": {
                                 "visible": true
@@ -138,13 +142,13 @@
                           "deps": [
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "data": 1
                             },
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "state": {
                                 "visible": true
@@ -163,13 +167,13 @@
                           "deps": [
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "data": 0
                             },
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "state": {
                                 "visible": true
@@ -186,14 +190,12 @@
                         "visible": {
                           "deps": [
                             {
-                              "selector": {
-                                "datasource": "$dummy.wildcard"
-                              },
+                              "selector.datasource": "$dummy.wildcard",
                               "data": true
                             },
                             {
                               "selector": {
-                                "datasource": "$dummy.ip_type"
+                                "datasource.source": "$dummy.ip_type"
                               },
                               "data": 0
                             }
@@ -229,7 +231,7 @@
                           "deps": [
                             {
                               "selector": {
-                                "datasource": "$dummy.wildcard"
+                                "datasource.source": "$dummy.wildcard"
                               },
                               "data": true
                             }
@@ -245,7 +247,7 @@
                           "deps": [
                             {
                               "selector": {
-                                "datasource": "$dummy.wildcard"
+                                "datasource.source": "$dummy.wildcard"
                               },
                               "data": true
                             }

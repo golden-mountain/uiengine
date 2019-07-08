@@ -9,6 +9,7 @@ export interface IDataSchema {
 export interface IDataSource {
   source: string;
   defaultValue?: any;
+  autoload?: boolean;
 }
 
 export interface ICache {
@@ -25,14 +26,17 @@ export interface IDataNode {
   pluginManager: IPluginManager;
   dataEngine: IDataEngine;
   uiNode: IUINode;
-  source: string;
+  source: IDataSource;
   schema?: any;
   rootSchema?: any;
   data: any;
   updatingData?: any;
   dataPool: IDataPool;
 
-  loadData(source?: string, schemaOnly?: boolean): Promise<AxiosPromise> | any;
+  loadData(
+    source?: IDataSource | string,
+    schemaOnly?: boolean
+  ): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
   deleteData(path?: any);
   getData(path?: string);

@@ -8,7 +8,7 @@ import { IPluginFunc, IPlugin, IDataNode } from "UIEngine/typings";
  */
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   const rootSchema = dataNode.getRootSchema();
-  let name = dataNode.source.replace(":", ".");
+  let name = dataNode.source.source.replace(":", ".");
   const regex = /\[\d+\]/;
   name = name.replace(regex, "");
   let result = _.get(rootSchema, `fields`, []).filter((schema: any) => {

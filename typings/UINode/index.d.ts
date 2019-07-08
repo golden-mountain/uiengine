@@ -36,7 +36,7 @@ export interface IUINode {
 
   loadLayout(schema?: ILayoutSchema | string);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
-  loadData(source: string, loadData?: boolean);
+  loadData(source: IDataSource, loadData?: boolean);
   getSchema(path?: string): ILayoutSchema;
   replaceLayout(newSchema: ILayoutSchema | string);
   updateLayout(loadData?: string);

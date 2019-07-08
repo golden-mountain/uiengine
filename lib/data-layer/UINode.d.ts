@@ -1,5 +1,5 @@
 import { AxiosPromise } from "axios";
-import { IDataNode, IStateNode, IUINode, ILayoutSchema, IRequest, IErrorInfo, IPluginManager, IMessager, IStateInfo } from "../../typings";
+import { IDataNode, IStateNode, IUINode, ILayoutSchema, IRequest, IErrorInfo, IPluginManager, IMessager, IStateInfo, IDataSource } from "../../typings";
 export default class UINode implements IUINode {
     private request;
     dataNode: IDataNode;
@@ -33,7 +33,7 @@ export default class UINode implements IUINode {
      * @param reloadData
      */
     private assignSchema;
-    loadData(source: string, schemaOnly?: boolean): Promise<any>;
+    loadData(source: IDataSource | string, schemaOnly?: boolean): Promise<any>;
     replaceLayout(newSchema: ILayoutSchema | string): Promise<any>;
     updateLayout(loadData?: string): Promise<this>;
     clearLayout(): this;

@@ -7,7 +7,8 @@ import {
   IUINode,
   IPluginExecutionConfig,
   IDataEngine,
-  IDataPool
+  IDataPool,
+  IDataSource
 } from "../../typings";
 import { Request, DataEngine } from ".";
 
@@ -20,25 +21,20 @@ export default class DataNode implements IDataNode {
   pluginManager: IPluginManager = new PluginManager(this);
   dataEngine: IDataEngine;
   uiNode: IUINode;
-  source: string;
+  source: IDataSource;
   schema?: any;
   rootSchema?: any;
   data: any;
   // cacheID: string = "";
   dataPool: IDataPool;
 
-  constructor(source: any, uiNode: IUINode, request?: IRequest) {
+  constructor(
+    source: IDataSource | string,
+    uiNode: IUINode,
+    request?: IRequest
+  ) {
     this.uiNode = uiNode;
-
-    if (_.isObject(source)) {
-      this.data = source;
-      this.source = "";
-    } else {
-      // give default data
-      this.data = _.get(uiNode.schema, "defaultvalue");
-      this.source = source;
-      // this.cacheID = this.formatCacheID(source);
-    }
+    this.source = this.setDataSource(source);
 
     // initial data engine
     if (request) {
@@ -50,6 +46,20 @@ export default class DataNode implements IDataNode {
 
     // get instance of data pool
     this.dataPool = DataPool.getInstance();
+  }
+
+  setDataSource(source: IDataSource | string) {
+    if (_.isObject(source)) {
+      this.data = source.defaultValue;
+      this.source = source;
+    } else {
+      // give default data
+      this.source = {
+        source: source,
+        autoload: true
+      };
+    }
+    return this.source;
   }
 
   getErrorInfo() {
@@ -75,42 +85,41 @@ export default class DataNode implements IDataNode {
     return this.pluginManager;
   }
 
-  async loadData(source?: string, schemaOnly: boolean = false) {
-    // const { schemaPath = "", name = "" } = this.source;
+  async loadData(source?: IDataSource | string, schemaOnly: boolean = false) {
     if (source) {
-      this.source = source;
-      // this.cacheID = this.formatCacheID(source);
-    } else {
-      source = this.source;
+      this.setDataSource(source);
     }
 
-    // let s = this.formatSource(source);
-    let result; // = this.dataPool.get(s, false);
+    const exeConfig: IPluginExecutionConfig = {
+      returnLastValue: true
+    };
+    let result = await this.pluginManager.executePlugins(
+      "data.data.parser",
+      exeConfig
+    );
 
-    // if (!result) {
-    // let result = this.dataPool.get(s, false);
-    if (schemaOnly) {
-      await this.dataEngine.loadSchema(source);
-      this.data = null;
-    } else {
-      let data = await this.dataEngine.loadData(source);
-      if (data === null) {
-        this.errorInfo = this.dataEngine.errorInfo;
-        return;
+    if (result === undefined && this.source.source.indexOf("$dummy") === -1) {
+      if (schemaOnly || !this.source.autoload) {
+        await this.dataEngine.loadSchema(this.source.source);
+        this.data = null;
+      } else {
+        let data = await this.dataEngine.loadData(this.source.source);
+        if (data === null) {
+          this.errorInfo = this.dataEngine.errorInfo;
+          return;
+        }
+        let formattedSource = formatSource(this.source.source);
+        result = _.get(data, formattedSource, null);
+        //assign data and dataPool
+        this.data = result;
+        this.dataPool.set(result, this.source.source);
       }
-      let formattedSource = formatSource(source);
-      result = _.get(data, formattedSource, null);
-      this.data = result;
-      this.dataPool.set(result, source);
     }
 
     // assign root schema
     this.rootSchema = this.dataEngine.mapper.rootSchema;
 
     // load this node schema
-    const exeConfig: IPluginExecutionConfig = {
-      returnLastValue: true
-    };
     this.schema = await this.pluginManager.executePlugins(
       "data.schema.parser",
       exeConfig
@@ -143,6 +152,7 @@ export default class DataNode implements IDataNode {
       // when one validation got false value, break; the rest plugins execution
       exeConfig
     );
+
     // update state without sending message
     if (noUpdateLayout) {
       await this.uiNode.pluginManager.executePlugins("ui.parser");
@@ -153,10 +163,10 @@ export default class DataNode implements IDataNode {
 
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
-      this.dataPool.set(this.data, this.source);
-      this.dataPool.clearError(this.source);
+      this.dataPool.set(this.data, this.source.source);
+      this.dataPool.clearError(this.source.source);
     } else {
-      this.dataPool.setError(this.source, this.errorInfo);
+      this.dataPool.setError(this.source.source, this.errorInfo);
     }
     return status;
   }
@@ -192,8 +202,8 @@ export default class DataNode implements IDataNode {
 
       // not array, can't delete directly
       if (typeof this.data !== "object") {
-        this.dataPool.set(this.data, this.source);
-        this.dataPool.clearError(this.source);
+        this.dataPool.set(this.data, this.source.source);
+        this.dataPool.clearError(this.source.source);
       }
       // update state without sending message
       if (noUpdateLayout) {
@@ -204,7 +214,7 @@ export default class DataNode implements IDataNode {
         await this.uiNode.updateLayout();
       }
     } else {
-      this.dataPool.setError(this.source, this.errorInfo);
+      this.dataPool.setError(this.source.source, this.errorInfo);
     }
     return status;
   }

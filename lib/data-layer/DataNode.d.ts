@@ -1,22 +1,23 @@
-import { IDataNode, IRequest, IPluginManager, IUINode, IDataEngine, IDataPool } from "../../typings";
+import { IDataNode, IRequest, IPluginManager, IUINode, IDataEngine, IDataPool, IDataSource } from "../../typings";
 export default class DataNode implements IDataNode {
     private request;
     errorInfo: any;
     pluginManager: IPluginManager;
     dataEngine: IDataEngine;
     uiNode: IUINode;
-    source: string;
+    source: IDataSource;
     schema?: any;
     rootSchema?: any;
     data: any;
     dataPool: IDataPool;
-    constructor(source: any, uiNode: IUINode, request?: IRequest);
+    constructor(source: IDataSource | string, uiNode: IUINode, request?: IRequest);
+    setDataSource(source: IDataSource | string): IDataSource;
     getErrorInfo(): any;
     getData(path?: string): any;
     getSchema(path?: string): any;
     getRootSchema(): any;
     getPluginManager(): IPluginManager;
-    loadData(source?: string, schemaOnly?: boolean): Promise<any>;
+    loadData(source?: IDataSource | string, schemaOnly?: boolean): Promise<any>;
     updateData(value: any, path?: string): Promise<any>;
     deleteData(path?: any): Promise<any>;
     submit(dataSources: Array<string>, method?: string, connectWith?: string): Promise<any>;

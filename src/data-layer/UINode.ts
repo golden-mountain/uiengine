@@ -17,7 +17,8 @@ import {
   IErrorInfo,
   IPluginManager,
   IMessager,
-  IStateInfo
+  IStateInfo,
+  IDataSource
 } from "../../typings";
 
 export default class UINode implements IUINode {
@@ -159,11 +160,8 @@ export default class UINode implements IUINode {
     loadData: string = "all" // all or schema
   ) {
     let liveSchema = schema;
-    if (
-      liveSchema["datasource"] &&
-      !_.startsWith(liveSchema["datasource"], "$dummy") &&
-      loadData
-    ) {
+
+    if (liveSchema["datasource"] && loadData) {
       const schemaOnly = loadData === "schema";
       await this.loadData(liveSchema["datasource"], schemaOnly);
     }
@@ -215,7 +213,7 @@ export default class UINode implements IUINode {
     return this;
   }
 
-  async loadData(source: string, schemaOnly = false) {
+  async loadData(source: IDataSource | string, schemaOnly = false) {
     return await this.dataNode.loadData(source, schemaOnly);
   }
 
@@ -316,7 +314,8 @@ export default class UINode implements IUINode {
                 let finded = false;
                 //k=id, v:id-of-demo-element-1
                 _.forIn(dep.selector, (v: any, k: any) => {
-                  if (!schema[k] || v !== schema[k]) {
+                  const depValue = _.get(schema, k);
+                  if (v !== depValue) {
                     finded = false;
                     return;
                   } else {

@@ -40,7 +40,8 @@ describe("Given an instance of my DataNode library", () => {
       const dataNode = new DataNode(toLoadName, uiNode, request);
       // const source = { name: "foo.bar", schemaPath: "foo.json" };
       const source = "foo.bar";
-      expect(dataNode.source).to.be.deep.equal(source);
+      const expectedSource = { source, autoload: true };
+      expect(dataNode.source).to.be.deep.equal(expectedSource);
       await dataNode.loadData();
       expect(dataNode.getData()).to.deep.equal(_.get(dataNodeJson, toLoadName));
       // load schema test
@@ -50,9 +51,10 @@ describe("Given an instance of my DataNode library", () => {
       );
 
       // localObject
-      const anyValue = { any: 1 };
-      const dataLocalNode = new DataNode(anyValue, uiNode);
-      expect(dataLocalNode.getData()).to.be.deep.equal(anyValue);
+      const anyData = { any: 1 };
+      const anySource = { source: "", defaultValue: anyData };
+      const dataLocalNode = new DataNode(anySource, uiNode);
+      expect(dataLocalNode.getData()).to.be.deep.equal(anyData);
     });
 
     it("loadData: data should be loaded from DataEngine", async () => {

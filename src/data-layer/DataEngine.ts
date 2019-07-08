@@ -38,7 +38,7 @@ export default class UIEngine implements IDataEngine {
 
   async loadSchema(source: string) {
     this.schemaPath = this.parseSchemaPath(source);
-    return await this.mapper.loadSchema(source);
+    return await this.mapper.loadSchema(this.schemaPath);
   }
 
   async sendRequest(
@@ -63,7 +63,7 @@ export default class UIEngine implements IDataEngine {
     this.source = schemaPath;
     let result = {};
     if (schemaPath) {
-      const schema = await this.loadSchema(schemaPath);
+      const schema = await this.mapper.loadSchema(schemaPath);
       if (schema === null) {
         this.errorInfo = {
           status: 2001,

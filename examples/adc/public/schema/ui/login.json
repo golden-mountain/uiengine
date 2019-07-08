@@ -6,15 +6,23 @@
   "children": [
     {
       "component": "a10:FormItem",
-      "datasource": "auth.username",
-      "defaultvalue": "admin",
+      "datasource": {
+        "source": "credentials:username",
+        "defaultvalue": "admin",
+        "autoload": false
+      },
       "props": {
         "type": "antd:Input"
       }
     },
     {
       "component": "a10:FormItem",
-      "datasource": "auth.password",
+      "datasource": {
+        "source": "credentials:password",
+        "defaultvalue": "admin",
+        "autoload": false
+      },
+
       "defaultvalue": "a10",
       "props": {
         "type": "antd:Input.Password"
