@@ -4,6 +4,7 @@ export interface IRequest {
   post(url: string, params?: any);
   delete(url: string, params?: any);
   getConfig(configName?: string);
+  setConfig(config: any, configName?: string);
 }
 
 export interface IRequestConfig extends AxiosRequestConfig {
@@ -12,6 +13,7 @@ export interface IRequestConfig extends AxiosRequestConfig {
   dataSchemaPrefix?: string;
   mockDataPrefix?: string;
   layoutSchemaPrefix?: string;
+  headers?: object;
 }
 
 export interface IErrorInfo {

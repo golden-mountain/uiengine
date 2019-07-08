@@ -1,6 +1,12 @@
 {
   "version": "3.0.0#Autoform v1.5",
   "axapi": "slb/virtual-server/{name}/port/{port-number}+{protocol}",
+  "endpoint": {
+    "default": {
+      "path": "mock-data/slb.virtual-server.json"
+    },
+    "post": "/axapi/v3/slb/virtual-server/{name}/port/{port-number}+{protocol}"
+  },
   "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
   "cm-lineage": "slb.virtual-server.port",
   "cm-object-meta": {

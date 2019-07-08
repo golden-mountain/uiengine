@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import _ from "lodash";
 import { BrowserRouter, Link } from "react-router-dom";
 import { Menu, PageHeader, Button, Modal } from "antd";
 
@@ -15,12 +16,9 @@ UIEngineRegister.registerPlugins(plugins);
 const App: React.FC = () => {
   const [current, setCurrent] = useState();
   const [visible, setVisible] = useState(false);
+  const [controller, setController] = useState<INodeController>();
 
   let loginLayout = "schema/ui/login.json";
-  let controller: INodeController;
-  const onEngineCreate = (nodeController: INodeController) => {
-    controller = nodeController;
-  };
 
   const handleClick = (e: any) => {
     setCurrent(e.key);
@@ -30,15 +28,32 @@ const App: React.FC = () => {
     setVisible(true);
   };
 
+  const headers: any = requestConfig.headers;
   const handleOK = () => {
     setVisible(false);
-    const uiNode = controller.getUINode(loginLayout);
-    uiNode.dataNode.submit(["credentials"]);
+    if (controller) {
+      const uiNode = controller.getUINode(loginLayout);
+      const result = uiNode.dataNode.submit(["credentials"]);
+      result.then((res: any) => {
+        const token = _.get(res[0], "authresponse.signature");
+        if (token) {
+          sessionStorage.setItem("token", token);
+          headers["Authorization"] = `A10 ${token}`;
+        }
+      });
+    } else {
+      console.error("controller missed", controller);
+    }
   };
 
   const handleCancel = () => {
     setVisible(false);
   };
+
+  const token = sessionStorage.getItem("token");
+  if (token) {
+    headers["Authorization"] = `A10 ${token}`;
+  }
 
   return (
     <BrowserRouter>
@@ -61,7 +76,7 @@ const App: React.FC = () => {
         <UIEngine
           layouts={[loginLayout]}
           reqConfig={requestConfig}
-          onEngineCreate={onEngineCreate}
+          onEngineCreate={setController}
         />
       </Modal>
       <Menu onClick={handleClick} selectedKeys={[current]} mode="horizontal">

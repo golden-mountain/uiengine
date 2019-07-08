@@ -1,4 +1,9 @@
 export interface IResponse {}
+export interface IRequestOptions {
+  endpoint?: string;
+  params?: any;
+  method?: string;
+}
 
 export interface IDataMapper {
   schema?: IDataSchema;
@@ -18,6 +23,7 @@ export interface IDataEngine {
   data?: any;
   pluginManager: IPluginManager;
   cacheID: string;
+  requestOptions: IRequestOptions;
 
   sendRequest(
     source: string,

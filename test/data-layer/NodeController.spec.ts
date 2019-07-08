@@ -17,7 +17,7 @@ import uiJSON from "../layouts/state-node-basic.json";
 chai.use(chaiSpies);
 const expect = chai.expect;
 
-describe("Given an instance of my DataNode library", () => {
+describe("Given an instance of my NodeController library", () => {
   before(() => {});
   describe("the given data", () => {
     it("constructor: should created a messager", () => {});

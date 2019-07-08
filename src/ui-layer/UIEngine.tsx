@@ -64,7 +64,7 @@ export default class UIEngine extends React.Component<
   }
 
   render() {
-    const { layouts, reqConfig, test, ...rest } = this.props;
+    const { layouts, reqConfig, test, onEngineCreate, ...rest } = this.props;
 
     return this.state.nodes.map((uiNode: IUINode, layoutKey: number) => {
       const context = {

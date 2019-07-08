@@ -1,4 +1,4 @@
-import { IDataEngine, IPluginManager, IRequest, IDataMapper } from "../../typings";
+import { IDataEngine, IPluginManager, IRequest, IRequestOptions, IDataMapper } from "../../typings";
 export default class UIEngine implements IDataEngine {
     private request;
     errorInfo?: any;
@@ -8,6 +8,7 @@ export default class UIEngine implements IDataEngine {
     data?: any;
     pluginManager: IPluginManager;
     cacheID: string;
+    requestOptions: IRequestOptions;
     /**
      *
      * @param source a.b.c

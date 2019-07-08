@@ -4,6 +4,7 @@ import {
   IDataEngine,
   IPluginManager,
   IRequest,
+  IRequestOptions,
   IDataMapper,
   IPluginExecutionConfig
 } from "../../typings";
@@ -18,6 +19,7 @@ export default class UIEngine implements IDataEngine {
   data?: any;
   pluginManager: IPluginManager = new PluginManager(this);
   cacheID: string = "response";
+  requestOptions: IRequestOptions = {};
 
   /**
    *
@@ -49,6 +51,8 @@ export default class UIEngine implements IDataEngine {
   ) {
     // clear initial data;
     this.data = {};
+    this.requestOptions.params = data;
+    this.requestOptions.method = method;
     this.errorInfo = null;
     if (!this.request[method] || !_.isFunction(this.request[method])) {
       this.errorInfo = {
@@ -72,8 +76,8 @@ export default class UIEngine implements IDataEngine {
         return false;
       }
 
-      const endpoint = this.mapper.getDataEntryPoint(method);
-      if (!endpoint) {
+      this.requestOptions.endpoint = this.mapper.getDataEntryPoint(method);
+      if (!this.requestOptions.endpoint) {
         this.errorInfo = {
           status: 1000,
           code: "URL not match"
@@ -102,14 +106,21 @@ export default class UIEngine implements IDataEngine {
         }
 
         if (cache) {
-          response = Cache.getData(this.cacheID, endpoint);
+          response = Cache.getData(this.cacheID, this.requestOptions.endpoint);
         }
         // handle response
         if (!response) {
-          response = await this.request[method](endpoint, data);
+          response = await this.request[method](
+            this.requestOptions.endpoint,
+            this.requestOptions.params
+          );
           if (response.data) {
             if (cache) {
-              Cache.setData(this.cacheID, endpoint, response.data);
+              Cache.setData(
+                this.cacheID,
+                this.requestOptions.endpoint,
+                response.data
+              );
             }
             response = response.data;
           }

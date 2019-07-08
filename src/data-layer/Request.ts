@@ -38,19 +38,19 @@ class RequestAbstract {
   }
 
   get(url: string, params?: any) {
-    return this.axios.get(url, params);
+    return this.axios.get(url, params, this.config);
   }
 
   put(url: string, params?: any) {
-    return this.axios.put(url, params);
+    return this.axios.put(url, params, this.config);
   }
 
   post(url: string, params?: any) {
-    return this.axios.post(url, params);
+    return this.axios.post(url, params, this.config);
   }
 
   delete(url: string, params?: any) {
-    return this.axios.delete(url, params);
+    return this.axios.delete(url, params, this.config);
   }
 }
 
@@ -98,8 +98,16 @@ class RequestProduct extends RequestAbstract {
 }
 
 export default class Request implements IRequest {
+  static instance: IRequest;
+  static getInstance = (config?: IRequestConfig) => {
+    if (!Request.instance) {
+      Request.instance = new Request(config);
+    }
+    return Request.instance as Request;
+  };
+
   private req: any;
-  private config: IRequestConfig | any;
+  config: IRequestConfig | any;
 
   constructor(config?: IRequestConfig) {
     if (config) this.config = config;
@@ -131,5 +139,13 @@ export default class Request implements IRequest {
   getConfig(configName?: string) {
     // console.log("get config>>>", configName, this.config);
     return configName ? _.get(this.config, configName) : this.config;
+  }
+
+  setConfig(config: any, configName?: string) {
+    if (configName) {
+      _.set(this.config, configName, config);
+    } else {
+      this.config = config;
+    }
   }
 }

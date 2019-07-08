@@ -34,8 +34,9 @@ export default class NodeController implements INodeController {
     id?: string,
     autoLoadLayout: boolean = true
   ) {
+    // TO Fix: getInstance can't pass the test case
+    // const request = Request.getInstance(this.requestConfig);
     const request = new Request(this.requestConfig);
-
     // get a unique id
     let rootName = "default";
     if (id) {

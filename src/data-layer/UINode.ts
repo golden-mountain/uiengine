@@ -22,7 +22,7 @@ import {
 } from "../../typings";
 
 export default class UINode implements IUINode {
-  private request: IRequest = new Request();
+  private request: IRequest = Request.getInstance();
   dataNode: IDataNode;
   stateNode: IStateNode = new StateNode(this);
   children: Array<UINode> = [];

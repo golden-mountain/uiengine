@@ -7,7 +7,8 @@ const reqConfig = {
   devMode: false,
   dataSchemaPrefix: "schema/data/",
   dataPathPrefix: "",
-  layoutSchemaPrefix: "schema/ui/"
+  layoutSchemaPrefix: "schema/ui/",
+  headers: {}
 };
 
 export default reqConfig;
