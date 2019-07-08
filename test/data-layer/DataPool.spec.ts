@@ -40,10 +40,7 @@ describe("Given all the DataPool", () => {
     it("get: should get given paths of data", () => {
       const dataPool = DataPool.getInstance();
       expect(dataPool.get(["foo"], false)).to.deep.equal([{ foo: "bar" }]);
-      const expectedData = [
-        { foo: { foo: { foo: "bar" } } },
-        { baz: { baz: dataPartialTwo } }
-      ];
+      const expectedData = [{ foo: { foo: "bar" } }, { baz: dataPartialTwo }];
       expect(dataPool.get(["foo", "baz"])).to.deep.equal(expectedData);
     });
 

@@ -46,7 +46,7 @@ export class A10Modal extends React.Component<any, any> {
         onOk={this.handleOk}
         onCancel={this.handleCancel}
       >
-        <ComponentWrapper uiNode={this.state.uiNode} key={`layout-${layout}`} />
+        <ComponentWrapper uiNode={this.state.uiNode} key={layout} />
       </Modal>
     ) : null;
   }

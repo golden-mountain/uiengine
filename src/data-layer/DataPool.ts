@@ -41,7 +41,7 @@ export default class DataPool implements IDataPool {
         let p = `${domainName}.${path}`;
         let result = _.get(this.data, p);
         if (withKey) {
-          return _.set({}, p, result);
+          return _.set({}, path, result);
         }
         return result;
       });
@@ -51,6 +51,9 @@ export default class DataPool implements IDataPool {
         paths = formatSource(paths);
         let p = `${domainName}.${paths}`;
         results = _.get(this.data, p);
+        if (withKey) {
+          return _.set({}, paths, results);
+        }
       } else {
         results = this.data;
       }

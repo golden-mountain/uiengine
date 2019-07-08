@@ -31,6 +31,9 @@ export default class UIEngine extends React.Component<
   constructor(props: IUIEngineProps) {
     super(props);
     this.nodeController = new NodeController(props.reqConfig);
+    if (_.isFunction(props.onEngineCreate)) {
+      props.onEngineCreate(this.nodeController);
+    }
   }
 
   componentDidMount() {
@@ -41,10 +44,7 @@ export default class UIEngine extends React.Component<
       this.nodes[layout] = this.nodeController
         .loadUINode(layouts[layout])
         .then((uiNode: IUINode) => {
-          this.nodeController.messager.setStateFunc(
-            `layout-${layout}`,
-            this.setState
-          );
+          this.nodeController.messager.setStateFunc(layout, this.setState);
           nodes[layout] = uiNode;
           this.setState({ nodes });
           return uiNode;
@@ -58,7 +58,7 @@ export default class UIEngine extends React.Component<
 
   componentWillUnmount() {
     this.props.layouts.forEach((uiNode: any, layout: any) => {
-      const layoutName = `layout-${layout}`;
+      const layoutName = layout;
       this.nodeController.messager.removeStateFunc(layoutName);
     });
   }

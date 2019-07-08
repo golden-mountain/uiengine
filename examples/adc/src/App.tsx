@@ -7,6 +7,7 @@ import * as plugins from "./plugins";
 import requestConfig from "./config/request";
 import { UIEngineRegister, UIEngine } from "UIEngine";
 import "./App.css";
+import { INodeController } from "../../../typings";
 
 UIEngineRegister.registerComponents(components);
 UIEngineRegister.registerPlugins(plugins);
@@ -14,12 +15,25 @@ UIEngineRegister.registerPlugins(plugins);
 const App: React.FC = () => {
   const [current, setCurrent] = useState();
   const [visible, setVisible] = useState(false);
+
+  let loginLayout = "schema/ui/login.json";
+  let controller: INodeController;
+  const onEngineCreate = (nodeController: INodeController) => {
+    controller = nodeController;
+  };
+
   const handleClick = (e: any) => {
     setCurrent(e.key);
   };
 
   const showLogin = () => {
     setVisible(true);
+  };
+
+  const handleOK = () => {
+    setVisible(false);
+    const uiNode = controller.getUINode(loginLayout);
+    uiNode.dataNode.submit(["credentials"]);
   };
 
   const handleCancel = () => {
@@ -41,12 +55,13 @@ const App: React.FC = () => {
       <Modal
         title="Login"
         visible={visible}
-        onOk={handleCancel}
+        onOk={handleOK}
         onCancel={handleCancel}
       >
         <UIEngine
-          layouts={["schema/ui/login.json"]}
+          layouts={[loginLayout]}
           reqConfig={requestConfig}
+          onEngineCreate={onEngineCreate}
         />
       </Modal>
       <Menu onClick={handleClick} selectedKeys={[current]} mode="horizontal">

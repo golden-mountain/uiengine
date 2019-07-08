@@ -26,6 +26,7 @@ import { IRequest, IRequestConfig } from "../../typings";
 //     return Promise.reject(error);
 //   }
 // );
+axios.defaults.headers.common["Content-Type"] = "application/json";
 
 class RequestAbstract {
   axios: any;
