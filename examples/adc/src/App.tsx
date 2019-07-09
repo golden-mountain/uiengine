@@ -35,7 +35,7 @@ const App: React.FC = () => {
       const uiNode = controller.getUINode(loginLayout);
       const result = uiNode.dataNode.submit(["credentials"]);
       result.then((res: any) => {
-        const token = _.get(res[0], "authresponse.signature");
+        const token = _.get(res[0], "credentials.authresponse.signature");
         if (token) {
           sessionStorage.setItem("token", token);
           headers["Authorization"] = `A10 ${token}`;

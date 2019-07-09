@@ -10,7 +10,7 @@
     "test": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors ./test/**/*.spec.ts*",
     "test:w": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors --watch-extensions ts,tsx -w ./test/**/*.spec.ts*",
     "test:sw": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors --watch-extensions ts,tsx -w ",
-    "test:cover": "cross-env NODE_ENV=test nyc mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors test/*.ts*",
+    "test:cover": "cross-env NODE_ENV=test nyc mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors ./test/**/*.spec.ts*",
     "repl": "node -i -e \"$(< ./lib/UIEngine.js)\""
   },
   "repository": {
@@ -35,6 +35,7 @@
     "@babel/cli": "^7.0.0-beta.51",
     "@babel/core": "^7.0.0-beta.51",
     "@babel/preset-env": "^7.0.0-beta.51",
+    "@istanbuljs/nyc-config-typescript": "^0.1.3",
     "@types/chai-spies": "^1.0.0",
     "@types/enzyme": "^3.9.4",
     "@types/enzyme-adapter-react-16": "^1.0.5",
@@ -56,8 +57,9 @@
     "jsdom": "^11.11.0",
     "jsdom-global": "^3.0.2",
     "mocha": "^4.0.1",
-    "nyc": "^13.1.0",
+    "nyc": "^13.3.0",
     "source-map-loader": "^0.2.4",
+    "source-map-support": "^0.5.12",
     "ts-node": "^8.3.0",
     "typescript": "^3.5.1",
     "uglifyjs-webpack-plugin": "^1.2.7",

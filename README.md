@@ -22,7 +22,9 @@ npm install
 npm start
 ```
 
-## TODO: DEBUG TOOL
+## TODO:
+
+### DEBUG TOOL
 
 Add a debug component to access all the debug info, structure like
 
@@ -47,4 +49,8 @@ nodes:
     uiNode: {}
     dataNode: {}
     stateNode: {}
+
+data choose commit
 ```
+
+### Workflow

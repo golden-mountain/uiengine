@@ -125,15 +125,13 @@ export default class UIEngine implements IDataEngine {
             response = response.data;
           }
         }
-        result = response;
+        this.data = response;
       } catch (e) {
         this.errorInfo = {
           code: e.message
         };
       }
     }
-
-    this.data = result;
 
     // could modify the response
     const exeConfig: IPluginExecutionConfig = {

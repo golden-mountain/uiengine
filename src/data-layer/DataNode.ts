@@ -242,9 +242,8 @@ export default class DataNode implements IDataNode {
       result = _.merge(result, this.dataPool.get(source, true));
       // remote?
       if (connectWith === undefined) {
-        responses.push(
-          this.dataEngine.sendRequest(source, result, method, false)
-        );
+        result = this.dataEngine.sendRequest(source, result, method, false);
+        responses.push(result);
       } else {
         this.dataPool.set(result, connectWith);
       }
