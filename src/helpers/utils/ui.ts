@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
-import { UIEngineRegister, Cache } from "..";
-import { IUINode, ILayoutSchema } from "../../typings";
+import { UIEngineRegister, Cache } from "../";
+import { IUINode, ILayoutSchema } from "../../../typings";
 
 /**
  * From schema define, get registered components

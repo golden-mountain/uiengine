@@ -44,5 +44,5 @@ export interface IDataNode {
   getErrorInfo();
   getPluginManager(): IPluginManager;
   getRootSchema();
-  submit(dataSources: Array<string>, method: string, connectWith?: string);
+  // submit(dataSources: Array<string>, method: string, connectWith?: string);
 }

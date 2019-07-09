@@ -219,41 +219,4 @@ export default class DataNode implements IDataNode {
     }
     return status;
   }
-
-  async submit(
-    dataSources: Array<string>,
-    method: string = "post",
-    connectWith?: string
-  ) {
-    const exeConfig: IPluginExecutionConfig = {
-      stopWhenEmpty: true,
-      returnLastValue: true
-    };
-    const couldSubmit = await this.pluginManager.executePlugins(
-      "data.commit.could",
-      exeConfig
-    );
-    if (couldSubmit !== undefined && !couldSubmit.status) {
-      return couldSubmit;
-    }
-    let result = {};
-    let responses: any = [];
-    dataSources.forEach((source: string) => {
-      // const cacheID = this.formatCacheID(source);
-      result = _.merge(result, this.dataPool.get(source, true));
-      // remote?
-      if (connectWith === undefined) {
-        result = this.dataEngine.sendRequest(source, result, method, false);
-        responses.push(result);
-      } else {
-        this.dataPool.set(result, connectWith);
-      }
-    });
-
-    if (connectWith === undefined) {
-      responses = await Promise.all(responses);
-      return responses;
-    }
-    return result;
-  }
 }

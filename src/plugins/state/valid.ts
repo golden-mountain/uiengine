@@ -1,6 +1,6 @@
 import _ from "lodash";
 import { IStateNode } from "../../../typings/StateNode";
-import { stateDepsResolver } from "../state-helper";
+import { stateDepsResolver } from "../../helpers";
 import { IPluginFunc, IPlugin } from "../../../typings";
 
 const callback: IPluginFunc = (stateNode: IStateNode) => {

@@ -10,7 +10,9 @@ import {
   UINode,
   PluginManager,
   UIEngineRegister,
-  DataPool
+  DataPool,
+  submitToAPI,
+  submitToPool
 } from "../../src";
 import reqConfig from "../config/request";
 // import { mount } from "enzyme";
@@ -136,7 +138,7 @@ describe("Given an instance of my DataNode library", () => {
 
       // remote commit
       let dataSources = ["foo:bar"];
-      let result = await dataNode.submit(dataSources, "get");
+      let result = await submitToAPI(dataSources, "get");
       expect(result).to.deep.equal(expectedResult);
 
       // local commit
@@ -148,7 +150,7 @@ describe("Given an instance of my DataNode library", () => {
           }
         }
       };
-      result = await dataNode.submit(dataSources, "", "data:any");
+      result = submitToPool(dataSources, "data:any");
       expect(dataNode.dataPool.get("data:any", false)).to.deep.equal(
         expectedResult2
       );

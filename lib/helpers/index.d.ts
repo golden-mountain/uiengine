@@ -7,5 +7,4 @@ export { default as Messager } from "./Messager";
 export { default as Cache } from "./Cache";
 export { default as Event } from "./Event";
 export * from "./UIEngineRegister";
-export * from "./ui";
-export * from "./data";
+export * from "./utils";
