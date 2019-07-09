@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { Event } from "../../data-layer";
+import { Event } from "../../helpers";
 import { IPluginFunc, IPlugin, IUINode } from "../../../typings";
 
 const callback: IPluginFunc = async (uiNode: IUINode) => {

@@ -13,7 +13,8 @@ import * as plugins from "../../src/plugins";
 // chai.expect();
 chai.use(chaiSpies);
 const expect = chai.expect;
-const request = new Request(reqConfig);
+const request = Request.getInstance();
+request.setConfig(reqConfig);
 
 const schemaPath = "foo.json";
 
@@ -24,7 +25,8 @@ describe("Given all the DataMapper", () => {
   describe("the given source", () => {
     it("loadSchema: schema should be loaded from remote", async () => {
       Cache.clearDataSchemaCache();
-      const dataMapper = new DataMapper(request);
+      const dataMapper = DataMapper.getInstance();
+      dataMapper.setRequest(request);
       // expect(dataMapper.source).to.equal(schemaPath);
       let schema = await dataMapper.loadSchema(schemaPath);
       expect(schema).to.deep.equal(dataSchemaJson);
@@ -35,7 +37,8 @@ describe("Given all the DataMapper", () => {
     });
 
     it("getDataEntryPoing: should return the data api path", async () => {
-      const dataMapper = new DataMapper(request);
+      const dataMapper = DataMapper.getInstance();
+      dataMapper.setRequest(request);
       await dataMapper.loadSchema(schemaPath);
       let path = dataMapper.getDataEntryPoint("get");
       let dataPathPrefix = reqConfig.dataPathPrefix;

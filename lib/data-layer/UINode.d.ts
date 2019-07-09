@@ -39,8 +39,6 @@ export default class UINode implements IUINode {
     clearLayout(): this;
     getNode(path?: string): any;
     getChildren(route?: Array<Number>): any;
-    searchNodes(prop: object, layoutId?: string): any;
-    searchDepsNodes(myNode?: IUINode, layoutId?: string): any[];
     genLiveLayout(schema: ILayoutSchema, data: any): Promise<ILayoutSchema>;
     updateState(): Promise<any>;
     sendMessage(): void;

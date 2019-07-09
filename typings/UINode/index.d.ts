@@ -47,8 +47,8 @@ export interface IUINode {
   getNode(path?: string);
   updateState();
   getStateNode(): IStateNode;
-  searchNodes(prop: object, layoutId?: string);
-  searchDepsNodes(myNode?: IUINode, layoutId?: string);
+  // searchNodes(prop: object, layoutId?: string);
+  // searchDepsNodes(myNode?: IUINode, layoutId?: string);
   getPluginManager(): IPluginManager;
   getRequest(): IRequest;
   sendMessage();

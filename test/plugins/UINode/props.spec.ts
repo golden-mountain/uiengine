@@ -21,7 +21,8 @@ describe("Given all the UI plugins", () => {
   });
   describe("the given props plugin ", async () => {
     it("props could parsed as required", async () => {
-      const request = new Request(reqConfig);
+      const request = Request.getInstance();
+      request.setConfig(reqConfig);
       const uiNode = new UINode(propLayout, request);
       await uiNode.loadLayout();
 

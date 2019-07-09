@@ -17,10 +17,9 @@ describe("Given an instance of my DataNode library", () => {
   describe("the given data", () => {
     it("constructor: should created a messager", () => {});
     it("setState: should set the components state", () => {
-      const messager = new Messager();
+      const messager = Messager.getInstance();
       const MessageUIComponent = (props: any) => {
         const [data, setData] = useState({ value: "foo" });
-        console.log(data);
         messager.setStateFunc(id, setData);
         return <div>{data.value}</div>;
       };
@@ -42,7 +41,7 @@ describe("Given an instance of my DataNode library", () => {
     it("removeStateFunc: should remove a func from messager", () => {
       const messager = new Messager();
       messager.removeStateFunc(id);
-      expect(Messager.objectStateFuncMap).to.have.not.property(id);
+      expect(messager.objectStateFuncMap).to.have.not.property(id);
     });
   });
 });

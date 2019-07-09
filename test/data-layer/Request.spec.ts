@@ -11,7 +11,8 @@ let request: any;
 
 describe("Given an instance of Request library", () => {
   before(() => {
-    request = new Request(reqConfig);
+    request = Request.getInstance();
+    request.setConfig(reqConfig);
   });
   describe("the given response ", () => {
     it("get:should same as json file state-test.json", () => {

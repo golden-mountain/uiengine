@@ -2,12 +2,20 @@ import _ from "lodash";
 import { IMessager } from "../../typings";
 
 export default class Messager implements IMessager {
-  static objectStateFuncMap = {
+  static instance: IMessager;
+  static getInstance = () => {
+    if (!Messager.instance) {
+      Messager.instance = new Messager();
+    }
+    return Messager.instance as Messager;
+  };
+
+  objectStateFuncMap = {
     // [id]: setState
   };
 
   sendMessage(schemaID: string, info: any) {
-    const setState = Messager.objectStateFuncMap[schemaID];
+    const setState = this.objectStateFuncMap[schemaID];
     if (_.isFunction(setState)) {
       return setState(info);
     } else {
@@ -17,11 +25,11 @@ export default class Messager implements IMessager {
 
   setStateFunc(schemaID: string, setState: any) {
     if (_.isFunction(setState)) {
-      Messager.objectStateFuncMap[schemaID] = setState;
+      this.objectStateFuncMap[schemaID] = setState;
     }
   }
 
   removeStateFunc(schemaID: string) {
-    _.unset(Messager.objectStateFuncMap, schemaID);
+    _.unset(this.objectStateFuncMap, schemaID);
   }
 }

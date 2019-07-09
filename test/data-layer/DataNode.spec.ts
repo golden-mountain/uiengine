@@ -26,7 +26,8 @@ import uiJSON from "../layouts/state-node-basic.json";
 chai.use(chaiSpies);
 const expect = chai.expect;
 
-const request = new Request(reqConfig);
+const request = Request.getInstance();
+request.setConfig(reqConfig);
 const uiNode = new UINode({});
 
 describe("Given an instance of my DataNode library", () => {

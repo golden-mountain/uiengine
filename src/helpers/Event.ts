@@ -1,6 +1,6 @@
 import _ from "lodash";
 
-import { PluginManager } from "./";
+import { PluginManager } from ".";
 
 import { IPluginManager, IEvent, IUINode } from "../../typings";
 

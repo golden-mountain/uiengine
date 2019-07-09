@@ -12,7 +12,8 @@ import dataJson from "../data/foo.json";
 // chai.expect();
 chai.use(chaiSpies);
 const expect = chai.expect;
-const request = new Request(reqConfig);
+const request = Request.getInstance();
+request.setConfig(reqConfig);
 
 const schemaPath = "foo.bar";
 
@@ -27,7 +28,8 @@ describe("Given all the DataEngine", () => {
     });
 
     it("parseSchemaPath: should return the schema path with request info appended", async () => {
-      const dataEngine = new DataEngine(request);
+      let dataEngine = DataEngine.getInstance();
+      dataEngine.setRequest(request);
       // with :
       let path = dataEngine.parseSchemaPath("any.test:bar");
       expect(path).to.be.deep.equal("any.test.json");
@@ -53,7 +55,8 @@ describe("Given all the DataEngine", () => {
     // });
 
     it("sendRequest: request agent for all api request methods", async () => {
-      let dataEngine = new DataEngine(request);
+      let dataEngine = DataEngine.getInstance();
+      dataEngine.setRequest(request);
 
       // use default source
       await dataEngine.sendRequest(schemaPath);

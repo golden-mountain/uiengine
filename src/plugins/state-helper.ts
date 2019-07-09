@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { searchNodes } from "../helpers/ui";
 import { IUINode, IStateNode, IState } from "../../typings";
 
 // not, is, or,  regexp
@@ -121,7 +122,7 @@ export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
     deps.forEach((dep: any) => {
       if (dep.selector) {
         // depends on which node?
-        const depTargetNodes = uiNode.searchNodes(dep.selector);
+        const depTargetNodes = searchNodes(dep.selector, uiNode.rootName);
         if (depTargetNodes.length) {
           // searched the props met the condition
           depTargetNodes.forEach((depTargetNode: any) => {

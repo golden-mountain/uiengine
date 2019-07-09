@@ -20,7 +20,8 @@ import * as plugins from "../../../../src/plugins";
 // chai.expect();
 chai.use(chaiSpies);
 const expect = chai.expect;
-const request = new Request(reqConfig);
+const request = Request.getInstance();
+request.setConfig(reqConfig);
 const uiNode = new UINode({});
 
 describe("Given all the DataNode validation plugins", () => {

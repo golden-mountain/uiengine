@@ -1,5 +1,5 @@
 import { IUINode, IMessager, INodeController, INodeProps, ILayoutSchema, IRequestConfig, IErrorInfo } from "../../typings";
-import { UINode } from ".";
+import { UINode } from "../data-layer";
 export default class NodeController implements INodeController {
     errorInfo: IErrorInfo;
     nodes: Array<IUINode>;

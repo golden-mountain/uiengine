@@ -10,10 +10,10 @@ import {
   IDataPool,
   IDataSource
 } from "../../typings";
-import { Request, DataEngine } from ".";
+import { Request, DataEngine } from "..";
 
 export default class DataNode implements IDataNode {
-  private request: IRequest = new Request({});
+  private request: IRequest = {} as IRequest;
   errorInfo: any = {
     status: undefined,
     code: ""
@@ -42,7 +42,8 @@ export default class DataNode implements IDataNode {
     }
 
     // get id
-    this.dataEngine = new DataEngine(this.request);
+    this.dataEngine = DataEngine.getInstance();
+    this.dataEngine.setRequest(this.request);
 
     // get instance of data pool
     this.dataPool = DataPool.getInstance();

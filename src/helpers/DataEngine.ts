@@ -10,26 +10,29 @@ import {
 } from "../../typings";
 import { PluginManager, Cache, DataMapper } from ".";
 
-export default class UIEngine implements IDataEngine {
-  private request: IRequest;
+export default class DataEngine implements IDataEngine {
+  static instance: IDataEngine;
+  static getInstance = () => {
+    if (!DataEngine.instance) {
+      DataEngine.instance = new DataEngine();
+    }
+    return DataEngine.instance as DataEngine;
+  };
+
+  request: IRequest = {} as IRequest;
   errorInfo?: any;
   source?: string;
   schemaPath?: string;
-  mapper: IDataMapper;
+  mapper: IDataMapper = {} as IDataMapper;
   data?: any;
   pluginManager: IPluginManager = new PluginManager(this);
   cacheID: string = "response";
   requestOptions: IRequestOptions = {};
 
-  /**
-   *
-   * @param source a.b.c
-   * @param request IRequest
-   * @param loadDefaultPlugins whether load default plugins
-   */
-  constructor(request: IRequest) {
+  setRequest(request: IRequest) {
     this.request = request;
-    this.mapper = new DataMapper(this.request);
+    this.mapper = DataMapper.getInstance();
+    this.mapper.setRequest(request);
   }
 
   parseSchemaPath(source: string) {

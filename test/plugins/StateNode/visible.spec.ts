@@ -22,7 +22,8 @@ describe("Given all the default plugins", () => {
   });
   describe("the given plugins ", () => {
     it("visiblization should be caculated on the first initial", async () => {
-      const request = new Request(reqConfig);
+      const request = Request.getInstance();
+      request.setConfig(reqConfig);
       const uiNode = new UINode(
         stateNodeBasicLayout,
         request,
@@ -54,7 +55,8 @@ describe("Given all the default plugins", () => {
     });
 
     it("visiblization should be caculated on the when update the schema", async () => {
-      const request = new Request(reqConfig);
+      const request = Request.getInstance();
+      request.setConfig(reqConfig);
       const uiNode = new UINode(
         stateNodeBasicLayout,
         request,

@@ -1,4 +1,5 @@
 import _ from "lodash";
+
 import {
   Request,
   DataNode,
@@ -6,7 +7,8 @@ import {
   StateNode,
   PluginManager,
   Messager
-} from ".";
+} from "..";
+
 import { AxiosPromise } from "axios";
 import {
   IDataNode,
@@ -63,7 +65,7 @@ export default class UINode implements IUINode {
     this.id = this.schema._id;
 
     // new messager
-    this.messager = new Messager();
+    this.messager = Messager.getInstance();
 
     // assign parent
     this.parent = parent;
@@ -262,78 +264,78 @@ export default class UINode implements IUINode {
     }
   }
 
-  searchNodes(prop: object, layoutId?: string): any {
-    let nodes: Array<any> = [];
+  // searchNodes(prop: object, layoutId?: string): any {
+  //   let nodes: Array<any> = [];
 
-    const rootName = layoutId || this.rootName;
-    let allUINodes = Cache.getUINode(rootName) as IUINode;
-    if (_.isObject(allUINodes)) {
-      _.forIn(allUINodes, (target: any, id: string) => {
-        if (!target.getSchema) return;
-        let finded = true;
-        const schema = target.getSchema();
-        _.forIn(prop, (v: any, name: string) => {
-          // handle name with $
-          if (name.indexOf("$") > -1 && schema._index !== undefined) {
-            name = name.replace("$", schema._index);
-          }
-          const schemaValue = _.get(schema, name);
-          if (v !== schemaValue) {
-            finded = false;
-            return;
-          }
-        });
-        if (finded) {
-          nodes.push(target);
-        }
-      });
-    }
-    return nodes;
-  }
+  //   const rootName = layoutId || this.rootName;
+  //   let allUINodes = Cache.getUINode(rootName) as IUINode;
+  //   if (_.isObject(allUINodes)) {
+  //     _.forIn(allUINodes, (target: any, id: string) => {
+  //       if (!target.getSchema) return;
+  //       let finded = true;
+  //       const schema = target.getSchema();
+  //       _.forIn(prop, (v: any, name: string) => {
+  //         // handle name with $
+  //         if (name.indexOf("$") > -1 && schema._index !== undefined) {
+  //           name = name.replace("$", schema._index);
+  //         }
+  //         const schemaValue = _.get(schema, name);
+  //         if (v !== schemaValue) {
+  //           finded = false;
+  //           return;
+  //         }
+  //       });
+  //       if (finded) {
+  //         nodes.push(target);
+  //       }
+  //     });
+  //   }
+  //   return nodes;
+  // }
 
-  searchDepsNodes(myNode?: IUINode, layoutId?: string) {
-    let schema: ILayoutSchema;
-    if (!myNode) {
-      schema = this.getSchema();
-    } else {
-      schema = myNode.getSchema();
-    }
+  // searchDepsNodes(myNode?: IUINode, layoutId?: string) {
+  //   let schema: ILayoutSchema;
+  //   if (!myNode) {
+  //     schema = this.getSchema();
+  //   } else {
+  //     schema = myNode.getSchema();
+  //   }
 
-    let root = layoutId;
-    let nodes: Array<any> = [];
-    // to fix: rootName should not be empty
-    if (!root) root = this.rootName || _.uniqueId("default-root-name-");
-    let allUINodes = Cache.getUINode(root) as IUINode;
-    _.forIn(allUINodes, (node: IUINode) => {
-      const sch = node.getSchema();
-      if (sch.state) {
-        _.forIn(sch.state, (state: any, key: string) => {
-          if (state.deps) {
-            _.forEach(state.deps, (dep: any) => {
-              if (dep.selector) {
-                let finded = false;
-                //k=id, v:id-of-demo-element-1
-                _.forIn(dep.selector, (v: any, k: any) => {
-                  const depValue = _.get(schema, k);
-                  if (v !== depValue) {
-                    finded = false;
-                    return;
-                  } else {
-                    finded = true;
-                  }
-                });
+  //   let root = layoutId;
+  //   let nodes: Array<any> = [];
+  //   // to fix: rootName should not be empty
+  //   if (!root) root = this.rootName || _.uniqueId("default-root-name-");
+  //   let allUINodes = Cache.getUINode(root) as IUINode;
+  //   _.forIn(allUINodes, (node: IUINode) => {
+  //     const sch = node.getSchema();
+  //     if (sch.state) {
+  //       _.forIn(sch.state, (state: any, key: string) => {
+  //         if (state.deps) {
+  //           _.forEach(state.deps, (dep: any) => {
+  //             if (dep.selector) {
+  //               let finded = false;
+  //               //k=id, v:id-of-demo-element-1
+  //               _.forIn(dep.selector, (v: any, k: any) => {
+  //                 const depValue = _.get(schema, k);
+  //                 if (v !== depValue) {
+  //                   finded = false;
+  //                   return;
+  //                 } else {
+  //                   finded = true;
+  //                 }
+  //               });
 
-                if (finded) {
-                  nodes.push(node);
-                }
-              }
-            });
-          }
-        });
-      }
-    });
-    return nodes;
-  }
+  //               if (finded) {
+  //                 nodes.push(node);
+  //               }
+  //             }
+  //           });
+  //         }
+  //       });
+  //     }
+  //   });
+  //   return nodes;
+  // }
 
   async genLiveLayout(schema: ILayoutSchema, data: any) {
     // if (schema.datasource) {

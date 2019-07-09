@@ -1,3 +1,5 @@
+import { IRequest } from "../Request";
+
 export interface IResponse {}
 export interface IRequestOptions {
   endpoint?: string;
@@ -12,6 +14,8 @@ export interface IDataMapper {
   schema?: IDataSchema;
   rootSchema?: IDataSchema;
   cacheID: string;
+
+  setRequest(request: IRequest);
   loadSchema(source?: string);
   getDataEntryPoint(method: string): string;
 }
@@ -20,11 +24,13 @@ export interface IDataEngine {
   errorInfo?: any;
   source?: string;
   mapper: IDataMapper;
+  request: IRequest;
   data?: any;
   pluginManager: IPluginManager;
   cacheID: string;
   requestOptions: IRequestOptions;
 
+  setRequest(req: IRequest);
   sendRequest(
     source: string,
     data: any,

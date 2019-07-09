@@ -99,9 +99,9 @@ class RequestProduct extends RequestAbstract {
 
 export default class Request implements IRequest {
   static instance: IRequest;
-  static getInstance = (config?: IRequestConfig) => {
+  static getInstance = () => {
     if (!Request.instance) {
-      Request.instance = new Request(config);
+      Request.instance = new Request();
     }
     return Request.instance as Request;
   };
@@ -109,7 +109,7 @@ export default class Request implements IRequest {
   private req: any;
   config: IRequestConfig | any;
 
-  constructor(config?: IRequestConfig) {
+  setConfig(config?: IRequestConfig) {
     if (config) this.config = config;
 
     // console.log(config);
@@ -139,13 +139,5 @@ export default class Request implements IRequest {
   getConfig(configName?: string) {
     // console.log("get config>>>", configName, this.config);
     return configName ? _.get(this.config, configName) : this.config;
-  }
-
-  setConfig(config: any, configName?: string) {
-    if (configName) {
-      _.set(this.config, configName, config);
-    } else {
-      this.config = config;
-    }
   }
 }

@@ -1,8 +1,13 @@
 import _ from "lodash";
 
-import { IState, IStateNode, IErrorInfo, IPluginManager } from "../../typings";
-import { IUINode } from "../../typings/UINode";
-import { PluginManager } from ".";
+import {
+  IState,
+  IStateNode,
+  IErrorInfo,
+  IPluginManager,
+  IUINode
+} from "../../typings";
+import { searchDepsNodes, PluginManager } from "../helpers";
 
 export default class StateNode implements IStateNode {
   errorInfo: IErrorInfo = {};
@@ -27,7 +32,7 @@ export default class StateNode implements IStateNode {
     this.state = await this.pluginManager.executePlugins("state.resolver");
 
     // update dependence state
-    const depNodes = this.uiNode.searchDepsNodes();
+    const depNodes = searchDepsNodes(this.uiNode);
     for (let key in depNodes) {
       const node = depNodes[key];
       await node.getStateNode().renewStates();

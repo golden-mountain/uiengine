@@ -9,7 +9,9 @@ import {
   Request,
   Cache,
   PluginManager,
-  UIEngineRegister
+  UIEngineRegister,
+  searchNodes,
+  searchDepsNodes
 } from "../../src";
 import reqConfig from "../config/request";
 import * as plugins from "../../src/plugins";
@@ -50,7 +52,8 @@ const expectedResult = [
   ]
 ];
 
-const request = new Request(reqConfig);
+const request = Request.getInstance();
+request.setConfig(reqConfig);
 
 const tableIncludeTest = (liveChildren: any, expectedResult: any) => {
   _.forEach(liveChildren, (child: any, key: string) => {
@@ -222,7 +225,7 @@ describe("Given an instance of my UINode library", () => {
       const root = "test_root_name";
       const localUINode = new UINode(copyLayout, request, root);
       await localUINode.loadLayout();
-      let nodes = localUINode.searchNodes(
+      let nodes = searchNodes(
         {
           // datasource: "foo:bar.baz.$.age"
           datasource: "foo:bar"
@@ -232,7 +235,7 @@ describe("Given an instance of my UINode library", () => {
       // console.log(nodes);
       expect(nodes.length).to.equal(1);
 
-      nodes = localUINode.searchNodes(
+      nodes = searchNodes(
         {
           datasource: "foo:bar.baz.0.age"
         },
@@ -240,7 +243,7 @@ describe("Given an instance of my UINode library", () => {
       );
       expect(nodes.length).to.equal(1);
 
-      nodes = localUINode.searchNodes(
+      nodes = searchNodes(
         {
           component: "lib:DemoLiveElement",
           datasource: "foo:bar.baz"
@@ -250,7 +253,7 @@ describe("Given an instance of my UINode library", () => {
       expect(nodes.length).to.equal(1);
 
       // multiple condition find
-      nodes = localUINode.searchNodes(
+      nodes = searchNodes(
         {
           datasource: "foo:bar.baz.0.age",
           component: "p"
@@ -260,7 +263,7 @@ describe("Given an instance of my UINode library", () => {
       expect(nodes.length).to.equal(1);
 
       // negtive cases
-      nodes = localUINode.searchNodes(
+      nodes = searchNodes(
         {
           datasource: "foo:bar.baz.0.age",
           component: "div" // not match this line
@@ -272,7 +275,7 @@ describe("Given an instance of my UINode library", () => {
       // from subnode search
       const childNode = localUINode.getChildren([1, 0, 1]);
       // console.log(childNode.getSchema());
-      nodes = childNode.searchNodes(
+      nodes = searchNodes(
         {
           component: "lib:DemoElement2",
           id: "id-of-demo-element-1",
@@ -283,7 +286,7 @@ describe("Given an instance of my UINode library", () => {
       expect(nodes.length).to.equal(1);
 
       // search complex prop
-      nodes = childNode.searchNodes(
+      nodes = searchNodes(
         {
           "state.visible.deps[$].selector.id": "id-of-demo-element-1"
         },
@@ -299,7 +302,7 @@ describe("Given an instance of my UINode library", () => {
       await localUINode.loadLayout();
       // id = id-of-demo-element-1
       const child = localUINode.getChildren([0]);
-      let nodes = localUINode.searchDepsNodes(child, root);
+      let nodes = searchDepsNodes(child);
       expect(nodes.length).to.equal(3);
     });
   });

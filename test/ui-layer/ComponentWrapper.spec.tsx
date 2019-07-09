@@ -22,7 +22,8 @@ import * as plugins from "../../src/plugins";
 
 chai.use(chaiSpies);
 const expect = chai.expect;
-const request = new Request(reqConfig);
+const request = Request.getInstance();
+request.setConfig(reqConfig);
 
 //  assign elements
 let uiNode: any, schema: any, wrapper: any;

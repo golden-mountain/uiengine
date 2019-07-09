@@ -19,7 +19,8 @@ describe("Given all the UI plugins", () => {
   before(() => {});
   describe("the given template plugin ", async () => {
     it("if template definiation provided, should load it from remote and replace current Node", async () => {
-      const request = new Request(reqConfig);
+      const request = Request.getInstance();
+      request.setConfig(reqConfig);
       const uiNode = new UINode(templateLayout, request);
       const result = await uiNode.loadLayout();
 

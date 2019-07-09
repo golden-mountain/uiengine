@@ -10,14 +10,22 @@ import {
 import { PluginManager, Cache } from ".";
 
 export default class DataMapper implements IDataMapper {
-  private request: IRequest;
+  static instance: IDataMapper;
+  static getInstance = () => {
+    if (!DataMapper.instance) {
+      DataMapper.instance = new DataMapper();
+    }
+    return DataMapper.instance as DataMapper;
+  };
+
+  request: IRequest = {} as IRequest;
   errorInfo?: IErrorInfo;
   source: string = "";
   rootSchema?: IDataSchema;
   pluginManager: IPluginManager = new PluginManager(this);
   cacheID: string = "";
 
-  constructor(request: IRequest) {
+  setRequest(request: IRequest) {
     this.request = request;
   }
 

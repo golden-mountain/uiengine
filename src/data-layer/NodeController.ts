@@ -9,7 +9,9 @@ import {
   IRequestConfig,
   IErrorInfo
 } from "../../typings";
-import { Messager, UINode, Request } from ".";
+import { UINode } from "../data-layer";
+import { Messager, Request } from "../helpers";
+import { searchNodes } from "../helpers";
 
 export default class NodeController implements INodeController {
   // layout path
@@ -21,7 +23,7 @@ export default class NodeController implements INodeController {
   activeLayout: string = "";
 
   constructor(requestConfig: any) {
-    this.messager = new Messager();
+    this.messager = Messager.getInstance();
     this.requestConfig = requestConfig;
   }
 
@@ -36,7 +38,8 @@ export default class NodeController implements INodeController {
   ) {
     // TO Fix: getInstance can't pass the test case
     // const request = Request.getInstance(this.requestConfig);
-    const request = new Request(this.requestConfig);
+    const request = Request.getInstance();
+    request.setConfig(this.requestConfig);
     // get a unique id
     let rootName = "default";
     if (id) {
@@ -77,7 +80,7 @@ export default class NodeController implements INodeController {
       nodes = _.pick(this.nodes, ids);
     }
     _.forIn(nodes, (uiNode: IUINode) => {
-      let searchedNodes = uiNode.searchNodes(nodeSelector);
+      let searchedNodes = searchNodes(nodeSelector, uiNode.rootName);
       _.forEach(searchedNodes, (s: IUINode) => {
         s.messager.sendMessage(s.id, data);
       });

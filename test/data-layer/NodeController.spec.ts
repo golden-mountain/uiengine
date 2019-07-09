@@ -6,7 +6,13 @@ import chaiSpies from "chai-spies";
 import { shallow } from "enzyme";
 
 import _ from "lodash";
-import { NodeController, UINode, Cache, PluginManager } from "../../src";
+import {
+  NodeController,
+  UINode,
+  Cache,
+  PluginManager,
+  searchNodes
+} from "../../src";
 import reqConfig from "../config/request";
 
 import uiJSON from "../layouts/state-node-basic.json";
@@ -73,7 +79,7 @@ describe("Given an instance of my NodeController library", () => {
       };
 
       const anyValue = "any.value";
-      const searchedNodes = uiNode.searchNodes(selector);
+      const searchedNodes = searchNodes(selector, uiNode.rootName);
       expect(searchedNodes.length).to.equal(1);
       const spy = chai.spy.on(searchedNodes[0].messager, "sendMessage");
       nodeController.castMessage(selector, anyValue, [id]);
