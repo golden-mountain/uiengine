@@ -4,7 +4,13 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { UINode, Request, Cache, UIEngineRegister } from "../../../src";
+import {
+  UINode,
+  Request,
+  Cache,
+  UIEngineRegister,
+  DataPool
+} from "../../../src";
 // import reqConfig from "./config/request";
 import stateNodeBasicLayout from "../../layouts/state-node-basic.json";
 import reqConfig from "../../config/request";
@@ -18,6 +24,8 @@ const expect = chai.expect;
 describe("Given all the default plugins", () => {
   before(() => {
     Cache.clearDataCache();
+    const dataPool = DataPool.getInstance();
+    dataPool.clear();
     UIEngineRegister.registerPlugins(plugins);
   });
   describe("the given plugins ", () => {

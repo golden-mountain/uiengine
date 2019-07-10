@@ -111,20 +111,20 @@ export default class DataNode implements IDataNode {
         }
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource, null);
-
-        //assign data and dataPool
-        this.data = result;
         this.dataPool.set(result, this.source.source);
-        // assign root schema
-        this.rootSchema = this.dataEngine.mapper.rootSchema;
       }
     }
+
+    this.data = result;
+    // assign root schema
+    this.rootSchema = this.dataEngine.mapper.rootSchema;
 
     // load this node schema
     this.schema = await this.pluginManager.executePlugins(
       "data.schema.parser",
       exeConfig
     );
+
     return this.data;
   }
 

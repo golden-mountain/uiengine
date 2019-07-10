@@ -60,7 +60,8 @@ describe("Given an instance of my DataNode library", () => {
     });
 
     it("loadData: data should be loaded from DataEngine", async () => {
-      Cache.clearDataCache();
+      const dataPool = DataPool.getInstance();
+      dataPool.clear();
       let dataNode = new DataNode("foo:bar", uiNode, request);
       let data = await dataNode.loadData();
       let equalData = _.get(dataNodeJson, "foo.bar");
@@ -70,7 +71,7 @@ describe("Given an instance of my DataNode library", () => {
       expect(data).to.deep.equal(equalData);
 
       // error loading
-      Cache.clearDataCache();
+      dataPool.clear();
       dataNode = new DataNode("any.wrong.node", uiNode, request);
       data = await dataNode.loadData();
       const errorCode = "Schema for any.json not found";
@@ -82,6 +83,8 @@ describe("Given an instance of my DataNode library", () => {
     it("updateData: data should be checked, updated, and state should be refreshed", async () => {
       // loading schema from UINode
       Cache.clearDataCache();
+      const dataPool = DataPool.getInstance();
+      dataPool.clear();
       const localUINode = new UINode(uiJSON, request, "test-root-name");
       await localUINode.loadLayout();
       const child = localUINode.getChildren([0]);
@@ -105,7 +108,8 @@ describe("Given an instance of my DataNode library", () => {
 
     it("deleteData: data should be deleted by given path, layout and state should be refreshed", async () => {
       // loading schema from UINode
-      Cache.clearDataCache();
+      const dataPool = DataPool.getInstance();
+      dataPool.clear();
       const localUINode = new UINode(uiJSON, request, "test-root-name");
       await localUINode.loadLayout();
 
