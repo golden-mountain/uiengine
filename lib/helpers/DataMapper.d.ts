@@ -10,5 +10,6 @@ export default class DataMapper implements IDataMapper {
     cacheID: string;
     setRequest(request: IRequest): void;
     getDataEntryPoint(method: string): string;
+    getSchema(source: string): Promise<any>;
     loadSchema(source: string): Promise<any>;
 }

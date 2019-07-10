@@ -7,7 +7,7 @@ import {
   IErrorInfo,
   IPluginManager
 } from "../../typings";
-import { PluginManager, Cache } from ".";
+import { PluginManager, Cache, parseCacheID, parseSchemaPath } from ".";
 
 export default class DataMapper implements IDataMapper {
   static instance: IDataMapper;
@@ -38,30 +38,38 @@ export default class DataMapper implements IDataMapper {
     return `${dataURLPrefix}${endpoint}`;
   }
 
+  async getSchema(source: string) {
+    this.cacheID = parseCacheID(source);
+    let schema: any = Cache.getDataSchema(this.cacheID);
+    if (!schema) {
+      schema = await this.loadSchema(source);
+    }
+    this.rootSchema = schema;
+    return schema;
+  }
+
   async loadSchema(source: string) {
     let result: any = null;
     this.source = source;
-    this.cacheID = _.snakeCase(source);
-
+    let path = parseSchemaPath(source);
+    this.cacheID = parseCacheID(source);
     try {
       let schema: any = Cache.getDataSchema(this.cacheID);
-      if (_.isEmpty(schema)) {
+      if (!schema) {
         const dataSchemaPrefix = this.request.getConfig("dataSchemaPrefix");
-        let path = source;
         if (!_.isEmpty(dataSchemaPrefix)) {
-          path = `${dataSchemaPrefix}${source}`;
+          path = `${dataSchemaPrefix}${path}`;
         }
         schema = await this.request.get(path);
-        if (schema.data) {
-          Cache.setDataSchema(this.cacheID, schema.data);
-          schema = schema.data;
-        }
+        schema = schema.data;
+        Cache.setDataSchema(this.cacheID, schema);
       }
 
       this.rootSchema = schema;
       result = schema;
     } catch (e) {
-      // console.log(e.message);
+      // prevent load and load again
+      Cache.setDataSchema(this.cacheID, {});
       this.errorInfo = {
         code: e.message
       };

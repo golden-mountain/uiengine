@@ -99,10 +99,10 @@ export default class DataNode implements IDataNode {
       exeConfig
     );
 
-    if (result === undefined && this.source.source.indexOf("$dummy") === -1) {
+    if (result === undefined) {
       if (schemaOnly || !this.source.autoload) {
-        await this.dataEngine.loadSchema(this.source.source);
-        this.data = null;
+        // await this.dataEngine.loadSchema(this.source.source);
+        result = null;
       } else {
         let data = await this.dataEngine.loadData(this.source.source);
         if (data === null) {
@@ -115,16 +115,17 @@ export default class DataNode implements IDataNode {
       }
     }
 
-    this.data = result;
-    // assign root schema
-    this.rootSchema = this.dataEngine.mapper.rootSchema;
+    // assign root schema if not $dummy data
+    this.rootSchema = await this.dataEngine.mapper.getSchema(
+      this.source.source
+    );
 
+    this.data = result;
     // load this node schema
     this.schema = await this.pluginManager.executePlugins(
       "data.schema.parser",
       exeConfig
     );
-
     return this.data;
   }
 
@@ -217,17 +218,4 @@ export default class DataNode implements IDataNode {
     }
     return status;
   }
-
-  // async submit(dataSources: Array<string>, method: string = "post") {
-  //   let result = {};
-  //   let responses: any = [];
-  //   dataSources.forEach((source: string) => {
-  //     result = _.merge(result, this.dataPool.get(source, true));
-  //     result = this.dataEngine.sendRequest(source, result, method, false);
-  //     responses.push(result);
-  //   });
-
-  //   responses = await Promise.all(responses);
-  //   return responses;
-  // }
 }
