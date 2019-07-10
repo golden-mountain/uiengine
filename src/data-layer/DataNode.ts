@@ -94,12 +94,11 @@ export default class DataNode implements IDataNode {
     const exeConfig: IPluginExecutionConfig = {
       returnLastValue: true
     };
-    // let result = await this.pluginManager.executePlugins(
-    //   "data.data.parser",
-    //   exeConfig
-    // );
+    let result = await this.pluginManager.executePlugins(
+      "data.data.parser",
+      exeConfig
+    );
 
-    let result;
     if (result === undefined && this.source.source.indexOf("$dummy") === -1) {
       if (schemaOnly || !this.source.autoload) {
         await this.dataEngine.loadSchema(this.source.source);
@@ -112,22 +111,20 @@ export default class DataNode implements IDataNode {
         }
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource, null);
+
         //assign data and dataPool
         this.data = result;
         this.dataPool.set(result, this.source.source);
+        // assign root schema
+        this.rootSchema = this.dataEngine.mapper.rootSchema;
       }
     }
-
-    // assign root schema
-    this.rootSchema = this.dataEngine.mapper.rootSchema;
 
     // load this node schema
     this.schema = await this.pluginManager.executePlugins(
       "data.schema.parser",
       exeConfig
     );
-    // }
-
     return this.data;
   }
 

@@ -11,6 +11,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
   let name = dataNode.source.source.replace(":", ".");
   const regex = /\[\d+\]/;
   name = name.replace(regex, "");
+  // console.log(_.cloneDeep(rootSchema), name);
   let result = _.get(rootSchema, `fields`, []).filter((schema: any) => {
     return schema["cm-lineage"] === name;
   });

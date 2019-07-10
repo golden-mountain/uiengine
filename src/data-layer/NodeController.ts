@@ -14,16 +14,23 @@ import { Messager, Request } from "../helpers";
 import { searchNodes } from "../helpers";
 
 export default class NodeController implements INodeController {
+  static instance: INodeController;
+  static getInstance = () => {
+    if (!NodeController.instance) {
+      NodeController.instance = new NodeController();
+    }
+    return NodeController.instance as NodeController;
+  };
+
   // layout path
   errorInfo: IErrorInfo = {};
   // layouts: object = {};
   nodes: Array<IUINode> = [];
-  messager: IMessager;
-  requestConfig: IRequestConfig;
+  messager: IMessager = Messager.getInstance();
+  requestConfig: IRequestConfig = {};
   activeLayout: string = "";
 
-  constructor(requestConfig: any) {
-    this.messager = Messager.getInstance();
+  setRequestConfig(requestConfig: IRequestConfig) {
     this.requestConfig = requestConfig;
   }
 
@@ -34,7 +41,8 @@ export default class NodeController implements INodeController {
   async loadUINode(
     layout: ILayoutSchema | string,
     id?: string,
-    autoLoadLayout: boolean = true
+    autoLoadLayout: boolean = true,
+    useCache: boolean = true
   ) {
     // TO Fix: getInstance can't pass the test case
     // const request = Request.getInstance(this.requestConfig);
@@ -52,14 +60,18 @@ export default class NodeController implements INodeController {
       }
     }
 
-    // default we load all default plugins
-    const uiNode = new UINode({}, request, rootName);
-    if (autoLoadLayout) {
-      await uiNode.loadLayout(layout);
-    }
+    // use cached nodes
+    let uiNode = this.nodes[rootName];
+    if (!uiNode || useCache === false) {
+      // default we load all default plugins
+      uiNode = new UINode({}, request, rootName);
+      if (autoLoadLayout) {
+        await uiNode.loadLayout(layout);
+      }
 
-    this.nodes[rootName] = uiNode;
-    this.activeLayout = rootName;
+      this.nodes[rootName] = uiNode;
+      this.activeLayout = rootName;
+    }
     return uiNode;
   }
 

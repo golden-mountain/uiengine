@@ -8,7 +8,8 @@ import { IPluginFunc, IPlugin, IDataNode } from "../../../../typings";
  * @param dataNode
  */
 const callback: IPluginFunc = (dataNode: IDataNode) => {
-  return dataNode.dataPool.get(dataNode.source.source, false);
+  const data = dataNode.dataPool.get(dataNode.source.source, false);
+  return data;
 };
 
 export const loadDataPoolData: IPlugin = {

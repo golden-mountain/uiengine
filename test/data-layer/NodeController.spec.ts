@@ -29,7 +29,8 @@ describe("Given an instance of my NodeController library", () => {
     it("constructor: should created a messager", () => {});
 
     it("loadUINode: layout should be loaded and layouts should hold the layout ", async () => {
-      const nodeController = new NodeController(reqConfig);
+      const nodeController = NodeController.getInstance();
+      nodeController.setRequestConfig(reqConfig);
       const schemaPath = "layouts/state-node-basic.json";
       const id = "any-id";
       let uiNode = await nodeController.loadUINode(schemaPath, id);
@@ -46,7 +47,8 @@ describe("Given an instance of my NodeController library", () => {
     });
 
     it("deleteLayout: should delete the given name of layout", async () => {
-      const nodeController = new NodeController(reqConfig);
+      const nodeController = NodeController.getInstance();
+      nodeController.setRequestConfig(reqConfig);
       const schemaPath = "layouts/state-node-basic.json";
       let uiNode = await nodeController.loadUINode(schemaPath);
       expect(uiNode).is.instanceOf(UINode);
@@ -59,7 +61,8 @@ describe("Given an instance of my NodeController library", () => {
     });
 
     it("getUI: should delete the given name of layout", async () => {
-      const nodeController = new NodeController(reqConfig);
+      const nodeController = NodeController.getInstance();
+      nodeController.setRequestConfig(reqConfig);
       const schemaPath = "layouts/state-node-basic.json";
       let uiNode = await nodeController.loadUINode(schemaPath);
       expect(nodeController.getUINode(schemaPath)).is.equal(uiNode);
@@ -68,7 +71,8 @@ describe("Given an instance of my NodeController library", () => {
     it("sendMessage: should set ui nodes state by selector & ids", async () => {
       Cache.clearCache();
 
-      const nodeController = new NodeController(reqConfig);
+      const nodeController = NodeController.getInstance();
+      nodeController.setRequestConfig(reqConfig);
       const schemaPath = "layouts/state-node-basic.json";
       const id = "test-id";
       let uiNode = await nodeController.loadUINode(schemaPath, id);
