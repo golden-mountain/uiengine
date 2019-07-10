@@ -10,7 +10,7 @@ import {
   IDataPool,
   IDataSource
 } from "../../typings";
-import { Request, DataEngine } from "..";
+import { DataEngine } from "../helpers";
 
 export default class DataNode implements IDataNode {
   private request: IRequest = {} as IRequest;
@@ -94,11 +94,12 @@ export default class DataNode implements IDataNode {
     const exeConfig: IPluginExecutionConfig = {
       returnLastValue: true
     };
-    let result = await this.pluginManager.executePlugins(
-      "data.data.parser",
-      exeConfig
-    );
+    // let result = await this.pluginManager.executePlugins(
+    //   "data.data.parser",
+    //   exeConfig
+    // );
 
+    let result;
     if (result === undefined && this.source.source.indexOf("$dummy") === -1) {
       if (schemaOnly || !this.source.autoload) {
         await this.dataEngine.loadSchema(this.source.source);
@@ -219,4 +220,17 @@ export default class DataNode implements IDataNode {
     }
     return status;
   }
+
+  // async submit(dataSources: Array<string>, method: string = "post") {
+  //   let result = {};
+  //   let responses: any = [];
+  //   dataSources.forEach((source: string) => {
+  //     result = _.merge(result, this.dataPool.get(source, true));
+  //     result = this.dataEngine.sendRequest(source, result, method, false);
+  //     responses.push(result);
+  //   });
+
+  //   responses = await Promise.all(responses);
+  //   return responses;
+  // }
 }

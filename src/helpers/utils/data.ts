@@ -37,16 +37,3 @@ export async function submitToAPI(
   responses = await Promise.all(responses);
   return responses;
 }
-
-export function submitToPool(
-  dataSources: Array<string>,
-  connectWith: string = ""
-) {
-  let result = {};
-  const dataPool = DataPool.getInstance();
-  dataSources.forEach((source: string) => {
-    result = _.merge(result, dataPool.get(source, true));
-    dataPool.set(result, connectWith);
-  });
-  return result;
-}

@@ -11,8 +11,7 @@ import {
   PluginManager,
   UIEngineRegister,
   DataPool,
-  submitToAPI,
-  submitToPool
+  submitToAPI
 } from "../../src";
 import reqConfig from "../config/request";
 // import { mount } from "enzyme";
@@ -137,20 +136,16 @@ describe("Given an instance of my DataNode library", () => {
       let expectedResult = [dataNodeJson];
 
       // remote commit
-      let dataSources = ["foo:bar"];
-      let result = await submitToAPI(dataSources, "get");
+      let dataSource = "foo:bar";
+      let result = await submitToAPI([dataSource], "get");
       expect(result).to.deep.equal(expectedResult);
 
       // local commit
       let expectedResult2 = {
-        foo: {
-          bar: {
-            name: "Zp",
-            baz: [{ name: "Rui", age: 30 }, { name: "Lifang", age: 30 }]
-          }
-        }
+        name: "Zp",
+        baz: [{ name: "Rui", age: 30 }, { name: "Lifang", age: 30 }]
       };
-      result = submitToPool(dataSources, "data:any");
+      result = dataPool.merge(dataSource, "data:any");
       expect(dataNode.dataPool.get("data:any", false)).to.deep.equal(
         expectedResult2
       );
