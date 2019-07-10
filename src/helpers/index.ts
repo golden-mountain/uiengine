@@ -12,5 +12,4 @@ export { default as Event } from "./Event";
 
 // other
 export * from "./UIEngineRegister";
-export * from "./ui";
-export * from "./data";
+export * from "./utils";

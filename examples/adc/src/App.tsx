@@ -6,7 +6,7 @@ import { Menu, PageHeader, Button, Modal } from "antd";
 import { default as components } from "./components";
 import * as plugins from "./plugins";
 import requestConfig from "./config/request";
-import { UIEngineRegister, UIEngine } from "UIEngine";
+import { UIEngineRegister, UIEngine, submitToAPI } from "UIEngine";
 import "./App.css";
 import { INodeController } from "../../../typings";
 
@@ -32,8 +32,8 @@ const App: React.FC = () => {
   const handleOK = () => {
     setVisible(false);
     if (controller) {
-      const uiNode = controller.getUINode(loginLayout);
-      const result = uiNode.dataNode.submit(["credentials"]);
+      // const uiNode = controller.getUINode(loginLayout);
+      const result = submitToAPI(["credentials"]);
       result.then((res: any) => {
         const token = _.get(res[0], "credentials.authresponse.signature");
         if (token) {

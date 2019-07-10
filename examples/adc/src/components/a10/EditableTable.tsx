@@ -1,11 +1,9 @@
 import React from "react";
 import _ from "lodash";
-import { Table, Input, Button, Popconfirm, Form } from "antd";
+import { Table, Input, Button, Popconfirm, Form, Icon } from "antd";
 import { A10Modal } from "./Modal";
 
 import { UIEngineContext } from "UIEngine";
-import { IUINode } from "UIEngine/typings";
-
 const EditableContext = React.createContext({});
 
 const EditableRow = (props: any) => (
@@ -105,7 +103,12 @@ export class EditableTable extends React.Component<any, any> {
 
   constructor(props: any) {
     super(props);
-    // console.log(this.props.uinode.dataNode.data);
+    this.state = {
+      dataSource: this.props.uinode.dataNode.data,
+      show_popup: false,
+      dataKey: 0
+    };
+
     this.columns = props.uinode.schema.$children.map((node: any) => {
       return {
         title: node.props.title,
@@ -121,24 +124,34 @@ export class EditableTable extends React.Component<any, any> {
       dataIndex: "operation",
       render: (text: any, record: any) =>
         this.state.dataSource.length >= 1 ? (
-          <Popconfirm
-            title="Sure to delete?"
-            onConfirm={() => this.handleDelete(record.key)}
-          >
-            <div>Delete</div>
-          </Popconfirm>
+          <>
+            <Icon
+              type="edit"
+              theme="twoTone"
+              twoToneColor="#428BCA"
+              style={{ paddingRight: "10px" }}
+              onClick={() => this.handleEdit(record.key)}
+            />
+
+            <Popconfirm
+              title="Sure to delete?"
+              onConfirm={() => this.handleDelete(record.key)}
+            >
+              <Icon type="delete" theme="twoTone" twoToneColor="red" />
+            </Popconfirm>
+          </>
         ) : null
     });
-
-    this.state = {
-      dataSource: this.props.uinode.dataNode.data,
-      show_popup: false
-    };
   }
+  handleEdit = (key: any) => {
+    this.setState({ dataKey: key });
+    this.setState({ show_popup: true });
+  };
 
   handleDelete = (key: any) => {
-    const dataSource = [...this.state.dataSource];
-    this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
+    this.props.uinode.dataNode.deleteData(key);
+    // const dataSource = [...this.state.dataSource];
+    // this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
   };
 
   handleAdd = () => {};
@@ -164,7 +177,7 @@ export class EditableTable extends React.Component<any, any> {
   };
 
   render() {
-    const { dataSource } = this.state;
+    const { dataSource, dataKey } = this.state;
     const { modal, uinode } = this.props;
     const components = {
       body: {
@@ -172,6 +185,12 @@ export class EditableTable extends React.Component<any, any> {
         cell: EditableCell
       }
     };
+    // add the key for each dataSource
+    if (dataSource && dataSource.length) {
+      for (let i = 0; i < dataSource.length; i++) {
+        this.state.dataSource[i]["key"] = i;
+      }
+    }
     const columns = this.columns.map((col: any) => {
       if (!col.editable) {
         return col;
@@ -192,7 +211,7 @@ export class EditableTable extends React.Component<any, any> {
         <Button
           onClick={this.handleAdd}
           type="primary"
-          style={{ marginBottom: 16 }}
+          style={{ marginBottom: 16, marginRight: 10 }}
         >
           Add a row
         </Button>
@@ -216,6 +235,7 @@ export class EditableTable extends React.Component<any, any> {
             {...modal}
             close={this.closeModal.bind(this)}
             uinode={uinode}
+            datakey={dataKey}
           />
         ) : null}
       </div>

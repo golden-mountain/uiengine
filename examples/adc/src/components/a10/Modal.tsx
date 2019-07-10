@@ -19,10 +19,10 @@ export class A10Modal extends React.Component<any, any> {
   handleOk = async (e: any) => {
     if (this.state.uiNode !== undefined) {
       const uiNode: any = this.state.uiNode;
-      uiNode.dataNode.submit(
-        ["slb.virtual-server.port:"],
-        "",
-        "slb.virtual-server:port-list[]"
+      uiNode.dataNode.dataPool.merge(
+        "slb.virtual-server.port:",
+        "slb.virtual-server:port-list[]",
+        true
       );
       console.log(uiNode.dataNode.dataPool.data);
     }

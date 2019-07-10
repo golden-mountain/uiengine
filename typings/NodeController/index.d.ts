@@ -12,9 +12,11 @@ export interface INodeController {
   loadUINode(
     layout: ILayoutSchema | string,
     id?: string,
-    autoLoadLayout: boolean = true
+    autoLoadLayout: boolean = true,
+    useCache: boolean = true
   );
   deleteUINode(id: string);
   getUINode(id: string);
   castMessage(nodeSelector: INodeProps, data: any, ids?: [string]);
+  setRequestConfig(requestConfig: IRequestConfig);
 }

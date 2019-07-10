@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { stateDepsResolver } from "../state-helper";
+import { stateDepsResolver } from "../../helpers";
 import { IPluginFunc, IPlugin, IStateNode } from "../../../typings";
 
 const callback: IPluginFunc = async (stateNode: IStateNode) => {

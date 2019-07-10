@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { IUINode } from "../../../typings";
-import { IPluginFunc, IPlugin } from "../../../typings";
+import { submitToAPI } from "../../helpers";
+import { IPluginFunc, IPlugin, IUINode } from "../../../typings";
 
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   return (e: any, options: any) => {
@@ -11,7 +11,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     let target = `${options.target}:`;
     // console.log(options, uiNode.dataNode.dataPool.get(target, false));
     // const data = uiNode.dataNode.dataPool.get(target, false);
-    uiNode.dataNode.submit([target], "post").then((result: any) => {
+    submitToAPI([target], "post").then((result: any) => {
       console.log(result);
     });
   };

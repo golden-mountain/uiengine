@@ -30,7 +30,8 @@ export default class UIEngine extends React.Component<
 
   constructor(props: IUIEngineProps) {
     super(props);
-    this.nodeController = new NodeController(props.reqConfig);
+    this.nodeController = NodeController.getInstance();
+    this.nodeController.setRequestConfig(props.reqConfig);
     if (_.isFunction(props.onEngineCreate)) {
       props.onEngineCreate(this.nodeController);
     }

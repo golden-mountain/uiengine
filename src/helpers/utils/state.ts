@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { searchNodes } from "../helpers/ui";
-import { IUINode, IStateNode, IState } from "../../typings";
+import { searchNodes } from ".";
+import { IUINode, IStateNode, IState } from "../../../typings";
 
 // not, is, or,  regexp
 function compareRule(expected: any, actual: any, rule: string = "is") {
