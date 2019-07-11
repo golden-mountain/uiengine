@@ -6,5 +6,6 @@ export { default as DataPool } from "./DataPool";
 export { default as Messager } from "./Messager";
 export { default as Cache } from "./Cache";
 export { default as Event } from "./Event";
+export { default as Workflow } from "./Workflow";
 export * from "./UIEngineRegister";
 export * from "./utils";
