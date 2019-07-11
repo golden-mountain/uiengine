@@ -8,7 +8,8 @@ import {
   IDataMapper,
   IPluginExecutionConfig
 } from "../../typings";
-import { PluginManager, Cache, DataMapper } from ".";
+
+import { PluginManager, Cache, DataMapper, parseCacheID } from ".";
 
 export default class DataEngine implements IDataEngine {
   static instance: IDataEngine;
@@ -35,15 +36,9 @@ export default class DataEngine implements IDataEngine {
     this.mapper.setRequest(request);
   }
 
-  parseSchemaPath(source: string) {
-    const splitter = source.indexOf(":") > -1 ? ":" : ".";
-    let [schemaPath] = source.split(splitter);
-    return `${schemaPath}.json`;
-  }
-
   async loadSchema(source: string) {
-    this.schemaPath = this.parseSchemaPath(source);
-    return await this.mapper.loadSchema(this.schemaPath);
+    // this.schemaPath = parseSchemaPath(source);
+    return await this.mapper.loadSchema(source);
   }
 
   async sendRequest(
@@ -65,16 +60,15 @@ export default class DataEngine implements IDataEngine {
       return false;
     }
 
-    let schemaPath = "";
-    schemaPath = this.parseSchemaPath(source);
-    this.source = schemaPath;
-    let result = {};
-    if (schemaPath) {
-      const schema = await this.mapper.loadSchema(schemaPath);
+    // schemaPath = parseSchemaPath(source);
+    this.cacheID = parseCacheID(source);
+    this.source = source;
+    if (source) {
+      const schema = await this.mapper.loadSchema(source);
       if (schema === null) {
         this.errorInfo = {
           status: 2001,
-          code: `Schema for ${schemaPath} not found`
+          code: `Schema for ${source} not found`
         };
         return false;
       }
@@ -146,6 +140,7 @@ export default class DataEngine implements IDataEngine {
     );
 
     if (!_.isEmpty(afterResult)) this.data = afterResult;
+
     return this.data;
   }
 

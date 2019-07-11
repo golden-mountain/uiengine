@@ -12,7 +12,6 @@ export default class DataEngine implements IDataEngine {
     cacheID: string;
     requestOptions: IRequestOptions;
     setRequest(request: IRequest): void;
-    parseSchemaPath(source: string): string;
     loadSchema(source: string): Promise<any>;
     sendRequest(source: string, data?: any, method?: string, cache?: boolean): Promise<any>;
     loadData(source: string, params?: any): Promise<any>;

@@ -4,7 +4,13 @@ import chai from "chai";
 import chaiSpies from "chai-spies";
 import _ from "lodash";
 
-import { DataEngine, Request, Cache, PluginManager } from "../../src";
+import {
+  DataEngine,
+  Request,
+  Cache,
+  PluginManager,
+  parseSchemaPath
+} from "../../src";
 import reqConfig from "../config/request";
 import dataJson from "../data/foo.json";
 
@@ -31,11 +37,11 @@ describe("Given all the DataEngine", () => {
       let dataEngine = DataEngine.getInstance();
       dataEngine.setRequest(request);
       // with :
-      let path = dataEngine.parseSchemaPath("any.test:bar");
+      let path = parseSchemaPath("any.test:bar");
       expect(path).to.be.deep.equal("any.test.json");
 
       // without :
-      path = dataEngine.parseSchemaPath("any.test.bar");
+      path = parseSchemaPath("any.test.bar");
       expect(path).to.be.deep.equal("any.json");
     });
 
@@ -87,7 +93,7 @@ describe("Given all the DataEngine", () => {
       expect(dataEngine.data).to.be.empty;
       errorInfo = {
         status: 2001,
-        code: `Schema for any.json not found`
+        code: `Schema for any.wrong.place not found`
       };
       expect(dataEngine.errorInfo).to.deep.equal(errorInfo);
 

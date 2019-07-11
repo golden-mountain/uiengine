@@ -29,6 +29,7 @@ export default class DataPool implements IDataPool {
       _.set(this.data, p, data);
     }
 
+    console.log(this.data, "..................>>>>");
     return this.data;
   }
 

@@ -74,7 +74,7 @@ describe("Given an instance of my DataNode library", () => {
       dataPool.clear();
       dataNode = new DataNode("any.wrong.node", uiNode, request);
       data = await dataNode.loadData();
-      const errorCode = "Schema for any.json not found";
+      const errorCode = "Schema for any.wrong.node not found";
       const errorInfo = dataNode.dataEngine.errorInfo;
       // console.log(errorCode);
       expect(errorInfo.code).to.include(errorCode);

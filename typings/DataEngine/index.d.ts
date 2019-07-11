@@ -17,6 +17,7 @@ export interface IDataMapper {
 
   setRequest(request: IRequest);
   loadSchema(source?: string);
+  getSchema(source: string);
   getDataEntryPoint(method: string): string;
 }
 
@@ -42,5 +43,5 @@ export interface IDataEngine {
   updateData(source?: string, data?: any);
   replaceData(source?: string, data?: any);
   deleteData(source?: string, data?: any);
-  parseSchemaPath(source: string);
+  // parseSchemaPath(source: string);
 }

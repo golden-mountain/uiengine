@@ -1,4 +1,5 @@
 import _ from "lodash";
+import { getDomainName } from "UIEngine";
 import { IPluginFunc, IPlugin, IDataEngine } from "UIEngine/typings";
 
 /**
@@ -9,7 +10,7 @@ const callback: IPluginFunc = (dataEngine: IDataEngine) => {
   const data = dataEngine.data;
   // console.log(data, dataEngine.source);
   if (dataEngine.source !== undefined) {
-    const sourceSegs = dataEngine.source.replace(".json", "").split(/[.|/]/);
+    const sourceSegs = getDomainName(dataEngine.source, false).split(".");
     let result: any = {};
     let validSegs: any = [];
     let validData: any = {};

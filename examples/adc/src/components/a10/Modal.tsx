@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
-import { UIEngineContext, ComponentWrapper, UINode } from "UIEngine";
+import { UIEngineContext, ComponentWrapper, UINode, DataPool } from "UIEngine";
 import { IUINode } from "UIEngine/typings";
 
 export class A10Modal extends React.Component<any, any> {
@@ -9,10 +9,19 @@ export class A10Modal extends React.Component<any, any> {
   state = { uiNode: new UINode({}), visible: false };
 
   componentDidMount() {
+    const dataPool = DataPool.getInstance();
+    dataPool.merge(
+      `slb.virtual-server:port-list[${this.props.datakey}]`,
+      "slb.virtual-server.port:",
+      false
+    );
     this.context.controller
       .loadUINode(this.props.layout)
       .then((node: IUINode) => {
-        this.setState({ uiNode: node, visible: true });
+        const data = dataPool.get("slb.virtual-server.port:", false);
+        node.dataNode.updateData(data).then(() => {
+          this.setState({ uiNode: node, visible: true });
+        });
       });
   }
 
@@ -24,7 +33,6 @@ export class A10Modal extends React.Component<any, any> {
         "slb.virtual-server:port-list[]",
         true
       );
-      console.log(uiNode.dataNode.dataPool.data);
     }
 
     // console.log(e);

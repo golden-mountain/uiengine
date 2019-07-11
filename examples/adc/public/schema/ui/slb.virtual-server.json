@@ -439,6 +439,9 @@
                 "type": "primary",
                 "htmlType": "submit",
                 "text": "Submit",
+                "style": {
+                  "marginRight": "10px"
+                },
                 "$events": [
                   {
                     "event": "onClick",
