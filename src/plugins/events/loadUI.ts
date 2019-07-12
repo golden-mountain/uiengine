@@ -4,9 +4,7 @@ import { IPluginFunc, IPlugin } from "../../../typings";
 
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   return (e: any, options: any) => {
-    if (e.stopPropagation) {
-      e.stopPropagation();
-    }
+    console.log(uiNode.schema, options, "... on loadUI plugin");
   };
 };
 

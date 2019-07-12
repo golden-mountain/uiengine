@@ -7,18 +7,26 @@ import {
 } from "../../typings";
 
 export default class Workflow implements IWorkflow {
-  static instance: IWorkflow;
-  static getInstance = () => {
-    if (!Workflow.instance) {
-      Workflow.instance = new Workflow();
-    }
-    return Workflow.instance as Workflow;
-  };
-
-  nodeController?: INodeController;
+  nodeController: INodeController;
   activeNode?: IUINode;
 
-  activeLayout(layout: string, options: ILoadOptions) {}
+  constructor(nodeController: INodeController) {
+    this.nodeController = nodeController;
+  }
+
+  async activeLayout(layout: string, options?: ILoadOptions) {
+    let uiNode: IUINode;
+    const uiNodeRenderer = this.nodeController.nodes[layout];
+    if (uiNodeRenderer) {
+      let node = this.nodeController.nodes[layout];
+      uiNode = node.uiNode;
+    } else {
+      uiNode = await this.nodeController.loadUINode(layout);
+    }
+
+    this.activeNode = uiNode;
+    return uiNode;
+  }
 
   deactiveLayout() {}
 

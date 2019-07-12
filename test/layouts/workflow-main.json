@@ -1,0 +1,34 @@
+{
+  "id": "react-component-test-2",
+  "component": "test:DivContainer",
+  "datasource": "foo:bar",
+  "props": {
+    "title": "Demo Container"
+  },
+  "children": [
+    {
+      "component": "test:DivContainer",
+      "onload": {
+        "layout": "state-test.json",
+        "container": "main"
+      },
+      "props": {
+        "title": "Demo sub container"
+      }
+    },
+    {
+      "component": "a",
+      "props": {
+        "$events": [
+          {
+            "event": "onClick",
+            "action": "loadUI",
+            "options": {
+              "container": "div"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

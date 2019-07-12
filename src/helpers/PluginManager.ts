@@ -90,23 +90,30 @@ export default class PluginManager implements IPluginManager {
       const name = p.name;
       if (!p.callback) return;
 
-      try {
-        result = p.callback.call(this.caller, this.caller);
-        _.set(this.result, `${type}.${name}`, result);
-
-        // break conditions
-        if (_.get(config, "stopWhenEmpty") && _.isEmpty(result)) return;
-        if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) return;
-      } catch (e) {
-        console.error(`plugin [${k}] executed failed:`, e);
-        this.setErrorInfo(p.type, name, e.message);
-      }
+      result = this.executePlugin(p);
+      _.set(this.result, `${type}.${name}`, result);
+      // break conditions
+      if (_.get(config, "stopWhenEmpty") && _.isEmpty(result)) return;
+      if (_.isEqual(_.get(config, "executeOnlyPluginName"), name)) return;
     });
 
     if (_.get(config, "returnLastValue")) {
       return result;
     }
     return _.get(this.result, type, {});
+  }
+
+  executePlugin(plugin: IPlugin) {
+    const name = plugin.name;
+    if (!plugin.callback) return;
+    let result;
+    try {
+      result = plugin.callback.call(this.caller, this.caller);
+    } catch (e) {
+      console.error(`plugin [${name}] executed failed:`, e);
+      this.setErrorInfo(plugin.type, name, e.message);
+    }
+    return result;
   }
 
   setErrorInfo(type: string, name: string, value: any): IErrorInfo {

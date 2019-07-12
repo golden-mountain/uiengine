@@ -4,14 +4,15 @@ import {
   NodeController,
   ComponentWrapper,
   UIEngineRegister,
-  UIEngineContext
+  UIEngineContext,
+  setComponentState,
+  getComponent
 } from "..";
 
 import * as plugins from "../plugins";
 UIEngineRegister.registerPlugins(plugins);
 
 import {
-  IUINode,
   INodeController,
   IUIEngineProps,
   IUIEngineStates
@@ -21,7 +22,6 @@ export default class UIEngine extends React.Component<
   IUIEngineProps,
   IUIEngineStates
 > {
-  nodes: any = [];
   state = {
     nodes: [],
     activeNodeID: ""
@@ -38,47 +38,43 @@ export default class UIEngine extends React.Component<
   }
 
   componentDidMount() {
-    const { layouts = [], test } = this.props;
-    let nodes: any = this.state.nodes;
-
+    const { layouts = [] } = this.props;
+    this.nodeController.messager.setStateFunc(
+      this.nodeController.engineId,
+      setComponentState.bind(this)
+    );
     for (let layout in layouts) {
-      this.nodes[layout] = this.nodeController
-        .loadUINode(layouts[layout])
-        .then((uiNode: IUINode) => {
-          this.nodeController.messager.setStateFunc(layout, this.setState);
-          nodes[layout] = uiNode;
-          this.setState({ nodes });
-          return uiNode;
-        });
-    }
-    // for test purpose
-    if (test) {
-      test(Promise.all(this.nodes));
+      this.nodeController.loadUINode(layouts[layout]);
     }
   }
 
   componentWillUnmount() {
-    this.props.layouts.forEach((uiNode: any, layout: any) => {
-      const layoutName = layout;
-      this.nodeController.messager.removeStateFunc(layoutName);
-    });
+    this.nodeController.messager.removeStateFunc(this.nodeController.engineId);
   }
 
   render() {
     const { layouts, reqConfig, test, onEngineCreate, ...rest } = this.props;
-
-    return this.state.nodes.map((uiNode: IUINode, layoutKey: number) => {
+    return _.entries(this.state.nodes).map((entry: any) => {
+      const [layoutKey, uiNodeRenderer] = entry;
+      const { uiNode, options } = uiNodeRenderer;
+      const containerComponent = _.get(options, "container");
+      let Container = ({ children, ...rest }: any) => children;
+      if (containerComponent) {
+        Container = getComponent(containerComponent);
+      }
       const context = {
         controller: this.nodeController,
         uiNode
       };
       return (
         <UIEngineContext.Provider value={context}>
-          <ComponentWrapper
-            uiNode={uiNode}
-            {...rest}
-            key={`layout-${layoutKey}`}
-          />
+          <Container>
+            <ComponentWrapper
+              uiNode={uiNode}
+              {...rest}
+              key={`layout-${layoutKey}`}
+            />
+          </Container>
         </UIEngineContext.Provider>
       );
     });

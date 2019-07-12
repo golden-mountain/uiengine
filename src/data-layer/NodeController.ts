@@ -7,10 +7,13 @@ import {
   INodeProps,
   ILayoutSchema,
   IRequestConfig,
-  IErrorInfo
+  IErrorInfo,
+  IWorkflow,
+  IUINodeRenderer,
+  IRequest
 } from "../../typings";
 import { UINode } from "../data-layer";
-import { Messager, Request } from "../helpers";
+import { Messager, Request, Workflow } from "../helpers";
 import { searchNodes } from "../helpers";
 
 export default class NodeController implements INodeController {
@@ -25,29 +28,28 @@ export default class NodeController implements INodeController {
   // layout path
   errorInfo: IErrorInfo = {};
   // layouts: object = {};
-  nodes: Array<IUINode> = [];
+  nodes: Array<IUINodeRenderer> = [];
   messager: IMessager = Messager.getInstance();
   requestConfig: IRequestConfig = {};
   activeLayout: string = "";
+  workflow: IWorkflow;
+  engineId: string = _.uniqueId("engine-");
+  request: IRequest = Request.getInstance();
+
+  constructor() {
+    this.workflow = new Workflow(this);
+  }
 
   setRequestConfig(requestConfig: IRequestConfig) {
     this.requestConfig = requestConfig;
+    this.request.setConfig(this.requestConfig);
   }
 
   /**
    * Load a layout from remote or local
    * @param layout ILayoutSchema|string path of layout or loaded layout
    */
-  async loadUINode(
-    layout: ILayoutSchema | string,
-    id?: string,
-    autoLoadLayout: boolean = true,
-    useCache: boolean = true
-  ) {
-    // TO Fix: getInstance can't pass the test case
-    // const request = Request.getInstance(this.requestConfig);
-    const request = Request.getInstance();
-    request.setConfig(this.requestConfig);
+  async loadUINode(layout: ILayoutSchema | string, id?: string, options?: any) {
     // get a unique id
     let rootName = "default";
     if (id) {
@@ -61,17 +63,20 @@ export default class NodeController implements INodeController {
     }
 
     // use cached nodes
-    let uiNode = this.nodes[rootName];
-    if (!uiNode || useCache === false) {
+    let uiNodeRenderer = this.nodes[rootName];
+    let uiNode;
+    if (!uiNodeRenderer) {
       // default we load all default plugins
-      uiNode = new UINode({}, request, rootName);
-      if (autoLoadLayout) {
-        await uiNode.loadLayout(layout);
-      }
+      uiNode = new UINode({}, this.request, rootName);
+      await uiNode.loadLayout(layout);
 
-      this.nodes[rootName] = uiNode;
+      this.nodes[rootName] = { uiNode, options };
       this.activeLayout = rootName;
+      this.messager.sendMessage(this.engineId, { nodes: this.nodes });
+    } else {
+      uiNode = uiNodeRenderer.uiNode;
     }
+
     return uiNode;
   }
 
@@ -79,11 +84,16 @@ export default class NodeController implements INodeController {
     _.unset(this.nodes, id);
 
     // send message to caller
+    this.messager.sendMessage(this.engineId, this.nodes);
     return true;
   }
 
-  getUINode(id: string) {
-    return _.get(this.nodes, id);
+  getUINode(id: string, uiNodeOnly: boolean = false) {
+    const uiNode = _.get(this.nodes, id);
+    if (uiNodeOnly) {
+      return uiNode.uiNode;
+    }
+    return uiNode;
   }
 
   castMessage(nodeSelector: INodeProps, data: any, ids?: [string]) {
@@ -91,8 +101,8 @@ export default class NodeController implements INodeController {
     if (ids) {
       nodes = _.pick(this.nodes, ids);
     }
-    _.forIn(nodes, (uiNode: IUINode) => {
-      let searchedNodes = searchNodes(nodeSelector, uiNode.rootName);
+    _.forIn(nodes, (uiNode: IUINodeRenderer) => {
+      let searchedNodes = searchNodes(nodeSelector, uiNode.uiNode.rootName);
       _.forEach(searchedNodes, (s: IUINode) => {
         s.messager.sendMessage(s.id, data);
       });

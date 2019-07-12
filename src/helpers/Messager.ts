@@ -17,7 +17,11 @@ export default class Messager implements IMessager {
   sendMessage(schemaID: string, info: any) {
     const setState = this.objectStateFuncMap[schemaID];
     if (_.isFunction(setState)) {
-      return setState(info);
+      try {
+        return setState(info);
+      } catch (e) {
+        console.log(e.message);
+      }
     } else {
       return false;
     }

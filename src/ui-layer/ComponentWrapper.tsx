@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 
-import { PluginManager, getComponent } from "..";
+import { PluginManager, getComponent, setComponentState } from "..";
 import {
   IComponentWrapper,
   IComponentState,
@@ -9,10 +9,10 @@ import {
   IPluginExecutionConfig
 } from "../../typings";
 
-function setComponentState(this: ComponentWrapper, state: IComponentState) {
-  // console.log("node status on Wrapper:", this.props.uiNode.id, state);
-  return this.setState(state);
-}
+// function setComponentState(this: ComponentWrapper, state: IComponentState) {
+//   // console.log("node status on Wrapper:", this.props.uiNode.id, state);
+//   return this.setState(state);
+// }
 
 class ComponentWrapper extends React.Component<
   IComponentWrapper,
@@ -88,12 +88,12 @@ class ComponentWrapper extends React.Component<
             <WrappedComponent {...props} />
           );
         } catch (e) {
-          console.log(e);
+          console.log(e.message);
         }
       } else {
         console.error(
           "ComponentWrapper not loading component for schema",
-          uiNode.schema
+          componentLine
         );
       }
     }

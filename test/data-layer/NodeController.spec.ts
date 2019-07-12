@@ -35,12 +35,12 @@ describe("Given an instance of my NodeController library", () => {
       const id = "any-id";
       let uiNode = await nodeController.loadUINode(schemaPath, id);
       expect(uiNode).is.instanceOf(UINode);
-      expect(nodeController.nodes[id]).is.instanceOf(UINode);
+      expect(nodeController.nodes[id]).to.have.all.keys(["uiNode", "options"]);
 
       // load object
       uiNode = await nodeController.loadUINode(uiJSON);
       expect(uiNode).is.instanceOf(UINode);
-      expect(nodeController.nodes[id]).is.instanceOf(UINode);
+      expect(nodeController.nodes[id]).to.have.all.keys(["uiNode", "options"]);
 
       // expect a message, loaded UINode, to notice other UI layer thing render it
       // nodeController.sendMessage({}, {layout: schemaPath}, 'layout.initialized');
@@ -52,7 +52,10 @@ describe("Given an instance of my NodeController library", () => {
       const schemaPath = "layouts/state-node-basic.json";
       let uiNode = await nodeController.loadUINode(schemaPath);
       expect(uiNode).is.instanceOf(UINode);
-      expect(nodeController.nodes[schemaPath]).is.instanceOf(UINode);
+      expect(nodeController.nodes[schemaPath]).to.have.all.keys([
+        "uiNode",
+        "options"
+      ]);
 
       // delete it
       const result = nodeController.deleteUINode(schemaPath);
@@ -60,12 +63,12 @@ describe("Given an instance of my NodeController library", () => {
       expect(nodeController.nodes[schemaPath]).to.be.undefined;
     });
 
-    it("getUI: should delete the given name of layout", async () => {
+    it("getUI: should get the given name of layout", async () => {
       const nodeController = NodeController.getInstance();
       nodeController.setRequestConfig(reqConfig);
       const schemaPath = "layouts/state-node-basic.json";
       let uiNode = await nodeController.loadUINode(schemaPath);
-      expect(nodeController.getUINode(schemaPath)).is.equal(uiNode);
+      expect(nodeController.getUINode(schemaPath, true)).is.equal(uiNode);
     });
 
     it("sendMessage: should set ui nodes state by selector & ids", async () => {

@@ -1,9 +1,9 @@
 export interface ILoadOptions {}
 
 export interface IWorkflow {
-  nodeController?: INodeController;
+  nodeController: INodeController;
   activeNode?: IUINode;
-  activeLayout(layout: string, options: ILoadOptions);
+  activeLayout(layout: string, options?: ILoadOptions);
   deactiveLayout();
   removeNodes(selector: object);
   refreshNodes(selector: object);
