@@ -16,9 +16,11 @@ export function getComponent(componentLine?: string) {
     const componentMap = UIEngineRegister.componentsLibrary;
     let [packageName, component] = componentLine.split(":");
     const defaultComponent = (props: any) => {
-      const { children, ...rest } = props;
+      const { children, uinode, ...rest } = props;
       return React.createElement(packageName, rest, children);
     };
+
+    // the lineage like 'div', 'a'
     if (!component) {
       WrappedComponent = defaultComponent;
     } else {

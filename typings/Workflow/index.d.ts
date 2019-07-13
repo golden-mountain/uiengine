@@ -1,4 +1,7 @@
-export interface ILoadOptions {}
+export interface ILoadOptions {
+  container?: string;
+  props?: object;
+}
 
 export interface IWorkflow {
   nodeController: INodeController;

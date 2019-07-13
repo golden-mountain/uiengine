@@ -22,7 +22,11 @@ export interface INodeController {
   activeLayout: string;
   engineId: string;
 
-  loadUINode(layout: ILayoutSchema | string, id?: string, options?: any);
+  loadUINode(
+    layout: ILayoutSchema | string,
+    id?: string,
+    options?: ILoadOptions
+  );
   deleteUINode(id: string);
   getUINode(id: string, uiNodeOnly: boolean = false);
   castMessage(nodeSelector: INodeProps, data: any, ids?: [string]);

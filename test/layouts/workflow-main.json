@@ -18,13 +18,16 @@
     },
     {
       "component": "a",
+      "content": "link",
       "props": {
+        "title": "Title",
         "$events": [
           {
             "event": "onClick",
             "action": "loadUI",
             "options": {
-              "container": "div"
+              "layout": "layouts/react-component-test-2.json",
+              "container": "main"
             }
           }
         ]

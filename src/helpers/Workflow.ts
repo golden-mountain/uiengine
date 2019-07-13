@@ -21,7 +21,7 @@ export default class Workflow implements IWorkflow {
       let node = this.nodeController.nodes[layout];
       uiNode = node.uiNode;
     } else {
-      uiNode = await this.nodeController.loadUINode(layout);
+      uiNode = await this.nodeController.loadUINode(layout, "", options);
     }
 
     this.activeNode = uiNode;

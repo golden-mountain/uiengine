@@ -10,7 +10,8 @@ import {
   IErrorInfo,
   IWorkflow,
   IUINodeRenderer,
-  IRequest
+  IRequest,
+  ILoadOptions
 } from "../../typings";
 import { UINode } from "../data-layer";
 import { Messager, Request, Workflow } from "../helpers";
@@ -49,7 +50,11 @@ export default class NodeController implements INodeController {
    * Load a layout from remote or local
    * @param layout ILayoutSchema|string path of layout or loaded layout
    */
-  async loadUINode(layout: ILayoutSchema | string, id?: string, options?: any) {
+  async loadUINode(
+    layout: ILayoutSchema | string,
+    id?: string,
+    options?: ILoadOptions
+  ) {
     // get a unique id
     let rootName = "default";
     if (id) {
