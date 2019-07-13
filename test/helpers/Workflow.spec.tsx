@@ -22,6 +22,8 @@ const expect = chai.expect;
 let nodeController: INodeController;
 let workflow: IWorkflow;
 const workflowMain = "layouts/workflow-main.json";
+// should mount
+let wrapper: any;
 
 describe("Given an instance of Workflow library", () => {
   before(() => {
@@ -31,14 +33,14 @@ describe("Given an instance of Workflow library", () => {
     nodeController = NodeController.getInstance();
     nodeController.setRequestConfig(reqConfig);
     workflow = nodeController.workflow;
+
+    // component set
+    const layouts = [workflowMain];
+    const component = <UIEngine layouts={layouts} reqConfig={reqConfig} />;
+    wrapper = mount(component);
   });
   describe("the given action from user side", () => {
     it("activeLayout: could active loaded or not loaded layout and show it out", async () => {
-      // should mount
-      const layouts = [workflowMain];
-      const component = <UIEngine layouts={layouts} reqConfig={reqConfig} />;
-      let wrapper = mount(component);
-
       // could load layout and turns to uinode
       const uiNode: IUINode = await workflow.activeLayout(workflowMain);
       const node = nodeController.nodes[workflowMain];
@@ -62,10 +64,21 @@ describe("Given an instance of Workflow library", () => {
         const expectHTML =
           '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div><main><div>Demo Container<div>foo.bar.name</div></div></main>';
         expect(wrapper.html()).to.equal(expectHTML);
+
+        // activelayout should change on node controller
+        const expectedLayout = "layouts/react-component-test-2.json";
+        expect(nodeController.activeLayout).to.equal(expectedLayout);
       });
     });
 
-    it("deactiveLayout: could deactive the current active layout", () => {});
+    it("deactiveLayout: could deactive the current active layout", () => {
+      // elements should removed from dom
+      workflow.deactiveLayout();
+      wrapper.update();
+      const expectedHTML =
+        '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div>';
+      expect(wrapper.html()).to.equal(expectedHTML);
+    });
 
     it("removeNodes: could remove nodes from current actived layout", () => {});
 

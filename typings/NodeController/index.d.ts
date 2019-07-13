@@ -20,6 +20,7 @@ export interface INodeController {
   messager: IMessager;
   requestConfig: IRequestConfig;
   activeLayout: string;
+  layouts: Array<string>; // layout stack
   engineId: string;
 
   loadUINode(
@@ -31,4 +32,5 @@ export interface INodeController {
   getUINode(id: string, uiNodeOnly: boolean = false);
   castMessage(nodeSelector: INodeProps, data: any, ids?: [string]);
   setRequestConfig(requestConfig: IRequestConfig);
+  pushLayout(layout: string);
 }

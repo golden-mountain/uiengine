@@ -25,10 +25,21 @@ export default class Workflow implements IWorkflow {
     }
 
     this.activeNode = uiNode;
+    this.nodeController.activeLayout = layout;
     return uiNode;
   }
 
-  deactiveLayout() {}
+  deactiveLayout() {
+    if (this.nodeController.activeLayout) {
+      this.nodeController.deleteUINode(this.nodeController.activeLayout);
+      // active new nodes
+      if (this.nodeController.activeLayout) {
+        this.activeNode = this.nodeController.nodes[
+          this.nodeController.activeLayout
+        ];
+      }
+    }
+  }
 
   removeNodes(selector: object) {}
 

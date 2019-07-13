@@ -33,6 +33,7 @@ export default class NodeController implements INodeController {
   messager: IMessager = Messager.getInstance();
   requestConfig: IRequestConfig = {};
   activeLayout: string = "";
+  layouts: Array<string> = [];
   workflow: IWorkflow;
   engineId: string = _.uniqueId("engine-");
   request: IRequest = Request.getInstance();
@@ -73,28 +74,39 @@ export default class NodeController implements INodeController {
     if (!uiNodeRenderer) {
       // default we load all default plugins
       uiNode = new UINode({}, this.request, rootName);
-      await uiNode.loadLayout(layout);
+      try {
+        await uiNode.loadLayout(layout);
+      } catch (e) {
+        console.error(e.message);
+      }
 
       this.nodes[rootName] = { uiNode, options };
-      this.activeLayout = rootName;
       this.messager.sendMessage(this.engineId, { nodes: this.nodes });
     } else {
       uiNode = uiNodeRenderer.uiNode;
     }
 
+    // add layout stack
+    this.pushLayout(rootName);
     return uiNode;
   }
 
-  deleteUINode(id: string): boolean {
-    _.unset(this.nodes, id);
+  deleteUINode(layout: string): boolean {
+    _.unset(this.nodes, layout);
 
     // send message to caller
     this.messager.sendMessage(this.engineId, this.nodes);
+    _.remove(this.layouts, (l: string) => {
+      return l === layout;
+    });
+
+    // activelayout
+    this.activeLayout = _.last(this.layouts) || "";
     return true;
   }
 
-  getUINode(id: string, uiNodeOnly: boolean = false) {
-    const uiNode = _.get(this.nodes, id);
+  getUINode(layout: string, uiNodeOnly: boolean = false) {
+    const uiNode = _.get(this.nodes, layout);
     if (uiNodeOnly) {
       return uiNode.uiNode;
     }
@@ -112,5 +124,13 @@ export default class NodeController implements INodeController {
         s.messager.sendMessage(s.id, data);
       });
     });
+  }
+
+  pushLayout(layout: string) {
+    _.remove(this.layouts, (l: string) => {
+      return l === layout;
+    });
+
+    this.layouts.push(layout);
   }
 }
