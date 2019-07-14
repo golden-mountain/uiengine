@@ -25,7 +25,8 @@ class ComponentWrapper extends React.Component<
     const { uiNode } = props;
     const initialState: IComponentState = {
       state: uiNode.stateNode.state,
-      data: uiNode.dataNode.data
+      data: uiNode.dataNode.data,
+      time: 0
     };
     this.state = initialState;
 

@@ -6,7 +6,8 @@ import {
   Cache,
   StateNode,
   PluginManager,
-  Messager
+  Messager,
+  parseRootName
 } from "..";
 
 import { AxiosPromise } from "axios";
@@ -39,7 +40,8 @@ export default class UINode implements IUINode {
   parent?: IUINode;
   stateInfo: IStateInfo = {
     data: null,
-    state: {}
+    state: {},
+    time: 0
   };
 
   constructor(
@@ -77,8 +79,7 @@ export default class UINode implements IUINode {
   }
 
   private setRootName(root: string) {
-    root = root.replace(".json", "");
-    this.rootName = _.snakeCase(root);
+    this.rootName = parseRootName(root);
   }
 
   async loadLayout(schema?: ILayoutSchema | string) {
@@ -304,10 +305,11 @@ export default class UINode implements IUINode {
     return await this.getStateNode().renewStates();
   }
 
-  sendMessage() {
+  sendMessage(force: boolean = false) {
     const newState = {
       data: _.clone(this.dataNode.data),
-      state: _.clone(this.stateNode.state)
+      state: _.clone(this.stateNode.state),
+      time: force ? new Date().getTime() : 0
     };
     if (!_.isEqual(newState, this.stateInfo)) {
       this.stateInfo = newState;

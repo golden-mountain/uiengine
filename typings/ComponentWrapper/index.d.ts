@@ -1,4 +1,4 @@
-import { IUINode } from "../UINode";
+import { IUINode, IStateInfo } from "../UINode";
 
 export interface IComponentWrapper {
   uiNode: IUINode;
@@ -7,7 +7,4 @@ export interface IComponentWrapper {
 }
 
 // used cross modules
-export interface IComponentState {
-  state?: IState;
-  data?: any;
-}
+export interface IComponentState extends IStateInfo {}

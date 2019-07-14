@@ -8,6 +8,7 @@ export interface INodeProps {}
 export interface IStateInfo {
   data: any;
   state: IState;
+  [name: string]: any;
 }
 
 export interface ILayoutSchema {

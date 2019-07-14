@@ -1,3 +1,5 @@
+import { IUINode } from "../UINode";
+
 export interface ILoadOptions {
   container?: string;
   props?: object;
@@ -8,9 +10,11 @@ export interface IWorkflow {
   activeNode?: IUINode;
   activeLayout(layout: string, options?: ILoadOptions);
   deactiveLayout();
-  removeNodes(selector: object);
-  refreshNodes(selector: object);
-  assignPropsToNode(selector: object, props: any);
-  updateData(source: string, data: any);
-  updateState(source: string, state: any);
+  removeNodes(nodes: Array<IUINode> | INodeProps);
+  refreshNodes(nodes: Array<IUINode> | INodeProps);
+  assignPropsToNode(nodes: Array<IUINode> | INodeProps, props: any);
+  updateData(source: IDataSource, data: any);
+  updateState(nodes: Array<IUINode> | INodeProps, state: any);
+  saveSources(sources: Array<IDataSource>);
+  saveNodes(nodes: Array<IUINode> | INodeProps);
 }

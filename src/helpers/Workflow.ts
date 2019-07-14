@@ -3,8 +3,13 @@ import {
   IWorkflow,
   IUINode,
   INodeController,
-  ILoadOptions
+  ILoadOptions,
+  IDataSource,
+  INodeProps
 } from "../../typings";
+
+import { searchNodes, parseRootName } from "../helpers";
+import { UINode } from "../data-layer";
 
 export default class Workflow implements IWorkflow {
   nodeController: INodeController;
@@ -15,17 +20,13 @@ export default class Workflow implements IWorkflow {
   }
 
   async activeLayout(layout: string, options?: ILoadOptions) {
-    let uiNode: IUINode;
-    const uiNodeRenderer = this.nodeController.nodes[layout];
-    if (uiNodeRenderer) {
-      let node = this.nodeController.nodes[layout];
-      uiNode = node.uiNode;
-    } else {
-      uiNode = await this.nodeController.loadUINode(layout, "", options);
-    }
+    let uiNode: IUINode = await this.nodeController.loadUINode(
+      layout,
+      "",
+      options
+    );
 
     this.activeNode = uiNode;
-    this.nodeController.activeLayout = layout;
     return uiNode;
   }
 
@@ -41,13 +42,39 @@ export default class Workflow implements IWorkflow {
     }
   }
 
-  removeNodes(selector: object) {}
+  removeNodes(nodes: Array<IUINode> | INodeProps) {
+    let uiNodes: any;
+    if (nodes instanceof UINode) {
+      uiNodes = nodes;
+    } else {
+      const layoutName = parseRootName(this.nodeController.activeLayout);
+      uiNodes = searchNodes(nodes, layoutName);
+    }
 
-  refreshNodes(selector: object) {}
+    uiNodes.forEach((uiNode: IUINode) => {
+      const parentNode: any = uiNode.parent;
+      if (parentNode) {
+        _.remove(parentNode.children, (node: IUINode) => {
+          return node === uiNode;
+        });
 
-  assignPropsToNode(selector: object, props: any) {}
+        _.remove(parentNode.schema.children, (schema: any) => {
+          return _.isEqual(schema, uiNode.schema);
+        });
+        parentNode.sendMessage(true);
+      }
+    });
+  }
+
+  refreshNodes(nodes: Array<IUINode> | INodeProps) {}
+
+  assignPropsToNode(nodes: Array<IUINode> | INodeProps, props: any) {}
+
+  updateState(nodes: Array<IUINode> | INodeProps, state: any) {}
+
+  saveNodes(nodes: Array<IUINode> | INodeProps) {}
 
   updateData(source: string, data: any) {}
 
-  updateState(source: string, state: any) {}
+  saveSources(sources: Array<IDataSource>) {}
 }

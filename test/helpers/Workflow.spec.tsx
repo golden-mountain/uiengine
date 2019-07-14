@@ -80,7 +80,18 @@ describe("Given an instance of Workflow library", () => {
       expect(wrapper.html()).to.equal(expectedHTML);
     });
 
-    it("removeNodes: could remove nodes from current actived layout", () => {});
+    it("removeNodes: could remove nodes from current actived layout", async () => {
+      // const fetchedUINode = await workflow.activeLayout(workflowMain);
+      const props = {
+        component: "a",
+        content: "link"
+      };
+
+      workflow.removeNodes(props);
+      const expectedHTML =
+        "<div>Demo Container<div>Demo sub container</div></div>";
+      expect(wrapper.html()).to.equal(expectedHTML);
+    });
 
     it("refreshNodes: could refresh the load already rendered", () => {});
 
@@ -89,5 +100,7 @@ describe("Given an instance of Workflow library", () => {
     it("updateData: could update data and re-render the correspond node", () => {});
 
     it("updateState: could update state and re-render the correspond node", () => {});
+    it("saveNodes: could save given ui nodes", () => {});
+    it("saveSources: could save given sources", () => {});
   });
 });

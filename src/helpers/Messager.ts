@@ -23,17 +23,20 @@ export default class Messager implements IMessager {
         console.log(e.message);
       }
     } else {
+      console.error("schema id", schemaID, "not found setstate");
       return false;
     }
   }
 
   setStateFunc(schemaID: string, setState: any) {
     if (_.isFunction(setState)) {
+      console.log(">>>>schema id ", schemaID, " is setting schema id");
       this.objectStateFuncMap[schemaID] = setState;
     }
   }
 
   removeStateFunc(schemaID: string) {
+    console.log("", schemaID, " is removing setstate");
     _.unset(this.objectStateFuncMap, schemaID);
   }
 }

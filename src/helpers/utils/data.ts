@@ -43,12 +43,28 @@ export function parseSchemaPath(source: string) {
   return `${schemaPath}.json`;
 }
 
+/**
+ * Convert source to a_b_c
+ *
+ * @param source
+ * @param parsePath
+ */
 export function parseCacheID(source: string, parsePath: boolean = true) {
   let path = source;
   if (parsePath) {
     path = parseSchemaPath(source);
   }
   return _.snakeCase(path);
+}
+
+/**
+ * export to a_b_c
+ *
+ * @param root like a-b-c.json
+ */
+export function parseRootName(root: string) {
+  root = root.replace(".json", "");
+  return _.snakeCase(root);
 }
 
 export async function submitToAPI(

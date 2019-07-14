@@ -81,13 +81,17 @@ export default class NodeController implements INodeController {
       }
 
       this.nodes[rootName] = { uiNode, options };
-      this.messager.sendMessage(this.engineId, { nodes: this.nodes });
     } else {
       uiNode = uiNodeRenderer.uiNode;
     }
 
+    this.messager.sendMessage(this.engineId, {
+      nodes: this.nodes,
+      time: new Date().getTime()
+    });
     // add layout stack
     this.pushLayout(rootName);
+    this.activeLayout = rootName;
     return uiNode;
   }
 
