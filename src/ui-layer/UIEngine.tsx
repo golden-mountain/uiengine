@@ -53,22 +53,25 @@ export default class UIEngine extends React.Component<
   }
 
   render() {
-    const { layouts, reqConfig, test, onEngineCreate, ...rest } = this.props;
+    const { layouts, reqConfig, onEngineCreate, ...rest } = this.props;
     return _.entries(this.state.nodes).map((entry: any) => {
       const [layoutKey, uiNodeRenderer] = entry;
-      const { uiNode, options } = uiNodeRenderer;
-      const containerComponent = _.get(options, "container");
-      let Container = ({ children, ...rest }: any) => children;
-      if (containerComponent) {
-        Container = getComponent(containerComponent);
+      const { uiNode, options = {} } = uiNodeRenderer;
+      const { container, ...optionsRest } = options;
+
+      // wrapper if provided
+      let Container = ({ children }: any) => children;
+      if (container) {
+        Container = getComponent(container);
       }
       const context = {
         controller: this.nodeController,
         uiNode
       };
+
       return (
         <UIEngineContext.Provider value={context}>
-          <Container>
+          <Container {...optionsRest}>
             <ComponentWrapper
               uiNode={uiNode}
               {...rest}

@@ -61,7 +61,7 @@ export async function submitToAPI(
   const dataEngine = DataEngine.getInstance();
   dataSources.forEach((source: string) => {
     result = _.merge(result, dataPool.get(source, true));
-    result = dataEngine.sendRequest(source, result, method, false);
+    result = dataEngine.sendRequest({ source }, result, method, false);
     responses.push(result);
   });
 

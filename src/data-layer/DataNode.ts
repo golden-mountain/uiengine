@@ -104,7 +104,7 @@ export default class DataNode implements IDataNode {
         // await this.dataEngine.loadSchema(this.source.source);
         result = null;
       } else {
-        let data = await this.dataEngine.loadData(this.source.source);
+        let data = await this.dataEngine.loadData(this.source);
         if (data === null) {
           this.errorInfo = this.dataEngine.errorInfo;
           return;
@@ -116,9 +116,7 @@ export default class DataNode implements IDataNode {
     }
 
     // assign root schema if not $dummy data
-    this.rootSchema = await this.dataEngine.mapper.getSchema(
-      this.source.source
-    );
+    this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
 
     this.data = result;
     // load this node schema

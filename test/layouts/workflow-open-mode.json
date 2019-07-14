@@ -1,0 +1,19 @@
+{
+  "id": "workflow-open-mode",
+  "component": "test:DivContainer",
+  "datasource": {
+    "source": "foo:bar",
+    "defaultValue": "1234",
+    "loadOptions": {
+      "name": "Zuoping"
+    }
+  },
+  "children": [
+    {
+      "component": "test:DivContainer",
+      "props": {
+        "title": "Demo sub container"
+      }
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "id": "react-component-test-2",
+  "id": "workflow-main",
   "component": "test:DivContainer",
   "datasource": "foo:bar",
   "props": {
@@ -8,10 +8,6 @@
   "children": [
     {
       "component": "test:DivContainer",
-      "onload": {
-        "layout": "state-test.json",
-        "container": "main"
-      },
       "props": {
         "title": "Demo sub container"
       }

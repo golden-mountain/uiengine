@@ -3,8 +3,8 @@
     "default": {
       "path": "foo.json"
     },
-    "delete": "foo/{foo.name}",
-    "post": "foo/{foo.name}"
+    "delete": "foo/{name}",
+    "post": "foo/{name}"
   },
   "definition": {
     "foo": {

@@ -1,4 +1,5 @@
 import { IRequest } from "../Request";
+import { IDataSource } from "../DataNode";
 
 export interface IResponse {}
 export interface IRequestOptions {
@@ -10,20 +11,20 @@ export interface IRequestOptions {
 export interface IDataMapper {
   schema?: IDataSchema;
   errorInfo?: any;
-  source?: string;
+  source?: IDataSource;
   schema?: IDataSchema;
   rootSchema?: IDataSchema;
   cacheID: string;
 
   setRequest(request: IRequest);
-  loadSchema(source?: string);
-  getSchema(source: string);
+  loadSchema(source?: IDataSource);
+  getSchema(source: IDataSource);
   getDataEntryPoint(method: string): string;
 }
 
 export interface IDataEngine {
   errorInfo?: any;
-  source?: string;
+  source?: IDataSource;
   mapper: IDataMapper;
   request: IRequest;
   data?: any;
@@ -33,15 +34,15 @@ export interface IDataEngine {
 
   setRequest(req: IRequest);
   sendRequest(
-    source: string,
+    source: IDataSource,
     data: any,
     method: string = "post",
     cache: boolean = false
   );
-  loadSchema(source?: string);
-  loadData(source?: string, data?: any);
-  updateData(source?: string, data?: any);
-  replaceData(source?: string, data?: any);
-  deleteData(source?: string, data?: any);
+  loadSchema(source?: IDataSource);
+  loadData(source?: IDataSource, data?: any);
+  updateData(source?: IDataSource, data?: any);
+  replaceData(source?: IDataSource, data?: any);
+  deleteData(source?: IDataSource, data?: any);
   // parseSchemaPath(source: string);
 }

@@ -10,6 +10,7 @@ export interface IDataSource {
   source: string;
   defaultValue?: any;
   autoload?: boolean;
+  loadOptions?: object;
 }
 
 export interface ICache {
