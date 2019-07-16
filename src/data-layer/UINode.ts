@@ -21,7 +21,8 @@ import {
   IPluginManager,
   IMessager,
   IStateInfo,
-  IDataSource
+  IDataSource,
+  IWorkingMode
 } from "../../typings";
 
 export default class UINode implements IUINode {
@@ -82,7 +83,10 @@ export default class UINode implements IUINode {
     this.rootName = parseRootName(root);
   }
 
-  async loadLayout(schema?: ILayoutSchema | string) {
+  async loadLayout(
+    schema?: ILayoutSchema | string,
+    workingMode?: IWorkingMode
+  ) {
     // load remote node
     let returnSchema: any = schema;
     if (!returnSchema) returnSchema = this.schema;
@@ -93,7 +97,7 @@ export default class UINode implements IUINode {
 
     // assign the schema to this and it's children
     if (returnSchema) {
-      await this.assignSchema(returnSchema);
+      await this.assignSchema(returnSchema, workingMode);
     }
 
     // cache this node
@@ -160,13 +164,12 @@ export default class UINode implements IUINode {
    */
   private async assignSchema(
     schema: ILayoutSchema,
-    loadData: string = "all" // all or schema
+    workingMode?: IWorkingMode
   ) {
     let liveSchema = schema;
 
-    if (liveSchema["datasource"] && loadData) {
-      const schemaOnly = loadData === "schema";
-      await this.loadData(liveSchema["datasource"], schemaOnly);
+    if (liveSchema["datasource"]) {
+      await this.loadData(liveSchema["datasource"], workingMode);
     }
 
     if (liveSchema["$children"] && this.dataNode) {
@@ -183,12 +186,12 @@ export default class UINode implements IUINode {
           node = new UINode({}, this.request, this.rootName, this);
           for (let i in s) {
             const subnode = new UINode(s[i], this.request, this.rootName, this);
-            await subnode.loadLayout(s[i]);
+            await subnode.loadLayout(s[i], workingMode);
             node.children.push(subnode);
           }
         } else {
           node = new UINode(s, this.request, this.rootName, this);
-          await node.loadLayout(s);
+          await node.loadLayout(s, workingMode);
         }
         children.push(node);
       }
@@ -216,18 +219,21 @@ export default class UINode implements IUINode {
     return this;
   }
 
-  async loadData(source: IDataSource | string, schemaOnly = false) {
-    return await this.dataNode.loadData(source, schemaOnly);
+  async loadData(source: IDataSource | string, workingMode?: IWorkingMode) {
+    return await this.dataNode.loadData(source, workingMode);
   }
 
-  async replaceLayout(newSchema: ILayoutSchema | string) {
+  async replaceLayout(
+    newSchema: ILayoutSchema | string,
+    workingMode?: IWorkingMode
+  ) {
     this.clearLayout();
-    const schemaReplaced = await this.loadLayout(newSchema);
+    const schemaReplaced = await this.loadLayout(newSchema, workingMode);
     return schemaReplaced;
   }
 
-  async updateLayout(loadData: string = "all") {
-    const newSchema = await this.assignSchema(this.schema, loadData);
+  async updateLayout(workingMode?: IWorkingMode) {
+    const newSchema = await this.assignSchema(this.schema, workingMode);
     return newSchema;
   }
 

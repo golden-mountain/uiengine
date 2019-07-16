@@ -58,17 +58,15 @@ describe("Given an instance of Workflow library", () => {
 
       // could show it on given component(like Modal, drawer, or current place default)
       let childNode = uiNode.getChildren([1]);
-      const promise = childNode.props.onClick.call();
-      promise.then((uiNode: any) => {
-        wrapper.update();
-        const expectHTML =
-          '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div><main><div>Demo Container<div>foo.bar.name</div></div></main>';
-        expect(wrapper.html()).to.equal(expectHTML);
+      await childNode.props.onClick.call();
+      wrapper.update();
+      const expectHTML =
+        '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div><main container="main"><div>Demo Container<div>foo.bar.name</div></div></main>';
+      expect(wrapper.html()).to.equal(expectHTML);
 
-        // activelayout should change on node controller
-        const expectedLayout = "layouts/react-component-test-2.json";
-        expect(nodeController.activeLayout).to.equal(expectedLayout);
-      });
+      // activelayout should change on node controller
+      const expectedLayout = "layouts/react-component-test-2.json";
+      expect(nodeController.activeLayout).to.equal(expectedLayout);
     });
 
     it("deactiveLayout: could deactive the current active layout", () => {
@@ -81,7 +79,6 @@ describe("Given an instance of Workflow library", () => {
     });
 
     it("removeNodes: could remove nodes from current actived layout", async () => {
-      // const fetchedUINode = await workflow.activeLayout(workflowMain);
       const props = {
         component: "a",
         content: "link"

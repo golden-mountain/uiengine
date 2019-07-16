@@ -4,6 +4,7 @@ import { IWorkflow, ILoadOptions } from "../Workflow";
 
 export interface IUINodeRenderer {
   uiNode: IUINode;
+  engineId: string; // React Component ID
   options?: ILoadOptions;
   visible?: boolean;
 }
@@ -19,10 +20,12 @@ export interface INodeController {
   layouts: Array<string>; // layout stack
   engineId: string;
 
+  activeEngine(engineID: string);
   loadUINode(
     layout: ILayoutSchema | string,
     id?: string,
-    options?: ILoadOptions
+    options?: ILoadOptions,
+    updateNodes?: boolean
   );
   deleteUINode(layout: string);
   hideUINode(layout: string);

@@ -8,7 +8,8 @@ import {
   IPluginExecutionConfig,
   IDataEngine,
   IDataPool,
-  IDataSource
+  IDataSource,
+  IWorkingMode
 } from "../../typings";
 import { DataEngine } from "../helpers";
 
@@ -86,7 +87,7 @@ export default class DataNode implements IDataNode {
     return this.pluginManager;
   }
 
-  async loadData(source?: IDataSource | string, schemaOnly: boolean = false) {
+  async loadData(source?: IDataSource | string, workingMode?: IWorkingMode) {
     if (source) {
       this.setDataSource(source);
     }
@@ -100,8 +101,8 @@ export default class DataNode implements IDataNode {
     );
 
     if (result === undefined) {
-      if (schemaOnly || !this.source.autoload) {
-        // await this.dataEngine.loadSchema(this.source.source);
+      if (_.get(workingMode, "mode") === "new" || !this.source.autoload) {
+        await this.dataEngine.loadSchema(this.source);
         result = null;
       } else {
         let data = await this.dataEngine.loadData(this.source);

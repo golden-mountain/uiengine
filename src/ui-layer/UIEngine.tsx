@@ -15,7 +15,9 @@ UIEngineRegister.registerPlugins(plugins);
 import {
   INodeController,
   IUIEngineProps,
-  IUIEngineStates
+  IUIEngineStates,
+  IUINode,
+  IUINodeRenderer
 } from "../../typings";
 
 export default class UIEngine extends React.Component<
@@ -28,10 +30,14 @@ export default class UIEngine extends React.Component<
   };
   nodeController: INodeController;
 
+  // bind to nodeController, to show it own instances
+  engineId = _.uniqueId("engine-");
+
   constructor(props: IUIEngineProps) {
     super(props);
     this.nodeController = NodeController.getInstance();
     this.nodeController.setRequestConfig(props.reqConfig);
+
     if (_.isFunction(props.onEngineCreate)) {
       props.onEngineCreate(this.nodeController);
     }
@@ -39,18 +45,27 @@ export default class UIEngine extends React.Component<
 
   componentDidMount() {
     this.nodeController.messager.setStateFunc(
-      this.nodeController.engineId,
+      this.engineId,
       setComponentState.bind(this)
     );
 
-    const { layouts = [] } = this.props;
+    const { layouts = [], loadOptions = {} } = this.props;
+
+    this.nodeController.activeEngine(this.engineId);
     for (let layout in layouts) {
-      this.nodeController.loadUINode(layouts[layout]);
+      // no refresh the state from NodeController,
+      // otherwise it will cause deadloop
+      this.nodeController
+        .loadUINode(layouts[layout], "", loadOptions, false)
+        .then((uiNode: IUINode) => {
+          const nodes = this.nodeController.nodes;
+          this.setState({ nodes });
+        });
     }
   }
 
   componentWillUnmount() {
-    this.nodeController.messager.removeStateFunc(this.nodeController.engineId);
+    this.nodeController.messager.removeStateFunc(this.engineId);
   }
 
   render() {
@@ -58,9 +73,18 @@ export default class UIEngine extends React.Component<
     const context = {
       controller: this.nodeController
     };
+
+    // only get nodes for this engine
+    const validNodes = _.pickBy(
+      this.state.nodes,
+      (nodeRenderer: IUINodeRenderer) => {
+        return nodeRenderer.engineId === this.engineId;
+      }
+    );
+
     return (
       <UIEngineContext.Provider value={context}>
-        {_.entries(this.state.nodes).map((entry: any) => {
+        {_.entries(validNodes).map((entry: any) => {
           const [layoutKey, uiNodeRenderer] = entry;
           const { uiNode, options = {}, visible = true } = uiNodeRenderer;
           const { container } = options;

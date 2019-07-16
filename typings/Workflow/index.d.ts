@@ -5,9 +5,18 @@ export interface ILoadOptions {
   props?: object;
 }
 
+/// using working mode to decide how to load data from dataNode
+export interface IWorkingMode {
+  mode: string; // edit, new, if new ,defaultly we don't load data,
+  options?: any;
+}
+
 export interface IWorkflow {
   nodeController: INodeController;
   activeNode?: IUINode;
+  workingMode?: IWorkingMode;
+  setWorkingMode(mode: IWorkingMode);
+  setNodeController(nodeController: INodeController);
   activeLayout(layout: string, options?: ILoadOptions);
   deactiveLayout();
   removeNodes(nodes: Array<IUINode> | INodeProps);

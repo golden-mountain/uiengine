@@ -390,7 +390,10 @@
                   "title": "Create Virtual Port",
                   "width": "80%",
                   "connect": "slb.virtual-server:port-list",
-                  "container": "antd:Modal"
+                  "container": "antd:Drawer",
+                  "placement": "right",
+                  "closable": true,
+                  "visible": true
                 }
               },
               "$children": [

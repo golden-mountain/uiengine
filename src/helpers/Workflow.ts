@@ -5,29 +5,49 @@ import {
   INodeController,
   ILoadOptions,
   IDataSource,
-  INodeProps
+  INodeProps,
+  IWorkingMode
 } from "../../typings";
 
 import { searchNodes, parseRootName } from "../helpers";
 import { UINode } from "../data-layer";
 
 export default class Workflow implements IWorkflow {
-  nodeController: INodeController;
-  activeNode?: IUINode;
+  static instance: IWorkflow;
+  static getInstance = () => {
+    if (!Workflow.instance) {
+      Workflow.instance = new Workflow();
+    }
+    return Workflow.instance as Workflow;
+  };
 
-  constructor(nodeController: INodeController) {
+  nodeController: INodeController = {} as INodeController;
+  activeNode?: IUINode;
+  workingMode: IWorkingMode = {
+    mode: "new", // default we use new mode instead of edit mode
+    options: {}
+  };
+
+  setNodeController(nodeController: INodeController) {
     this.nodeController = nodeController;
   }
 
-  async activeLayout(layout: string, options?: ILoadOptions) {
-    let uiNode: IUINode = await this.nodeController.loadUINode(
-      layout,
-      "",
-      options
-    );
+  setWorkingMode(mode: IWorkingMode) {
+    this.workingMode = mode;
+  }
 
-    this.activeNode = uiNode;
-    return uiNode;
+  activeLayout(layout: string, options?: ILoadOptions) {
+    let promise = this.nodeController.loadUINode(layout, "", options, false);
+
+    // send message
+    promise.then((uiNode: IUINode) => {
+      this.nodeController.messager.sendMessage(this.nodeController.engineId, {
+        nodes: this.nodeController.nodes
+      });
+      this.activeNode = uiNode;
+    });
+
+    return promise;
   }
 
   deactiveLayout() {

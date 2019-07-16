@@ -149,8 +149,6 @@ export class EditableTable extends React.Component<any, any> {
 
   handleDelete = (key: any) => {
     this.props.uinode.dataNode.deleteData(key);
-    // const dataSource = [...this.state.dataSource];
-    // this.setState({ dataSource: dataSource.filter(item => item.key !== key) });
   };
 
   handleAdd = () => {};
@@ -164,10 +162,6 @@ export class EditableTable extends React.Component<any, any> {
     nodeController.hideUINode(layout);
   };
 
-  handleOK = () => {
-    console.log("ok");
-  };
-
   openModal = () => {
     if (_.has(this.props, "modal.layout")) {
       const {
@@ -176,11 +170,11 @@ export class EditableTable extends React.Component<any, any> {
       } = this.props;
 
       const options = {
-        onOk: this.handleOK,
-        onCancel: this.handleCancel,
-        ...modal
+        ...modal,
+        onClose: this.handleCancel,
+        visible: true
       };
-      this.context.controller.loadUINode(layout, "", options);
+      this.context.controller.workflow.activeLayout(layout, options);
     } else {
       console.error("popup layout not provided on schema");
     }
@@ -246,14 +240,6 @@ export class EditableTable extends React.Component<any, any> {
           dataSource={dataSource}
           columns={columns}
         />
-        {/* {this.state.showPopup ? (
-          <A10Modal
-            {...modal}
-            close={this.closeModal.bind(this)}
-            uinode={uinode}
-            datakey={dataKey}
-          />
-        ) : null} */}
       </div>
     );
   }

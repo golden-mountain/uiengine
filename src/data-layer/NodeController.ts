@@ -41,7 +41,12 @@ export default class NodeController implements INodeController {
   request: IRequest = Request.getInstance();
 
   constructor() {
-    this.workflow = new Workflow(this);
+    this.workflow = Workflow.getInstance();
+    this.workflow.setNodeController(this);
+  }
+
+  activeEngine(engineId: string) {
+    this.engineId = engineId;
   }
 
   setRequestConfig(requestConfig: IRequestConfig) {
@@ -53,10 +58,11 @@ export default class NodeController implements INodeController {
    * Load a layout from remote or local
    * @param layout ILayoutSchema|string path of layout or loaded layout
    */
-  loadUINode(
+  async loadUINode(
     layout: ILayoutSchema | string,
     id?: string,
-    options?: ILoadOptions
+    options?: ILoadOptions,
+    updateNodes: boolean = true
   ) {
     // get a unique id
     let rootName = "default";
@@ -77,26 +83,29 @@ export default class NodeController implements INodeController {
       // default we load all default plugins
       uiNode = new UINode({}, this.request, rootName);
       try {
-        uiNode.loadLayout(layout).then(() => {
-          this.nodes[rootName] = { uiNode, visible: true, options };
-          // add layout stack
-          this.pushLayout(rootName);
-          this.activeLayout = rootName;
-          this.messager.sendMessage(this.engineId, {
-            nodes: this.nodes
-          });
-        });
+        await uiNode.loadLayout(layout, this.workflow.workingMode);
       } catch (e) {
         console.error(e.message);
       }
     } else {
       uiNode = uiNodeRenderer.uiNode;
-      this.nodes[rootName] = { uiNode, visible: true, options };
+      this.nodes[rootName]["engineId"] = this.engineId;
+    }
+
+    this.nodes[rootName] = {
+      uiNode,
+      visible: true,
+      options,
+      engineId: this.engineId
+    };
+    // add layout stack
+    this.pushLayout(rootName);
+    this.activeLayout = rootName;
+    if (updateNodes) {
       this.messager.sendMessage(this.engineId, {
         nodes: this.nodes
       });
     }
-
     return uiNode;
   }
 

@@ -35,12 +35,12 @@ export interface IUINode {
   parent?: IUINode;
   stateInfo: IStateInfo;
 
-  loadLayout(schema?: ILayoutSchema | string);
+  loadLayout(schema?: ILayoutSchema | string, workingMode?: IWorkingMode);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
-  loadData(source: IDataSource, loadData?: boolean);
+  loadData(source: IDataSource, workingMode?: IWorkingMode);
   getSchema(path?: string): ILayoutSchema;
-  replaceLayout(newSchema: ILayoutSchema | string);
-  updateLayout(loadData?: string);
+  replaceLayout(newSchema: ILayoutSchema | string, workingMode?: IWorkingMode);
+  updateLayout(workingMode?: IWorkingMode);
   genLiveLayout(schema: ILayoutSchema, data: any);
   clearLayout();
   getChildren(route?: Array<Number>);

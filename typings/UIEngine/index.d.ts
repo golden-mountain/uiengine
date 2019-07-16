@@ -1,7 +1,7 @@
 import { IUINode } from "../UINode";
 
 export interface IUIEngineProps {
-  layouts: Array<any>;
+  layouts: any;
   [anyKey: string]: any;
 }
 

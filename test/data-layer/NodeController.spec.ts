@@ -34,13 +34,14 @@ describe("Given an instance of my NodeController library", () => {
       const schemaPath = "layouts/state-node-basic.json";
       const id = "any-id";
       let uiNode = await nodeController.loadUINode(schemaPath, id);
+      const expectedOptions = ["uiNode", "options", "engineId", "visible"];
       expect(uiNode).is.instanceOf(UINode);
-      expect(nodeController.nodes[id]).to.have.all.keys(["uiNode", "options"]);
+      expect(nodeController.nodes[id]).to.have.all.keys(expectedOptions);
 
       // load object
       uiNode = await nodeController.loadUINode(uiJSON);
       expect(uiNode).is.instanceOf(UINode);
-      expect(nodeController.nodes[id]).to.have.all.keys(["uiNode", "options"]);
+      expect(nodeController.nodes[id]).to.have.all.keys(expectedOptions);
 
       // expect a message, loaded UINode, to notice other UI layer thing render it
       // nodeController.sendMessage({}, {layout: schemaPath}, 'layout.initialized');
@@ -51,11 +52,11 @@ describe("Given an instance of my NodeController library", () => {
       nodeController.setRequestConfig(reqConfig);
       const schemaPath = "layouts/state-node-basic.json";
       let uiNode = await nodeController.loadUINode(schemaPath);
+      const expectedOptions = ["uiNode", "options", "engineId", "visible"];
       expect(uiNode).is.instanceOf(UINode);
-      expect(nodeController.nodes[schemaPath]).to.have.all.keys([
-        "uiNode",
-        "options"
-      ]);
+      expect(nodeController.nodes[schemaPath]).to.have.all.keys(
+        expectedOptions
+      );
 
       // delete it
       const result = nodeController.deleteUINode(schemaPath);

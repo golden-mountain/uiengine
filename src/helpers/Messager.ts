@@ -14,8 +14,8 @@ export default class Messager implements IMessager {
     // [id]: setState
   };
 
-  sendMessage(schemaID: string, info: any) {
-    const setState = this.objectStateFuncMap[schemaID];
+  sendMessage(id: string, info: any) {
+    const setState = this.objectStateFuncMap[id];
     if (_.isFunction(setState)) {
       try {
         return setState(info);
@@ -27,13 +27,13 @@ export default class Messager implements IMessager {
     }
   }
 
-  setStateFunc(schemaID: string, setState: any) {
+  setStateFunc(id: string, setState: any) {
     if (_.isFunction(setState)) {
-      this.objectStateFuncMap[schemaID] = setState;
+      this.objectStateFuncMap[id] = setState;
     }
   }
 
-  removeStateFunc(schemaID: string) {
-    _.unset(this.objectStateFuncMap, schemaID);
+  removeStateFunc(id: string) {
+    _.unset(this.objectStateFuncMap, id);
   }
 }

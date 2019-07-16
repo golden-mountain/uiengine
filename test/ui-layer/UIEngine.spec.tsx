@@ -28,10 +28,12 @@ describe("Given an instance of UIEngine library", () => {
       nodeController.setRequestConfig(reqConfig);
       const layoutPath = "layouts/react-component-test-2.json";
       const layouts = [reactComponentTestJson, layoutPath];
+
+      // spy loadUINode
       const component = <UIEngine layouts={layouts} reqConfig={reqConfig} />;
+      const loadUINodeSpy = chai.spy.on(nodeController, "loadUINode");
       let wrapper = mount(component);
-      const expectedNodes = nodeController.nodes;
-      expect(wrapper.state("nodes")).to.deep.equal(expectedNodes);
+      expect(loadUINodeSpy).to.be.called.twice;
     });
   });
 });

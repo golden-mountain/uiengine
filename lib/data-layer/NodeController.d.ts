@@ -14,12 +14,13 @@ export default class NodeController implements INodeController {
     engineId: string;
     request: IRequest;
     constructor();
+    activeEngine(engineId: string): void;
     setRequestConfig(requestConfig: IRequestConfig): void;
     /**
      * Load a layout from remote or local
      * @param layout ILayoutSchema|string path of layout or loaded layout
      */
-    loadUINode(layout: ILayoutSchema | string, id?: string, options?: ILoadOptions): IUINode;
+    loadUINode(layout: ILayoutSchema | string, id?: string, options?: ILoadOptions, updateNodes?: boolean): Promise<IUINode>;
     deleteUINode(layout: string): boolean;
     hideUINode(layout: string): void;
     getUINode(layout: string, uiNodeOnly?: boolean): IUINode | IUINodeRenderer;

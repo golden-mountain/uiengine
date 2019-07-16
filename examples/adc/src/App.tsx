@@ -37,7 +37,7 @@ const App: React.FC = () => {
       onOk: handleOK,
       onCancel: handleCancel
     };
-    nodeController.loadUINode(loginLayout, "", loadOptions);
+    nodeController.workflow.activeLayout(loginLayout, loadOptions);
   };
 
   const headers: any = requestConfig.headers;
@@ -51,6 +51,10 @@ const App: React.FC = () => {
         sessionStorage.setItem("token", token);
         headers["Authorization"] = `A10 ${token}`;
       }
+
+      console.log(sessionStorage.getItem("token"), " token fetched");
+      const nodeController = NodeController.getInstance();
+      nodeController.hideUINode(loginLayout);
     });
   };
 
@@ -77,7 +81,7 @@ const App: React.FC = () => {
         ]}
       />
 
-      {/* <Menu onClick={handleClick} selectedKeys={[current]} mode="horizontal">
+      <Menu onClick={handleClick} selectedKeys={[current]} mode="horizontal">
         <Menu.Item key="virtual-server">
           <Link to="/virtual-server">Virtual Server</Link>
         </Menu.Item>
@@ -87,12 +91,9 @@ const App: React.FC = () => {
         <Menu.Item key="ssl-client">
           <Link to="/ssl-client">SSL Client Template</Link>
         </Menu.Item>
-      </Menu> */}
+      </Menu>
 
-      <UIEngine
-        layouts={["schema/ui/slb.virtual-server.json"]}
-        reqConfig={requestConfig}
-      />
+      <UIEngine layouts={["schema/ui/app.json"]} reqConfig={requestConfig} />
     </BrowserRouter>
   );
 };
