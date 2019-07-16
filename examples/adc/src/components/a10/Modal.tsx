@@ -15,14 +15,15 @@ export class A10Modal extends React.Component<any, any> {
       "slb.virtual-server.port:",
       false
     );
-    this.context.controller
-      .loadUINode(this.props.layout)
-      .then((node: IUINode) => {
-        const data = dataPool.get("slb.virtual-server.port:", false);
-        node.dataNode.updateData(data).then(() => {
-          this.setState({ uiNode: node, visible: true });
-        });
-      });
+    this.setState({ visible: true });
+    // this.context.controller
+    //   .loadUINode(this.props.layout)
+    //   .then((node: IUINode) => {
+    //     const data = dataPool.get("slb.virtual-server.port:", false);
+    //     node.dataNode.updateData(data).then(() => {
+    //       this.setState({ uiNode: node, visible: true });
+    //     });
+    //   });
   }
 
   handleOk = async (e: any) => {
@@ -37,16 +38,16 @@ export class A10Modal extends React.Component<any, any> {
 
     // console.log(e);
     await this.props.uinode.updateLayout();
-    this.props.close();
+    this.setState({ visible: false });
   };
 
   handleCancel = (e: any) => {
     // console.log(e);
-    this.props.close();
+    this.setState({ visible: false });
   };
 
   render() {
-    const { layout, uinode, ...rest } = this.props;
+    const { layout, uinode, children, ...rest } = this.props;
     return this.state.visible ? (
       <Modal
         {...rest}
@@ -54,7 +55,7 @@ export class A10Modal extends React.Component<any, any> {
         onOk={this.handleOk}
         onCancel={this.handleCancel}
       >
-        <ComponentWrapper uiNode={this.state.uiNode} key={layout} />
+        {children}
       </Modal>
     ) : null;
   }

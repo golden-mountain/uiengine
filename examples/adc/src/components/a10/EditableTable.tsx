@@ -1,9 +1,9 @@
 import React from "react";
 import _ from "lodash";
 import { Table, Input, Button, Popconfirm, Form, Icon } from "antd";
-import { A10Modal } from "./Modal";
+// import { A10Modal } from "./Modal";
 
-import { UIEngineContext } from "UIEngine";
+import { UIEngineContext, NodeController } from "UIEngine";
 const EditableContext = React.createContext({});
 
 const EditableRow = (props: any) => (
@@ -154,9 +154,33 @@ export class EditableTable extends React.Component<any, any> {
   };
 
   handleAdd = () => {};
+
+  handleCancel = () => {
+    const nodeController = NodeController.getInstance();
+    const {
+      modal: { layout }
+    } = this.props;
+
+    nodeController.hideUINode(layout);
+  };
+
+  handleOK = () => {
+    console.log("ok");
+  };
+
   openModal = () => {
     if (_.has(this.props, "modal.layout")) {
-      this.setState({ showPopup: true });
+      const {
+        modal: { layout },
+        modal
+      } = this.props;
+
+      const options = {
+        onOk: this.handleOK,
+        onCancel: this.handleCancel,
+        ...modal
+      };
+      this.context.controller.loadUINode(layout, "", options);
     } else {
       console.error("popup layout not provided on schema");
     }
@@ -168,16 +192,9 @@ export class EditableTable extends React.Component<any, any> {
     this.setState(dataSource);
   };
 
-  closeModal = () => {
-    this.setState({
-      showPopup: false,
-      dataSource: this.props.uinode.dataNode.data
-    });
-  };
-
   render() {
     const { dataSource, dataKey } = this.state;
-    const { modal, uinode } = this.props;
+    // const { modal, uinode } = this.props;
     const components = {
       body: {
         row: EditableFormRow,
@@ -229,14 +246,14 @@ export class EditableTable extends React.Component<any, any> {
           dataSource={dataSource}
           columns={columns}
         />
-        {this.state.showPopup ? (
+        {/* {this.state.showPopup ? (
           <A10Modal
             {...modal}
             close={this.closeModal.bind(this)}
             uinode={uinode}
             datakey={dataKey}
           />
-        ) : null}
+        ) : null} */}
       </div>
     );
   }

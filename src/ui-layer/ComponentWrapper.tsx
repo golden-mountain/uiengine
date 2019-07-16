@@ -9,11 +9,6 @@ import {
   IPluginExecutionConfig
 } from "../../typings";
 
-// function setComponentState(this: ComponentWrapper, state: IComponentState) {
-//   // console.log("node status on Wrapper:", this.props.uiNode.id, state);
-//   return this.setState(state);
-// }
-
 class ComponentWrapper extends React.Component<
   IComponentWrapper,
   IComponentState
@@ -25,21 +20,21 @@ class ComponentWrapper extends React.Component<
     const { uiNode } = props;
     const initialState: IComponentState = {
       state: uiNode.stateNode.state,
-      data: uiNode.dataNode.data,
-      time: 0
+      data: uiNode.dataNode.data
     };
     this.state = initialState;
+  }
 
+  componentDidMount() {
     // register setState func
-    uiNode.messager.setStateFunc(uiNode.id, setComponentState.bind(this));
+    this.props.uiNode.messager.setStateFunc(
+      this.props.uiNode.id,
+      setComponentState.bind(this)
+    );
   }
 
   componentWillUnmount() {
     this.props.uiNode.messager.removeStateFunc(this.props.uiNode.id);
-  }
-
-  componentWillUpdate() {
-    // console.log("state received on Wrapper:", this.props.uiNode.id, this.state);
   }
 
   render() {
@@ -55,7 +50,7 @@ class ComponentWrapper extends React.Component<
 
       // map children as components
       let childrenObjects = uiNode.children.map((child: any, key: any) => {
-        const props = { ...rest, uiNode: child, key: child.id };
+        const props = { ...rest, uiNode: child, key: child.id || key };
         return <ComponentWrapper {...props} />;
       });
 
@@ -89,13 +84,10 @@ class ComponentWrapper extends React.Component<
             <WrappedComponent {...props} />
           );
         } catch (e) {
-          console.log(e.message);
+          console.error(e.message);
         }
       } else {
-        console.error(
-          "ComponentWrapper not loading component for schema",
-          componentLine
-        );
+        console.error("load component error: ", componentLine);
       }
     }
 

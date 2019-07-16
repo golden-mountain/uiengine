@@ -9,5 +9,5 @@ export default class UIEngine extends React.Component<IUIEngineProps, IUIEngineS
     constructor(props: IUIEngineProps);
     componentDidMount(): void;
     componentWillUnmount(): void;
-    render(): JSX.Element[];
+    render(): JSX.Element;
 }

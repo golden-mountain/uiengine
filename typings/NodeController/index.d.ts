@@ -1,21 +1,17 @@
 import { IUINode } from "../UINode";
 import { IErrorInfo } from "../Request";
-import { IWorkflow } from "../Workflow";
-
-export interface IRenderOptions {
-  component: string;
-  [name]?: any;
-}
+import { IWorkflow, ILoadOptions } from "../Workflow";
 
 export interface IUINodeRenderer {
   uiNode: IUINode;
-  options: IRenderOptions;
+  options?: ILoadOptions;
+  visible?: boolean;
 }
 
 export interface INodeController {
   errorInfo: IErrorInfo;
   // layouts: object;
-  nodes: Array<IUINodeRenderer>;
+  nodes: any;
   workflow: IWorkflow;
   messager: IMessager;
   requestConfig: IRequestConfig;
@@ -28,8 +24,9 @@ export interface INodeController {
     id?: string,
     options?: ILoadOptions
   );
-  deleteUINode(id: string);
-  getUINode(id: string, uiNodeOnly: boolean = false);
+  deleteUINode(layout: string);
+  hideUINode(layout: string);
+  getUINode(layout: string, uiNodeOnly: boolean = false);
   castMessage(nodeSelector: INodeProps, data: any, ids?: [string]);
   setRequestConfig(requestConfig: IRequestConfig);
   pushLayout(layout: string);

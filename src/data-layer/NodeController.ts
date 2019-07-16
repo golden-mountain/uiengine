@@ -29,7 +29,9 @@ export default class NodeController implements INodeController {
   // layout path
   errorInfo: IErrorInfo = {};
   // layouts: object = {};
-  nodes: Array<IUINodeRenderer> = [];
+  nodes: {
+    [name: string]: IUINodeRenderer;
+  } = {};
   messager: IMessager = Messager.getInstance();
   requestConfig: IRequestConfig = {};
   activeLayout: string = "";
@@ -51,7 +53,7 @@ export default class NodeController implements INodeController {
    * Load a layout from remote or local
    * @param layout ILayoutSchema|string path of layout or loaded layout
    */
-  async loadUINode(
+  loadUINode(
     layout: ILayoutSchema | string,
     id?: string,
     options?: ILoadOptions
@@ -70,28 +72,31 @@ export default class NodeController implements INodeController {
 
     // use cached nodes
     let uiNodeRenderer = this.nodes[rootName];
-    let uiNode;
+    let uiNode: IUINode;
     if (!uiNodeRenderer) {
       // default we load all default plugins
       uiNode = new UINode({}, this.request, rootName);
       try {
-        await uiNode.loadLayout(layout);
+        uiNode.loadLayout(layout).then(() => {
+          this.nodes[rootName] = { uiNode, visible: true, options };
+          // add layout stack
+          this.pushLayout(rootName);
+          this.activeLayout = rootName;
+          this.messager.sendMessage(this.engineId, {
+            nodes: this.nodes
+          });
+        });
       } catch (e) {
         console.error(e.message);
       }
-
-      this.nodes[rootName] = { uiNode, options };
     } else {
       uiNode = uiNodeRenderer.uiNode;
+      this.nodes[rootName] = { uiNode, visible: true, options };
+      this.messager.sendMessage(this.engineId, {
+        nodes: this.nodes
+      });
     }
 
-    this.messager.sendMessage(this.engineId, {
-      nodes: this.nodes,
-      time: new Date().getTime()
-    });
-    // add layout stack
-    this.pushLayout(rootName);
-    this.activeLayout = rootName;
     return uiNode;
   }
 
@@ -107,6 +112,17 @@ export default class NodeController implements INodeController {
     // activelayout
     this.activeLayout = _.last(this.layouts) || "";
     return true;
+  }
+
+  hideUINode(layout: string) {
+    const renderer = this.nodes[layout];
+    if (renderer) {
+      renderer.visible = false;
+    }
+
+    this.messager.sendMessage(this.engineId, {
+      nodes: this.nodes
+    });
   }
 
   getUINode(layout: string, uiNodeOnly: boolean = false) {

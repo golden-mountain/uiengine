@@ -1,10 +1,10 @@
-import { IDataEngine, IPluginManager, IRequest, IRequestOptions, IDataMapper } from "../../typings";
+import { IDataEngine, IPluginManager, IRequest, IRequestOptions, IDataMapper, IDataSource } from "../../typings";
 export default class DataEngine implements IDataEngine {
     static instance: IDataEngine;
     static getInstance: () => DataEngine;
     request: IRequest;
     errorInfo?: any;
-    source?: string;
+    source?: IDataSource;
     schemaPath?: string;
     mapper: IDataMapper;
     data?: any;
@@ -12,10 +12,10 @@ export default class DataEngine implements IDataEngine {
     cacheID: string;
     requestOptions: IRequestOptions;
     setRequest(request: IRequest): void;
-    loadSchema(source: string): Promise<any>;
-    sendRequest(source: string, data?: any, method?: string, cache?: boolean): Promise<any>;
-    loadData(source: string, params?: any): Promise<any>;
-    updateData(source: string, data?: any): Promise<any>;
-    replaceData(source: string, data?: any): Promise<any>;
-    deleteData(source: string, data?: any): Promise<any>;
+    loadSchema(source: IDataSource): Promise<any>;
+    sendRequest(source: IDataSource, data?: any, method?: string, cache?: boolean): Promise<any>;
+    loadData(source: IDataSource, params?: any): Promise<any>;
+    updateData(source: IDataSource, data?: any): Promise<any>;
+    replaceData(source: IDataSource, data?: any): Promise<any>;
+    deleteData(source: IDataSource, data?: any): Promise<any>;
 }

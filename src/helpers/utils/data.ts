@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { DataPool, DataEngine } from "..";
+import { IDataSource } from "../../../typings";
 
 /**
  * convert a.b.c:d to a.b.c.d
@@ -20,7 +21,16 @@ export function formatSource(source: string, prefix?: string) {
  *
  * @param id a.b.c:d
  */
-export function getDomainName(id: any, snakeCase: boolean = true) {
+export function getDomainName(
+  id: IDataSource | string,
+  snakeCase: boolean = true
+) {
+  // it's a IDataSource
+  // {source: "slb.virtual-server:template-policy", autoload: true}
+  if (typeof id === "object") {
+    id = _.get(id, "source", "");
+  }
+
   if (id && _.isString(id)) {
     const splitter = id.indexOf(":") > -1 ? ":" : ".";
     let [schemaPath] = id.split(splitter);

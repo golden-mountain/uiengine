@@ -32,8 +32,8 @@ export default class Workflow implements IWorkflow {
 
   deactiveLayout() {
     if (this.nodeController.activeLayout) {
-      this.nodeController.deleteUINode(this.nodeController.activeLayout);
-      // active new nodes
+      this.nodeController.hideUINode(this.nodeController.activeLayout);
+      // active new nodes, now NodeController actived the new layout
       if (this.nodeController.activeLayout) {
         this.activeNode = this.nodeController.nodes[
           this.nodeController.activeLayout

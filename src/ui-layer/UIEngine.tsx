@@ -38,11 +38,12 @@ export default class UIEngine extends React.Component<
   }
 
   componentDidMount() {
-    const { layouts = [] } = this.props;
     this.nodeController.messager.setStateFunc(
       this.nodeController.engineId,
       setComponentState.bind(this)
     );
+
+    const { layouts = [] } = this.props;
     for (let layout in layouts) {
       this.nodeController.loadUINode(layouts[layout]);
     }
@@ -54,32 +55,35 @@ export default class UIEngine extends React.Component<
 
   render() {
     const { layouts, reqConfig, onEngineCreate, ...rest } = this.props;
-    return _.entries(this.state.nodes).map((entry: any) => {
-      const [layoutKey, uiNodeRenderer] = entry;
-      const { uiNode, options = {} } = uiNodeRenderer;
-      const { container, ...optionsRest } = options;
+    const context = {
+      controller: this.nodeController
+    };
+    return (
+      <UIEngineContext.Provider value={context}>
+        {_.entries(this.state.nodes).map((entry: any) => {
+          const [layoutKey, uiNodeRenderer] = entry;
+          const { uiNode, options = {}, visible = true } = uiNodeRenderer;
+          const { container } = options;
 
-      // wrapper if provided
-      let Container = ({ children }: any) => children;
-      if (container) {
-        Container = getComponent(container);
-      }
-      const context = {
-        controller: this.nodeController,
-        uiNode
-      };
+          if (!visible) return null;
 
-      return (
-        <UIEngineContext.Provider value={context}>
-          <Container {...optionsRest}>
-            <ComponentWrapper
-              uiNode={uiNode}
-              {...rest}
-              key={`layout-${layoutKey}`}
-            />
-          </Container>
-        </UIEngineContext.Provider>
-      );
-    });
+          // wrapper if provided
+          let Container = ({ children }: any) => children;
+          if (container) {
+            Container = getComponent(container);
+          }
+
+          return (
+            <Container {...options} visible>
+              <ComponentWrapper
+                uiNode={uiNode}
+                {...rest}
+                key={`layout-${layoutKey}`}
+              />
+            </Container>
+          );
+        })}
+      </UIEngineContext.Provider>
+    );
   }
 }

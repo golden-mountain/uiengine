@@ -41,5 +41,5 @@ export default class UINode implements IUINode {
     getChildren(route?: Array<Number>): any;
     genLiveLayout(schema: ILayoutSchema, data: any): Promise<ILayoutSchema>;
     updateState(): Promise<any>;
-    sendMessage(): void;
+    sendMessage(force?: boolean): void;
 }

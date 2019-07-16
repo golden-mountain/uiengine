@@ -136,6 +136,7 @@ export default class DataEngine implements IDataEngine {
     const exeConfig: IPluginExecutionConfig = {
       returnLastValue: true
     };
+
     const afterResult = await this.pluginManager.executePlugins(
       "data.request.after",
       exeConfig
