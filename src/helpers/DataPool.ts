@@ -22,8 +22,13 @@ export default class DataPool implements IDataPool {
     let d = _.get(domainData, p, path.indexOf("[]") > -1 ? [] : null);
 
     p = `${domainName}.${p}`;
-    if (_.isArray(d) && !_.isArray(data)) {
-      d.push(data);
+    if (_.isArray(d)) {
+      if (!_.isArray(data)) {
+        d.push(data);
+      } else {
+        // compare with the data is equal, if equal, then ignore it
+        d = _.unionWith(d, data, _.isEqual);
+      }
       _.set(this.data, p, d);
     } else {
       _.set(this.data, p, data);
@@ -66,7 +71,16 @@ export default class DataPool implements IDataPool {
       const domainName = getDomainName(path);
       path = formatSource(path);
       let p = `${domainName}.${path}`;
-      _.unset(this.data, p);
+      const pathObject = _.toPath(p);
+
+      if (!isNaN(Number(_.last(pathObject)))) {
+        const rmIndex = pathObject.pop();
+        const parentObj = _.get(this.data, pathObject, []);
+        parentObj.splice(rmIndex, 1);
+        _.set(this.data, pathObject, parentObj);
+      } else {
+        _.unset(this.data, p);
+      }
     } else {
       this.data = {};
     }

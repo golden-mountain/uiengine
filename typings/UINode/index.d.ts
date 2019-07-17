@@ -52,6 +52,6 @@ export interface IUINode {
   // searchDepsNodes(myNode?: IUINode, layoutId?: string);
   getPluginManager(): IPluginManager;
   getRequest(): IRequest;
-  sendMessage();
+  sendMessage(force: boolean = false) {
   // getProps(): INodeProps;
 }

@@ -47,10 +47,20 @@ export function getComponent(componentLine?: string) {
  * @param rootName the root name of the loaded schema nodes
  * @return UINodes has the props
  */
-export function searchNodes(prop: object, rootName: string) {
+export function searchNodes(prop: object, rootName?: string) {
   let nodes: Array<any> = [];
 
-  let allUINodes = Cache.getUINode(rootName) as IUINode;
+  let allUINodes = {};
+  if (rootName) {
+    allUINodes = Cache.getUINode(rootName);
+  } else {
+    // if rootName not provided, merge all nodes, and search from
+    const nodes = Cache.getCache("uiNodes");
+    _.forIn(nodes, (node: any) => {
+      allUINodes = _.assign(allUINodes, node);
+    });
+  }
+
   if (_.isObject(allUINodes)) {
     _.forIn(allUINodes, (target: any, id: string) => {
       if (!target.getSchema) return;

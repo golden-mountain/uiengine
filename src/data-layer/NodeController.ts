@@ -129,6 +129,16 @@ export default class NodeController implements INodeController {
       renderer.visible = false;
     }
 
+    // set active layout as last node
+    const index = _.findLastIndex(this.layouts, function(o) {
+      return o !== layout;
+    });
+    if (index > -1) {
+      this.activeLayout = this.layouts[index];
+    } else {
+      this.activeLayout = "";
+    }
+
     this.messager.sendMessage(this.engineId, {
       nodes: this.nodes
     });

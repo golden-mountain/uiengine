@@ -106,10 +106,10 @@ export default class DataNode implements IDataNode {
         result = null;
       } else {
         let data = await this.dataEngine.loadData(this.source);
-        if (data === null) {
-          this.errorInfo = this.dataEngine.errorInfo;
-          return;
-        }
+        // if (this.dataEngine.errorInfo.status === 2001) {
+        //   this.errorInfo = this.dataEngine.errorInfo;
+        //   return;
+        // }
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource, null);
         this.dataPool.set(result, this.source.source);

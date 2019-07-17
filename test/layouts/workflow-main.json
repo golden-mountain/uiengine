@@ -1,7 +1,7 @@
 {
   "id": "workflow-main",
   "component": "test:DivContainer",
-  "datasource": "foo:bar",
+  "datasource": "workflow:node1",
   "props": {
     "title": "Demo Container"
   },
