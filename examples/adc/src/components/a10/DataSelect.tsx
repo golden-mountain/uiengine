@@ -16,11 +16,10 @@ export const DataSelect = (props: any) => {
   // load data
   // console.log(uinode, associations);
   const [assocs, setAssocs] = useState([]);
-  const load = async () => {
-    const data = await uinode.dataNode.dataEngine.loadData(datasource);
+  const source = { source: datasource };
+  uinode.dataNode.dataEngine.loadData(source).then((data: any) => {
     setAssocs(_.get(data, datasource.replace(":", ".")));
-  };
-  load();
+  });
   return (
     <Select {...rest}>
       {assocs &&

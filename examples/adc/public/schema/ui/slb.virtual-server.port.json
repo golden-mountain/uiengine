@@ -839,7 +839,7 @@
                 "$events": [
                   {
                     "event": "onClick",
-                    "action": "request",
+                    "action": "submitToPool",
                     "options": {
                       "method": "POST",
                       "params": {},
@@ -858,10 +858,8 @@
                 "$events": [
                   {
                     "event": "onClick",
-                    "action": "routeTo",
-                    "options": {
-                      "redirect": "#/"
-                    }
+                    "action": "hideNode",
+                    "options": {}
                   }
                 ]
               }
