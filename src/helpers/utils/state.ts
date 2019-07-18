@@ -126,6 +126,7 @@ export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
       if (dep.selector) {
         // depends on which node?
         const depTargetNodes = searchNodes(dep.selector, uiNode.rootName);
+
         if (depTargetNodes.length) {
           // searched the props met the condition
           depTargetNodes.forEach((depTargetNode: any) => {

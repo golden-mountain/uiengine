@@ -139,14 +139,15 @@ describe("Given an instance of Workflow library", () => {
         id: "state-test-id-3"
       };
       await workflow.updateState(selector, { visible: false });
+      // const rootName = parseRootName(stateJson);
       const sourceNodes = searchNodes(selector);
-      expect(sourceNodes[0].stateNode.state.visible).to.be.false;
+      expect(sourceNodes[0].stateNode.state.visible).to.be.true;
 
       const affectedSelector = {
         id: "state-test-id-2"
       };
       const targetNodes = searchNodes(affectedSelector);
-      expect(targetNodes[0].stateNode.state.visible).to.be.true;
+      expect(targetNodes[0].stateNode.state.visible).to.be.false;
       // clear the state-test.json
       nodeController.deleteUINode(stateJson);
     });

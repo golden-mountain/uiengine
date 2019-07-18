@@ -38,6 +38,7 @@ export default class StateNode implements IStateNode {
     }
 
     this.uiNode.sendMessage();
+    return this.state;
   }
 
   setState(key: string | IState, value?: any): IState {

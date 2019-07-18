@@ -47,9 +47,9 @@ export function getComponent(componentLine?: string) {
  * @param rootName the root name of the loaded schema nodes
  * @return UINodes has the props
  */
-export function searchNodes(prop: object, layout: string = "") {
+export function searchNodes(prop: object, rootName: string = "") {
   let nodes: Array<any> = [];
-  const rootName = parseRootName(layout);
+  // const rootName = parseRootName(layout);
 
   let allUINodes = {};
   if (rootName) {
