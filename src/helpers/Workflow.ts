@@ -10,13 +10,7 @@ import {
   IConnectOptions
 } from "../../typings";
 
-import {
-  Cache,
-  searchNodes,
-  parseRootName,
-  DataPool,
-  submitToAPI
-} from "../helpers";
+import { searchNodes, parseRootName, DataPool, submitToAPI } from "../helpers";
 import { UINode } from "../data-layer";
 
 export default class Workflow implements IWorkflow {

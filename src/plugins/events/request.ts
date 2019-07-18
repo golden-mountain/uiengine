@@ -1,5 +1,4 @@
 import _ from "lodash";
-import { submitToAPI } from "../../helpers";
 import { IPluginFunc, IPlugin, IUINode } from "../../../typings";
 import { NodeController } from "../../data-layer";
 
