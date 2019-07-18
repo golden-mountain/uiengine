@@ -30,4 +30,4 @@ export declare function parseCacheID(source: string, parsePath?: boolean): strin
  * @param root like a-b-c.json
  */
 export declare function parseRootName(root: string): string;
-export declare function submitToAPI(dataSources: Array<string>, method?: string): Promise<any>;
+export declare function submitToAPI(dataSources: Array<IDataSource>, method?: string): Promise<any>;

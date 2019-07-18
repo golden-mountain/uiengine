@@ -1,6 +1,7 @@
 import _ from "lodash";
 import { submitToAPI } from "../../helpers";
 import { IPluginFunc, IPlugin, IUINode } from "../../../typings";
+import { NodeController } from "../../data-layer";
 
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   return (e: any, options: any) => {
@@ -8,10 +9,11 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
       e.stopPropagation();
     }
 
+    const nodeController = NodeController.getInstance();
     let target = `${options.target}:`;
     // console.log(options, uiNode.dataNode.dataPool.get(target, false));
     // const data = uiNode.dataNode.dataPool.get(target, false);
-    submitToAPI([target], "post").then((result: any) => {
+    nodeController.workflow.submit([{ source: target }]).then((result: any) => {
       console.log(result);
     });
   };

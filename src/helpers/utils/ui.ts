@@ -1,6 +1,6 @@
 import React from "react";
 import _ from "lodash";
-import { UIEngineRegister, Cache } from "../";
+import { UIEngineRegister, Cache, parseRootName } from "../";
 import { IUINode, ILayoutSchema } from "../../../typings";
 
 /**
@@ -47,8 +47,9 @@ export function getComponent(componentLine?: string) {
  * @param rootName the root name of the loaded schema nodes
  * @return UINodes has the props
  */
-export function searchNodes(prop: object, rootName?: string) {
+export function searchNodes(prop: object, layout: string = "") {
   let nodes: Array<any> = [];
+  const rootName = parseRootName(layout);
 
   let allUINodes = {};
   if (rootName) {

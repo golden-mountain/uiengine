@@ -30,7 +30,6 @@ export default class StateNode implements IStateNode {
 
   async renewStates() {
     this.state = await this.pluginManager.executePlugins("state.resolver");
-
     // update dependence state
     const depNodes = searchDepsNodes(this.uiNode);
     for (let key in depNodes) {
@@ -39,12 +38,28 @@ export default class StateNode implements IStateNode {
     }
 
     this.uiNode.sendMessage();
+  }
+
+  setState(key: string | IState, value?: any): IState {
+    if (typeof key === "object") {
+      _.merge(this.state, key);
+    } else {
+      _.set(this.state, key, value);
+    }
+
     return this.state;
   }
 
-  setState(key: string, value: any): IState {
-    _.set(this.state, key, value);
-    return this.state;
+  async updateState(state: IState) {
+    this.setState(state);
+    this.uiNode.sendMessage();
+
+    // update dependence state
+    const depNodes = searchDepsNodes(this.uiNode);
+    for (let key in depNodes) {
+      const node = depNodes[key];
+      await node.getStateNode().renewStates();
+    }
   }
 
   getPluginManager(): IPluginManager {

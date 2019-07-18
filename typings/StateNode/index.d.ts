@@ -15,6 +15,7 @@ export interface IStateNode {
   getUINode(): IUINode;
   getState(key?: string): IState;
   renewStates();
-  setState(key: string, value: any): IState;
+  setState(key: string | IState, value?: any);
+  updateState(state: IState);
   getPluginManager(): IPluginManager;
 }

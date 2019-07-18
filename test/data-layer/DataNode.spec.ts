@@ -141,7 +141,7 @@ describe("Given an instance of my DataNode library", () => {
 
       // remote commit
       let dataSource = "foo:bar";
-      let result = await submitToAPI([dataSource], "get");
+      let result = await submitToAPI([{ source: dataSource }], "get");
       expect(result).to.deep.equal(expectedResult);
 
       // local commit

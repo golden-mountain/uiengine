@@ -92,8 +92,7 @@ export function stateCompare(
       const expected = _.get(deps, name);
       result = compareStateLogic(expected, actual, strategy);
     } else {
-      // TO FIX: Need a case to improve this
-      // recursively find other UI Node
+      // TO FIX: if load after the dep target node,  the status maybe false
       result = stateDepsResolver(stateNode, name);
     }
   }

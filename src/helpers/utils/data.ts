@@ -78,19 +78,19 @@ export function parseRootName(root: string) {
 }
 
 export async function submitToAPI(
-  dataSources: Array<string>,
+  dataSources: Array<IDataSource>,
   method: string = "post"
 ) {
   let result = {};
   let responses: any = [];
   const dataPool = DataPool.getInstance();
   const dataEngine = DataEngine.getInstance();
-  dataSources.forEach((source: string) => {
-    result = _.merge(result, dataPool.get(source, true));
-    result = dataEngine.sendRequest({ source }, result, method, false);
+  for (let index in dataSources) {
+    const source = dataSources[index];
+    result = _.merge(result, dataPool.get(source.source, true));
+    result = await dataEngine.sendRequest(source, result, method, false);
     responses.push(result);
-  });
+  }
 
-  responses = await Promise.all(responses);
   return responses;
 }
