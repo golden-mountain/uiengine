@@ -1,13 +1,37 @@
-export interface ILoadOptions {}
+import { IUINode } from "../UINode";
+
+export interface ILoadOptions {
+  container?: string;
+  props?: object;
+}
+
+/// using working mode to decide how to load data from dataNode
+export interface IWorkingMode {
+  mode: string; // edit, new, if new ,defaultly we don't load data,
+  options?: any;
+}
 
 export interface IWorkflow {
-  nodeController?: INodeController;
+  nodeController: INodeController;
   activeNode?: IUINode;
-  activeLayout(layout: string, options: ILoadOptions);
+  workingMode?: IWorkingMode;
+  // layout operations
+  setWorkingMode(mode: IWorkingMode);
+  setNodeController(nodeController: INodeController);
+  activeLayout(layout: string, options?: ILoadOptions);
   deactiveLayout();
-  removeNodes(selector: object);
-  refreshNodes(selector: object);
-  assignPropsToNode(selector: object, props: any);
-  updateData(source: string, data: any);
-  updateState(source: string, state: any);
+  // nodes operations
+  removeNodes(nodes: Array<IUINode> | INodeProps);
+  refreshNodes(nodes: Array<IUINode> | INodeProps);
+  assignPropsToNode(nodes: Array<IUINode> | INodeProps, props: any);
+  updateState(nodes: Array<IUINode> | INodeProps, state: any);
+  saveNodes(nodes: Array<IUINode> | INodeProps);
+
+  // data operations
+  submit(sources: Array<IDataSource>);
+
+  // data pool
+  submitToPool(connectOptions: IConnectOptions, refreshLayout?: string);
+  removeFromPool(source: string, refreshLayout?: string);
+  updatePool(source: string, data: any, refreshLayout?: string);
 }

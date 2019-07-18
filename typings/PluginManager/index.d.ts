@@ -29,5 +29,6 @@ export interface IPluginManager {
   //unloadPlugins(type: string, name?: string);
   executePlugins(type: string, stopWhenEqual?: IPluginExecutionConfig);
   executeSyncPlugins(type: string, stopWhenEqual?: IPluginExecutionConfig);
+  executePlugin(plugin: IPlugin);
   setErrorInfo(type: string, name: string, key: string, value: any): IErrorInfo;
 }

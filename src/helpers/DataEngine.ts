@@ -6,7 +6,8 @@ import {
   IRequest,
   IRequestOptions,
   IDataMapper,
-  IPluginExecutionConfig
+  IPluginExecutionConfig,
+  IDataSource
 } from "../../typings";
 
 import { PluginManager, Cache, DataMapper, parseCacheID } from ".";
@@ -22,7 +23,7 @@ export default class DataEngine implements IDataEngine {
 
   request: IRequest = {} as IRequest;
   errorInfo?: any;
-  source?: string;
+  source?: IDataSource;
   schemaPath?: string;
   mapper: IDataMapper = {} as IDataMapper;
   data?: any;
@@ -36,13 +37,13 @@ export default class DataEngine implements IDataEngine {
     this.mapper.setRequest(request);
   }
 
-  async loadSchema(source: string) {
+  async loadSchema(source: IDataSource) {
     // this.schemaPath = parseSchemaPath(source);
     return await this.mapper.loadSchema(source);
   }
 
   async sendRequest(
-    source: string,
+    source: IDataSource,
     data?: any,
     method: string = "get",
     cache: boolean = false
@@ -61,14 +62,15 @@ export default class DataEngine implements IDataEngine {
     }
 
     // schemaPath = parseSchemaPath(source);
-    this.cacheID = parseCacheID(source);
+    let dataSource = source.source;
+    this.cacheID = parseCacheID(dataSource);
     this.source = source;
     if (source) {
       const schema = await this.mapper.loadSchema(source);
       if (schema === null) {
         this.errorInfo = {
           status: 2001,
-          code: `Schema for ${source} not found`
+          code: `Schema for ${source.source} not found`
         };
         return false;
       }
@@ -134,6 +136,7 @@ export default class DataEngine implements IDataEngine {
     const exeConfig: IPluginExecutionConfig = {
       returnLastValue: true
     };
+
     const afterResult = await this.pluginManager.executePlugins(
       "data.request.after",
       exeConfig
@@ -144,19 +147,19 @@ export default class DataEngine implements IDataEngine {
     return this.data;
   }
 
-  async loadData(source: string, params?: any) {
+  async loadData(source: IDataSource, params?: any) {
     return await this.sendRequest(source, params, "get", true);
   }
 
-  async updateData(source: string, data?: any) {
+  async updateData(source: IDataSource, data?: any) {
     return await this.sendRequest(source, data, "post");
   }
 
-  async replaceData(source: string, data?: any) {
+  async replaceData(source: IDataSource, data?: any) {
     return await this.sendRequest(source, data, "put");
   }
 
-  async deleteData(source: string, data?: any) {
+  async deleteData(source: IDataSource, data?: any) {
     return await this.sendRequest(source, data, "put");
   }
 }

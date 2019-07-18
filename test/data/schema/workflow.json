@@ -1,0 +1,9 @@
+{
+  "endpoint": {
+    "default": {
+      "path": "workflow.json"
+    },
+    "post": "workflow/{name}"
+  },
+  "definition": {}
+}

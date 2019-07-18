@@ -17,6 +17,7 @@ const request = Request.getInstance();
 request.setConfig(reqConfig);
 
 const schemaPath = "foo.json";
+const dataSource = { source: schemaPath };
 
 describe("Given all the DataMapper", () => {
   before(() => {
@@ -28,18 +29,18 @@ describe("Given all the DataMapper", () => {
       const dataMapper = DataMapper.getInstance();
       dataMapper.setRequest(request);
       // expect(dataMapper.source).to.equal(schemaPath);
-      let schema = await dataMapper.loadSchema(schemaPath);
+      let schema = await dataMapper.loadSchema(dataSource);
       expect(schema).to.deep.equal(dataSchemaJson);
 
       // load from cache
-      schema = await dataMapper.loadSchema(schemaPath);
+      schema = await dataMapper.loadSchema(dataSource);
       expect(schema).to.deep.equal(dataSchemaJson);
     });
 
     it("getDataEntryPoing: should return the data api path", async () => {
       const dataMapper = DataMapper.getInstance();
       dataMapper.setRequest(request);
-      await dataMapper.loadSchema(schemaPath);
+      await dataMapper.loadSchema(dataSource);
       let path = dataMapper.getDataEntryPoint("get");
       let dataPathPrefix = reqConfig.dataPathPrefix;
       let expectedPath = `${dataPathPrefix}${schemaPath}`;
@@ -51,7 +52,7 @@ describe("Given all the DataMapper", () => {
       // delete path
       path = dataMapper.getDataEntryPoint("delete");
       dataPathPrefix = reqConfig.dataPathPrefix;
-      expectedPath = `${dataPathPrefix}foo/{foo.name}`;
+      expectedPath = `${dataPathPrefix}foo/{name}`;
       expect(path).to.deep.equal(expectedPath);
     });
   });

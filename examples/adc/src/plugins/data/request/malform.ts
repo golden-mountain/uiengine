@@ -8,7 +8,6 @@ import { IPluginFunc, IPlugin, IDataEngine } from "UIEngine/typings";
  */
 const callback: IPluginFunc = (dataEngine: IDataEngine) => {
   const data = dataEngine.data;
-  // console.log(data, dataEngine.source);
   if (dataEngine.source !== undefined) {
     const sourceSegs = getDomainName(dataEngine.source, false).split(".");
     let result: any = {};

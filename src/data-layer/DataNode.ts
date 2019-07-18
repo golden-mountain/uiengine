@@ -8,7 +8,8 @@ import {
   IPluginExecutionConfig,
   IDataEngine,
   IDataPool,
-  IDataSource
+  IDataSource,
+  IWorkingMode
 } from "../../typings";
 import { DataEngine } from "../helpers";
 
@@ -86,7 +87,7 @@ export default class DataNode implements IDataNode {
     return this.pluginManager;
   }
 
-  async loadData(source?: IDataSource | string, schemaOnly: boolean = false) {
+  async loadData(source?: IDataSource | string, workingMode?: IWorkingMode) {
     if (source) {
       this.setDataSource(source);
     }
@@ -100,15 +101,15 @@ export default class DataNode implements IDataNode {
     );
 
     if (result === undefined) {
-      if (schemaOnly || !this.source.autoload) {
-        // await this.dataEngine.loadSchema(this.source.source);
+      if (_.get(workingMode, "mode") === "new" || !this.source.autoload) {
+        await this.dataEngine.loadSchema(this.source);
         result = null;
       } else {
-        let data = await this.dataEngine.loadData(this.source.source);
-        if (data === null) {
-          this.errorInfo = this.dataEngine.errorInfo;
-          return;
-        }
+        let data = await this.dataEngine.loadData(this.source);
+        // if (this.dataEngine.errorInfo.status === 2001) {
+        //   this.errorInfo = this.dataEngine.errorInfo;
+        //   return;
+        // }
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource, null);
         this.dataPool.set(result, this.source.source);
@@ -116,9 +117,7 @@ export default class DataNode implements IDataNode {
     }
 
     // assign root schema if not $dummy data
-    this.rootSchema = await this.dataEngine.mapper.getSchema(
-      this.source.source
-    );
+    this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
 
     this.data = result;
     // load this node schema

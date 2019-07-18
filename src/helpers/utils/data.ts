@@ -1,5 +1,6 @@
 import _ from "lodash";
 import { DataPool, DataEngine } from "..";
+import { IDataSource } from "../../../typings";
 
 /**
  * convert a.b.c:d to a.b.c.d
@@ -20,7 +21,16 @@ export function formatSource(source: string, prefix?: string) {
  *
  * @param id a.b.c:d
  */
-export function getDomainName(id: any, snakeCase: boolean = true) {
+export function getDomainName(
+  id: IDataSource | string,
+  snakeCase: boolean = true
+) {
+  // it's a IDataSource
+  // {source: "slb.virtual-server:template-policy", autoload: true}
+  if (typeof id === "object") {
+    id = _.get(id, "source", "");
+  }
+
   if (id && _.isString(id)) {
     const splitter = id.indexOf(":") > -1 ? ":" : ".";
     let [schemaPath] = id.split(splitter);
@@ -43,6 +53,12 @@ export function parseSchemaPath(source: string) {
   return `${schemaPath}.json`;
 }
 
+/**
+ * Convert source to a_b_c
+ *
+ * @param source
+ * @param parsePath
+ */
 export function parseCacheID(source: string, parsePath: boolean = true) {
   let path = source;
   if (parsePath) {
@@ -51,20 +67,30 @@ export function parseCacheID(source: string, parsePath: boolean = true) {
   return _.snakeCase(path);
 }
 
+/**
+ * export to a_b_c
+ *
+ * @param root like a-b-c.json
+ */
+export function parseRootName(root: string) {
+  root = root.replace(".json", "");
+  return _.snakeCase(root);
+}
+
 export async function submitToAPI(
-  dataSources: Array<string>,
+  dataSources: Array<IDataSource>,
   method: string = "post"
 ) {
   let result = {};
   let responses: any = [];
   const dataPool = DataPool.getInstance();
   const dataEngine = DataEngine.getInstance();
-  dataSources.forEach((source: string) => {
-    result = _.merge(result, dataPool.get(source, true));
-    result = dataEngine.sendRequest(source, result, method, false);
+  for (let index in dataSources) {
+    const source = dataSources[index];
+    result = _.merge(result, dataPool.get(source.source, true));
+    result = await dataEngine.sendRequest(source, result, method, false);
     responses.push(result);
-  });
+  }
 
-  responses = await Promise.all(responses);
   return responses;
 }

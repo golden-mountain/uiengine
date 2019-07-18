@@ -1,4 +1,4 @@
-import { IPluginManager, IPlugins, IErrorInfo, IPluginExecutionConfig } from "../../typings";
+import { IPluginManager, IPlugins, IErrorInfo, IPlugin, IPluginExecutionConfig } from "../../typings";
 export default class PluginManager implements IPluginManager {
     static plugins: IPlugins;
     private caller;
@@ -13,5 +13,6 @@ export default class PluginManager implements IPluginManager {
     static loadPlugins(newPlugins: IPlugins): IPlugins;
     executePlugins(type: string, config?: IPluginExecutionConfig): Promise<any>;
     executeSyncPlugins(type: string, config?: IPluginExecutionConfig): any;
+    executePlugin(plugin: IPlugin): any;
     setErrorInfo(type: string, name: string, value: any): IErrorInfo;
 }

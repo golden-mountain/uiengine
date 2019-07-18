@@ -5,7 +5,8 @@ import {
   IDataSchema,
   IRequest,
   IErrorInfo,
-  IPluginManager
+  IPluginManager,
+  IDataSource
 } from "../../typings";
 import { PluginManager, Cache, parseCacheID, parseSchemaPath } from ".";
 
@@ -20,7 +21,7 @@ export default class DataMapper implements IDataMapper {
 
   request: IRequest = {} as IRequest;
   errorInfo?: IErrorInfo;
-  source: string = "";
+  source: IDataSource = { source: "" };
   rootSchema?: IDataSchema;
   pluginManager: IPluginManager = new PluginManager(this);
   cacheID: string = "";
@@ -38,8 +39,8 @@ export default class DataMapper implements IDataMapper {
     return `${dataURLPrefix}${endpoint}`;
   }
 
-  async getSchema(source: string) {
-    this.cacheID = parseCacheID(source);
+  async getSchema(source: IDataSource) {
+    this.cacheID = parseCacheID(source.source);
     let schema: any = Cache.getDataSchema(this.cacheID);
     if (!schema) {
       schema = await this.loadSchema(source);
@@ -48,11 +49,11 @@ export default class DataMapper implements IDataMapper {
     return schema;
   }
 
-  async loadSchema(source: string) {
+  async loadSchema(source: IDataSource) {
     let result: any = null;
     this.source = source;
-    let path = parseSchemaPath(source);
-    this.cacheID = parseCacheID(source);
+    let path = parseSchemaPath(source.source);
+    this.cacheID = parseCacheID(source.source);
     try {
       let schema: any = Cache.getDataSchema(this.cacheID);
       if (!schema) {

@@ -1,0 +1,14 @@
+{
+  "workflow": {
+    "node1": [
+      {
+        "name": "XuJain",
+        "age": 29
+      },
+      {
+        "name": "Rui",
+        "age": 30
+      }
+    ]
+  }
+}

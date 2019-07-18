@@ -389,7 +389,11 @@
                   "layout": "schema/ui/slb.virtual-server.port.json",
                   "title": "Create Virtual Port",
                   "width": "80%",
-                  "connect": "slb.virtual-server:port-list"
+                  "connect": "slb.virtual-server:port-list",
+                  "container": "antd:Drawer",
+                  "placement": "right",
+                  "closable": true,
+                  "visible": true
                 }
               },
               "$children": [

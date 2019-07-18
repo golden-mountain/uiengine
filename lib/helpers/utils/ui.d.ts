@@ -11,7 +11,7 @@ export declare function getComponent(componentLine?: string): any;
  * @param rootName the root name of the loaded schema nodes
  * @return UINodes has the props
  */
-export declare function searchNodes(prop: object, rootName: string): any[];
+export declare function searchNodes(prop: object, layout?: string): any[];
 /**
  * Search the node who deps on me
  * A => Dep => B(myNode)

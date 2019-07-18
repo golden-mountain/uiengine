@@ -65,22 +65,23 @@ describe("Given all the DataEngine", () => {
       dataEngine.setRequest(request);
 
       // use default source
-      await dataEngine.sendRequest(schemaPath);
+      await dataEngine.sendRequest({ source: schemaPath });
       expect(dataEngine.errorInfo).to.be.null;
       expect(dataEngine.data).to.deep.equal(dataJson);
 
       // use customize source
-      await dataEngine.sendRequest("foo.bar.baz", { str: "query-string-1" });
+      const dataSource = { source: "foo.bar.baz" };
+      await dataEngine.sendRequest(dataSource, { str: "query-string-1" });
       expect(dataEngine.errorInfo).to.be.null;
       expect(dataEngine.data).to.deep.equal(dataJson);
 
       // cache test
       const spy = chai.spy(Cache.setData);
-      await dataEngine.sendRequest("foo.bar.baz", { str: "query-string-1" });
+      await dataEngine.sendRequest(dataSource, { str: "query-string-1" });
       expect(spy).to.not.be.called;
 
       // use undefined request method
-      await dataEngine.sendRequest("foo.bar.baz", null, "nothing");
+      await dataEngine.sendRequest(dataSource, null, "nothing");
       let errorInfo = {
         status: 1001,
         code: "Method nothing did not defined on Request"
@@ -89,7 +90,7 @@ describe("Given all the DataEngine", () => {
       expect(dataEngine.data).to.be.empty;
 
       // load empty path
-      await dataEngine.sendRequest("any.wrong.place");
+      await dataEngine.sendRequest({ source: "any.wrong.place" });
       expect(dataEngine.data).to.be.empty;
       errorInfo = {
         status: 2001,
@@ -109,7 +110,7 @@ describe("Given all the DataEngine", () => {
         }
       };
       dataEngine.pluginManager.loadPlugins(plugins);
-      await dataEngine.sendRequest("foo.bar.baz");
+      await dataEngine.sendRequest({ source: "foo.bar.baz" });
       errorInfo = {
         status: 1001,
         code: "Plugins blocked the commit"

@@ -1,0 +1,33 @@
+{
+  "id": "workflow-main",
+  "component": "test:DivContainer",
+  "datasource": "workflow:node1",
+  "props": {
+    "title": "Demo Container"
+  },
+  "children": [
+    {
+      "component": "test:DivContainer",
+      "props": {
+        "title": "Demo sub container"
+      }
+    },
+    {
+      "component": "a",
+      "content": "link",
+      "props": {
+        "title": "Title",
+        "$events": [
+          {
+            "event": "onClick",
+            "action": "loadUI",
+            "options": {
+              "layout": "layouts/react-component-test-2.json",
+              "container": "main"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

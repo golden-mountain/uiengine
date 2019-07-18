@@ -1,810 +1,868 @@
 {
-  "component": "antd:Row",
+  "component": "div",
   "children": [
     {
-      "component": "antd:Col",
+      "component": "antd:Row",
       "children": [
         {
-          "component": "antd:Form",
-          "props": {
-            "name": "vPort",
-            "title": {
-              "create": "Add New ${name}",
-              "update": "Edit ${name}"
-            },
-            "description": {
-              "create": "Please provide following information to create a new ${name}",
-              "update": "Please provide following information to edit ${name}"
-            }
-          },
+          "component": "antd:Col",
           "children": [
             {
-              "component": "a10:Section",
+              "component": "antd:Form",
               "props": {
-                "title": "Basic"
+                "name": "vPort",
+                "title": {
+                  "create": "Add New ${name}",
+                  "update": "Edit ${name}"
+                },
+                "description": {
+                  "create": "Please provide following information to create a new ${name}",
+                  "update": "Please provide following information to edit ${name}"
+                }
               },
               "children": [
                 {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:port-number"
+                  "component": "a10:Section",
+                  "props": {
+                    "title": "Basic"
+                  },
+                  "children": [
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:port-number"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:protocol"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:range"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:alternate-port"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:conn-limit"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:def-selection-if-pref-failed"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:service-group"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:no-dest-nat"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:port-translation"
+                    }
+                  ]
                 },
                 {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:protocol"
+                  "component": "a10:Section",
+                  "props": {
+                    "title": "Advanced"
+                  },
+                  "children": [
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:proxy-layer"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:optimization-level"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:support-http2"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:name"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:reset"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:no-logging"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:use-alternate-port"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:alternate-port-number"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:alt-protocol1"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:serv-sel-fail"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:when-down"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:alt-protocol2"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:req-fail"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:when-down-protocol2"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:action"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:l7-service-chain"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:ha-conn-mirror"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:on-syn"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:skip-rev-hash"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:message-switching"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:force-routing-mode"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:rate-limit-pr-log"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:rate"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:per"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:secs"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:reset-on-server-selection-fail"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:clientip-sticky-nat"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:extended-stats"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:gslb-enable"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:view"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:snat-on-vip"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:stats-data-action"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:syn-cookie"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:expand"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:access-list"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:acl-id-list"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:acl-name-list"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:aflex-dummy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:aflex-scripts"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:no-auto-up-on-aflex"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:enable-scaleout"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:scaleout-bucket-count"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:scaleout-device-group"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:source-nat"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:nat-pool"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:pool"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-pool"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-pool"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:pool-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:auto"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:precedence"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:use-cgnv6"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:enable-playerid-check"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:ipinip"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:rtp-sip-call-id-match"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:use-rcv-hop-for-resp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:persist-type"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:redirect-fwd"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:eth-fwd"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:trunk-fwd"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:redirect-rev"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:eth-rev"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:trunk-rev"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:l7-hardware-assist"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:auth-cfg"
+                    }
+                  ]
                 },
                 {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:range"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:alternate-port"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:conn-limit"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:def-selection-if-pref-failed"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:service-group"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:no-dest-nat"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:port-translation"
+                  "component": "a10:Section",
+                  "props": {
+                    "title": "Template"
+                  },
+                  "children": [
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:policy-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-policy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-policy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-policy-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-policy-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-sip"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-smpp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-dblb"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:connection-reuse-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-connection-reuse"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-connection-reuse"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-connection-reuse-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-connection-reuse-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:dns-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-dns"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-dns"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-dns-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-dns-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:dynamic-service-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-dynamic-service"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-dynamic-service"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-dynamic-service-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-dynamic-service-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:persist"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:persist-source-ip-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-persist-source-ip"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-persist-source-ip"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-persist-source-ip-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-persist-source-ip-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:persist-destination-ip-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-persist-destination-ip"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-persist-destination-ip"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-persist-destination-ip-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-persist-destination-ip-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:persist-ssl-sid-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-persist-ssl-sid"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-persist-ssl-sid"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-persist-ssl-sid-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-persist-ssl-sid-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:persist-cookie-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-persist-cookie"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-persist-cookie"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-persist-cookie-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-persist-cookie-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-imap-pop3"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-smtp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:http-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-http"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-http"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-http-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-http-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:http-policy-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-http-policy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-http-policy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-http-policy-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-http-policy-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:redirect-to-https"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:external-service-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-external-service"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-external-service"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-external-service-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-external-service-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-reqmod-icap"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-respmod-icap"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-file-inspection"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:server-ssl-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-server-ssl"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-server-ssl"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-server-ssl-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-server-ssl-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:client-ssl-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-client-ssl"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-client-ssl"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-client-ssl-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-client-ssl-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-server-ssh"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-client-ssh"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:udp-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-udp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-udp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-udp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-udp-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:tcp-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-tcp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-tcp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-tcp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-tcp-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:virtual-port-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-virtual-port"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-virtual-port"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-virtual-port-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-virtual-port-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-ftp"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:diameter-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-diameter"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-diameter"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-diameter-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-diameter-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:cache-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-cache"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-cache"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-cache-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-cache-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-ram-cache"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-fix"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:waf-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-ssli"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:tcp-proxy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-tcp-proxy-client"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-tcp-proxy-server"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-tcp-proxy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:p-tcp-proxy"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:shared-partition-tcp-proxy-template"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-tcp-proxy-shared"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:use-default-if-no-server"
+                    },
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:template-scaleout"
+                    }
+                  ]
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "antd:Row",
+      "props": {
+        "type": "flex",
+        "justify": "center"
+      },
+      "children": [
+        {
+          "component": "antd:Col",
+          "props": {},
+          "children": [
+            {
+              "component": "a10:Button",
+              "props": {
+                "size": "large",
+                "type": "primary",
+                "htmlType": "submit",
+                "text": "Submit",
+                "style": {
+                  "marginRight": "10px"
+                },
+                "$events": [
+                  {
+                    "event": "onClick",
+                    "action": "submitToPool",
+                    "options": {
+                      "method": "POST",
+                      "params": {},
+                      "target": "slb.virtual-server"
+                    }
+                  }
+                ]
+              }
             },
             {
-              "component": "a10:Section",
+              "component": "a10:Button",
               "props": {
-                "title": "Advanced"
-              },
-              "children": [
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:proxy-layer"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:optimization-level"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:support-http2"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:name"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:reset"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:no-logging"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:use-alternate-port"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:alternate-port-number"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:alt-protocol1"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:serv-sel-fail"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:when-down"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:alt-protocol2"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:req-fail"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:when-down-protocol2"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:action"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:l7-service-chain"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:ha-conn-mirror"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:on-syn"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:skip-rev-hash"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:message-switching"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:force-routing-mode"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:rate-limit-pr-log"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:rate"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:per"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:secs"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:reset-on-server-selection-fail"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:clientip-sticky-nat"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:extended-stats"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:gslb-enable"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:view"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:snat-on-vip"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:stats-data-action"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:syn-cookie"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:expand"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:access-list"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:acl-id-list"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:acl-name-list"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:aflex-dummy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:aflex-scripts"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:no-auto-up-on-aflex"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:enable-scaleout"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:scaleout-bucket-count"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:scaleout-device-group"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:source-nat"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:nat-pool"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:pool"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-pool"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-pool"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:pool-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:auto"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:precedence"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:use-cgnv6"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:enable-playerid-check"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:ipinip"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:rtp-sip-call-id-match"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:use-rcv-hop-for-resp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:persist-type"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:redirect-fwd"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:eth-fwd"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:trunk-fwd"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:redirect-rev"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:eth-rev"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:trunk-rev"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:l7-hardware-assist"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:auth-cfg"
-                }
-              ]
-            },
-            {
-              "component": "a10:Section",
-              "props": {
-                "title": "Template"
-              },
-              "children": [
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:policy-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-policy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-policy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-policy-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-policy-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-sip"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-smpp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-dblb"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:connection-reuse-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-connection-reuse"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-connection-reuse"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-connection-reuse-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-connection-reuse-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:dns-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-dns"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-dns"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-dns-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-dns-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:dynamic-service-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-dynamic-service"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-dynamic-service"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-dynamic-service-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-dynamic-service-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:persist"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:persist-source-ip-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-persist-source-ip"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-persist-source-ip"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-persist-source-ip-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-persist-source-ip-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:persist-destination-ip-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-persist-destination-ip"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-persist-destination-ip"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-persist-destination-ip-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-persist-destination-ip-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:persist-ssl-sid-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-persist-ssl-sid"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-persist-ssl-sid"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-persist-ssl-sid-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-persist-ssl-sid-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:persist-cookie-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-persist-cookie"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-persist-cookie"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-persist-cookie-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-persist-cookie-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-imap-pop3"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-smtp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:http-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-http"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-http"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-http-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-http-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:http-policy-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-http-policy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-http-policy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-http-policy-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-http-policy-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:redirect-to-https"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:external-service-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-external-service"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-external-service"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-external-service-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-external-service-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-reqmod-icap"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-respmod-icap"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-file-inspection"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:server-ssl-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-server-ssl"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-server-ssl"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-server-ssl-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-server-ssl-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:client-ssl-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-client-ssl"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-client-ssl"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-client-ssl-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-client-ssl-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-server-ssh"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-client-ssh"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:udp-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-udp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-udp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-udp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-udp-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:tcp-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-tcp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-tcp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-tcp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-tcp-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:virtual-port-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-virtual-port"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-virtual-port"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-virtual-port-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-virtual-port-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-ftp"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:diameter-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-diameter"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-diameter"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-diameter-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-diameter-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:cache-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-cache"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-cache"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-cache-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-cache-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-ram-cache"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-fix"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:waf-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-ssli"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:tcp-proxy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-tcp-proxy-client"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-tcp-proxy-server"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-tcp-proxy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:p-tcp-proxy"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:shared-partition-tcp-proxy-template"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-tcp-proxy-shared"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:use-default-if-no-server"
-                },
-                {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server.port:template-scaleout"
-                }
-              ]
+                "size": "large",
+                "type": "secondary",
+                "text": "Cancel",
+                "$events": [
+                  {
+                    "event": "onClick",
+                    "action": "hideNode",
+                    "options": {}
+                  }
+                ]
+              }
             }
           ]
         }

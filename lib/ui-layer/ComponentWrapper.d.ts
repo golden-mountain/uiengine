@@ -3,8 +3,8 @@ import { IComponentWrapper, IComponentState, IPluginManager } from "../../typing
 declare class ComponentWrapper extends React.Component<IComponentWrapper, IComponentState> {
     pluginManager: IPluginManager;
     constructor(props: IComponentWrapper);
+    componentDidMount(): void;
     componentWillUnmount(): void;
-    componentWillUpdate(): void;
     render(): JSX.Element | null;
 }
 export default ComponentWrapper;

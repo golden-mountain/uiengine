@@ -8,6 +8,7 @@ export interface INodeProps {}
 export interface IStateInfo {
   data: any;
   state: IState;
+  [name: string]: any;
 }
 
 export interface ILayoutSchema {
@@ -34,12 +35,12 @@ export interface IUINode {
   parent?: IUINode;
   stateInfo: IStateInfo;
 
-  loadLayout(schema?: ILayoutSchema | string);
+  loadLayout(schema?: ILayoutSchema | string, workingMode?: IWorkingMode);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
-  loadData(source: IDataSource, loadData?: boolean);
+  loadData(source: IDataSource, workingMode?: IWorkingMode);
   getSchema(path?: string): ILayoutSchema;
-  replaceLayout(newSchema: ILayoutSchema | string);
-  updateLayout(loadData?: string);
+  replaceLayout(newSchema: ILayoutSchema | string, workingMode?: IWorkingMode);
+  updateLayout(workingMode?: IWorkingMode);
   genLiveLayout(schema: ILayoutSchema, data: any);
   clearLayout();
   getChildren(route?: Array<Number>);
@@ -51,6 +52,6 @@ export interface IUINode {
   // searchDepsNodes(myNode?: IUINode, layoutId?: string);
   getPluginManager(): IPluginManager;
   getRequest(): IRequest;
-  sendMessage();
+  sendMessage(force: boolean = false) {
   // getProps(): INodeProps;
 }

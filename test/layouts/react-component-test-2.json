@@ -10,7 +10,7 @@
       "component": "test:DivContainer",
       "datasource": "foo:bar.name",
       "props": {
-        "title": "Demo sub container"
+        "title": "foo.bar.name"
       }
     }
   ]

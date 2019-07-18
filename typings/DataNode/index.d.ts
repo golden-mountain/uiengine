@@ -1,5 +1,6 @@
 import { AxiosPromise } from "axios";
 import { IDataPool } from "../DataPool";
+import { IWorkingMode } from "../Workflow";
 
 export interface IDataSchema {
   endpoint: {};
@@ -10,6 +11,7 @@ export interface IDataSource {
   source: string;
   defaultValue?: any;
   autoload?: boolean;
+  loadOptions?: object;
 }
 
 export interface ICache {
@@ -35,7 +37,7 @@ export interface IDataNode {
 
   loadData(
     source?: IDataSource | string,
-    schemaOnly?: boolean
+    workingMode?: IWorkingMode
   ): Promise<AxiosPromise> | any;
   updateData(value: any, path?: string);
   deleteData(path?: any);

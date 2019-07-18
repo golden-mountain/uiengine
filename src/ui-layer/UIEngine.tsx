@@ -4,83 +4,110 @@ import {
   NodeController,
   ComponentWrapper,
   UIEngineRegister,
-  UIEngineContext
+  UIEngineContext,
+  setComponentState,
+  getComponent
 } from "..";
 
 import * as plugins from "../plugins";
 UIEngineRegister.registerPlugins(plugins);
 
 import {
-  IUINode,
   INodeController,
   IUIEngineProps,
-  IUIEngineStates
+  IUIEngineStates,
+  IUINode,
+  IUINodeRenderer
 } from "../../typings";
 
 export default class UIEngine extends React.Component<
   IUIEngineProps,
   IUIEngineStates
 > {
-  nodes: any = [];
   state = {
     nodes: [],
     activeNodeID: ""
   };
   nodeController: INodeController;
 
+  // bind to nodeController, to show it own instances
+  engineId = _.uniqueId("engine-");
+
   constructor(props: IUIEngineProps) {
     super(props);
     this.nodeController = NodeController.getInstance();
     this.nodeController.setRequestConfig(props.reqConfig);
+
     if (_.isFunction(props.onEngineCreate)) {
       props.onEngineCreate(this.nodeController);
     }
   }
 
   componentDidMount() {
-    const { layouts = [], test } = this.props;
-    let nodes: any = this.state.nodes;
+    this.nodeController.messager.setStateFunc(
+      this.engineId,
+      setComponentState.bind(this)
+    );
 
+    const { layouts = [], loadOptions = {} } = this.props;
+
+    this.nodeController.activeEngine(this.engineId);
     for (let layout in layouts) {
-      this.nodes[layout] = this.nodeController
-        .loadUINode(layouts[layout])
+      // no refresh the state from NodeController,
+      // otherwise it will cause deadloop
+      this.nodeController
+        .loadUINode(layouts[layout], "", loadOptions, false)
         .then((uiNode: IUINode) => {
-          this.nodeController.messager.setStateFunc(layout, this.setState);
-          nodes[layout] = uiNode;
+          const nodes = this.nodeController.nodes;
           this.setState({ nodes });
-          return uiNode;
         });
-    }
-    // for test purpose
-    if (test) {
-      test(Promise.all(this.nodes));
     }
   }
 
   componentWillUnmount() {
-    this.props.layouts.forEach((uiNode: any, layout: any) => {
-      const layoutName = layout;
-      this.nodeController.messager.removeStateFunc(layoutName);
-    });
+    this.nodeController.messager.removeStateFunc(this.engineId);
   }
 
   render() {
-    const { layouts, reqConfig, test, onEngineCreate, ...rest } = this.props;
+    const { layouts, reqConfig, onEngineCreate, ...rest } = this.props;
+    const context = {
+      controller: this.nodeController
+    };
 
-    return this.state.nodes.map((uiNode: IUINode, layoutKey: number) => {
-      const context = {
-        controller: this.nodeController,
-        uiNode
-      };
-      return (
-        <UIEngineContext.Provider value={context}>
-          <ComponentWrapper
-            uiNode={uiNode}
-            {...rest}
-            key={`layout-${layoutKey}`}
-          />
-        </UIEngineContext.Provider>
-      );
-    });
+    // only get nodes for this engine
+    const validNodes = _.pickBy(
+      this.state.nodes,
+      (nodeRenderer: IUINodeRenderer) => {
+        return nodeRenderer.engineId === this.engineId;
+      }
+    );
+
+    return (
+      <UIEngineContext.Provider value={context}>
+        {_.entries(validNodes).map((entry: any) => {
+          const [layoutKey, uiNodeRenderer] = entry;
+          const { uiNode, options = {}, visible = true } = uiNodeRenderer;
+          const { container } = options;
+
+          if (!visible) return null;
+
+          // wrapper if provided
+          let Container = ({ children }: any) => children;
+          if (container) {
+            Container = getComponent(container);
+          }
+
+          return (
+            <Container {...options} visible>
+              <ComponentWrapper
+                uiNode={uiNode}
+                {...rest}
+                key={`layout-${layoutKey}`}
+              />
+            </Container>
+          );
+        })}
+      </UIEngineContext.Provider>
+    );
   }
 }

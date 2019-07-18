@@ -1,12 +1,17 @@
 import _ from "lodash";
-import { IUINode } from "../../../typings";
-import { IPluginFunc, IPlugin } from "../../../typings";
+import { NodeController } from "../..";
+import { IPluginFunc, IPlugin, IUINode } from "../../../typings";
 
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   return (e: any, options: any) => {
-    if (e.stopPropagation) {
-      e.stopPropagation();
+    // console.log(uiNode.schema, options, "... on loadUI plugin");
+    const { layout, container } = options;
+    if (!layout) {
+      return false;
     }
+    const nodeController = NodeController.getInstance();
+    const workflow = nodeController.workflow;
+    return workflow.activeLayout(layout, { container });
   };
 };
 

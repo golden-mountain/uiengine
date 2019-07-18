@@ -32,7 +32,11 @@ function compareRule(expected: any, actual: any, rule: string = "is") {
   }
 }
 
-function compareDataLogic(
+export function setComponentState(this: any, state: any) {
+  return this.setState(state);
+}
+
+export function compareDataLogic(
   expected: any,
   actual: any,
   strategy: string = "and",
@@ -57,7 +61,7 @@ function compareDataLogic(
   return result;
 }
 
-function compareStateLogic(
+export function compareStateLogic(
   expected: IState,
   actual: IState,
   strategy = "and",
@@ -73,7 +77,7 @@ function compareStateLogic(
   return result;
 }
 
-function stateCompare(
+export function stateCompare(
   target: IUINode,
   deps: any,
   name: string,
@@ -88,8 +92,7 @@ function stateCompare(
       const expected = _.get(deps, name);
       result = compareStateLogic(expected, actual, strategy);
     } else {
-      // TO FIX: Need a case to improve this
-      // recursively find other UI Node
+      // TO FIX: if load after the dep target node,  the status maybe false
       result = stateDepsResolver(stateNode, name);
     }
   }
@@ -97,7 +100,7 @@ function stateCompare(
   return result;
 }
 
-function dataCompare(
+export function dataCompare(
   target: IUINode,
   expected: any,
   strategy: string = "and",
@@ -123,6 +126,7 @@ export function stateDepsResolver(stateNode: IStateNode, stateName: string) {
       if (dep.selector) {
         // depends on which node?
         const depTargetNodes = searchNodes(dep.selector, uiNode.rootName);
+
         if (depTargetNodes.length) {
           // searched the props met the condition
           depTargetNodes.forEach((depTargetNode: any) => {
