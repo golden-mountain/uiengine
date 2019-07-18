@@ -28,9 +28,10 @@ export interface IWorkflow {
   saveNodes(nodes: Array<IUINode> | INodeProps);
 
   // data operations
-  updateData(source: IDataSource, data: any);
   submit(sources: Array<IDataSource>);
+
   // data pool
   submitToPool(connectOptions: IConnectOptions, refreshLayout?: string);
   removeFromPool(source: string, refreshLayout?: string);
+  updatePool(source: string, data: any, refreshLayout?: string);
 }

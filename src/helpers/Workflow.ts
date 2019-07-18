@@ -10,7 +10,7 @@ import {
   IConnectOptions
 } from "../../typings";
 
-import { searchNodes, parseRootName, DataPool } from "../helpers";
+import { searchNodes, parseRootName, DataPool, submitToAPI } from "../helpers";
 import { UINode } from "../data-layer";
 
 export default class Workflow implements IWorkflow {
@@ -102,46 +102,79 @@ export default class Workflow implements IWorkflow {
 
   updateState(nodes: Array<IUINode> | INodeProps, state: any) {}
 
-  saveNodes(nodes: Array<IUINode> | INodeProps) {}
+  async saveNodes(nodes: Array<IUINode> | INodeProps) {
+    let uiNodes: any = nodes;
+    if (!_.isArray(nodes)) {
+      uiNodes = searchNodes(nodes, this.nodeController.activeLayout);
+    }
 
-  updateData(source: string, data: any) {}
+    let dataSources: Array<IDataSource> = [];
+    // fetch data source
+    uiNodes.forEach((uiNode: IUINode) => {
+      dataSources.push(uiNode.dataNode.source);
+    });
 
-  submit(sources: Array<IDataSource>) {}
+    // submit
+    return await this.submit(dataSources);
+  }
 
-  submitToPool(connectOptions: IConnectOptions, refreshLayout?: string) {
+  async submit(sources: Array<IDataSource>) {
+    return await submitToAPI(sources);
+  }
+
+  async submitToPool(connectOptions: IConnectOptions, refreshLayout?: string) {
     const dataPool = DataPool.getInstance();
     const { source, target, options } = connectOptions;
     let clearSource = _.get(options, "clearSource");
     dataPool.merge(source, target, clearSource);
 
+    let promises: any = [];
     // refresh target ui node
-    if (refreshLayout !== undefined) {
-      const selector = {
-        datasource: target
-      };
-      const selectedNodes = searchNodes(selector, refreshLayout);
-      selectedNodes.forEach((node: IUINode) => {
-        // send message
-        node.updateLayout();
-        node.sendMessage(true);
-      });
+    const selector = {
+      datasource: target
+    };
+    const selectedNodes = searchNodes(selector, refreshLayout);
+
+    for (let index in selectedNodes) {
+      const node = selectedNodes[index];
+      // send message
+      await node.updateLayout();
     }
+    return promises;
   }
 
-  removeFromPool(source: string, refreshLayout?: string) {
+  async removeFromPool(source: string, refreshLayout?: string) {
     const dataPool = DataPool.getInstance();
     dataPool.clear(source);
 
     // refresh target ui node
-    if (refreshLayout !== undefined) {
-      const selector = {
-        datasource: source
-      };
-      const selectedNodes = searchNodes(selector, refreshLayout);
-      selectedNodes.forEach((node: IUINode) => {
-        node.updateLayout();
-        node.sendMessage(true);
-      });
+    // only refresh parent if the path suffixed with [0] or .0
+    const updateSource = source.replace(/\.?\[?\d+\]?$/, "");
+    const selector = {
+      datasource: updateSource
+    };
+
+    const selectedNodes = searchNodes(selector, refreshLayout);
+    for (let index in selectedNodes) {
+      const node = selectedNodes[index];
+      // send message
+      await node.updateLayout();
+    }
+  }
+
+  async updatePool(source: string, data: any, refreshLayout?: string) {
+    const dataPool = DataPool.getInstance();
+    dataPool.set(data, source);
+
+    // refresh target ui node
+    const selector = {
+      datasource: source
+    };
+    const selectedNodes = searchNodes(selector, refreshLayout);
+    for (let index in selectedNodes) {
+      const node = selectedNodes[index];
+      // send message
+      await node.updateLayout();
     }
   }
 }

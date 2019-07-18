@@ -11,7 +11,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     let target = `${options.target}:`;
     // console.log(options, uiNode.dataNode.dataPool.get(target, false));
     // const data = uiNode.dataNode.dataPool.get(target, false);
-    submitToAPI([target], "post").then((result: any) => {
+    submitToAPI([{ source: target }], "post").then((result: any) => {
       console.log(result);
     });
   };
