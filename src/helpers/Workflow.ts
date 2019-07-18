@@ -138,15 +138,20 @@ export default class Workflow implements IWorkflow {
     const dataPool = DataPool.getInstance();
     const { source, target, options } = connectOptions;
     let clearSource = _.get(options, "clearSource");
+    // bug: 1. source data did not removed from DataNode
+    // bug: 2. add empty item
     dataPool.merge(source, target, clearSource);
-
     let promises: any = [];
     // refresh target ui node
-    const selector = {
-      datasource: target
-    };
-    const selectedNodes = searchNodes(selector, refreshLayout);
 
+    let selector = connectOptions.targetSelector;
+    if (!selector) {
+      selector = {
+        datasource: target.replace(/\[\d*\]$/, "")
+      };
+    }
+
+    const selectedNodes = searchNodes(selector, refreshLayout);
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message

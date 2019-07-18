@@ -20,7 +20,6 @@ export default class DataPool implements IDataPool {
     path = formatSource(path);
     let p = path.replace("[]", "");
     let d = _.get(domainData, p, path.indexOf("[]") > -1 ? [] : null);
-
     p = `${domainName}.${p}`;
     if (_.isArray(d)) {
       if (!_.isArray(data)) {

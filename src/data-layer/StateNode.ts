@@ -36,7 +36,6 @@ export default class StateNode implements IStateNode {
       const node = depNodes[key];
       await node.getStateNode().renewStates();
     }
-
     this.uiNode.sendMessage();
     return this.state;
   }

@@ -167,7 +167,6 @@ export default class UINode implements IUINode {
     workingMode?: IWorkingMode
   ) {
     let liveSchema = schema;
-
     if (liveSchema["datasource"]) {
       await this.loadData(liveSchema["datasource"], workingMode);
     }

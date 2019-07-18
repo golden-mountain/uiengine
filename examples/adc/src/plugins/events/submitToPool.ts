@@ -1,10 +1,13 @@
 // import _ from "lodash";
-import { NodeController } from "UIEngine";
+import { Workflow } from "UIEngine";
 import { IPluginFunc, IPlugin, IUINode } from "UIEngine/typings";
 
 const callback: IPluginFunc = (uiNode: IUINode) => {
-  return (e: any, options: any) => {
-    console.log(options);
+  return async (e: any, options: any) => {
+    // console.log(options);
+    const workflow = Workflow.getInstance();
+    await workflow.submitToPool(options);
+    workflow.deactiveLayout();
   };
 };
 

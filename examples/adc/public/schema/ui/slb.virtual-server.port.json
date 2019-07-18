@@ -841,9 +841,11 @@
                     "event": "onClick",
                     "action": "submitToPool",
                     "options": {
-                      "method": "POST",
-                      "params": {},
-                      "target": "slb.virtual-server"
+                      "options": {
+                        "clearSource": true
+                      },
+                      "source": "slb.virtual-server.port:",
+                      "target": "slb.virtual-server:port-list[]"
                     }
                   }
                 ]

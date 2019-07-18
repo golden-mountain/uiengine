@@ -1,3 +1,5 @@
+import { INodeProps } from "../UINode";
+
 export interface IConnectOptions {
   source: string; // from data source like a.b.c
   target: string; // target data source like foo.bar
@@ -5,6 +7,7 @@ export interface IConnectOptions {
     clearSource: boolean;
     [name: string]: any;
   };
+  targetSelector?: INodeProps;
 }
 
 export interface IDataPool {
