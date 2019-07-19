@@ -84,7 +84,7 @@ export default class UIEngine extends React.Component<
 
     return (
       <UIEngineContext.Provider value={context}>
-        {_.entries(validNodes).map((entry: any) => {
+        {_.entries(validNodes).map((entry: any, index: number) => {
           const [layoutKey, uiNodeRenderer] = entry;
           const { uiNode, options = {}, visible = true } = uiNodeRenderer;
           const { container } = options;
@@ -98,7 +98,7 @@ export default class UIEngine extends React.Component<
           }
 
           return (
-            <Container {...options} visible>
+            <Container {...options} visible key={`container-${index}`}>
               <ComponentWrapper
                 uiNode={uiNode}
                 {...rest}
