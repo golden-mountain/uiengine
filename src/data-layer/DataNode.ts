@@ -25,7 +25,7 @@ export default class DataNode implements IDataNode {
   source: IDataSource;
   schema?: any;
   rootSchema?: any;
-  data: any;
+  // data: any;
   // cacheID: string = "";
   dataPool: IDataPool;
 
@@ -34,6 +34,9 @@ export default class DataNode implements IDataNode {
     uiNode: IUINode,
     request?: IRequest
   ) {
+    // get instance of data pool
+    this.dataPool = DataPool.getInstance();
+
     this.uiNode = uiNode;
     this.source = this.setDataSource(source);
 
@@ -45,15 +48,20 @@ export default class DataNode implements IDataNode {
     // get id
     this.dataEngine = DataEngine.getInstance();
     this.dataEngine.setRequest(this.request);
+  }
 
-    // get instance of data pool
-    this.dataPool = DataPool.getInstance();
+  set data(value: any) {
+    this.dataPool.set(value, this.source.source);
+  }
+
+  get data() {
+    return this.dataPool.get(this.source.source, false);
   }
 
   setDataSource(source: IDataSource | string) {
     if (_.isObject(source)) {
-      this.data = source.defaultValue;
       this.source = source;
+      this.data = source.defaultValue;
     } else {
       // give default data
       this.source = {
@@ -112,14 +120,14 @@ export default class DataNode implements IDataNode {
         // }
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource, null);
-        this.dataPool.set(result, this.source.source);
+        // this.dataPool.set(result, this.source.source);
+        this.data = result;
       }
     }
 
     // assign root schema if not $dummy data
     this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
 
-    this.data = result;
     // load this node schema
     this.schema = await this.pluginManager.executePlugins(
       "data.schema.parser",
@@ -136,7 +144,8 @@ export default class DataNode implements IDataNode {
 
     // update this data
     if (path) {
-      _.set(this.data, path, value);
+      let data = this.data;
+      _.set(data, path, value);
     } else {
       this.data = value;
     }
@@ -162,7 +171,7 @@ export default class DataNode implements IDataNode {
 
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
-      this.dataPool.set(this.data, this.source.source);
+      // this.dataPool.set(this.data, this.source.source);
       this.dataPool.clearError(this.source.source);
     } else {
       this.dataPool.setError(this.source.source, this.errorInfo);
@@ -182,6 +191,7 @@ export default class DataNode implements IDataNode {
     let noUpdateLayout = true;
 
     const status = _.get(this.errorInfo, "status", true);
+    let data = this.data;
     if (status) {
       if (path !== undefined) {
         if ((_.isArray(path) || _.isNumber(path)) && _.isArray(this.data)) {
@@ -189,11 +199,11 @@ export default class DataNode implements IDataNode {
             noUpdateLayout = false;
           }
 
-          _.remove(this.data, (e: any, index: number) => {
+          _.remove(data, (e: any, index: number) => {
             return _.isArray(path) ? path.indexOf(index) > -1 : index === path;
           });
         } else {
-          _.unset(this.data, path);
+          _.unset(data, path);
         }
       } else {
         this.data = null;
@@ -201,7 +211,7 @@ export default class DataNode implements IDataNode {
 
       // not array, can't delete directly
       if (typeof this.data !== "object") {
-        this.dataPool.set(this.data, this.source.source);
+        // this.dataPool.set(this.data, this.source.source);
         this.dataPool.clearError(this.source.source);
       }
       // update state without sending message

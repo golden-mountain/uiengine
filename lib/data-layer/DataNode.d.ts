@@ -8,9 +8,9 @@ export default class DataNode implements IDataNode {
     source: IDataSource;
     schema?: any;
     rootSchema?: any;
-    data: any;
     dataPool: IDataPool;
     constructor(source: IDataSource | string, uiNode: IUINode, request?: IRequest);
+    data: any;
     setDataSource(source: IDataSource | string): IDataSource;
     getErrorInfo(): any;
     getData(path?: string): any;
