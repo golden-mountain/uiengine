@@ -7,7 +7,8 @@ import {
   IDataSource,
   INodeProps,
   IWorkingMode,
-  IConnectOptions
+  IConnectOptions,
+  IPluginExecutionConfig
 } from "../../typings";
 
 import { searchNodes, parseRootName, DataPool, submitToAPI } from "../helpers";
@@ -131,33 +132,59 @@ export default class Workflow implements IWorkflow {
   }
 
   async submit(sources: Array<IDataSource>) {
-    return await submitToAPI(sources);
+    // could stop the commit
+    const exeConfig: IPluginExecutionConfig = {
+      stopWhenEmpty: true,
+      returnLastValue: true
+    };
+    const couldCommit = await this.nodeController.pluginManager.executePlugins(
+      "data.commit.could",
+      exeConfig
+    );
+    if (couldCommit === undefined || couldCommit === true) {
+      return await submitToAPI(sources);
+    } else {
+      return couldCommit;
+    }
   }
 
   async submitToPool(connectOptions: IConnectOptions, refreshLayout?: string) {
-    const dataPool = DataPool.getInstance();
-    const { source, target, options } = connectOptions;
-    let clearSource = _.get(options, "clearSource");
-    // bug: 1. source data did not removed from DataNode
-    // bug: 2. add empty item
-    dataPool.merge(source, target, clearSource);
-    let promises: any = [];
-    // refresh target ui node
+    // could stop the commit
+    const exeConfig: IPluginExecutionConfig = {
+      stopWhenEmpty: true,
+      returnLastValue: true
+    };
+    const couldCommit = await this.nodeController.pluginManager.executePlugins(
+      "data.commit.could",
+      exeConfig
+    );
+    if (couldCommit === undefined || couldCommit === true) {
+      const dataPool = DataPool.getInstance();
+      const { source, target, options } = connectOptions;
+      let clearSource = _.get(options, "clearSource");
+      // bug: 1. source data did not removed from DataNode
+      // bug: 2. add empty item
+      dataPool.merge(source, target, clearSource);
+      let promises: any = [];
+      // refresh target ui node
 
-    let selector = connectOptions.targetSelector;
-    if (!selector) {
-      selector = {
-        datasource: target.replace(/\[\d*\]$/, "")
-      };
-    }
+      let selector = connectOptions.targetSelector;
+      if (!selector) {
+        selector = {
+          datasource: target.replace(/\[\d*\]$/, "")
+        };
+      }
 
-    const selectedNodes = searchNodes(selector, refreshLayout);
-    for (let index in selectedNodes) {
-      const node = selectedNodes[index];
-      // send message
-      await node.updateLayout();
+      const selectedNodes = searchNodes(selector, refreshLayout);
+      for (let index in selectedNodes) {
+        const node = selectedNodes[index];
+        // send message
+        await node.updateLayout();
+      }
+      return promises;
+    } else {
+      return couldCommit;
     }
-    return promises;
   }
 
   async removeFromPool(source: string, refreshLayout?: string) {

@@ -9,24 +9,19 @@ import {
   IDataEngine,
   IDataPool,
   IDataSource,
-  IWorkingMode
+  IWorkingMode,
+  IErrorInfo
 } from "../../typings";
 import { DataEngine } from "../helpers";
 
 export default class DataNode implements IDataNode {
   private request: IRequest = {} as IRequest;
-  errorInfo: any = {
-    status: undefined,
-    code: ""
-  };
   pluginManager: IPluginManager = new PluginManager(this);
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: IDataSource;
   schema?: any;
   rootSchema?: any;
-  // data: any;
-  // cacheID: string = "";
   dataPool: IDataPool;
 
   constructor(
@@ -62,6 +57,18 @@ export default class DataNode implements IDataNode {
     }
   }
 
+  set errorInfo(error: IErrorInfo) {
+    if (this.dataPool instanceof DataPool) {
+      this.dataPool.setError(this.source.source, error);
+    }
+  }
+
+  get errorInfo() {
+    if (this.dataPool instanceof DataPool) {
+      return this.dataPool.getError(this.source.source);
+    }
+  }
+
   setDataSource(source: IDataSource | string) {
     if (_.isObject(source)) {
       this.source = source;
@@ -74,10 +81,6 @@ export default class DataNode implements IDataNode {
       };
     }
     return this.source;
-  }
-
-  getErrorInfo() {
-    return this.errorInfo;
   }
 
   getData(path?: string) {
@@ -177,8 +180,6 @@ export default class DataNode implements IDataNode {
     if (status) {
       // this.dataPool.set(this.data, this.source.source);
       this.dataPool.clearError(this.source.source);
-    } else {
-      this.dataPool.setError(this.source.source, this.errorInfo);
     }
     return status;
   }
@@ -226,8 +227,6 @@ export default class DataNode implements IDataNode {
       } else {
         await this.uiNode.updateLayout();
       }
-    } else {
-      this.dataPool.setError(this.source.source, this.errorInfo);
     }
     return status;
   }

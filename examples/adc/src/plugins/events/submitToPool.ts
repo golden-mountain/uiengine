@@ -6,8 +6,10 @@ const callback: IPluginFunc = (uiNode: IUINode) => {
   return async (e: any, options: any) => {
     // console.log(options);
     const workflow = Workflow.getInstance();
-    await workflow.submitToPool(options);
-    workflow.deactiveLayout();
+    const result = await workflow.submitToPool(options);
+    if (result) {
+      workflow.deactiveLayout();
+    }
   };
 };
 

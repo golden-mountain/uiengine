@@ -18,5 +18,6 @@ export interface IDataPool {
   merge(fromPath: string, toPath: string, clearFromPath: boolean = false);
   clear(path?: string);
   setError(field: string, error: any);
+  getError(source: string);
   clearError(source: any);
 }

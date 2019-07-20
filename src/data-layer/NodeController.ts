@@ -11,10 +11,11 @@ import {
   IWorkflow,
   IUINodeRenderer,
   IRequest,
-  ILoadOptions
+  ILoadOptions,
+  IPluginManager
 } from "../../typings";
 import { UINode } from "../data-layer";
-import { Messager, Request, Workflow } from "../helpers";
+import { Messager, Request, Workflow, PluginManager } from "../helpers";
 import { searchNodes } from "../helpers";
 
 export default class NodeController implements INodeController {
@@ -25,7 +26,7 @@ export default class NodeController implements INodeController {
     }
     return NodeController.instance as NodeController;
   };
-
+  pluginManager: IPluginManager = new PluginManager(this);
   // layout path
   errorInfo: IErrorInfo = {};
   // layouts: object = {};

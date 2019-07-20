@@ -1,7 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
-import { UIEngineContext, ComponentWrapper, UINode, DataPool } from "UIEngine";
-import { IUINode } from "UIEngine/typings";
+import { UIEngineContext, UINode, DataPool } from "UIEngine";
 
 export class A10Modal extends React.Component<any, any> {
   static contextType = UIEngineContext;

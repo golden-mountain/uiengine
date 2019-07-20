@@ -1,7 +1,8 @@
-import { IUINode, IMessager, INodeController, INodeProps, ILayoutSchema, IRequestConfig, IErrorInfo, IWorkflow, IUINodeRenderer, IRequest, ILoadOptions } from "../../typings";
+import { IUINode, IMessager, INodeController, INodeProps, ILayoutSchema, IRequestConfig, IErrorInfo, IWorkflow, IUINodeRenderer, IRequest, ILoadOptions, IPluginManager } from "../../typings";
 export default class NodeController implements INodeController {
     static instance: INodeController;
     static getInstance: () => NodeController;
+    pluginManager: IPluginManager;
     errorInfo: IErrorInfo;
     nodes: {
         [name: string]: IUINodeRenderer;

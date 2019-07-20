@@ -14,6 +14,13 @@ export default class DataPool implements IDataPool {
   data: any = {};
   errors: any = {};
 
+  private getRealPath(source: string) {
+    const domainName = getDomainName(source);
+    let path = formatSource(source);
+    let p = `${domainName}.${path}`;
+    return p;
+  }
+
   set(data: any, path: string) {
     const domainName = getDomainName(path);
     const domainData = _.get(this.data, domainName);
@@ -94,7 +101,13 @@ export default class DataPool implements IDataPool {
   }
 
   setError(source: string, error: any) {
-    this.errors[source] = error;
+    const path = this.getRealPath(source);
+    _.set(this.errors, path, error);
+  }
+
+  getError(source: string) {
+    const path = this.getRealPath(source);
+    return _.get(this.errors, path);
   }
 
   clearError(source: any) {

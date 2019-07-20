@@ -1,4 +1,4 @@
-import _ from "lodash";
+// import _ from "lodash";
 import { IPluginFunc, IPlugin } from "UIEngine/typings";
 
 const callback: IPluginFunc = (component: any) => {

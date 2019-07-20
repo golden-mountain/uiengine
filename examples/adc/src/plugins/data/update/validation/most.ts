@@ -57,16 +57,19 @@ const validationMap = {
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   const data = dataNode.data;
   const meta = dataNode.getSchema("cm-meta");
-  let result;
 
-  if (meta && meta.format) {
-    const format = _.camelCase(meta.format);
-    const callback = _.get(validationMap, format);
-    if (callback) {
-      result = callback ? callback(data, meta) : {};
+  if (meta) {
+    if (meta["object-key"] && _.isEmpty(data)) {
+      return { status: false, code: "Field required" };
+    }
+    if (meta.format && !_.isEmpty(data)) {
+      const format = _.camelCase(meta.format);
+      const callback = _.get(validationMap, format);
+      if (callback) {
+        return callback ? callback(data, meta) : {};
+      }
     }
   }
-  return result;
 };
 
 export const most: IPlugin = {

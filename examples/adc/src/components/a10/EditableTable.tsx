@@ -187,7 +187,7 @@ export class EditableTable extends React.Component<any, any> {
   };
 
   render() {
-    const { dataSource, dataKey } = this.state;
+    const { dataSource } = this.state;
     // const { modal, uinode } = this.props;
     const components = {
       body: {
@@ -198,7 +198,7 @@ export class EditableTable extends React.Component<any, any> {
     // add the key for each dataSource
     if (dataSource && dataSource.length) {
       for (let i = 0; i < dataSource.length; i++) {
-        this.state.dataSource[i]["key"] = i;
+        //this.state.dataSource[i]["key"] = i;
       }
     }
     const columns = this.columns.map((col: any) => {

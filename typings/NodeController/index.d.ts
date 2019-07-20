@@ -10,6 +10,7 @@ export interface IUINodeRenderer {
 }
 
 export interface INodeController {
+  pluginManager: IPluginManager;
   errorInfo: IErrorInfo;
   // layouts: object;
   nodes: any;
