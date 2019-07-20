@@ -95,8 +95,10 @@ export default class DataPool implements IDataPool {
   merge(fromPath: string, toPath: string, clearFromPath: boolean = false) {
     let result = {};
     result = this.get(fromPath, false);
-    this.set(result, toPath);
-    if (clearFromPath) this.clear(fromPath);
+    if (!_.isEmpty(result)) {
+      this.set(result, toPath);
+      if (clearFromPath) this.clear(fromPath);
+    }
     return result;
   }
 
@@ -111,6 +113,7 @@ export default class DataPool implements IDataPool {
   }
 
   clearError(source: any) {
-    _.unset(this.errors, source);
+    const path = this.getRealPath(source);
+    _.unset(this.errors, path);
   }
 }

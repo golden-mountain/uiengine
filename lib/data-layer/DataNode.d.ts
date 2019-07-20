@@ -8,6 +8,7 @@ export default class DataNode implements IDataNode {
     schema?: any;
     rootSchema?: any;
     dataPool: IDataPool;
+    workingMode?: IWorkingMode;
     constructor(source: IDataSource | string, uiNode: IUINode, request?: IRequest);
     data: any;
     errorInfo: IErrorInfo;
@@ -17,6 +18,6 @@ export default class DataNode implements IDataNode {
     getRootSchema(): any;
     getPluginManager(): IPluginManager;
     loadData(source?: IDataSource | string, workingMode?: IWorkingMode): Promise<any>;
-    updateData(value: any, path?: string): Promise<number | true>;
-    deleteData(path?: any): Promise<number | true>;
+    updateData(value: any, path?: string, workingMode?: IWorkingMode): Promise<number | true>;
+    deleteData(path?: any, workingMode?: IWorkingMode): Promise<number | true>;
 }

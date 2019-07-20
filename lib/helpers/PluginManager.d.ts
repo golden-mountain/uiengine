@@ -11,8 +11,8 @@ export default class PluginManager implements IPluginManager {
     static unloadPlugins(type?: string, name?: string): void;
     loadPlugins(newPlugins: IPlugins): IPlugins;
     static loadPlugins(newPlugins: IPlugins): IPlugins;
-    executePlugins(type: string, config?: IPluginExecutionConfig): Promise<any>;
-    executeSyncPlugins(type: string, config?: IPluginExecutionConfig): any;
-    executePlugin(plugin: IPlugin): any;
+    executePlugins(type: string, config?: IPluginExecutionConfig, options?: any): Promise<any>;
+    executeSyncPlugins(type: string, config?: IPluginExecutionConfig, options?: any): any;
+    executePlugin(plugin: IPlugin, options?: any): any;
     setErrorInfo(type: string, name: string, value: any): IErrorInfo;
 }

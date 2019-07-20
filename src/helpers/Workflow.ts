@@ -138,8 +138,9 @@ export default class Workflow implements IWorkflow {
       returnLastValue: true
     };
     const couldCommit = await this.nodeController.pluginManager.executePlugins(
-      "data.commit.could",
-      exeConfig
+      "data.commit.workflow.could",
+      exeConfig,
+      sources
     );
     if (couldCommit === undefined || couldCommit === true) {
       return await submitToAPI(sources);
@@ -155,8 +156,9 @@ export default class Workflow implements IWorkflow {
       returnLastValue: true
     };
     const couldCommit = await this.nodeController.pluginManager.executePlugins(
-      "data.commit.could",
-      exeConfig
+      "data.commit.workflow.could",
+      exeConfig,
+      connectOptions
     );
     if (couldCommit === undefined || couldCommit === true) {
       const dataPool = DataPool.getInstance();
@@ -179,7 +181,7 @@ export default class Workflow implements IWorkflow {
       for (let index in selectedNodes) {
         const node = selectedNodes[index];
         // send message
-        await node.updateLayout();
+        await node.updateLayout(this.workingMode);
       }
       return promises;
     } else {
@@ -202,7 +204,7 @@ export default class Workflow implements IWorkflow {
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message
-      await node.updateLayout();
+      await node.updateLayout(this.workingMode);
     }
   }
 
@@ -218,7 +220,7 @@ export default class Workflow implements IWorkflow {
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message
-      await node.updateLayout();
+      await node.updateLayout(this.workingMode);
     }
   }
 }

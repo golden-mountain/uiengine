@@ -9,6 +9,9 @@ const callback: IPluginFunc = (uiNode: IUINode) => {
     const result = await workflow.submitToPool(options);
     if (result) {
       workflow.deactiveLayout();
+    } else {
+      // to write to a global notification
+      console.error("Data should not empty when submitting");
     }
   };
 };

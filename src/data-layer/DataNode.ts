@@ -23,6 +23,7 @@ export default class DataNode implements IDataNode {
   schema?: any;
   rootSchema?: any;
   dataPool: IDataPool;
+  workingMode?: IWorkingMode;
 
   constructor(
     source: IDataSource | string,
@@ -67,6 +68,7 @@ export default class DataNode implements IDataNode {
     if (this.dataPool instanceof DataPool) {
       return this.dataPool.getError(this.source.source);
     }
+    return {};
   }
 
   setDataSource(source: IDataSource | string) {
@@ -115,8 +117,12 @@ export default class DataNode implements IDataNode {
       exeConfig
     );
 
+    if (workingMode) {
+      this.workingMode = workingMode;
+    }
+
     if (result === undefined) {
-      if (_.get(workingMode, "mode") === "new" || !this.source.autoload) {
+      if (_.get(this.workingMode, "mode") === "new" || !this.source.autoload) {
         await this.dataEngine.loadSchema(this.source);
         result = null;
       } else {
@@ -143,7 +149,7 @@ export default class DataNode implements IDataNode {
     return this.data;
   }
 
-  async updateData(value: any, path?: string) {
+  async updateData(value: any, path?: string, workingMode?: IWorkingMode) {
     let noUpdateLayout = true;
     if (_.isArray(value) && this.uiNode.schema.$children) {
       noUpdateLayout = _.isEqual(value, this.data);
@@ -173,7 +179,7 @@ export default class DataNode implements IDataNode {
       await this.uiNode.pluginManager.executePlugins("ui.parser");
       await this.uiNode.stateNode.renewStates();
     } else {
-      await this.uiNode.updateLayout();
+      await this.uiNode.updateLayout(workingMode || this.workingMode);
     }
 
     const status = _.get(this.errorInfo, "status", true);
@@ -184,7 +190,7 @@ export default class DataNode implements IDataNode {
     return status;
   }
 
-  async deleteData(path?: any) {
+  async deleteData(path?: any, workingMode?: IWorkingMode) {
     const exeConfig: IPluginExecutionConfig = {
       stopWhenEmpty: true,
       returnLastValue: true
@@ -225,7 +231,7 @@ export default class DataNode implements IDataNode {
         await this.uiNode.pluginManager.executePlugins("ui.parser");
         await this.uiNode.stateNode.renewStates();
       } else {
-        await this.uiNode.updateLayout();
+        await this.uiNode.updateLayout(workingMode || this.workingMode);
       }
     }
     return status;

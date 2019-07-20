@@ -25,7 +25,7 @@ export interface IDataConnector {
 }
 
 export interface IDataNode {
-  errorInfo: IErrorInfo;
+  errorInfo?: IErrorInfo;
   pluginManager: IPluginManager;
   dataEngine: IDataEngine;
   uiNode: IUINode;
@@ -35,13 +35,14 @@ export interface IDataNode {
   data: any;
   updatingData?: any;
   dataPool: IDataPool;
+  workingMode?: IWorkingMode;
 
   loadData(
     source?: IDataSource | string,
     workingMode?: IWorkingMode
   ): Promise<AxiosPromise> | any;
-  updateData(value: any, path?: string);
-  deleteData(path?: any);
+  updateData(value: any, path?: string, workingMode?: IWorkingMode);
+  deleteData(path?: any, workingMode?: IWorkingMode);
   getData(path?: string);
   getSchema(path?: string);
   getPluginManager(): IPluginManager;
