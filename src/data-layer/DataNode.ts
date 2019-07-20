@@ -51,11 +51,15 @@ export default class DataNode implements IDataNode {
   }
 
   set data(value: any) {
-    this.dataPool.set(value, this.source.source);
+    if (this.dataPool instanceof DataPool) {
+      this.dataPool.set(value, this.source.source);
+    }
   }
 
   get data() {
-    return this.dataPool.get(this.source.source, false);
+    if (this.dataPool instanceof DataPool) {
+      return this.dataPool.get(this.source.source, false);
+    }
   }
 
   setDataSource(source: IDataSource | string) {
