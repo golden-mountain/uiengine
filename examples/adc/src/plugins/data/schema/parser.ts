@@ -8,7 +8,8 @@ import { IPluginFunc, IPlugin, IDataNode } from "UIEngine/typings";
  */
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   const rootSchema = dataNode.getRootSchema();
-  let name = dataNode.source.source.replace(":", ".");
+  let schemaPath = dataNode.source.schema || dataNode.source.source;
+  let name = schemaPath.replace(":", ".");
   const regex = /\[\d+\]/;
   name = name.replace(regex, "");
   // console.log(_.cloneDeep(rootSchema), name);

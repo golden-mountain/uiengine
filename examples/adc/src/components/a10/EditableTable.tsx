@@ -4,7 +4,6 @@ import { Table, Input, Button, Popconfirm, Form, Icon } from "antd";
 // import { A10Modal } from "./Modal";
 
 import { UIEngineContext, NodeController, ComponentWrapper } from "UIEngine";
-import { any } from "prop-types";
 const EditableContext = React.createContext({});
 
 const EditableRow = (props: any) => (
@@ -71,7 +70,7 @@ class EditableCell extends React.Component<any, any> {
     ) : (
       <div
         className="editable-cell-value-wrap"
-        style={{ paddingRight: 24 }}
+        style={{ paddingRight: 24, width: "100%", height: "30px" }}
         onClick={this.toggleEdit}
       >
         {children}
