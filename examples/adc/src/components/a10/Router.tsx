@@ -3,7 +3,7 @@ import React from "react";
 import { Route } from "react-router-dom";
 
 import requestConfig from "../../config/request";
-import { UIEngine } from "UIEngine";
+import { UIEngine, Workflow } from "UIEngine";
 
 export const Router: React.FC = (props: any) => {
   const { path, layouts, ...routeProps } = props;

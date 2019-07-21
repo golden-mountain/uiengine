@@ -10,7 +10,15 @@
       "component": "a10:Router",
       "props": {
         "path": "/virtual-server",
-        "layouts": ["schema/ui/slb.virtual-server.json"]
+        "layouts": [
+          {
+            "layout": "schema/ui/slb.virtual-server.json",
+            "workingMode": {
+              "mode": "new",
+              "options": {}
+            }
+          }
+        ]
       }
     },
     {
@@ -18,7 +26,15 @@
       "props": {
         "exact": true,
         "path": "/virtual-port",
-        "layouts": ["schema/ui/slb.virtual-server.port.json"]
+        "layouts": [
+          {
+            "layout": "schema/ui/slb.virtual-server.port.json",
+            "workingMode": {
+              "mode": "edit",
+              "options": {}
+            }
+          }
+        ]
       }
     }
   ]

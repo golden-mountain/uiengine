@@ -21,7 +21,7 @@ export default class DataMapper implements IDataMapper {
 
   request: IRequest = {} as IRequest;
   errorInfo?: IErrorInfo;
-  source: IDataSource = { source: "" };
+  source: IDataSource = { source: "", schema: "" };
   rootSchema?: IDataSchema;
   pluginManager: IPluginManager = new PluginManager(this);
   cacheID: string = "";
@@ -52,8 +52,10 @@ export default class DataMapper implements IDataMapper {
   async loadSchema(source: IDataSource) {
     let result: any = null;
     this.source = source;
-    let path = parseSchemaPath(source.source);
-    this.cacheID = parseCacheID(source.source);
+    let schemaSource = source.schema;
+    if (!schemaSource) schemaSource = source.source;
+    let path = parseSchemaPath(schemaSource);
+    this.cacheID = parseCacheID(schemaSource);
     try {
       let schema: any = Cache.getDataSchema(this.cacheID);
       if (!schema) {

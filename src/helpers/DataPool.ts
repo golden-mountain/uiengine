@@ -39,7 +39,6 @@ export default class DataPool implements IDataPool {
     } else {
       _.set(this.data, p, data);
     }
-
     return this.data;
   }
 

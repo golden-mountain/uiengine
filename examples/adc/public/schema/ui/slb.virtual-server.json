@@ -40,7 +40,9 @@
                       "props": {
                         "type": "antd:Input"
                       },
-                      "datasource": "slb.virtual-server:name"
+                      "datasource": {
+                        "source": "slb.virtual-server:name"
+                      }
                     },
                     {
                       "component": "a10:FormItem",
@@ -398,25 +400,37 @@
               },
               "$children": [
                 {
-                  "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:port-list.$.port-number",
+                  "component": "antd:Input",
+                  "datasource": {
+                    "source": "slb.virtual-server:port-list[$].port-number",
+                    "schema": "slb.virtual-server.port.port-number",
+                    "autoload": true
+                  },
                   "props": {
                     "title": "Port"
                   }
                 },
                 {
-                  "component": "antd:Input",
+                  "component": "antd:Select",
                   "props": {
                     "title": "Protocol"
                   },
-                  "datasource": "slb.virtual-server:port-list.$.protocol"
+                  "datasource": {
+                    "source": "slb.virtual-server:port-list[$].protocol",
+                    "schema": "slb.virtual-server.port.protocol",
+                    "autoload": true
+                  }
                 },
                 {
                   "props": {
                     "title": "Service Group"
                   },
-                  "component": "antd:Input",
-                  "datasource": "slb.virtual-server:port-list.$.service-group"
+                  "component": "antd:Select",
+                  "datasource": {
+                    "source": "slb.virtual-server:port-list.$.service-group",
+                    "schema": "slb.virtual-server.port.service-group",
+                    "autoload": true
+                  }
                 }
               ]
             }

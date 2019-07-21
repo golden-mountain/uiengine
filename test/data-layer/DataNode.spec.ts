@@ -42,7 +42,7 @@ describe("Given an instance of my DataNode library", () => {
       const dataNode = new DataNode(toLoadName, uiNode, request);
       // const source = { name: "foo.bar", schemaPath: "foo.json" };
       const source = "foo.bar";
-      const expectedSource = { source, autoload: true };
+      const expectedSource = { source, schema: source, autoload: true };
       expect(dataNode.source).to.be.deep.equal(expectedSource);
       await dataNode.loadData();
       expect(dataNode.getData()).to.deep.equal(_.get(dataNodeJson, toLoadName));

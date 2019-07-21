@@ -74,11 +74,14 @@ export default class DataNode implements IDataNode {
   setDataSource(source: IDataSource | string) {
     if (_.isObject(source)) {
       this.source = source;
-      this.data = source.defaultValue;
+      if (source.schema === undefined) this.source.schema = source.source;
+      if (source.autoload === undefined) this.source.autoload = true;
+      if (source.defaultValue !== undefined) this.data = source.defaultValue;
     } else {
       // give default data
       this.source = {
         source: source,
+        schema: source,
         autoload: true
       };
     }
@@ -127,13 +130,8 @@ export default class DataNode implements IDataNode {
         result = null;
       } else {
         let data = await this.dataEngine.loadData(this.source);
-        // if (this.dataEngine.errorInfo.status === 2001) {
-        //   this.errorInfo = this.dataEngine.errorInfo;
-        //   return;
-        // }
         let formattedSource = formatSource(this.source.source);
-        result = _.get(data, formattedSource, null);
-        // this.dataPool.set(result, this.source.source);
+        result = _.get(data, formattedSource);
         this.data = result;
       }
     }

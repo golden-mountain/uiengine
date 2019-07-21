@@ -107,6 +107,7 @@ export default class DataEngine implements IDataEngine {
         if (cache) {
           response = Cache.getData(this.cacheID, this.requestOptions.endpoint);
         }
+
         // handle response
         if (!response) {
           response = await this.request[method](
@@ -124,6 +125,7 @@ export default class DataEngine implements IDataEngine {
             response = response.data;
           }
         }
+
         this.data = response;
       } catch (e) {
         this.errorInfo = {
@@ -141,7 +143,6 @@ export default class DataEngine implements IDataEngine {
       "data.request.after",
       exeConfig
     );
-
     if (!_.isEmpty(afterResult)) this.data = afterResult;
 
     return this.data;

@@ -52,11 +52,21 @@ export default class UIEngine extends React.Component<
     const { layouts = [], loadOptions = {} } = this.props;
 
     this.nodeController.activeEngine(this.engineId);
-    for (let layout in layouts) {
+    for (let index in layouts) {
+      let layout, workingMode;
+      if (layouts[index]["layout"]) {
+        layout = layouts[index]["layout"];
+        workingMode = layouts[index]["workingMode"];
+      } else {
+        layout = layouts[index];
+      }
+
       // no refresh the state from NodeController,
       // otherwise it will cause deadloop
+      this.nodeController.workflow.setWorkingMode(workingMode);
+      // console.log(layout, workingMode);
       this.nodeController
-        .loadUINode(layouts[layout], "", loadOptions, false)
+        .loadUINode(layout, "", loadOptions, false)
         .then((uiNode: IUINode) => {
           const nodes = this.nodeController.nodes;
           this.setState({ nodes });

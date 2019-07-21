@@ -3,7 +3,8 @@ import _ from "lodash";
 import { Table, Input, Button, Popconfirm, Form, Icon } from "antd";
 // import { A10Modal } from "./Modal";
 
-import { UIEngineContext, NodeController } from "UIEngine";
+import { UIEngineContext, NodeController, ComponentWrapper } from "UIEngine";
+import { any } from "prop-types";
 const EditableContext = React.createContext({});
 
 const EditableRow = (props: any) => (
@@ -25,7 +26,9 @@ class EditableCell extends React.Component<any, any> {
     const editing = !this.state.editing;
     this.setState({ editing }, () => {
       if (editing) {
-        this.input.focus();
+        try {
+          this.input.focus();
+        } catch {}
       }
     });
   };
@@ -43,8 +46,9 @@ class EditableCell extends React.Component<any, any> {
 
   renderCell = (form: any) => {
     this.form = form;
-    const { children, dataIndex, record, title } = this.props;
+    const { children, dataIndex, record, title, index } = this.props;
     const { editing } = this.state;
+    const uiNode = record.uinode.children[index];
     return editing ? (
       <Form.Item style={{ margin: 0 }}>
         {form.getFieldDecorator(dataIndex, {
@@ -56,7 +60,8 @@ class EditableCell extends React.Component<any, any> {
           ],
           initialValue: record[dataIndex]
         })(
-          <Input
+          <ComponentWrapper
+            uiNode={uiNode}
             ref={node => (this.input = node)}
             onPressEnter={this.save}
             onBlur={this.save}
@@ -110,10 +115,14 @@ export class EditableTable extends React.Component<any, any> {
     };
 
     this.columns = props.uinode.schema.$children.map((node: any) => {
+      const datasource =
+        typeof node.datasource === "string"
+          ? node.datasource
+          : node.datasource.source;
       return {
         title: node.props.title,
-        dataIndex: node.datasource.split(".").pop(),
-        node,
+        dataIndex: datasource.split(".").pop(),
+        schema: node,
         width: "30%",
         editable: true
       };
@@ -122,7 +131,7 @@ export class EditableTable extends React.Component<any, any> {
     this.columns.push({
       title: "operation",
       dataIndex: "operation",
-      render: (text: any, record: any) =>
+      render: (text: any, record: any, index: number) =>
         this.state.dataSource.length >= 1 ? (
           <>
             <Icon
@@ -130,12 +139,12 @@ export class EditableTable extends React.Component<any, any> {
               theme="twoTone"
               twoToneColor="#428BCA"
               style={{ paddingRight: "10px" }}
-              onClick={() => this.handleEdit(record.key)}
+              onClick={() => this.handleEdit(index)}
             />
 
             <Popconfirm
-              title="Sure to delete?"
-              onConfirm={() => this.handleDelete(record.key)}
+              title="Are you sure to delete?"
+              onConfirm={() => this.handleDelete(index)}
             >
               <Icon type="delete" theme="twoTone" twoToneColor="red" />
             </Popconfirm>
@@ -197,11 +206,12 @@ export class EditableTable extends React.Component<any, any> {
     };
     // add the key for each dataSource
     if (dataSource && dataSource.length) {
-      for (let i = 0; i < dataSource.length; i++) {
-        dataSource[i]["key"] = i;
-      }
+      dataSource.forEach((record: any, index: number) => {
+        record.key = index;
+        record.uinode = this.props.uinode.children[index];
+      });
     }
-    const columns = this.columns.map((col: any) => {
+    const columns = this.columns.map((col: any, index: number) => {
       if (!col.editable) {
         return col;
       }
@@ -212,7 +222,8 @@ export class EditableTable extends React.Component<any, any> {
           editable: col.editable,
           dataIndex: col.dataIndex,
           title: col.title,
-          handleSave: this.handleSave
+          handleSave: this.handleSave,
+          index: index
         })
       };
     });

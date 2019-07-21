@@ -172,7 +172,7 @@ export default class UINode implements IUINode {
     }
 
     if (liveSchema["$children"] && this.dataNode) {
-      const data = this.dataNode.getData();
+      const data = this.dataNode.data;
       liveSchema = await this.genLiveLayout(liveSchema, data);
     }
 

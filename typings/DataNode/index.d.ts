@@ -10,6 +10,7 @@ export interface IDataSchema {
 
 export interface IDataSource {
   source: string;
+  schema?: string; // data schema sometimes not same as source
   defaultValue?: any;
   autoload?: boolean;
   loadOptions?: object;
