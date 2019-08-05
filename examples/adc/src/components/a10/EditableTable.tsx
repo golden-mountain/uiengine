@@ -23,7 +23,7 @@ class EditableCell extends React.Component<any, any> {
 
   toggleEdit = () => {
     const editing = !this.state.editing;
-    this.setState({ editing }, () => {
+    this.setState({ editing: true }, () => {
       if (editing) {
         try {
           this.input.focus();
@@ -46,11 +46,14 @@ class EditableCell extends React.Component<any, any> {
   renderCell = (form: any) => {
     this.form = form;
     const { children, dataIndex, record, title, index } = this.props;
-    const { editing } = this.state;
+    if (!record.uinode) return;
+
+    let editing: any = this.state.editing;
+
     const uiNode = record.uinode.children[index];
     return editing ? (
       <Form.Item style={{ margin: 0 }}>
-        {form.getFieldDecorator(dataIndex, {
+        {/* {form.getFieldDecorator(dataIndex, {
           rules: [
             {
               required: true,
@@ -58,14 +61,14 @@ class EditableCell extends React.Component<any, any> {
             }
           ],
           initialValue: record[dataIndex]
-        })(
-          <ComponentWrapper
-            uiNode={uiNode}
-            ref={node => (this.input = node)}
-            onPressEnter={this.save}
-            onBlur={this.save}
-          />
-        )}
+        })( */}
+        <ComponentWrapper
+          uiNode={uiNode}
+          ref={node => (this.input = node)}
+          onPressEnter={this.save}
+          onBlur={this.save}
+        />
+        {/* )} */}
       </Form.Item>
     ) : (
       <div
@@ -131,7 +134,7 @@ export class EditableTable extends React.Component<any, any> {
       title: "operation",
       dataIndex: "operation",
       render: (text: any, record: any, index: number) =>
-        this.state.dataSource.length >= 1 ? (
+        this.props.uinode.dataNode.data.length >= 1 ? (
           <>
             <Icon
               type="edit"
@@ -151,15 +154,19 @@ export class EditableTable extends React.Component<any, any> {
         ) : null
     });
   }
+
   handleEdit = (key: any) => {
-    this.setState({ dataKey: key, showPopup: true });
+    // this.setState({ dataKey: key, showPopup: true });
+    this.openModal();
   };
 
   handleDelete = (key: any) => {
     this.props.uinode.dataNode.deleteData(key);
   };
 
-  handleAdd = () => {};
+  handleAdd = async () => {
+    this.props.uinode.dataNode.createRow();
+  };
 
   handleCancel = () => {
     const nodeController = NodeController.getInstance();
@@ -195,7 +202,9 @@ export class EditableTable extends React.Component<any, any> {
   };
 
   render() {
-    const { dataSource } = this.state;
+    // const { dataSource } = this.state;
+    let dataSource = this.props.uinode.dataNode.data;
+    // console.log("data Source changed,", this.props.state);
     // const { modal, uinode } = this.props;
     const components = {
       body: {

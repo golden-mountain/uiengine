@@ -70,7 +70,8 @@ class ComponentWrapper extends React.Component<
             ...uiNode.props,
             key: `key-of-child-${uiNode.id}`,
             ...newProps,
-            uinode: uiNode
+            uinode: uiNode,
+            state: this.state
           };
 
           // simple text

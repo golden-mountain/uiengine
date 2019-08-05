@@ -2,7 +2,7 @@
 import { IPluginFunc, IPlugin, IDataNode } from "UIEngine/typings";
 
 const callback: IPluginFunc = (dataNode: IDataNode) => {
-  console.log(dataNode.schema, dataNode.rootSchema);
+  // console.log(dataNode.schema, dataNode.rootSchema);
   // const errors = dataNode.dataPool.errors;
   // return {
   //   status: _.isEmpty(errors),

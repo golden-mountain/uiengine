@@ -10,7 +10,8 @@ import {
   IDataPool,
   IDataSource,
   IWorkingMode,
-  IErrorInfo
+  IErrorInfo,
+  INodeProps
 } from "../../typings";
 import { DataEngine } from "../helpers";
 
@@ -149,13 +150,13 @@ export default class DataNode implements IDataNode {
   async updateData(value: any, path?: string, workingMode?: IWorkingMode) {
     let noUpdateLayout = true;
     if (_.isArray(value) && this.uiNode.schema.$children) {
-      noUpdateLayout = _.isEqual(value, this.data);
+      noUpdateLayout = false;
     }
 
     // update this data
     if (path) {
-      let data = this.data;
-      _.set(data, path, value);
+      // let data = this.data;
+      _.set(this.data, path, value);
     } else {
       this.data = value;
     }
@@ -171,10 +172,11 @@ export default class DataNode implements IDataNode {
       exeConfig
     );
 
-    // update state without sending message
+    // console.log(noUpdateLayout);
+    // // update state without sending message
     if (noUpdateLayout) {
-      await this.uiNode.pluginManager.executePlugins("ui.parser");
       await this.uiNode.stateNode.renewStates();
+      await this.uiNode.pluginManager.executePlugins("ui.parser");
     } else {
       await this.uiNode.updateLayout(workingMode || this.workingMode);
     }
@@ -183,6 +185,28 @@ export default class DataNode implements IDataNode {
     if (status) {
       // this.dataPool.set(this.data, this.source.source);
       this.dataPool.clearError(this.source.source);
+    }
+    return status;
+  }
+
+  async createRow(
+    value?: any,
+    insertHead?: boolean,
+    workingMode?: IWorkingMode
+  ) {
+    let status: any = false;
+    if (this.uiNode.schema.$children) {
+      const currentValue = this.data || [];
+      if (_.isEmpty(value)) {
+        value = this.uiNode.schema.$children.map((node: INodeProps) => "");
+      }
+
+      if (insertHead) {
+        currentValue.unshift(value);
+      } else {
+        currentValue.push(value);
+      }
+      status = await this.updateData(currentValue, "", workingMode);
     }
     return status;
   }

@@ -19,5 +19,6 @@ export default class DataNode implements IDataNode {
     getPluginManager(): IPluginManager;
     loadData(source?: IDataSource | string, workingMode?: IWorkingMode): Promise<any>;
     updateData(value: any, path?: string, workingMode?: IWorkingMode): Promise<number | true>;
+    createRow(value?: any, insertHead?: boolean, workingMode?: IWorkingMode): Promise<any>;
     deleteData(path?: any, workingMode?: IWorkingMode): Promise<number | true>;
 }

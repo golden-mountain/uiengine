@@ -48,5 +48,6 @@ export interface IDataNode {
   getSchema(path?: string);
   getPluginManager(): IPluginManager;
   getRootSchema();
+  createRow(value?: any, insertHead?: boolean, workingMode?: IWorkingMode);
   // submit(dataSources: Array<string>, method: string);
 }
