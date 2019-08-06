@@ -1,12 +1,13 @@
 import { IUINode } from "../UINode";
 import { IErrorInfo } from "../Request";
-import { IWorkflow, ILoadOptions } from "../Workflow";
+import { IWorkflow, ILoadOptions, IWorkingMode } from "../Workflow";
 
 export interface IUINodeRenderer {
   uiNode: IUINode;
   engineId: string; // React Component ID
   options?: ILoadOptions;
   visible?: boolean;
+  workingMode?: IWorkingMode;
 }
 
 export interface INodeController {
@@ -34,4 +35,6 @@ export interface INodeController {
   castMessage(nodeSelector: INodeProps, data: any, ids?: [string]);
   setRequestConfig(requestConfig: IRequestConfig);
   pushLayout(layout: string);
+  setWorkingMode(layout: string, workingMode: IWorkingMode);
+  getWorkingMode(layout?: string);
 }

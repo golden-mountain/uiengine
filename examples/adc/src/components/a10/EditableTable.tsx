@@ -4,6 +4,7 @@ import { Table, Input, Button, Popconfirm, Form, Icon } from "antd";
 // import { A10Modal } from "./Modal";
 
 import { UIEngineContext, NodeController, ComponentWrapper } from "UIEngine";
+import { IWorkingMode } from "../../../../../typings";
 const EditableContext = React.createContext({});
 
 const EditableRow = (props: any) => (
@@ -157,7 +158,17 @@ export class EditableTable extends React.Component<any, any> {
 
   handleEdit = (key: any) => {
     // this.setState({ dataKey: key, showPopup: true });
-    this.openModal();
+    const {
+      modal: { connect }
+    } = this.props;
+    const workingMode = {
+      mode: "edit-pool",
+      options: {
+        key,
+        source: connect
+      }
+    };
+    this.openModal(key, workingMode);
   };
 
   handleDelete = (key: any) => {
@@ -177,10 +188,10 @@ export class EditableTable extends React.Component<any, any> {
     nodeController.hideUINode(layout);
   };
 
-  openModal = () => {
+  openModal = (index?: number, workingMode?: IWorkingMode) => {
     if (_.has(this.props, "modal.layout")) {
       const {
-        modal: { layout },
+        modal: { layout, connect },
         modal
       } = this.props;
 
@@ -189,6 +200,10 @@ export class EditableTable extends React.Component<any, any> {
         onClose: this.handleCancel,
         visible: true
       };
+      // const workflow = Workflow.getInstance();
+
+      this.context.controller.setWorkingMode(layout, workingMode);
+      console.log(this.context.controller.getWorkingMode(layout));
       this.context.controller.workflow.activeLayout(layout, options);
     } else {
       console.error("popup layout not provided on schema");

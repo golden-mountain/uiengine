@@ -25,17 +25,9 @@ export default class Workflow implements IWorkflow {
 
   nodeController: INodeController = {} as INodeController;
   activeNode?: IUINode;
-  workingMode: IWorkingMode = {
-    mode: "new", // default we use new mode instead of edit mode
-    options: {}
-  };
 
   setNodeController(nodeController: INodeController) {
     this.nodeController = nodeController;
-  }
-
-  setWorkingMode(mode: IWorkingMode) {
-    this.workingMode = mode;
   }
 
   activeLayout(layout: string, options?: ILoadOptions) {
@@ -181,7 +173,7 @@ export default class Workflow implements IWorkflow {
       for (let index in selectedNodes) {
         const node = selectedNodes[index];
         // send message
-        await node.updateLayout(this.workingMode);
+        await node.updateLayout(this.nodeController.getWorkingMode());
       }
       return promises;
     } else {
@@ -204,7 +196,7 @@ export default class Workflow implements IWorkflow {
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message
-      await node.updateLayout(this.workingMode);
+      await node.updateLayout(this.nodeController.getWorkingMode());
     }
   }
 
@@ -220,7 +212,7 @@ export default class Workflow implements IWorkflow {
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message
-      await node.updateLayout(this.workingMode);
+      await node.updateLayout(this.nodeController.getWorkingMode());
     }
   }
 }

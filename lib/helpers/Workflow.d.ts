@@ -1,12 +1,10 @@
-import { IWorkflow, IUINode, INodeController, ILoadOptions, IDataSource, INodeProps, IWorkingMode, IConnectOptions } from "../../typings";
+import { IWorkflow, IUINode, INodeController, ILoadOptions, IDataSource, INodeProps, IConnectOptions } from "../../typings";
 export default class Workflow implements IWorkflow {
     static instance: IWorkflow;
     static getInstance: () => Workflow;
     nodeController: INodeController;
     activeNode?: IUINode;
-    workingMode: IWorkingMode;
     setNodeController(nodeController: INodeController): void;
-    setWorkingMode(mode: IWorkingMode): void;
     activeLayout(layout: string, options?: ILoadOptions): any;
     deactiveLayout(): void;
     private fetchNodes;

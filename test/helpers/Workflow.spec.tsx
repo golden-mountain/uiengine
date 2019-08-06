@@ -45,7 +45,7 @@ describe("Given an instance of Workflow library", () => {
     nodeController = NodeController.getInstance();
     nodeController.setRequestConfig(reqConfig);
     workflow = nodeController.workflow;
-    workflow.setWorkingMode({ mode: "edit" });
+    nodeController.setWorkingMode(workflowMain, { mode: "edit" });
 
     // component set
     const layouts = [workflowMain];

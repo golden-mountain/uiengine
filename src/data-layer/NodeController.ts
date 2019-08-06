@@ -12,7 +12,8 @@ import {
   IUINodeRenderer,
   IRequest,
   ILoadOptions,
-  IPluginManager
+  IPluginManager,
+  IWorkingMode
 } from "../../typings";
 import { UINode } from "../data-layer";
 import { Messager, Request, Workflow, PluginManager } from "../helpers";
@@ -78,9 +79,8 @@ export default class NodeController implements INodeController {
     }
 
     // use cached nodes
-    let uiNodeRenderer = this.nodes[rootName];
-    let uiNode: IUINode;
-    if (!uiNodeRenderer) {
+    let uiNode: IUINode = _.get(this.nodes[rootName], "uiNode");
+    if (!uiNode) {
       // default we load all default plugins
       uiNode = new UINode({}, this.request, rootName);
       try {
@@ -88,17 +88,14 @@ export default class NodeController implements INodeController {
       } catch (e) {
         console.error(e.message);
       }
-    } else {
-      uiNode = uiNodeRenderer.uiNode;
-      this.nodes[rootName]["engineId"] = this.engineId;
     }
 
-    this.nodes[rootName] = {
+    this.nodes[rootName] = _.merge(this.nodes[rootName], {
       uiNode,
       visible: true,
       options,
       engineId: this.engineId
-    };
+    });
     // add layout stack
     this.pushLayout(rootName);
     this.activeLayout = rootName;
@@ -172,5 +169,20 @@ export default class NodeController implements INodeController {
     });
 
     this.layouts.push(layout);
+  }
+
+  setWorkingMode(layout: string, workingMode: IWorkingMode) {
+    if (_.isEmpty(this.nodes[layout])) {
+      this.nodes[layout] = {} as IUINodeRenderer;
+    }
+
+    if (workingMode) {
+      _.set(this.nodes[layout], "workingMode", workingMode);
+    }
+  }
+
+  getWorkingMode(layout?: string) {
+    if (!layout) layout = this.activeLayout;
+    return _.get(this.nodes[layout], "workingMode");
   }
 }

@@ -1,4 +1,4 @@
-import { IUINode, IMessager, INodeController, INodeProps, ILayoutSchema, IRequestConfig, IErrorInfo, IWorkflow, IUINodeRenderer, IRequest, ILoadOptions, IPluginManager } from "../../typings";
+import { IUINode, IMessager, INodeController, INodeProps, ILayoutSchema, IRequestConfig, IErrorInfo, IWorkflow, IUINodeRenderer, IRequest, ILoadOptions, IPluginManager, IWorkingMode } from "../../typings";
 export default class NodeController implements INodeController {
     static instance: INodeController;
     static getInstance: () => NodeController;
@@ -27,4 +27,6 @@ export default class NodeController implements INodeController {
     getUINode(layout: string, uiNodeOnly?: boolean): IUINode | IUINodeRenderer;
     castMessage(nodeSelector: INodeProps, data: any, ids?: [string]): void;
     pushLayout(layout: string): void;
+    setWorkingMode(layout: string, workingMode: IWorkingMode): void;
+    getWorkingMode(layout?: string): IWorkingMode | undefined;
 }

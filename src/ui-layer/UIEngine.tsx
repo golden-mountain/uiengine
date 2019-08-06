@@ -63,7 +63,7 @@ export default class UIEngine extends React.Component<
 
       // no refresh the state from NodeController,
       // otherwise it will cause deadloop
-      this.nodeController.workflow.setWorkingMode(workingMode);
+      this.nodeController.setWorkingMode(layout, workingMode);
       // console.log(layout, workingMode);
       this.nodeController
         .loadUINode(layout, "", loadOptions, false)

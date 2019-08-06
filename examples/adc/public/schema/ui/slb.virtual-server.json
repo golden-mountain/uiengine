@@ -391,7 +391,13 @@
                   "layout": "schema/ui/slb.virtual-server.port.json",
                   "title": "Create Virtual Port",
                   "width": "80%",
-                  "connect": "slb.virtual-server:port-list",
+                  "connect": {
+                    "options": {
+                      "clearSource": true
+                    },
+                    "source": "slb.virtual-server.port:",
+                    "target": "slb.virtual-server:port-list[]"
+                  },
                   "container": "antd:Drawer",
                   "placement": "right",
                   "closable": true,
@@ -400,20 +406,22 @@
               },
               "$children": [
                 {
-                  "component": "antd:Input",
+                  "component": "a10:FormItem",
                   "datasource": {
                     "source": "slb.virtual-server:port-list[$].port-number",
                     "schema": "slb.virtual-server.port:port-number",
                     "autoload": true
                   },
                   "props": {
-                    "title": "Port"
+                    "title": "Port",
+                    "label": ""
                   }
                 },
                 {
-                  "component": "antd:Select",
+                  "component": "a10:FormItem",
                   "props": {
-                    "title": "Protocol"
+                    "title": "Protocol",
+                    "label": ""
                   },
                   "datasource": {
                     "source": "slb.virtual-server:port-list[$].protocol",
@@ -423,9 +431,10 @@
                 },
                 {
                   "props": {
-                    "title": "Service Group"
+                    "title": "Service Group",
+                    "label": ""
                   },
-                  "component": "antd:Select",
+                  "component": "a10:FormItem",
                   "datasource": {
                     "source": "slb.virtual-server:port-list.$.service-group",
                     "schema": "slb.virtual-server.port:service-group",

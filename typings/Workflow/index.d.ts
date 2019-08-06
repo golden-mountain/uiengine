@@ -16,7 +16,7 @@ export interface IWorkflow {
   activeNode?: IUINode;
   workingMode?: IWorkingMode;
   // layout operations
-  setWorkingMode(mode: IWorkingMode);
+  // setWorkingMode(mode: IWorkingMode);
   setNodeController(nodeController: INodeController);
   activeLayout(layout: string, options?: ILoadOptions);
   deactiveLayout();

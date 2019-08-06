@@ -113,6 +113,10 @@ export default class DataNode implements IDataNode {
       this.setDataSource(source);
     }
 
+    if (workingMode) {
+      this.workingMode = workingMode;
+    }
+
     const exeConfig: IPluginExecutionConfig = {
       returnLastValue: true
     };
@@ -120,10 +124,6 @@ export default class DataNode implements IDataNode {
       "data.data.parser",
       exeConfig
     );
-
-    if (workingMode) {
-      this.workingMode = workingMode;
-    }
 
     if (result === undefined) {
       if (_.get(this.workingMode, "mode") === "new" || !this.source.autoload) {
