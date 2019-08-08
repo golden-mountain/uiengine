@@ -36,18 +36,14 @@ export interface IDataNode {
   data: any;
   updatingData?: any;
   dataPool: IDataPool;
-  workingMode?: IWorkingMode;
 
   loadData(
     source?: IDataSource | string,
     workingMode?: IWorkingMode
   ): Promise<AxiosPromise> | any;
-  updateData(value: any, path?: string, workingMode?: IWorkingMode);
-  deleteData(path?: any, workingMode?: IWorkingMode);
+  updateData(value: any, path?: string);
+  deleteData(path?: any);
   getData(path?: string);
   getSchema(path?: string);
-  getPluginManager(): IPluginManager;
-  getRootSchema();
-  createRow(value?: any, insertHead?: boolean, workingMode?: IWorkingMode);
-  // submit(dataSources: Array<string>, method: string);
+  createRow(value?: any, insertHead?: boolean);
 }

@@ -21,6 +21,7 @@ export interface ILayoutSchema {
 }
 
 export interface IUINode {
+  request: IRequest;
   dataNode: IDataNode;
   stateNode: IStateNode = new StateNode(this);
   children: Array<UINode> = [];
@@ -34,24 +35,18 @@ export interface IUINode {
   props: object;
   parent?: IUINode;
   stateInfo: IStateInfo;
+  workingMode?: IWorkingMode;
 
   loadLayout(schema?: ILayoutSchema | string, workingMode?: IWorkingMode);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
-  loadData(source: IDataSource, workingMode?: IWorkingMode);
+  // loadData(source: IDataSource, workingMode?: IWorkingMode);
   getSchema(path?: string): ILayoutSchema;
   replaceLayout(newSchema: ILayoutSchema | string, workingMode?: IWorkingMode);
   updateLayout(workingMode?: IWorkingMode);
   genLiveLayout(schema: ILayoutSchema, data: any);
   clearLayout();
   getChildren(route?: Array<Number>);
-  getDataNode(): IDataNode;
   getNode(path?: string);
-  updateState();
-  getStateNode(): IStateNode;
-  // searchNodes(prop: object, layoutId?: string);
-  // searchDepsNodes(myNode?: IUINode, layoutId?: string);
-  getPluginManager(): IPluginManager;
-  getRequest(): IRequest;
+  // updateState();
   sendMessage(force: boolean = false) {
-  // getProps(): INodeProps;
 }

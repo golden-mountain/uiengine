@@ -9,9 +9,7 @@ import {
   IDataEngine,
   IDataPool,
   IDataSource,
-  IWorkingMode,
-  IErrorInfo,
-  INodeProps
+  IErrorInfo
 } from "../../typings";
 import { DataEngine } from "../helpers";
 
@@ -24,7 +22,6 @@ export default class DataNode implements IDataNode {
   schema?: any;
   rootSchema?: any;
   dataPool: IDataPool;
-  workingMode?: IWorkingMode;
 
   constructor(
     source: IDataSource | string,
@@ -100,44 +97,32 @@ export default class DataNode implements IDataNode {
     return this.schema;
   }
 
-  getRootSchema() {
-    return this.rootSchema;
-  }
-
-  getPluginManager(): IPluginManager {
-    return this.pluginManager;
-  }
-
-  async loadData(source?: IDataSource | string, workingMode?: IWorkingMode) {
+  async loadData(source?: IDataSource | string) {
     if (source) {
       this.setDataSource(source);
-    }
-
-    if (workingMode) {
-      this.workingMode = workingMode;
     }
 
     const exeConfig: IPluginExecutionConfig = {
       returnLastValue: true
     };
 
+    const mode = _.get(this.uiNode.workingMode, "mode");
     let result = await this.pluginManager.executePlugins(
       "data.data.parser",
       exeConfig
     );
 
-    if (result === undefined) {
-      if (_.get(this.workingMode, "mode") === "new" || !this.source.autoload) {
-        await this.dataEngine.loadSchema(this.source);
-        result = null;
-      } else {
+    if (mode === "new" || !this.source.autoload) {
+      await this.dataEngine.loadSchema(this.source);
+    } else {
+      if (result === undefined) {
         let data = await this.dataEngine.loadData(this.source);
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource);
       }
+      this.data = result;
     }
 
-    this.data = result;
     // assign root schema if not $dummy data
     this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
     // load this node schema
@@ -145,10 +130,10 @@ export default class DataNode implements IDataNode {
       "data.schema.parser",
       exeConfig
     );
-    return this.data;
+    return result;
   }
 
-  async updateData(value: any, path?: string, workingMode?: IWorkingMode) {
+  async updateData(value: any, path?: string) {
     let noUpdateLayout = true;
     if (_.isArray(value) && this.uiNode.schema.$children) {
       noUpdateLayout = false;
@@ -177,7 +162,7 @@ export default class DataNode implements IDataNode {
       await this.uiNode.pluginManager.executePlugins("ui.parser");
       await this.uiNode.stateNode.renewStates();
     } else {
-      await this.uiNode.updateLayout(workingMode || this.workingMode);
+      await this.uiNode.updateLayout();
     }
 
     const status = _.get(this.errorInfo, "status", true);
@@ -188,11 +173,7 @@ export default class DataNode implements IDataNode {
     return status;
   }
 
-  async createRow(
-    value: any = {},
-    insertHead?: boolean,
-    workingMode?: IWorkingMode
-  ) {
+  async createRow(value: any = {}, insertHead?: boolean) {
     let status: any = false;
     if (this.uiNode.schema.$children) {
       const currentValue = this.data || [];
@@ -208,12 +189,12 @@ export default class DataNode implements IDataNode {
       } else {
         currentValue.push(value);
       }
-      status = await this.updateData(currentValue, "", workingMode);
+      status = await this.updateData(currentValue, "");
     }
     return status;
   }
 
-  async deleteData(path?: any, workingMode?: IWorkingMode) {
+  async deleteData(path?: any) {
     const exeConfig: IPluginExecutionConfig = {
       stopWhenEmpty: true,
       returnLastValue: true
@@ -254,7 +235,7 @@ export default class DataNode implements IDataNode {
         await this.uiNode.pluginManager.executePlugins("ui.parser");
         await this.uiNode.stateNode.renewStates();
       } else {
-        await this.uiNode.updateLayout(workingMode || this.workingMode);
+        await this.uiNode.updateLayout();
       }
     }
     return status;

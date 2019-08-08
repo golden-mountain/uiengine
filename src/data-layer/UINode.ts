@@ -21,12 +21,11 @@ import {
   IPluginManager,
   IMessager,
   IStateInfo,
-  IDataSource,
   IWorkingMode
 } from "../../typings";
 
 export default class UINode implements IUINode {
-  private request: IRequest = Request.getInstance();
+  request: IRequest = Request.getInstance();
   dataNode: IDataNode;
   stateNode: IStateNode = new StateNode(this);
   children: Array<UINode> = [];
@@ -44,6 +43,7 @@ export default class UINode implements IUINode {
     state: {},
     time: 0
   };
+  workingMode?: IWorkingMode;
 
   constructor(
     schema: ILayoutSchema,
@@ -115,26 +115,6 @@ export default class UINode implements IUINode {
     return this.schema;
   }
 
-  getErrorInfo(): IErrorInfo {
-    return this.errorInfo;
-  }
-
-  getDataNode() {
-    return this.dataNode;
-  }
-
-  getStateNode(): IStateNode {
-    return this.stateNode;
-  }
-
-  getPluginManager(): IPluginManager {
-    return this.pluginManager;
-  }
-
-  getRequest(): IRequest {
-    return this.request;
-  }
-
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {
     this.setRootName(url);
     let result: any = Cache.getLayoutSchema(this.rootName);
@@ -166,9 +146,12 @@ export default class UINode implements IUINode {
     schema: ILayoutSchema,
     workingMode?: IWorkingMode
   ) {
+    // assign workingMode
+    if (workingMode) this.workingMode = workingMode;
+
     let liveSchema = schema;
     if (liveSchema["datasource"]) {
-      await this.loadData(liveSchema["datasource"], workingMode);
+      await this.dataNode.loadData(liveSchema["datasource"]);
     }
 
     if (liveSchema["$children"] && this.dataNode) {
@@ -185,12 +168,12 @@ export default class UINode implements IUINode {
           node = new UINode({}, this.request, this.rootName, this);
           for (let i in s) {
             const subnode = new UINode(s[i], this.request, this.rootName, this);
-            await subnode.loadLayout(s[i], workingMode);
+            await subnode.loadLayout(s[i], this.workingMode);
             node.children.push(subnode);
           }
         } else {
           node = new UINode(s, this.request, this.rootName, this);
-          await node.loadLayout(s, workingMode);
+          await node.loadLayout(s, this.workingMode);
         }
         children.push(node);
       }
@@ -211,10 +194,6 @@ export default class UINode implements IUINode {
 
     // state info default
     return this;
-  }
-
-  async loadData(source: IDataSource | string, workingMode?: IWorkingMode) {
-    return await this.dataNode.loadData(source, workingMode);
   }
 
   async replaceLayout(
@@ -266,10 +245,6 @@ export default class UINode implements IUINode {
   }
 
   async genLiveLayout(schema: ILayoutSchema, data: any) {
-    // if (schema.datasource) {
-    //   data = await this.loadData(schema.datasource);
-    // }
-
     // replace $ to row number
     const updatePropRow = (target: ILayoutSchema, index: string) => {
       _.forIn(target, function(value: any, key: string) {
@@ -299,10 +274,6 @@ export default class UINode implements IUINode {
     // add a new children
     this.isLiveChildren = true;
     return liveSchema;
-  }
-
-  async updateState() {
-    return await this.getStateNode().renewStates();
   }
 
   sendMessage(force: boolean = false) {

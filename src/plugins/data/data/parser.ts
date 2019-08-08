@@ -8,11 +8,11 @@ import { DataPool } from "../../../helpers";
  * @param dataNode
  */
 const callback: IPluginFunc = (dataNode: IDataNode) => {
-  const mode = _.get(dataNode.workingMode, "mode");
-  const connect = _.get(dataNode.workingMode, "options.source");
+  const mode = _.get(dataNode.uiNode.workingMode, "mode");
+  const connect = _.get(dataNode.uiNode.workingMode, "options.source");
   if (mode === "edit-pool") {
     let { source, target } = connect;
-    const index = _.get(dataNode.workingMode, "options.key");
+    const index = _.get(dataNode.uiNode.workingMode, "options.key");
     if (index !== undefined) {
       target = target.replace(/(\[.*?\])/, `[${index}]`);
     }

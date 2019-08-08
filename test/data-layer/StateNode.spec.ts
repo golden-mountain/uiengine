@@ -25,7 +25,7 @@ describe("Given an instance of my StateNode library", () => {
   describe("the given layoutNode and DataNode ", () => {
     it("constructor: StateNode should initialized on UINode creation", () => {
       const uiNode = new UINode({});
-      const stateNode = uiNode.getStateNode();
+      const stateNode = uiNode.stateNode;
       expect(stateNode).is.instanceOf(StateNode);
       const plugins = stateNode.getPluginManager().getPlugins("state.resolver");
       expect(plugins).to.have.property("visible");
@@ -33,7 +33,7 @@ describe("Given an instance of my StateNode library", () => {
 
     it("renewState: should renew all state data", async () => {
       const uiNode = new UINode({});
-      const stateNode = uiNode.getStateNode();
+      const stateNode = uiNode.stateNode;
       const state = await stateNode.renewStates();
       expect(state).to.have.property("visible");
       expect(stateNode.getState()).to.have.property("visible");
@@ -42,7 +42,7 @@ describe("Given an instance of my StateNode library", () => {
 
     it("loadPlugins: should renew all state data", () => {
       const uiNode = new UINode({});
-      const stateNode = uiNode.getStateNode();
+      const stateNode = uiNode.stateNode;
       stateNode.getPluginManager().loadPlugins();
       let plugins = stateNode.getPluginManager().getPlugins("state.resolver");
 

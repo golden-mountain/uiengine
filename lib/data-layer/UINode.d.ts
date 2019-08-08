@@ -1,7 +1,7 @@
 import { AxiosPromise } from "axios";
-import { IDataNode, IStateNode, IUINode, ILayoutSchema, IRequest, IErrorInfo, IPluginManager, IMessager, IStateInfo, IDataSource, IWorkingMode } from "../../typings";
+import { IDataNode, IStateNode, IUINode, ILayoutSchema, IRequest, IErrorInfo, IPluginManager, IMessager, IStateInfo, IWorkingMode } from "../../typings";
 export default class UINode implements IUINode {
-    private request;
+    request: IRequest;
     dataNode: IDataNode;
     stateNode: IStateNode;
     children: Array<UINode>;
@@ -15,15 +15,11 @@ export default class UINode implements IUINode {
     props: object;
     parent?: IUINode;
     stateInfo: IStateInfo;
+    workingMode?: IWorkingMode;
     constructor(schema: ILayoutSchema, request?: IRequest, root?: string, parent?: IUINode);
     private setRootName;
     loadLayout(schema?: ILayoutSchema | string, workingMode?: IWorkingMode): Promise<any>;
     getSchema(path?: string): ILayoutSchema;
-    getErrorInfo(): IErrorInfo;
-    getDataNode(): IDataNode;
-    getStateNode(): IStateNode;
-    getPluginManager(): IPluginManager;
-    getRequest(): IRequest;
     loadRemoteLayout(url: string): Promise<AxiosPromise>;
     /**
      * TO DO: need to enhance:
@@ -33,13 +29,11 @@ export default class UINode implements IUINode {
      * @param reloadData
      */
     private assignSchema;
-    loadData(source: IDataSource | string, workingMode?: IWorkingMode): Promise<any>;
     replaceLayout(newSchema: ILayoutSchema | string, workingMode?: IWorkingMode): Promise<any>;
     updateLayout(workingMode?: IWorkingMode): Promise<this>;
     clearLayout(): this;
     getNode(path?: string): any;
     getChildren(route?: Array<Number>): any;
     genLiveLayout(schema: ILayoutSchema, data: any): Promise<ILayoutSchema>;
-    updateState(): Promise<any>;
     sendMessage(force?: boolean): void;
 }

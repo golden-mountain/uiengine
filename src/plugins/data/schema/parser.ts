@@ -8,7 +8,7 @@ import { IPluginFunc, IPlugin, IDataNode } from "../../../../typings";
  * @param dataNode
  */
 const callback: IPluginFunc = (dataNode: IDataNode) => {
-  const rootSchema = dataNode.getRootSchema();
+  const rootSchema = dataNode.rootSchema;
   let schemaPath = dataNode.source.schema || dataNode.source.source;
   let name = schemaPath.replace(":", ".");
   const regex = /\[\d+\]/;
