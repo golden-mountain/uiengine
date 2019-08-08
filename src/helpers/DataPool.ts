@@ -24,9 +24,13 @@ export default class DataPool implements IDataPool {
   set(data: any, path: string) {
     const domainName = getDomainName(path);
     const domainData = _.get(this.data, domainName);
+
     path = formatSource(path);
     let p = path.replace("[]", "");
-    let d = _.get(domainData, p, path.indexOf("[]") > -1 ? [] : null);
+    const defaultValue = path.indexOf("[]") > -1 ? [] : null;
+    let d = _.get(domainData, p);
+    if (d === null || d === undefined) d = defaultValue;
+
     p = `${domainName}.${p}`;
     if (_.isArray(d)) {
       if (!_.isArray(data)) {
@@ -84,6 +88,7 @@ export default class DataPool implements IDataPool {
         parentObj.splice(rmIndex, 1);
         _.set(this.data, pathObject, parentObj);
       } else {
+        console.log(p, this.data);
         _.unset(this.data, p);
       }
     } else {

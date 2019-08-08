@@ -201,12 +201,7 @@ export default class UINode implements IUINode {
     // load State
     this.stateNode = new StateNode(this);
     await this.stateNode.renewStates();
-    // console.log(
-    //   this.id,
-    //   this.dataNode.data,
-    //   this.stateNode.state,
-    //   ".......... state on UINODE......"
-    // );
+
     // load ui.parser plugin
     try {
       await this.pluginManager.executePlugins("ui.parser");
@@ -312,8 +307,8 @@ export default class UINode implements IUINode {
 
   sendMessage(force: boolean = false) {
     const newState = {
-      data: _.clone(this.dataNode.data),
-      state: _.clone(this.stateNode.state),
+      data: _.cloneDeep(this.dataNode.data),
+      state: _.cloneDeep(this.stateNode.state),
       time: force ? new Date().getTime() : 0
     };
     if (!_.isEqual(newState, this.stateInfo)) {

@@ -60,6 +60,8 @@ class ComponentWrapper extends React.Component<
             returnLastValue: true
           };
 
+          // TO FIX, when add and delete row, the state did not update in time using setState on messager
+          // console.log(uiNode.id, this.state, "<<<<<<<< rendering");
           let newProps: any = this.pluginManager.executeSyncPlugins(
             "component.props.get",
             exeConfig

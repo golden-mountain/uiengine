@@ -168,15 +168,28 @@ export class EditableTable extends React.Component<any, any> {
         source: connect
       }
     };
-    this.openModal(key, workingMode);
+    this.openModal(workingMode);
   };
 
-  handleDelete = (key: any) => {
-    this.props.uinode.dataNode.deleteData(key);
+  handleDelete = async (key: any) => {
+    await this.props.uinode.dataNode.deleteData(key);
   };
 
   handleAdd = async () => {
     this.props.uinode.dataNode.createRow();
+  };
+
+  handleAdvanceAdd = async () => {
+    const {
+      modal: { connect }
+    } = this.props;
+    const workingMode = {
+      mode: "new",
+      options: {
+        source: connect
+      }
+    };
+    this.openModal(workingMode);
   };
 
   handleCancel = () => {
@@ -188,10 +201,10 @@ export class EditableTable extends React.Component<any, any> {
     nodeController.hideUINode(layout);
   };
 
-  openModal = (index?: number, workingMode?: IWorkingMode) => {
+  openModal = (workingMode?: IWorkingMode) => {
     if (_.has(this.props, "modal.layout")) {
       const {
-        modal: { layout, connect },
+        modal: { layout },
         modal
       } = this.props;
 
@@ -201,9 +214,7 @@ export class EditableTable extends React.Component<any, any> {
         visible: true
       };
       // const workflow = Workflow.getInstance();
-
       this.context.controller.setWorkingMode(layout, workingMode);
-      console.log(this.context.controller.getWorkingMode(layout));
       this.context.controller.workflow.activeLayout(layout, options);
     } else {
       console.error("popup layout not provided on schema");
@@ -240,14 +251,16 @@ export class EditableTable extends React.Component<any, any> {
       }
       return {
         ...col,
-        onCell: (record: any) => ({
-          record,
-          editable: col.editable,
-          dataIndex: col.dataIndex,
-          title: col.title,
-          handleSave: this.handleSave,
-          index: index
-        })
+        onCell: (record: any) => {
+          return {
+            record,
+            editable: col.editable,
+            dataIndex: col.dataIndex,
+            title: col.title,
+            handleSave: this.handleSave,
+            index: index
+          };
+        }
       };
     });
     return (
@@ -261,7 +274,7 @@ export class EditableTable extends React.Component<any, any> {
         </Button>
 
         <Button
-          onClick={this.openModal}
+          onClick={this.handleAdvanceAdd}
           type="danger"
           style={{ marginBottom: 16 }}
         >

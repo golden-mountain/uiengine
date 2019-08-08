@@ -24,6 +24,8 @@ npm start
 
 ## TODO:
 
+### extension for core nodes
+
 ### DEBUG TOOL
 
 Add a debug component to access all the debug info, structure like
@@ -53,4 +55,8 @@ nodes:
 data choose commit
 ```
 
-### Workflow
+## TO FIX
+
+### setState always slow one step
+
+### working mode can control on each separate node

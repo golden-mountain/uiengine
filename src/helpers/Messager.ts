@@ -29,6 +29,7 @@ export default class Messager implements IMessager {
 
   setStateFunc(id: string, setState: any) {
     if (_.isFunction(setState)) {
+      // this.objectStateFuncMap[id] = _.debounce(setState, 10);
       this.objectStateFuncMap[id] = setState;
     }
   }

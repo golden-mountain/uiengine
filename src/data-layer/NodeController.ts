@@ -80,14 +80,18 @@ export default class NodeController implements INodeController {
 
     // use cached nodes
     let uiNode: IUINode = _.get(this.nodes[rootName], "uiNode");
+    const workingMode = _.get(this.nodes[rootName], "workingMode");
+    console.log(workingMode);
     if (!uiNode) {
       // default we load all default plugins
       uiNode = new UINode({}, this.request, rootName);
       try {
-        await uiNode.loadLayout(layout, this.workflow.workingMode);
+        await uiNode.loadLayout(layout, workingMode);
       } catch (e) {
         console.error(e.message);
       }
+    } else {
+      await uiNode.updateLayout(workingMode);
     }
 
     this.nodes[rootName] = _.merge(this.nodes[rootName], {

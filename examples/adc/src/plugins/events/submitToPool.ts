@@ -7,9 +7,11 @@ const callback: IPluginFunc = (uiNode: IUINode) => {
     // console.log(options);
     const nodeCtroller = NodeController.getInstance();
     const workflow = nodeCtroller.workflow;
-    if (_.has(workflow.workingMode, "options.source")) {
-      const connectOptions = _.get(workflow.workingMode, "options.source");
+    const workingMode = nodeCtroller.getWorkingMode();
+    if (_.has(workingMode, "options.source")) {
+      const connectOptions = _.get(workingMode, "options.source");
       const result = await workflow.submitToPool(connectOptions);
+
       if (result) {
         workflow.deactiveLayout();
       } else {

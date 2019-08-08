@@ -158,7 +158,7 @@ export default class Workflow implements IWorkflow {
       let clearSource = _.get(options, "clearSource");
       // bug: 1. source data did not removed from DataNode
       // bug: 2. add empty item
-      dataPool.merge(source, target, clearSource);
+      const result = dataPool.merge(source, target, clearSource);
       let promises: any = [];
       // refresh target ui node
 

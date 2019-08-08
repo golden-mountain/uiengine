@@ -120,6 +120,7 @@ export default class DataNode implements IDataNode {
     const exeConfig: IPluginExecutionConfig = {
       returnLastValue: true
     };
+
     let result = await this.pluginManager.executePlugins(
       "data.data.parser",
       exeConfig
@@ -133,10 +134,10 @@ export default class DataNode implements IDataNode {
         let data = await this.dataEngine.loadData(this.source);
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource);
-        this.data = result;
       }
     }
 
+    this.data = result;
     // assign root schema if not $dummy data
     this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
     // load this node schema
@@ -160,7 +161,6 @@ export default class DataNode implements IDataNode {
     } else {
       this.data = value;
     }
-
     // check data from update plugins
     const exeConfig: IPluginExecutionConfig = {
       stopWhenEmpty: true,
@@ -172,11 +172,10 @@ export default class DataNode implements IDataNode {
       exeConfig
     );
 
-    // console.log(noUpdateLayout);
-    // // update state without sending message
+    // update state without sending message
     if (noUpdateLayout) {
-      await this.uiNode.stateNode.renewStates();
       await this.uiNode.pluginManager.executePlugins("ui.parser");
+      await this.uiNode.stateNode.renewStates();
     } else {
       await this.uiNode.updateLayout(workingMode || this.workingMode);
     }
@@ -190,16 +189,19 @@ export default class DataNode implements IDataNode {
   }
 
   async createRow(
-    value?: any,
+    value: any = {},
     insertHead?: boolean,
     workingMode?: IWorkingMode
   ) {
     let status: any = false;
     if (this.uiNode.schema.$children) {
       const currentValue = this.data || [];
-      if (_.isEmpty(value)) {
-        value = this.uiNode.schema.$children.map((node: INodeProps) => "");
-      }
+      // if (_.isEmpty(value)) {
+      //   // this.uiNode.schema.$children.forEach((node: INodeProps) => {
+      //   //   console.log(node);
+      //   // });
+      //   value = {};
+      // }
 
       if (insertHead) {
         currentValue.unshift(value);
