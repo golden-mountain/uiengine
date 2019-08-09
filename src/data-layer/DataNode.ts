@@ -44,6 +44,16 @@ export default class DataNode implements IDataNode {
     this.dataEngine.setRequest(this.request);
   }
 
+  private async refreshLayout(noUpdateLayout: boolean) {
+    // update state without sending message
+    if (noUpdateLayout) {
+      await this.uiNode.pluginManager.executePlugins("ui.parser");
+      await this.uiNode.stateNode.renewStates();
+    } else {
+      await this.uiNode.updateLayout();
+    }
+  }
+
   set data(value: any) {
     if (this.dataPool instanceof DataPool) {
       this.dataPool.set(value, this.source.source);
@@ -106,21 +116,22 @@ export default class DataNode implements IDataNode {
       returnLastValue: true
     };
 
-    const mode = _.get(this.uiNode.workingMode, "mode");
     let result = await this.pluginManager.executePlugins(
       "data.data.parser",
       exeConfig
     );
 
-    if (mode === "new" || !this.source.autoload) {
-      await this.dataEngine.loadSchema(this.source);
-    } else {
-      if (result === undefined) {
+    if (result === undefined) {
+      const mode = _.get(this.uiNode.workingMode, "mode");
+      if (mode === "new" || !this.source.autoload) {
+        await this.dataEngine.loadSchema(this.source);
+        result = null;
+      } else {
         let data = await this.dataEngine.loadData(this.source);
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource);
+        this.data = result;
       }
-      this.data = result;
     }
 
     // assign root schema if not $dummy data
@@ -157,19 +168,13 @@ export default class DataNode implements IDataNode {
       exeConfig
     );
 
-    // update state without sending message
-    if (noUpdateLayout) {
-      await this.uiNode.pluginManager.executePlugins("ui.parser");
-      await this.uiNode.stateNode.renewStates();
-    } else {
-      await this.uiNode.updateLayout();
-    }
-
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
       // this.dataPool.set(this.data, this.source.source);
       this.dataPool.clearError(this.source.source);
     }
+
+    await this.refreshLayout(noUpdateLayout);
     return status;
   }
 
@@ -177,12 +182,6 @@ export default class DataNode implements IDataNode {
     let status: any = false;
     if (this.uiNode.schema.$children) {
       const currentValue = this.data || [];
-      // if (_.isEmpty(value)) {
-      //   // this.uiNode.schema.$children.forEach((node: INodeProps) => {
-      //   //   console.log(node);
-      //   // });
-      //   value = {};
-      // }
 
       if (insertHead) {
         currentValue.unshift(value);
@@ -230,13 +229,7 @@ export default class DataNode implements IDataNode {
         this.dataPool.clearError(this.source.source);
       }
       // update state without sending message
-      if (noUpdateLayout) {
-        // for update props purpose
-        await this.uiNode.pluginManager.executePlugins("ui.parser");
-        await this.uiNode.stateNode.renewStates();
-      } else {
-        await this.uiNode.updateLayout();
-      }
+      await this.refreshLayout(noUpdateLayout);
     }
     return status;
   }

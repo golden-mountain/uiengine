@@ -3,7 +3,12 @@ import _ from "lodash";
 import { Table, Input, Button, Popconfirm, Form, Icon } from "antd";
 // import { A10Modal } from "./Modal";
 
-import { UIEngineContext, NodeController, ComponentWrapper } from "UIEngine";
+import {
+  UIEngineContext,
+  NodeController,
+  ComponentWrapper,
+  DataPool
+} from "UIEngine";
 import { IWorkingMode } from "../../../../../typings";
 const EditableContext = React.createContext({});
 
@@ -195,10 +200,14 @@ export class EditableTable extends React.Component<any, any> {
   handleCancel = () => {
     const nodeController = NodeController.getInstance();
     const {
-      modal: { layout }
+      modal: { layout, connect }
     } = this.props;
 
-    nodeController.hideUINode(layout);
+    // if (_.has(connect, "source")) {
+    //   const dataPool = DataPool.getInstance();
+    //   dataPool.clear(_.get(connect, "source"));
+    // }
+    nodeController.hideUINode(layout, true);
   };
 
   openModal = (workingMode?: IWorkingMode) => {
@@ -229,7 +238,7 @@ export class EditableTable extends React.Component<any, any> {
 
   render() {
     // const { dataSource } = this.state;
-    let dataSource = this.props.uinode.dataNode.data;
+    let dataSource = _.cloneDeep(this.props.uinode.dataNode.data);
     // console.log("data Source changed,", this.props.state);
     // const { modal, uinode } = this.props;
     const components = {

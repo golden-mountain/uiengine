@@ -32,16 +32,17 @@ export default class DataPool implements IDataPool {
     if (d === null || d === undefined) d = defaultValue;
 
     p = `${domainName}.${p}`;
+    const cloneData = _.cloneDeep(data);
     if (_.isArray(d)) {
-      if (!_.isArray(data)) {
-        d.push(data);
+      if (!_.isArray(cloneData)) {
+        d.push(cloneData);
       } else {
-        // compare with the data is equal, if equal, then ignore it
-        d = _.unionWith(d, data, _.isEqual);
+        // compare with the cloneData is equal, if equal, then ignore it
+        d = _.unionWith(d, cloneData, _.isEqual);
       }
       _.set(this.data, p, d);
     } else {
-      _.set(this.data, p, data);
+      _.set(this.data, p, cloneData);
     }
     return this.data;
   }
@@ -76,6 +77,7 @@ export default class DataPool implements IDataPool {
   }
 
   clear(path?: string) {
+    console.log(path, "to be cleared");
     if (path) {
       const domainName = getDomainName(path);
       path = formatSource(path);
@@ -88,7 +90,6 @@ export default class DataPool implements IDataPool {
         parentObj.splice(rmIndex, 1);
         _.set(this.data, pathObject, parentObj);
       } else {
-        console.log(p, this.data);
         _.unset(this.data, p);
       }
     } else {
@@ -101,7 +102,9 @@ export default class DataPool implements IDataPool {
     result = this.get(fromPath, false);
     if (!_.isEmpty(result)) {
       this.set(result, toPath);
-      if (clearFromPath) this.clear(fromPath);
+      if (clearFromPath) {
+        this.clear(fromPath);
+      }
     }
     return result;
   }

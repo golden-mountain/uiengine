@@ -16,7 +16,13 @@ import {
   IWorkingMode
 } from "../../typings";
 import { UINode } from "../data-layer";
-import { Messager, Request, Workflow, PluginManager } from "../helpers";
+import {
+  Messager,
+  Request,
+  Workflow,
+  PluginManager,
+  DataPool
+} from "../helpers";
 import { searchNodes } from "../helpers";
 
 export default class NodeController implements INodeController {
@@ -80,8 +86,7 @@ export default class NodeController implements INodeController {
 
     // use cached nodes
     let uiNode: IUINode = _.get(this.nodes[rootName], "uiNode");
-    const workingMode = _.get(this.nodes[rootName], "workingMode");
-    console.log(workingMode);
+    const workingMode = this.getWorkingMode(rootName);
     if (!uiNode) {
       // default we load all default plugins
       uiNode = new UINode({}, this.request, rootName);
@@ -125,7 +130,7 @@ export default class NodeController implements INodeController {
     return true;
   }
 
-  hideUINode(layout: string) {
+  hideUINode(layout: string, clearSource: boolean = false) {
     const renderer = this.nodes[layout];
     if (renderer) {
       renderer.visible = false;
@@ -139,6 +144,14 @@ export default class NodeController implements INodeController {
       this.activeLayout = this.layouts[index];
     } else {
       this.activeLayout = "";
+    }
+
+    // clear data pool
+    const workingMode = this.getWorkingMode(layout);
+    if (clearSource && _.has(workingMode, "options.source.source")) {
+      const dataPool = DataPool.getInstance();
+      const source = _.get(workingMode, "options.source.source");
+      if (source) dataPool.clear(source);
     }
 
     this.messager.sendMessage(this.engineId, {

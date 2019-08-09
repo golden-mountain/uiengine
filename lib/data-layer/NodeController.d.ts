@@ -23,7 +23,7 @@ export default class NodeController implements INodeController {
      */
     loadUINode(layout: ILayoutSchema | string, id?: string, options?: ILoadOptions, updateNodes?: boolean): Promise<IUINode>;
     deleteUINode(layout: string): boolean;
-    hideUINode(layout: string): void;
+    hideUINode(layout: string, clearSource?: boolean): void;
     getUINode(layout: string, uiNodeOnly?: boolean): IUINode | IUINodeRenderer;
     castMessage(nodeSelector: INodeProps, data: any, ids?: [string]): void;
     pushLayout(layout: string): void;

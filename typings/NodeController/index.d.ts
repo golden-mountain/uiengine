@@ -30,7 +30,7 @@ export interface INodeController {
     updateNodes?: boolean
   );
   deleteUINode(layout: string);
-  hideUINode(layout: string);
+  hideUINode(layout: string, clearSource: boolean = false);
   getUINode(layout: string, uiNodeOnly: boolean = false);
   castMessage(nodeSelector: INodeProps, data: any, ids?: [string]);
   setRequestConfig(requestConfig: IRequestConfig);

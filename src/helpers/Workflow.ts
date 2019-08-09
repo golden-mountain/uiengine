@@ -6,7 +6,6 @@ import {
   ILoadOptions,
   IDataSource,
   INodeProps,
-  IWorkingMode,
   IConnectOptions,
   IPluginExecutionConfig
 } from "../../typings";
@@ -156,10 +155,7 @@ export default class Workflow implements IWorkflow {
       const dataPool = DataPool.getInstance();
       const { source, target, options } = connectOptions;
       let clearSource = _.get(options, "clearSource");
-      // bug: 1. source data did not removed from DataNode
-      // bug: 2. add empty item
       const result = dataPool.merge(source, target, clearSource);
-      let promises: any = [];
       // refresh target ui node
 
       let selector = connectOptions.targetSelector;
@@ -173,9 +169,9 @@ export default class Workflow implements IWorkflow {
       for (let index in selectedNodes) {
         const node = selectedNodes[index];
         // send message
-        await node.updateLayout(this.nodeController.getWorkingMode());
+        await node.updateLayout();
       }
-      return promises;
+      return result;
     } else {
       return couldCommit;
     }
@@ -196,7 +192,7 @@ export default class Workflow implements IWorkflow {
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message
-      await node.updateLayout(this.nodeController.getWorkingMode());
+      await node.updateLayout();
     }
   }
 
@@ -212,7 +208,7 @@ export default class Workflow implements IWorkflow {
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message
-      await node.updateLayout(this.nodeController.getWorkingMode());
+      await node.updateLayout();
     }
   }
 }
