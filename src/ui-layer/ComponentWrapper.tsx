@@ -2,6 +2,7 @@ import React from "react";
 import _ from "lodash";
 
 import { PluginManager, getComponent, setComponentState } from "..";
+import { renderNodes } from ".";
 import {
   IComponentWrapper,
   IComponentState,
@@ -42,7 +43,7 @@ class ComponentWrapper extends React.Component<
     if (!_.get(this.state, "state.visible", true)) {
       return null;
     }
-
+    // console.log(_.keys(uiNode.nodes), "will render on component side");
     if (uiNode.schema) {
       // render logic
       const componentLine = _.get(uiNode.schema, "component");
@@ -81,10 +82,17 @@ class ComponentWrapper extends React.Component<
             childrenObjects.push(uiNode.schema.content);
           }
 
-          return childrenObjects.length ? (
-            <WrappedComponent {...props}>{childrenObjects}</WrappedComponent>
-          ) : (
-            <WrappedComponent {...props} />
+          return (
+            <>
+              {childrenObjects.length ? (
+                <WrappedComponent {...props}>
+                  {childrenObjects}
+                </WrappedComponent>
+              ) : (
+                <WrappedComponent {...props} />
+              )}
+              {renderNodes(uiNode.nodes)}
+            </>
           );
         } catch (e) {
           console.error(e.message);

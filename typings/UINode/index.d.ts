@@ -36,6 +36,9 @@ export interface IUINode {
   parent?: IUINode;
   stateInfo: IStateInfo;
   workingMode?: IWorkingMode;
+  nodes: {
+    [name: string]: IUINodeRenderer;
+  } = {}; 
 
   loadLayout(schema?: ILayoutSchema | string, workingMode?: IWorkingMode);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;

@@ -78,7 +78,7 @@ describe("Given an instance of Workflow library", () => {
       await childNode.props.onClick.call();
       wrapper.update();
       const expectHTML =
-        '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div><main container="main"><div>Demo Container<div>foo.bar.name</div></div></main>';
+        '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a><main container="main" parentnode="[object Object]"><div>Demo Container<div>foo.bar.name</div></div></main></div>';
       expect(wrapper.html()).to.equal(expectHTML);
 
       // activelayout should change on node controller

@@ -220,7 +220,8 @@ export class EditableTable extends React.Component<any, any> {
       const options = {
         ...modal,
         onClose: this.handleCancel,
-        visible: true
+        // visible: true,
+        parentNode: this.props.uinode
       };
       // const workflow = Workflow.getInstance();
       this.context.controller.setWorkingMode(layout, workingMode);

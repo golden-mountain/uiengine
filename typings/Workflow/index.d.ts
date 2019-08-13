@@ -3,6 +3,7 @@ import { IUINode } from "../UINode";
 export interface ILoadOptions {
   container?: string;
   props?: object;
+  parentNode?: IUINode; // parent ui node, default render in UIEngine
 }
 
 /// using working mode to decide how to load data from dataNode

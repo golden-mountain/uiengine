@@ -21,7 +21,8 @@ import {
   IPluginManager,
   IMessager,
   IStateInfo,
-  IWorkingMode
+  IWorkingMode,
+  IUINodeRenderer
 } from "../../typings";
 
 export default class UINode implements IUINode {
@@ -44,6 +45,9 @@ export default class UINode implements IUINode {
     time: 0
   };
   workingMode?: IWorkingMode;
+  nodes: {
+    [name: string]: IUINodeRenderer;
+  } = {};
 
   constructor(
     schema: ILayoutSchema,
@@ -278,10 +282,14 @@ export default class UINode implements IUINode {
 
   sendMessage(force: boolean = false) {
     const newState = {
+      nodes: this.nodes,
       data: _.cloneDeep(this.dataNode.data),
       state: _.cloneDeep(this.stateNode.state),
       time: force ? new Date().getTime() : 0
     };
+    // if (!_.isEmpty(newState.nodes)) {
+    //   console.log(_.cloneDeep(newState), "at send message on UINode");
+    // }
     if (!_.isEqual(newState, this.stateInfo)) {
       this.stateInfo = newState;
       this.messager.sendMessage(this.id, this.stateInfo);

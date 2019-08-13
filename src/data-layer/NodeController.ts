@@ -99,19 +99,36 @@ export default class NodeController implements INodeController {
       await uiNode.updateLayout(workingMode);
     }
 
-    this.nodes[rootName] = _.merge(this.nodes[rootName], {
+    const rendererOptions = _.merge(this.nodes[rootName], {
       uiNode,
       visible: true,
       options,
       engineId: this.engineId
     });
+    this.nodes[rootName] = rendererOptions;
+
     // add layout stack
     this.pushLayout(rootName);
     this.activeLayout = rootName;
+
+    // update parent node
+    const parentNode = _.get(options, "parentNode");
+    if (parentNode) {
+      const nodesOfParentNode = _.get(parentNode.nodes, `${rootName}.uiNode`);
+      if (nodesOfParentNode !== uiNode) {
+        parentNode.nodes[rootName] = rendererOptions;
+      }
+    }
+
+    // send message
     if (updateNodes) {
-      this.messager.sendMessage(this.engineId, {
-        nodes: this.nodes
-      });
+      if (parentNode) {
+        parentNode.sendMessage(true);
+      } else {
+        this.messager.sendMessage(this.engineId, {
+          nodes: this.nodes
+        });
+      }
     }
     return uiNode;
   }
@@ -154,9 +171,15 @@ export default class NodeController implements INodeController {
       if (source) dataPool.clear(source);
     }
 
-    this.messager.sendMessage(this.engineId, {
-      nodes: this.nodes
-    });
+    const parentNode = _.get(renderer, "options.parentNode");
+    if (parentNode) {
+      // must force update , since the data adjugement on uinode side not precised
+      parentNode.sendMessage(true);
+    } else {
+      this.messager.sendMessage(this.engineId, {
+        nodes: this.nodes
+      });
+    }
   }
 
   getUINode(layout: string, uiNodeOnly: boolean = false) {

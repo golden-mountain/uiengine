@@ -400,8 +400,7 @@
                   },
                   "container": "antd:Drawer",
                   "placement": "right",
-                  "closable": true,
-                  "visible": true
+                  "closable": true
                 }
               },
               "$children": [

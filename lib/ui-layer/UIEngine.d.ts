@@ -12,3 +12,4 @@ export default class UIEngine extends React.Component<IUIEngineProps, IUIEngineS
     componentWillUnmount(): void;
     render(): JSX.Element;
 }
+export declare function renderNodes(uiNodeRenderers: any, restOptions?: any): (JSX.Element | null)[];

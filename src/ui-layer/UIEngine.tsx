@@ -88,36 +88,44 @@ export default class UIEngine extends React.Component<
     const validNodes = _.pickBy(
       this.state.nodes,
       (nodeRenderer: IUINodeRenderer) => {
-        return nodeRenderer.engineId === this.engineId;
+        const { engineId, options } = nodeRenderer;
+        if (options) {
+          return engineId === this.engineId && !_.has(options, "parentNode");
+        }
+        return engineId === this.engineId;
       }
     );
-
+    // console.log(_.keys(validNodes), "will render on uiengine side");
     return (
       <UIEngineContext.Provider value={context}>
-        {_.entries(validNodes).map((entry: any, index: number) => {
-          const [layoutKey, uiNodeRenderer] = entry;
-          const { uiNode, options = {}, visible = true } = uiNodeRenderer;
-          const { container } = options;
-
-          if (!visible) return null;
-
-          // wrapper if provided
-          let Container = ({ children }: any) => children;
-          if (container) {
-            Container = getComponent(container);
-          }
-
-          return (
-            <Container {...options} visible key={`container-${index}`}>
-              <ComponentWrapper
-                uiNode={uiNode}
-                {...rest}
-                key={`layout-${layoutKey}`}
-              />
-            </Container>
-          );
-        })}
+        {renderNodes(validNodes, rest)}
       </UIEngineContext.Provider>
     );
   }
+}
+
+export function renderNodes(uiNodeRenderers: any, restOptions?: any) {
+  return _.entries(uiNodeRenderers).map((entry: any, index: number) => {
+    const [layoutKey, uiNodeRenderer] = entry;
+    const { uiNode, options = {}, visible } = uiNodeRenderer;
+    const { container } = options;
+
+    if (!visible) return null;
+
+    // wrapper if provided
+    let Container = ({ children }: any) => children;
+    if (container) {
+      Container = getComponent(container);
+    }
+
+    return (
+      <Container {...options} visible={visible} key={`container-${index}`}>
+        <ComponentWrapper
+          uiNode={uiNode}
+          {...restOptions}
+          key={`layout-${layoutKey}`}
+        />
+      </Container>
+    );
+  });
 }

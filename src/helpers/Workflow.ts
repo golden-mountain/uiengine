@@ -34,9 +34,14 @@ export default class Workflow implements IWorkflow {
 
     // send message
     promise.then((uiNode: IUINode) => {
-      this.nodeController.messager.sendMessage(this.nodeController.engineId, {
-        nodes: this.nodeController.nodes
-      });
+      const parentNode = _.get(options, "parentNode");
+      if (parentNode) {
+        parentNode.sendMessage(true);
+      } else {
+        this.nodeController.messager.sendMessage(this.nodeController.engineId, {
+          nodes: this.nodeController.nodes
+        });
+      }
       this.activeNode = uiNode;
     });
 
