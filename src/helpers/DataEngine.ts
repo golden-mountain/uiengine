@@ -51,11 +51,15 @@ export default class DataEngine implements IDataEngine {
     const validData = await this.pluginManager.executePlugins(
       "data.commit.exclude",
       { stopWhenEmpty: true, returnLastValue: true },
-      { source, data },
+      { source, data }
     );
     // clear initial data;
     this.data = {};
-    this.requestOptions.params = validData;
+    if (validData !== undefined) {
+      this.requestOptions.params = validData;
+    } else {
+      this.requestOptions.params = data;
+    }
     this.requestOptions.method = method;
     this.errorInfo = null;
     if (!this.request[method] || !_.isFunction(this.request[method])) {
