@@ -50,6 +50,7 @@ export default class DataEngine implements IDataEngine {
   ) {
     // clear initial data;
     this.data = {};
+    this.requestOptions.params = data;
     this.requestOptions.method = method;
     this.errorInfo = null;
     if (!this.request[method] || !_.isFunction(this.request[method])) {
@@ -91,26 +92,19 @@ export default class DataEngine implements IDataEngine {
           stopWhenEmpty: true,
           returnLastValue: true
         };
+
         const couldCommit = await this.pluginManager.executePlugins(
-          "data.request.could",
-          exeConfig
+          "data.request.before",
+          { stopWhenEmpty: true, returnLastValue: true },
+          { source, data: _.cloneDeep(data) }
         );
+
         if (couldCommit === false) {
           this.errorInfo = {
             status: 1001,
             code: "Plugins blocked the commit"
           };
           return false;
-        }
-        const submitData = await this.pluginManager.executePlugins(
-          "data.commit.process",
-          { stopWhenEmpty: true, returnLastValue: true },
-          { source, data: _.cloneDeep(data) },
-        );
-        if (submitData !== undefined) {
-          this.requestOptions.params = submitData;
-        } else {
-          this.requestOptions.params = data;
         }
 
         if (cache) {

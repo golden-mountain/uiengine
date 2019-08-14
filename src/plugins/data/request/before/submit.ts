@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataNode } from "../../../../typings";
+import { IPluginFunc, IPlugin, IDataNode } from "../../../../../typings";
 
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   // const errors = dataNode.dataPool.errors;
@@ -10,7 +10,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 };
 
 export const submit: IPlugin = {
-  type: "data.commit.could",
+  type: "data.request.before",
   weight: 0,
   callback,
   name: "submit-handler"
