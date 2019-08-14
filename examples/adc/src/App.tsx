@@ -43,7 +43,7 @@ const App: React.FC = () => {
   const headers: any = requestConfig.headers;
   const handleOK = () => {
     // const uiNode = controller.getUINode(loginLayout);
-    const result = submitToAPI(["credentials"]);
+    const result = submitToAPI([{ source: 'credentials' }]);
     result.then((res: any) => {
       const token = _.get(res[0], "credentials.authresponse.signature");
 
