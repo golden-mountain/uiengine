@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 import { default as components } from "./components";
 import * as plugins from "./plugins";
-import requestConfig from "./config/request";
+import { requestConfig, widgetConfig } from "./config";
 import {
   UIEngineRegister,
   UIEngine,
@@ -93,7 +93,10 @@ const App: React.FC = () => {
         </Menu.Item>
       </Menu>
 
-      <UIEngine layouts={["schema/ui/app.json"]} reqConfig={requestConfig} />
+      <UIEngine
+        layouts={["schema/ui/app.json"]}
+        config={{ requestConfig, widgetConfig }}
+      />
     </BrowserRouter>
   );
 };

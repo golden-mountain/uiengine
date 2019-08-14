@@ -26,17 +26,25 @@ export default class UIEngine extends React.Component<
 > {
   state = {
     nodes: [],
+    error: {},
+    time: 0,
     activeNodeID: ""
   };
   nodeController: INodeController;
+  error = {};
 
   // bind to nodeController, to show it own instances
   engineId = _.uniqueId("engine-");
 
   constructor(props: IUIEngineProps) {
     super(props);
+    if (!props.config) {
+      console.warn("No requestConfig on props, this is required!");
+    }
+
     this.nodeController = NodeController.getInstance();
-    this.nodeController.setRequestConfig(props.reqConfig);
+    const { requestConfig } = props.config;
+    this.nodeController.setRequestConfig(requestConfig);
 
     if (_.isFunction(props.onEngineCreate)) {
       props.onEngineCreate(this.nodeController);
@@ -79,10 +87,29 @@ export default class UIEngine extends React.Component<
   }
 
   render() {
-    const { layouts, reqConfig, onEngineCreate, ...rest } = this.props;
+    const { layouts, config, onEngineCreate, ...rest } = this.props;
     const context = {
       controller: this.nodeController
     };
+
+    // error handler
+    const { error, time } = this.state;
+    let Messager = (props: any) => <div />;
+    // only show once error
+    if (_.has(error, "code") && !_.isEqual(error, this.error)) {
+      if (_.has(config, "widgetConfig.messager")) {
+        Messager = _.get(config, "widgetConfig.messager", null);
+      } else {
+        Messager = (props: any) => {
+          return (
+            <div className={`uiengine-message message-${props.status}`}>
+              {props.code}
+            </div>
+          );
+        };
+      }
+      this.error = error;
+    }
 
     // only get nodes for this engine
     const validNodes = _.pickBy(
@@ -95,9 +122,10 @@ export default class UIEngine extends React.Component<
         return engineId === this.engineId;
       }
     );
-    // console.log(_.keys(validNodes), "will render on uiengine side");
+
     return (
       <UIEngineContext.Provider value={context}>
+        <Messager {...error} />
         {renderNodes(validNodes, rest)}
       </UIEngineContext.Provider>
     );

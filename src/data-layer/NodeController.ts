@@ -203,6 +203,15 @@ export default class NodeController implements INodeController {
     });
   }
 
+  sendMessage(info: any, force: boolean = false) {
+    const state = {
+      ...info,
+      time: force ? new Date().getTime() : 0
+    };
+
+    this.messager.sendMessage(this.engineId, state);
+  }
+
   pushLayout(layout: string) {
     _.remove(this.layouts, (l: string) => {
       return l === layout;

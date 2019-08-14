@@ -60,13 +60,18 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
   if (meta) {
     if (meta["object-key"] && _.isEmpty(data)) {
-      return { status: false, code: "Field required" };
+      return {
+        status: false,
+        code: `Field ${dataNode.source.source} required`
+      };
     }
+
     if (meta.format && !_.isEmpty(data)) {
       const format = _.camelCase(meta.format);
       const callback = _.get(validationMap, format);
       if (callback) {
-        return callback ? callback(data, meta) : {};
+        const result = callback ? callback(data, meta) : {};
+        return result;
       }
     }
   }
