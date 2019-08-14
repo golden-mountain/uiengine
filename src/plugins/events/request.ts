@@ -10,17 +10,8 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     }
 
     const nodeController = NodeController.getInstance();
+
     if (!options.target) {
-      // const errorInfo = {
-      //   status: 500,
-      //   code: "Submit target can't be empty"
-      // };
-      // nodeController.sendMessage(
-      //   {
-      //     error: errorInfo
-      //   },
-      //   true
-      // );
       return false;
     }
 
@@ -51,18 +42,11 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     }
 
     if (errors.length) {
-      // const errorInfo = {
-      //   status: 500,
-      //   code:
-      //     "Validation not passed, please check each fields and make sure they are right"
-      // };
-      // nodeController.sendMessage(
-      //   {
-      //     error: errorInfo
-      //   },
-      //   true
-      // );
-      return false;
+      let couldRequest = true;
+      errors.forEach((error: any) => {
+        if (error.status !== true) couldRequest = false;
+      });
+      if (!couldRequest) return false;
     }
 
     nodeController.workflow.submit(sources).then((result: any) => {

@@ -9,7 +9,7 @@ import { mount } from "enzyme";
 import { UIEngineRegister, UIEngine, NodeController } from "../../src/";
 
 import reactComponentTestJson from "../layouts/react-component-test.json";
-import reqConfig from "../config/request";
+import requestConfig from "../config/request";
 
 // import components
 import components from "../components";
@@ -25,12 +25,14 @@ describe("Given an instance of UIEngine library", () => {
   describe("the given layouts", () => {
     it("should follow the layout schema, render the UI", async () => {
       const nodeController = NodeController.getInstance();
-      nodeController.setRequestConfig(reqConfig);
+      nodeController.setRequestConfig(requestConfig);
       const layoutPath = "layouts/react-component-test-2.json";
       const layouts = [reactComponentTestJson, layoutPath];
 
       // spy loadUINode
-      const component = <UIEngine layouts={layouts} reqConfig={reqConfig} />;
+      const component = (
+        <UIEngine layouts={layouts} config={{ requestConfig }} />
+      );
       const loadUINodeSpy = chai.spy.on(nodeController, "loadUINode");
       let wrapper = mount(component);
       expect(loadUINodeSpy).to.be.called.twice;
