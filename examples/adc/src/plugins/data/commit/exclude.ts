@@ -86,13 +86,12 @@ const callback: IPluginFunc = (
     return data
   }
 
-  const copyData = _.cloneDeep(data)
-  deepSearch(rootNode, hasExclusion, doExclusion.bind(null, copyData))
-  return copyData
+  deepSearch(rootNode, hasExclusion, doExclusion.bind(null, data))
+  return data
 };
 
 export const exclude: IPlugin = {
-  type: "data.commit.exclude",
+  type: "data.commit.process",
   weight: 100,
   callback,
   name: "exclude"
