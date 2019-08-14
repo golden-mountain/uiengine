@@ -40,7 +40,9 @@
                       "props": {
                         "type": "antd:Input"
                       },
-                      "datasource": "slb.virtual-server:name"
+                      "datasource": {
+                        "source": "slb.virtual-server:name"
+                      }
                     },
                     {
                       "component": "a10:FormItem",
@@ -389,34 +391,54 @@
                   "layout": "schema/ui/slb.virtual-server.port.json",
                   "title": "Create Virtual Port",
                   "width": "80%",
-                  "connect": "slb.virtual-server:port-list",
+                  "connect": {
+                    "options": {
+                      "clearSource": true
+                    },
+                    "source": "slb.virtual-server.port:",
+                    "target": "slb.virtual-server:port-list[]"
+                  },
                   "container": "antd:Drawer",
                   "placement": "right",
-                  "closable": true,
-                  "visible": true
+                  "closable": true
                 }
               },
               "$children": [
                 {
                   "component": "a10:FormItem",
-                  "datasource": "slb.virtual-server:port-list.$.port-number",
+                  "datasource": {
+                    "source": "slb.virtual-server:port-list[$].port-number",
+                    "schema": "slb.virtual-server.port:port-number",
+                    "autoload": true
+                  },
                   "props": {
-                    "title": "Port"
+                    "title": "Port",
+                    "label": ""
                   }
                 },
                 {
-                  "component": "antd:Input",
+                  "component": "a10:FormItem",
                   "props": {
-                    "title": "Protocol"
+                    "title": "Protocol",
+                    "label": ""
                   },
-                  "datasource": "slb.virtual-server:port-list.$.protocol"
+                  "datasource": {
+                    "source": "slb.virtual-server:port-list[$].protocol",
+                    "schema": "slb.virtual-server.port:protocol",
+                    "autoload": true
+                  }
                 },
                 {
                   "props": {
-                    "title": "Service Group"
+                    "title": "Service Group",
+                    "label": ""
                   },
-                  "component": "antd:Input",
-                  "datasource": "slb.virtual-server:port-list.$.service-group"
+                  "component": "a10:FormItem",
+                  "datasource": {
+                    "source": "slb.virtual-server:port-list.$.service-group",
+                    "schema": "slb.virtual-server.port:service-group",
+                    "autoload": true
+                  }
                 }
               ]
             }
@@ -453,7 +475,7 @@
                     "options": {
                       "method": "POST",
                       "params": {},
-                      "target": "slb.virtual-server"
+                      "target": "slb.virtual-server:"
                     }
                   }
                 ]

@@ -85,7 +85,7 @@ export function stateCompare(
   rule: string = "is"
 ) {
   let result = true;
-  const stateNode = target.getStateNode();
+  const stateNode = target.stateNode;
   if (stateNode) {
     const actual = stateNode.getState(name);
     if (actual !== "undefined") {
@@ -107,7 +107,7 @@ export function dataCompare(
   rule: string = "is"
 ) {
   let result = true;
-  const dataNode = target.getDataNode();
+  const dataNode = target.dataNode;
   if (dataNode) {
     result = compareDataLogic(expected, dataNode.getData(), strategy, rule);
   }

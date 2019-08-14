@@ -3,7 +3,13 @@ import _ from "lodash";
 import { Table, Input, Button, Popconfirm, Form, Icon } from "antd";
 // import { A10Modal } from "./Modal";
 
-import { UIEngineContext, NodeController } from "UIEngine";
+import {
+  UIEngineContext,
+  NodeController,
+  ComponentWrapper,
+  DataPool
+} from "UIEngine";
+import { IWorkingMode } from "../../../../../typings";
 const EditableContext = React.createContext({});
 
 const EditableRow = (props: any) => (
@@ -23,9 +29,11 @@ class EditableCell extends React.Component<any, any> {
 
   toggleEdit = () => {
     const editing = !this.state.editing;
-    this.setState({ editing }, () => {
+    this.setState({ editing: true }, () => {
       if (editing) {
-        this.input.focus();
+        try {
+          this.input.focus();
+        } catch {}
       }
     });
   };
@@ -43,11 +51,15 @@ class EditableCell extends React.Component<any, any> {
 
   renderCell = (form: any) => {
     this.form = form;
-    const { children, dataIndex, record, title } = this.props;
-    const { editing } = this.state;
+    const { children, dataIndex, record, title, index } = this.props;
+    if (!record.uinode) return;
+
+    let editing: any = this.state.editing;
+
+    const uiNode = record.uinode.children[index];
     return editing ? (
       <Form.Item style={{ margin: 0 }}>
-        {form.getFieldDecorator(dataIndex, {
+        {/* {form.getFieldDecorator(dataIndex, {
           rules: [
             {
               required: true,
@@ -55,18 +67,19 @@ class EditableCell extends React.Component<any, any> {
             }
           ],
           initialValue: record[dataIndex]
-        })(
-          <Input
-            ref={node => (this.input = node)}
-            onPressEnter={this.save}
-            onBlur={this.save}
-          />
-        )}
+        })( */}
+        <ComponentWrapper
+          uiNode={uiNode}
+          ref={node => (this.input = node)}
+          onPressEnter={this.save}
+          onBlur={this.save}
+        />
+        {/* )} */}
       </Form.Item>
     ) : (
       <div
         className="editable-cell-value-wrap"
-        style={{ paddingRight: 24 }}
+        style={{ paddingRight: 24, width: "100%", height: "30px" }}
         onClick={this.toggleEdit}
       >
         {children}
@@ -104,16 +117,20 @@ export class EditableTable extends React.Component<any, any> {
   constructor(props: any) {
     super(props);
     this.state = {
-      dataSource: this.props.uinode.dataNode.data,
+      dataSource: this.props.uinode.dataNode.data || [],
       showPopup: false,
       dataKey: 0
     };
 
     this.columns = props.uinode.schema.$children.map((node: any) => {
+      const datasource =
+        typeof node.datasource === "string"
+          ? node.datasource
+          : node.datasource.source;
       return {
         title: node.props.title,
-        dataIndex: node.datasource.split(".").pop(),
-        node,
+        dataIndex: datasource.split(".").pop(),
+        schema: node,
         width: "30%",
         editable: true
       };
@@ -122,20 +139,20 @@ export class EditableTable extends React.Component<any, any> {
     this.columns.push({
       title: "operation",
       dataIndex: "operation",
-      render: (text: any, record: any) =>
-        this.state.dataSource.length >= 1 ? (
+      render: (text: any, record: any, index: number) =>
+        this.props.uinode.dataNode.data.length >= 1 ? (
           <>
             <Icon
               type="edit"
               theme="twoTone"
               twoToneColor="#428BCA"
               style={{ paddingRight: "10px" }}
-              onClick={() => this.handleEdit(record.key)}
+              onClick={() => this.handleEdit(index)}
             />
 
             <Popconfirm
-              title="Sure to delete?"
-              onConfirm={() => this.handleDelete(record.key)}
+              title="Are you sure to delete?"
+              onConfirm={() => this.handleDelete(index)}
             >
               <Icon type="delete" theme="twoTone" twoToneColor="red" />
             </Popconfirm>
@@ -143,26 +160,57 @@ export class EditableTable extends React.Component<any, any> {
         ) : null
     });
   }
+
   handleEdit = (key: any) => {
-    this.setState({ dataKey: key, showPopup: true });
+    // this.setState({ dataKey: key, showPopup: true });
+    const {
+      modal: { connect }
+    } = this.props;
+    const workingMode = {
+      mode: "edit-pool",
+      options: {
+        key,
+        source: connect
+      }
+    };
+    this.openModal(workingMode);
   };
 
-  handleDelete = (key: any) => {
-    this.props.uinode.dataNode.deleteData(key);
+  handleDelete = async (key: any) => {
+    await this.props.uinode.dataNode.deleteData(key);
   };
 
-  handleAdd = () => {};
+  handleAdd = async () => {
+    this.props.uinode.dataNode.createRow();
+  };
+
+  handleAdvanceAdd = async () => {
+    const {
+      modal: { connect }
+    } = this.props;
+    const workingMode = {
+      mode: "new",
+      options: {
+        source: connect
+      }
+    };
+    this.openModal(workingMode);
+  };
 
   handleCancel = () => {
     const nodeController = NodeController.getInstance();
     const {
-      modal: { layout }
+      modal: { layout, connect }
     } = this.props;
 
-    nodeController.hideUINode(layout);
+    // if (_.has(connect, "source")) {
+    //   const dataPool = DataPool.getInstance();
+    //   dataPool.clear(_.get(connect, "source"));
+    // }
+    nodeController.hideUINode(layout, true);
   };
 
-  openModal = () => {
+  openModal = (workingMode?: IWorkingMode) => {
     if (_.has(this.props, "modal.layout")) {
       const {
         modal: { layout },
@@ -172,8 +220,11 @@ export class EditableTable extends React.Component<any, any> {
       const options = {
         ...modal,
         onClose: this.handleCancel,
-        visible: true
+        // visible: true,
+        parentNode: this.props.uinode
       };
+      // const workflow = Workflow.getInstance();
+      this.context.controller.setWorkingMode(layout, workingMode);
       this.context.controller.workflow.activeLayout(layout, options);
     } else {
       console.error("popup layout not provided on schema");
@@ -187,7 +238,9 @@ export class EditableTable extends React.Component<any, any> {
   };
 
   render() {
-    const { dataSource, dataKey } = this.state;
+    // const { dataSource } = this.state;
+    let dataSource = _.cloneDeep(this.props.uinode.dataNode.data);
+    // console.log("data Source changed,", this.props.state);
     // const { modal, uinode } = this.props;
     const components = {
       body: {
@@ -197,23 +250,27 @@ export class EditableTable extends React.Component<any, any> {
     };
     // add the key for each dataSource
     if (dataSource && dataSource.length) {
-      for (let i = 0; i < dataSource.length; i++) {
-        this.state.dataSource[i]["key"] = i;
-      }
+      dataSource.forEach((record: any, index: number) => {
+        record.key = index;
+        record.uinode = this.props.uinode.children[index];
+      });
     }
-    const columns = this.columns.map((col: any) => {
+    const columns = this.columns.map((col: any, index: number) => {
       if (!col.editable) {
         return col;
       }
       return {
         ...col,
-        onCell: (record: any) => ({
-          record,
-          editable: col.editable,
-          dataIndex: col.dataIndex,
-          title: col.title,
-          handleSave: this.handleSave
-        })
+        onCell: (record: any) => {
+          return {
+            record,
+            editable: col.editable,
+            dataIndex: col.dataIndex,
+            title: col.title,
+            handleSave: this.handleSave,
+            index: index
+          };
+        }
       };
     });
     return (
@@ -227,7 +284,7 @@ export class EditableTable extends React.Component<any, any> {
         </Button>
 
         <Button
-          onClick={this.openModal}
+          onClick={this.handleAdvanceAdd}
           type="danger"
           style={{ marginBottom: 16 }}
         >

@@ -1,4 +1,4 @@
-import _ from "lodash";
+// import _ from "lodash";
 import { IPluginFunc, IPlugin, IDataEngine } from "UIEngine/typings";
 
 /**
@@ -6,7 +6,7 @@ import { IPluginFunc, IPlugin, IDataEngine } from "UIEngine/typings";
  * @param dataEngine
  */
 const callback: IPluginFunc = (dataEngine: IDataEngine) => {
-  const { method, params, endpoint = "" } = dataEngine.requestOptions;
+  const { endpoint = "" } = dataEngine.requestOptions;
   dataEngine.requestOptions.endpoint = endpoint.replace(/\{(.*?)\}/, "");
   return true;
 };

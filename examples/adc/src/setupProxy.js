@@ -2,7 +2,7 @@
 var proxy = require("http-proxy-middleware");
 
 var devProxy = proxy("/axapi/v3/**", {
-  target: "https://192.168.105.99",
+  target: "https://192.168.101.12",
   secure: false,
   onProxyReq: function(proxyReq, req, res) {},
   onProxyRes: function(proxyRes, req, res) {},

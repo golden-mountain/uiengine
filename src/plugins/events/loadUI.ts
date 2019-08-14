@@ -10,8 +10,10 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
       return false;
     }
     const nodeController = NodeController.getInstance();
-    const workflow = nodeController.workflow;
-    return workflow.activeLayout(layout, { container });
+    return nodeController.workflow.activeLayout(layout, {
+      container,
+      parentNode: uiNode
+    });
   };
 };
 

@@ -38,27 +38,27 @@ describe("Given all the default plugins", () => {
         "loaded-from-local-node"
       );
       const schema = await uiNode.loadLayout();
-      let visible = uiNode.getStateNode().getState("visible");
+      let visible = uiNode.stateNode.getState("visible");
       expect(visible).to.equal(true);
 
       // children 0:
       let child: any = uiNode.getChildren([0]);
-      visible = child.getStateNode().getState("visible");
+      visible = child.stateNode.getState("visible");
       expect(visible).to.equal(true);
 
       // children 1
       child = uiNode.getChildren([1]);
-      visible = child.getStateNode().getState("visible");
+      visible = child.stateNode.getState("visible");
       expect(visible).to.equal(true);
 
       // children 1, 0
       child = child.getChildren([1, 0]);
-      visible = child.getStateNode().getState("visible");
+      visible = child.stateNode.getState("visible");
       // console.log(child[0].getSchema("state.visible.deps"));
       expect(visible).to.equal(true);
 
       // children 1, 1
-      visible = child.getStateNode().getState("visible");
+      visible = child.stateNode.getState("visible");
       expect(visible).to.equal(true);
     });
 
@@ -77,15 +77,15 @@ describe("Given all the default plugins", () => {
       const path = `${reqConfig.layoutSchemaPrefix}state-test.json`;
       const replacedSchema = await uiNode.replaceLayout(path);
       expect(replacedSchema.id).to.equal("state-test-id-1");
-      const rootNodeVisible = uiNode.getStateNode().getState("visible");
+      const rootNodeVisible = uiNode.stateNode.getState("visible");
       expect(rootNodeVisible).to.equal(true);
 
       let child: any = uiNode.getChildren([0]);
-      let visible = child.getStateNode().getState("visible");
+      let visible = child.stateNode.getState("visible");
       expect(visible).to.equal(true);
 
       child = uiNode.getChildren([1]);
-      visible = child.getStateNode().getState("visible");
+      visible = child.stateNode.getState("visible");
       expect(visible).to.equal(false);
     });
   });

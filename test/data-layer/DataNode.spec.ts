@@ -42,7 +42,7 @@ describe("Given an instance of my DataNode library", () => {
       const dataNode = new DataNode(toLoadName, uiNode, request);
       // const source = { name: "foo.bar", schemaPath: "foo.json" };
       const source = "foo.bar";
-      const expectedSource = { source, autoload: true };
+      const expectedSource = { source, schema: source, autoload: true };
       expect(dataNode.source).to.be.deep.equal(expectedSource);
       await dataNode.loadData();
       expect(dataNode.getData()).to.deep.equal(_.get(dataNodeJson, toLoadName));
@@ -88,7 +88,7 @@ describe("Given an instance of my DataNode library", () => {
       const localUINode = new UINode(uiJSON, request, "test-root-name");
       await localUINode.loadLayout();
       const child = localUINode.getChildren([0]);
-      const dataNode = child.getDataNode();
+      const dataNode = child.dataNode;
       const data = dataNode.getData();
       expect(data).to.equal("Zp");
 
@@ -98,11 +98,11 @@ describe("Given an instance of my DataNode library", () => {
 
       // refresh the state
       let rowChild = localUINode.getChildren([1, 0, 0]);
-      const stateVisibleCol1 = rowChild.getStateNode().getState("visible");
+      const stateVisibleCol1 = rowChild.stateNode.getState("visible");
       // console.log(rowChild[0].getSchema("state.visible.deps"));
       expect(stateVisibleCol1).to.equal(false);
       rowChild = localUINode.getChildren([1, 0, 1]);
-      const stateVisibleCol2 = rowChild.getStateNode().getState("visible");
+      const stateVisibleCol2 = rowChild.stateNode.getState("visible");
       expect(stateVisibleCol2).to.equal(false);
     });
 
@@ -115,7 +115,7 @@ describe("Given an instance of my DataNode library", () => {
 
       // refresh the state
       const rowChild = localUINode.getChildren([1]);
-      const dataNode = rowChild.getDataNode();
+      const dataNode = rowChild.dataNode;
       await dataNode.deleteData(0);
 
       // console.log(rowChild[0].getSchema("state.visible.deps"));

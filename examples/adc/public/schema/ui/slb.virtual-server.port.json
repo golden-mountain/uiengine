@@ -839,14 +839,7 @@
                 "$events": [
                   {
                     "event": "onClick",
-                    "action": "submitToPool",
-                    "options": {
-                      "options": {
-                        "clearSource": true
-                      },
-                      "source": "slb.virtual-server.port:",
-                      "target": "slb.virtual-server:port-list[]"
-                    }
+                    "action": "submitToPool"
                   }
                 ]
               }

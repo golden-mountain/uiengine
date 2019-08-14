@@ -26,17 +26,25 @@ export default class UIEngine extends React.Component<
 > {
   state = {
     nodes: [],
+    error: {},
+    time: 0,
     activeNodeID: ""
   };
   nodeController: INodeController;
+  error = {};
 
   // bind to nodeController, to show it own instances
   engineId = _.uniqueId("engine-");
 
   constructor(props: IUIEngineProps) {
     super(props);
+    if (!props.config) {
+      console.warn("No requestConfig on props, this is required!");
+    }
+
     this.nodeController = NodeController.getInstance();
-    this.nodeController.setRequestConfig(props.reqConfig);
+    const { requestConfig } = props.config;
+    this.nodeController.setRequestConfig(requestConfig);
 
     if (_.isFunction(props.onEngineCreate)) {
       props.onEngineCreate(this.nodeController);
@@ -52,11 +60,21 @@ export default class UIEngine extends React.Component<
     const { layouts = [], loadOptions = {} } = this.props;
 
     this.nodeController.activeEngine(this.engineId);
-    for (let layout in layouts) {
+    for (let index in layouts) {
+      let layout, workingMode;
+      if (layouts[index]["layout"]) {
+        layout = layouts[index]["layout"];
+        workingMode = layouts[index]["workingMode"];
+      } else {
+        layout = layouts[index];
+      }
+
       // no refresh the state from NodeController,
       // otherwise it will cause deadloop
+      this.nodeController.setWorkingMode(layout, workingMode);
+      // console.log(layout, workingMode);
       this.nodeController
-        .loadUINode(layouts[layout], "", loadOptions, false)
+        .loadUINode(layout, "", loadOptions, false)
         .then((uiNode: IUINode) => {
           const nodes = this.nodeController.nodes;
           this.setState({ nodes });
@@ -69,45 +87,73 @@ export default class UIEngine extends React.Component<
   }
 
   render() {
-    const { layouts, reqConfig, onEngineCreate, ...rest } = this.props;
+    const { layouts, config, onEngineCreate, ...rest } = this.props;
     const context = {
       controller: this.nodeController
     };
+
+    // error handler
+    const { error, time } = this.state;
+    let Messager = (props: any) => <div />;
+    // only show once error
+    if (_.has(error, "code") && !_.isEqual(error, this.error)) {
+      if (_.has(config, "widgetConfig.messager")) {
+        Messager = _.get(config, "widgetConfig.messager", null);
+      } else {
+        Messager = (props: any) => {
+          return (
+            <div className={`uiengine-message message-${props.status}`}>
+              {props.code}
+            </div>
+          );
+        };
+      }
+      this.error = error;
+    }
 
     // only get nodes for this engine
     const validNodes = _.pickBy(
       this.state.nodes,
       (nodeRenderer: IUINodeRenderer) => {
-        return nodeRenderer.engineId === this.engineId;
+        const { engineId, options } = nodeRenderer;
+        if (options) {
+          return engineId === this.engineId && !_.has(options, "parentNode");
+        }
+        return engineId === this.engineId;
       }
     );
 
     return (
       <UIEngineContext.Provider value={context}>
-        {_.entries(validNodes).map((entry: any, index: number) => {
-          const [layoutKey, uiNodeRenderer] = entry;
-          const { uiNode, options = {}, visible = true } = uiNodeRenderer;
-          const { container } = options;
-
-          if (!visible) return null;
-
-          // wrapper if provided
-          let Container = ({ children }: any) => children;
-          if (container) {
-            Container = getComponent(container);
-          }
-
-          return (
-            <Container {...options} visible key={`container-${index}`}>
-              <ComponentWrapper
-                uiNode={uiNode}
-                {...rest}
-                key={`layout-${layoutKey}`}
-              />
-            </Container>
-          );
-        })}
+        <Messager {...error} />
+        {renderNodes(validNodes, rest)}
       </UIEngineContext.Provider>
     );
   }
+}
+
+export function renderNodes(uiNodeRenderers: any, restOptions?: any) {
+  return _.entries(uiNodeRenderers).map((entry: any, index: number) => {
+    const [layoutKey, uiNodeRenderer] = entry;
+    const { uiNode, options = {}, visible } = uiNodeRenderer;
+    const { container } = options;
+
+    if (!visible) return null;
+
+    // wrapper if provided
+    let Container = ({ children }: any) => children;
+    if (container) {
+      Container = getComponent(container);
+    }
+
+    return (
+      <Container {...options} visible={visible} key={`container-${index}`}>
+        <ComponentWrapper
+          uiNode={uiNode}
+          {...restOptions}
+          key={`layout-${layoutKey}`}
+        />
+      </Container>
+    );
+  });
 }

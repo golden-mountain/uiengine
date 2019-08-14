@@ -1,4 +1,5 @@
 import { IUINode } from "../UINode";
+import { IErrorInfo } from "../Request";
 
 export interface IUIEngineProps {
   layouts: any;
@@ -8,5 +9,6 @@ export interface IUIEngineProps {
 export interface IUIEngineStates {
   nodes: Array<IUINodeRenderer>;
   activeNodeID: string;
+  error?: IErrorInfo;
   [anyKey: string]: any;
 }

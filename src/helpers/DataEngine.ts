@@ -48,9 +48,14 @@ export default class DataEngine implements IDataEngine {
     method: string = "get",
     cache: boolean = false
   ) {
+    const validData = await this.pluginManager.executePlugins(
+      "data.commit.exclude",
+      { stopWhenEmpty: true, returnLastValue: true },
+      { source, data },
+    );
     // clear initial data;
     this.data = {};
-    this.requestOptions.params = data;
+    this.requestOptions.params = validData;
     this.requestOptions.method = method;
     this.errorInfo = null;
     if (!this.request[method] || !_.isFunction(this.request[method])) {
@@ -107,6 +112,7 @@ export default class DataEngine implements IDataEngine {
         if (cache) {
           response = Cache.getData(this.cacheID, this.requestOptions.endpoint);
         }
+
         // handle response
         if (!response) {
           response = await this.request[method](
@@ -124,6 +130,7 @@ export default class DataEngine implements IDataEngine {
             response = response.data;
           }
         }
+
         this.data = response;
       } catch (e) {
         this.errorInfo = {
@@ -141,7 +148,6 @@ export default class DataEngine implements IDataEngine {
       "data.request.after",
       exeConfig
     );
-
     if (!_.isEmpty(afterResult)) this.data = afterResult;
 
     return this.data;

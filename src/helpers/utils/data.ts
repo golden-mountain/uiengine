@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { DataPool, DataEngine } from "..";
-import { IDataSource } from "../../../typings";
+import { DataPool, DataEngine, searchNodes } from "..";
+import { IDataSource, IPluginExecutionConfig } from "../../../typings";
 
 /**
  * convert a.b.c:d to a.b.c.d
@@ -93,4 +93,37 @@ export async function submitToAPI(
   }
 
   return responses;
+}
+
+export async function validateAll(dataSources: Array<any>) {
+  let validateResults: any = [];
+  // dataSources.forEach((dataSource: any) => {
+  for (let j in dataSources) {
+    let dataSource = dataSources[j];
+    const props = {
+      datasource: dataSource
+    };
+    const nodes = searchNodes(props);
+    // nodes.forEach((uiNode: IUINode) => {
+    for (let i in nodes) {
+      const uiNode = nodes[i];
+      // check data from update plugins
+      const exeConfig: IPluginExecutionConfig = {
+        stopWhenEmpty: true,
+        returnLastValue: true
+      };
+      const errorInfo = uiNode.dataNode.pluginManager.executeSyncPlugins(
+        "data.update.could",
+        exeConfig
+      );
+      if (errorInfo) {
+        uiNode.dataNode.errorInfo = errorInfo;
+        validateResults.push(errorInfo);
+        // await uiNode.updateLayout();
+        await uiNode.pluginManager.executePlugins("ui.parser");
+        uiNode.sendMessage(true);
+      }
+    }
+  }
+  return validateResults;
 }

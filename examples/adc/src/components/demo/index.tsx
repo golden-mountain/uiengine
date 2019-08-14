@@ -4,6 +4,5 @@ export * from "./FormContainer";
 export * from "./DemoTable";
 export * from "./DemoForm";
 export * from "./DemoFormItem";
-export * from "./EditableTable";
 export * from "./Modal";
 export * from "./DemoTabPane";

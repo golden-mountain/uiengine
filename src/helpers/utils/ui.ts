@@ -1,7 +1,11 @@
 import React from "react";
 import _ from "lodash";
-import { UIEngineRegister, Cache, parseRootName } from "../";
-import { IUINode, ILayoutSchema } from "../../../typings";
+import { UIEngineRegister, Cache } from "../";
+import {
+  IUINode,
+  ILayoutSchema,
+  IPluginExecutionConfig
+} from "../../../typings";
 
 /**
  * From schema define, get registered components
@@ -44,6 +48,12 @@ export function getComponent(componentLine?: string) {
  * Search UINodes which has the search condition props
  *
  * @param prop the schema defined props
+ *  example:
+ *            { datasource: /^slb.virtual-server:/} will match by regexp
+ *            or string
+ *           { datasource: 'slb.virtual-server:name}
+ *            or callback allowed
+ *           { datasource: (schemaValue) => {}}
  * @param rootName the root name of the loaded schema nodes
  * @return UINodes has the props
  */
@@ -72,11 +82,22 @@ export function searchNodes(prop: object, rootName: string = "") {
         if (name.indexOf("$") > -1 && schema._index !== undefined) {
           name = name.replace("$", schema._index);
         }
-        const schemaValue = _.get(schema, name);
-        if (v !== schemaValue) {
-          finded = false;
-          return;
+
+        let schemaValue = _.get(schema, name);
+        // add special rule to search datasource
+        // since datasource could be { source: 'a.b.c' } or 'a.b.c'
+        if (name === "datasource" && _.isObject(schemaValue)) {
+          schemaValue = _.get(schemaValue, "source");
         }
+
+        if (v instanceof RegExp) {
+          finded = v.test(schemaValue);
+        } else if (v !== schemaValue) {
+          finded = false;
+        } else if (typeof v === "function") {
+          finded = v(schemaValue);
+        }
+        if (!finded) return;
       });
       if (finded) {
         nodes.push(target);

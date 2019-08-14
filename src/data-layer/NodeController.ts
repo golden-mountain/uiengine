@@ -11,10 +11,18 @@ import {
   IWorkflow,
   IUINodeRenderer,
   IRequest,
-  ILoadOptions
+  ILoadOptions,
+  IPluginManager,
+  IWorkingMode
 } from "../../typings";
 import { UINode } from "../data-layer";
-import { Messager, Request, Workflow } from "../helpers";
+import {
+  Messager,
+  Request,
+  Workflow,
+  PluginManager,
+  DataPool
+} from "../helpers";
 import { searchNodes } from "../helpers";
 
 export default class NodeController implements INodeController {
@@ -25,7 +33,7 @@ export default class NodeController implements INodeController {
     }
     return NodeController.instance as NodeController;
   };
-
+  pluginManager: IPluginManager = new PluginManager(this);
   // layout path
   errorInfo: IErrorInfo = {};
   // layouts: object = {};
@@ -77,34 +85,50 @@ export default class NodeController implements INodeController {
     }
 
     // use cached nodes
-    let uiNodeRenderer = this.nodes[rootName];
-    let uiNode: IUINode;
-    if (!uiNodeRenderer) {
+    let uiNode: IUINode = _.get(this.nodes[rootName], "uiNode");
+    const workingMode = this.getWorkingMode(rootName);
+    if (!uiNode) {
       // default we load all default plugins
       uiNode = new UINode({}, this.request, rootName);
       try {
-        await uiNode.loadLayout(layout, this.workflow.workingMode);
+        await uiNode.loadLayout(layout, workingMode);
       } catch (e) {
         console.error(e.message);
       }
     } else {
-      uiNode = uiNodeRenderer.uiNode;
-      this.nodes[rootName]["engineId"] = this.engineId;
+      await uiNode.updateLayout(workingMode);
     }
 
-    this.nodes[rootName] = {
+    const rendererOptions = _.merge(this.nodes[rootName], {
       uiNode,
       visible: true,
       options,
       engineId: this.engineId
-    };
+    });
+    this.nodes[rootName] = rendererOptions;
+
     // add layout stack
     this.pushLayout(rootName);
     this.activeLayout = rootName;
+
+    // update parent node
+    const parentNode = _.get(options, "parentNode");
+    if (parentNode) {
+      const nodesOfParentNode = _.get(parentNode.nodes, `${rootName}.uiNode`);
+      if (nodesOfParentNode !== uiNode) {
+        parentNode.nodes[rootName] = rendererOptions;
+      }
+    }
+
+    // send message
     if (updateNodes) {
-      this.messager.sendMessage(this.engineId, {
-        nodes: this.nodes
-      });
+      if (parentNode) {
+        parentNode.sendMessage(true);
+      } else {
+        this.messager.sendMessage(this.engineId, {
+          nodes: this.nodes
+        });
+      }
     }
     return uiNode;
   }
@@ -123,7 +147,7 @@ export default class NodeController implements INodeController {
     return true;
   }
 
-  hideUINode(layout: string) {
+  hideUINode(layout: string, clearSource: boolean = false) {
     const renderer = this.nodes[layout];
     if (renderer) {
       renderer.visible = false;
@@ -139,9 +163,23 @@ export default class NodeController implements INodeController {
       this.activeLayout = "";
     }
 
-    this.messager.sendMessage(this.engineId, {
-      nodes: this.nodes
-    });
+    // clear data pool
+    const workingMode = this.getWorkingMode(layout);
+    if (clearSource && _.has(workingMode, "options.source.source")) {
+      const dataPool = DataPool.getInstance();
+      const source = _.get(workingMode, "options.source.source");
+      if (source) dataPool.clear(source);
+    }
+
+    const parentNode = _.get(renderer, "options.parentNode");
+    if (parentNode) {
+      // must force update , since the data adjugement on uinode side not precised
+      parentNode.sendMessage(true);
+    } else {
+      this.messager.sendMessage(this.engineId, {
+        nodes: this.nodes
+      });
+    }
   }
 
   getUINode(layout: string, uiNodeOnly: boolean = false) {
@@ -165,11 +203,35 @@ export default class NodeController implements INodeController {
     });
   }
 
+  sendMessage(info: any, force: boolean = false) {
+    const state = {
+      ...info,
+      time: force ? new Date().getTime() : 0
+    };
+
+    this.messager.sendMessage(this.engineId, state);
+  }
+
   pushLayout(layout: string) {
     _.remove(this.layouts, (l: string) => {
       return l === layout;
     });
 
     this.layouts.push(layout);
+  }
+
+  setWorkingMode(layout: string, workingMode: IWorkingMode) {
+    if (_.isEmpty(this.nodes[layout])) {
+      this.nodes[layout] = {} as IUINodeRenderer;
+    }
+
+    if (workingMode) {
+      _.set(this.nodes[layout], "workingMode", workingMode);
+    }
+  }
+
+  getWorkingMode(layout?: string) {
+    if (!layout) layout = this.activeLayout;
+    return _.get(this.nodes[layout], "workingMode");
   }
 }

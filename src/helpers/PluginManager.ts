@@ -66,8 +66,12 @@ export default class PluginManager implements IPluginManager {
     return PluginManager.plugins;
   }
 
-  async executePlugins(type: string, config?: IPluginExecutionConfig) {
-    let result = this.executeSyncPlugins(type, config);
+  async executePlugins(
+    type: string,
+    config?: IPluginExecutionConfig,
+    options?: any
+  ) {
+    let result = this.executeSyncPlugins(type, config, options);
     if (_.get(config, "returnLastValue")) {
       return await result;
     } else {
@@ -78,7 +82,11 @@ export default class PluginManager implements IPluginManager {
     }
   }
 
-  executeSyncPlugins(type: string, config?: IPluginExecutionConfig) {
+  executeSyncPlugins(
+    type: string,
+    config?: IPluginExecutionConfig,
+    options?: any
+  ) {
     const plugins: IPlugins = _.get(PluginManager.plugins, type);
     let result;
     // sort by weight asc
@@ -90,7 +98,7 @@ export default class PluginManager implements IPluginManager {
       const name = p.name;
       if (!p.callback) return;
 
-      result = this.executePlugin(p);
+      result = this.executePlugin(p, options);
       _.set(this.result, `${type}.${name}`, result);
       // break conditions
       if (_.get(config, "stopWhenEmpty") && _.isEmpty(result)) return;
@@ -103,12 +111,12 @@ export default class PluginManager implements IPluginManager {
     return _.get(this.result, type, {});
   }
 
-  executePlugin(plugin: IPlugin) {
+  executePlugin(plugin: IPlugin, options?: any) {
     const name = plugin.name;
     if (!plugin.callback) return;
     let result;
     try {
-      result = plugin.callback.call(this.caller, this.caller);
+      result = plugin.callback.call(this.caller, this.caller, options);
     } catch (e) {
       console.error(`plugin [${name}] executed failed:`, e);
       this.setErrorInfo(plugin.type, name, e.message);

@@ -9,24 +9,18 @@ import {
   IDataEngine,
   IDataPool,
   IDataSource,
-  IWorkingMode
+  IErrorInfo
 } from "../../typings";
 import { DataEngine } from "../helpers";
 
 export default class DataNode implements IDataNode {
   private request: IRequest = {} as IRequest;
-  errorInfo: any = {
-    status: undefined,
-    code: ""
-  };
   pluginManager: IPluginManager = new PluginManager(this);
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: IDataSource;
   schema?: any;
   rootSchema?: any;
-  // data: any;
-  // cacheID: string = "";
   dataPool: IDataPool;
 
   constructor(
@@ -50,30 +44,56 @@ export default class DataNode implements IDataNode {
     this.dataEngine.setRequest(this.request);
   }
 
+  private async refreshLayout(noUpdateLayout: boolean) {
+    // update state without sending message
+    if (noUpdateLayout) {
+      await this.uiNode.pluginManager.executePlugins("ui.parser");
+      await this.uiNode.stateNode.renewStates();
+    } else {
+      await this.uiNode.updateLayout();
+    }
+  }
+
   set data(value: any) {
-    this.dataPool.set(value, this.source.source);
+    if (this.dataPool instanceof DataPool) {
+      this.dataPool.set(value, this.source.source);
+    }
   }
 
   get data() {
-    return this.dataPool.get(this.source.source, false);
+    if (this.dataPool instanceof DataPool) {
+      return this.dataPool.get(this.source.source, false);
+    }
+  }
+
+  set errorInfo(error: IErrorInfo) {
+    if (this.dataPool instanceof DataPool) {
+      this.dataPool.setError(this.source.source, error);
+    }
+  }
+
+  get errorInfo() {
+    if (this.dataPool instanceof DataPool) {
+      return this.dataPool.getError(this.source.source);
+    }
+    return {};
   }
 
   setDataSource(source: IDataSource | string) {
     if (_.isObject(source)) {
       this.source = source;
-      this.data = source.defaultValue;
+      if (source.schema === undefined) this.source.schema = source.source;
+      if (source.autoload === undefined) this.source.autoload = true;
+      if (source.defaultValue !== undefined) this.data = source.defaultValue;
     } else {
       // give default data
       this.source = {
         source: source,
+        schema: source,
         autoload: true
       };
     }
     return this.source;
-  }
-
-  getErrorInfo() {
-    return this.errorInfo;
   }
 
   getData(path?: string) {
@@ -87,15 +107,7 @@ export default class DataNode implements IDataNode {
     return this.schema;
   }
 
-  getRootSchema() {
-    return this.rootSchema;
-  }
-
-  getPluginManager(): IPluginManager {
-    return this.pluginManager;
-  }
-
-  async loadData(source?: IDataSource | string, workingMode?: IWorkingMode) {
+  async loadData(source?: IDataSource | string) {
     if (source) {
       this.setDataSource(source);
     }
@@ -103,53 +115,48 @@ export default class DataNode implements IDataNode {
     const exeConfig: IPluginExecutionConfig = {
       returnLastValue: true
     };
+
     let result = await this.pluginManager.executePlugins(
       "data.data.parser",
       exeConfig
     );
 
     if (result === undefined) {
-      if (_.get(workingMode, "mode") === "new" || !this.source.autoload) {
+      const mode = _.get(this.uiNode.workingMode, "mode");
+      if (mode === "new" || !this.source.autoload) {
         await this.dataEngine.loadSchema(this.source);
         result = null;
       } else {
         let data = await this.dataEngine.loadData(this.source);
-        // if (this.dataEngine.errorInfo.status === 2001) {
-        //   this.errorInfo = this.dataEngine.errorInfo;
-        //   return;
-        // }
         let formattedSource = formatSource(this.source.source);
-        result = _.get(data, formattedSource, null);
-        // this.dataPool.set(result, this.source.source);
+        result = _.get(data, formattedSource);
         this.data = result;
       }
     }
 
     // assign root schema if not $dummy data
     this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
-
     // load this node schema
     this.schema = await this.pluginManager.executePlugins(
       "data.schema.parser",
       exeConfig
     );
-    return this.data;
+    return result;
   }
 
   async updateData(value: any, path?: string) {
     let noUpdateLayout = true;
     if (_.isArray(value) && this.uiNode.schema.$children) {
-      noUpdateLayout = _.isEqual(value, this.data);
+      noUpdateLayout = false;
     }
 
     // update this data
     if (path) {
-      let data = this.data;
-      _.set(data, path, value);
+      // let data = this.data;
+      _.set(this.data, path, value);
     } else {
       this.data = value;
     }
-
     // check data from update plugins
     const exeConfig: IPluginExecutionConfig = {
       stopWhenEmpty: true,
@@ -161,20 +168,27 @@ export default class DataNode implements IDataNode {
       exeConfig
     );
 
-    // update state without sending message
-    if (noUpdateLayout) {
-      await this.uiNode.pluginManager.executePlugins("ui.parser");
-      await this.uiNode.stateNode.renewStates();
-    } else {
-      await this.uiNode.updateLayout();
-    }
-
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
       // this.dataPool.set(this.data, this.source.source);
       this.dataPool.clearError(this.source.source);
-    } else {
-      this.dataPool.setError(this.source.source, this.errorInfo);
+    }
+
+    await this.refreshLayout(noUpdateLayout);
+    return status;
+  }
+
+  async createRow(value: any = {}, insertHead?: boolean) {
+    let status: any = false;
+    if (this.uiNode.schema.$children) {
+      const currentValue = this.data || [];
+
+      if (insertHead) {
+        currentValue.unshift(value);
+      } else {
+        currentValue.push(value);
+      }
+      status = await this.updateData(currentValue, "");
     }
     return status;
   }
@@ -215,15 +229,7 @@ export default class DataNode implements IDataNode {
         this.dataPool.clearError(this.source.source);
       }
       // update state without sending message
-      if (noUpdateLayout) {
-        // for update props purpose
-        await this.uiNode.pluginManager.executePlugins("ui.parser");
-        await this.uiNode.stateNode.renewStates();
-      } else {
-        await this.uiNode.updateLayout();
-      }
-    } else {
-      this.dataPool.setError(this.source.source, this.errorInfo);
+      await this.refreshLayout(noUpdateLayout);
     }
     return status;
   }

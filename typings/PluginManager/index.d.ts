@@ -27,8 +27,16 @@ export interface IPluginManager {
   getPlugins(type?: string, name?: string);
   loadPlugins(plugins: IPlugins): IPlugins;
   //unloadPlugins(type: string, name?: string);
-  executePlugins(type: string, stopWhenEqual?: IPluginExecutionConfig);
-  executeSyncPlugins(type: string, stopWhenEqual?: IPluginExecutionConfig);
-  executePlugin(plugin: IPlugin);
+  executePlugins(
+    type: string,
+    stopWhenEqual?: IPluginExecutionConfig,
+    options?: any
+  );
+  executeSyncPlugins(
+    type: string,
+    stopWhenEqual?: IPluginExecutionConfig,
+    options?: any
+  );
+  executePlugin(plugin: IPlugin, options?: any);
   setErrorInfo(type: string, name: string, key: string, value: any): IErrorInfo;
 }

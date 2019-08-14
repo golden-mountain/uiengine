@@ -12,7 +12,6 @@ const callback: IPluginFunc = (uiNode: IUINode) => {
     } else {
       value = e;
     }
-    console.log("current value on change ", value);
     uiNode.dataNode.updateData(value);
   };
 };

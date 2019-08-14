@@ -14,25 +14,36 @@ export default class DataPool implements IDataPool {
   data: any = {};
   errors: any = {};
 
+  private getRealPath(source: string) {
+    const domainName = getDomainName(source);
+    let path = formatSource(source);
+    let p = `${domainName}.${path}`;
+    return p;
+  }
+
   set(data: any, path: string) {
     const domainName = getDomainName(path);
     const domainData = _.get(this.data, domainName);
+
     path = formatSource(path);
     let p = path.replace("[]", "");
-    let d = _.get(domainData, p, path.indexOf("[]") > -1 ? [] : null);
+    const defaultValue = path.indexOf("[]") > -1 ? [] : null;
+    let d = _.get(domainData, p);
+    if (d === null || d === undefined) d = defaultValue;
+
     p = `${domainName}.${p}`;
+    const cloneData = _.cloneDeep(data);
     if (_.isArray(d)) {
-      if (!_.isArray(data)) {
-        d.push(data);
+      if (!_.isArray(cloneData)) {
+        d.push(cloneData);
       } else {
-        // compare with the data is equal, if equal, then ignore it
-        d = _.unionWith(d, data, _.isEqual);
+        // compare with the cloneData is equal, if equal, then ignore it
+        d = _.unionWith(d, cloneData, _.isEqual);
       }
       _.set(this.data, p, d);
     } else {
-      _.set(this.data, p, data);
+      _.set(this.data, p, cloneData);
     }
-
     return this.data;
   }
 
@@ -88,16 +99,27 @@ export default class DataPool implements IDataPool {
   merge(fromPath: string, toPath: string, clearFromPath: boolean = false) {
     let result = {};
     result = this.get(fromPath, false);
-    this.set(result, toPath);
-    if (clearFromPath) this.clear(fromPath);
+    if (!_.isEmpty(result)) {
+      this.set(result, toPath);
+      if (clearFromPath) {
+        this.clear(fromPath);
+      }
+    }
     return result;
   }
 
   setError(source: string, error: any) {
-    this.errors[source] = error;
+    const path = this.getRealPath(source);
+    _.set(this.errors, path, error);
+  }
+
+  getError(source: string) {
+    const path = this.getRealPath(source);
+    return _.get(this.errors, path);
   }
 
   clearError(source: any) {
-    _.unset(this.errors, source);
+    const path = this.getRealPath(source);
+    _.unset(this.errors, path);
   }
 }

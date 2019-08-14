@@ -34,7 +34,7 @@ export default class StateNode implements IStateNode {
     const depNodes = searchDepsNodes(this.uiNode);
     for (let key in depNodes) {
       const node = depNodes[key];
-      await node.getStateNode().renewStates();
+      await node.stateNode.renewStates();
     }
     this.uiNode.sendMessage();
     return this.state;
@@ -58,7 +58,7 @@ export default class StateNode implements IStateNode {
     const depNodes = searchDepsNodes(this.uiNode);
     for (let key in depNodes) {
       const node = depNodes[key];
-      await node.getStateNode().renewStates();
+      await node.stateNode.renewStates();
     }
   }
 

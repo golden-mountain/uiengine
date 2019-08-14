@@ -10,7 +10,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
   const inputType: string = uiNode.dataNode.getSchema("type");
 
   // get data value
-  const value = uiNode.dataNode.getData();
+  const value = uiNode.dataNode.data;
 
   // load event and default event
   let $events: any = props.$events || [];
@@ -27,7 +27,6 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
 
   // get error validation info
   const errorInfo = uiNode.dataNode.errorInfo;
-
   // assign all default props
   let result = {
     key: uiNode.id,
@@ -37,6 +36,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     error: errorInfo,
     ...eventFuncs
   };
+
   // assign user defined props;
   if (props) {
     let {
@@ -49,6 +49,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     // assign props to uiNode
     result = { ...rest, ...result, label, type };
   }
+
   uiNode.props = result;
   return result;
 };

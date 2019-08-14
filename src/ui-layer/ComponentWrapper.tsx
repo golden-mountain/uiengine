@@ -2,6 +2,7 @@ import React from "react";
 import _ from "lodash";
 
 import { PluginManager, getComponent, setComponentState } from "..";
+import { renderNodes } from ".";
 import {
   IComponentWrapper,
   IComponentState,
@@ -42,7 +43,7 @@ class ComponentWrapper extends React.Component<
     if (!_.get(this.state, "state.visible", true)) {
       return null;
     }
-
+    // console.log(_.keys(uiNode.nodes), "will render on component side");
     if (uiNode.schema) {
       // render logic
       const componentLine = _.get(uiNode.schema, "component");
@@ -60,6 +61,8 @@ class ComponentWrapper extends React.Component<
             returnLastValue: true
           };
 
+          // TO FIX, when add and delete row, the state did not update in time using setState on messager
+          // console.log(uiNode.id, this.state, "<<<<<<<< rendering");
           let newProps: any = this.pluginManager.executeSyncPlugins(
             "component.props.get",
             exeConfig
@@ -71,6 +74,7 @@ class ComponentWrapper extends React.Component<
             key: `key-of-child-${uiNode.id}`,
             ...newProps,
             uinode: uiNode
+            // state: this.state
           };
 
           // simple text
@@ -78,10 +82,17 @@ class ComponentWrapper extends React.Component<
             childrenObjects.push(uiNode.schema.content);
           }
 
-          return childrenObjects.length ? (
-            <WrappedComponent {...props}>{childrenObjects}</WrappedComponent>
-          ) : (
-            <WrappedComponent {...props} />
+          return (
+            <>
+              {childrenObjects.length ? (
+                <WrappedComponent {...props}>
+                  {childrenObjects}
+                </WrappedComponent>
+              ) : (
+                <WrappedComponent {...props} />
+              )}
+              {renderNodes(uiNode.nodes)}
+            </>
           );
         } catch (e) {
           console.error(e.message);
