@@ -9,7 +9,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const mock: IPlugin = {
   type: "data.request.after",
-  weight: 0,
+  priority: 0,
   callback,
   name: "mock-data"
 };

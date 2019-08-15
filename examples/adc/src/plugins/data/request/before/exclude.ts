@@ -70,26 +70,26 @@ const doExclusion = (data: any, uiNode: IUINode) => {
  * exclude data
  * @param dataEngine
  */
-const callback: IPluginFunc = (dataEngine: IDataEngine, options?: any) => {
-  const { source, data } = options;
-  if (!source.source) {
+const callback: IPluginFunc = (dataEngine: IDataEngine) => {
+  const { params } = dataEngine.requestOptions;
+  const dataSource = dataEngine.source;
+  if (!dataSource || !dataSource.source) {
     return true;
   }
   const nodeController = NodeController.getInstance();
-  const layout = `schema/ui/${source.source.slice(0, -1)}.json`;
+  const layout = `schema/ui/${dataSource.source.slice(0, -1)}.json`;
   const rootNode = _.get(nodeController.nodes[layout], "uiNode");
   if (!rootNode) {
     return true;
   }
 
-  deepSearch(rootNode, hasExclusion, doExclusion.bind(null, data));
-  dataEngine.requestOptions.params = data;
+  deepSearch(rootNode, hasExclusion, doExclusion.bind(null, params));
   return true;
 };
 
 export const exclude: IPlugin = {
   type: "data.request.before",
-  weight: 100,
+  priority: 100,
   callback,
   name: "exclude"
 };

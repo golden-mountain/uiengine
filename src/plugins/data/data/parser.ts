@@ -26,7 +26,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const loadDataPoolData: IPlugin = {
   type: "data.data.parser",
-  weight: 0,
+  priority: 0,
   callback,
   name: "loadDataPoolData"
 };

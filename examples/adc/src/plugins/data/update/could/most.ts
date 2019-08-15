@@ -79,7 +79,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const most: IPlugin = {
   type: "data.update.could",
-  weight: 100,
+  priority: 100,
   callback,
   name: "most-from-validator-js"
 };

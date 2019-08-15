@@ -9,7 +9,7 @@ const callback: IPluginFunc = (component: any) => {
 
 export const propsGet: IPlugin = {
   type: "component.props.get",
-  weight: 100,
+  priority: 100,
   callback,
   name: "props-get"
 };

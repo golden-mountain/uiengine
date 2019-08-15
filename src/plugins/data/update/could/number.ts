@@ -27,7 +27,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const validate: IPlugin = {
   type: "data.update.could",
-  weight: 0,
+  priority: 0,
   callback,
   name: "number"
 };

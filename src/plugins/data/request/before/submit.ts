@@ -11,7 +11,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const submit: IPlugin = {
   type: "data.request.before",
-  weight: 0,
+  priority: 0,
   callback,
   name: "submit-handler"
 };

@@ -50,6 +50,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
     // }
 
     nodeController.workflow.submit(sources).then((result: any) => {
+      console.log(result);
       if (!_.isEmpty(result)) {
         const errorInfo = {
           status: 200,
@@ -65,7 +66,7 @@ const callback: IPluginFunc = async (uiNode: IUINode) => {
 
 export const request: IPlugin = {
   type: "ui.parser.event",
-  weight: 0,
+  priority: 0,
   callback,
   name: "request"
 };

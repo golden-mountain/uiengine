@@ -18,7 +18,7 @@ const callback: IPluginFunc = (uiNode: IUINode) => {
 
 export const change: IPlugin = {
   type: "ui.parser.event",
-  weight: 100,
+  priority: 100,
   callback,
   name: "change"
 };

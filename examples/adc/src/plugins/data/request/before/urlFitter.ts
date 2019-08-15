@@ -13,7 +13,7 @@ const callback: IPluginFunc = (dataEngine: IDataEngine) => {
 
 export const urlFitter: IPlugin = {
   type: "data.request.could",
-  weight: 100,
+  priority: 100,
   callback,
   name: "urlFitter"
 };

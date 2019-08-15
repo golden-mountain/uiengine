@@ -27,15 +27,20 @@ const callback: IPluginFunc = async (dataEngine: IDataEngine) => {
   if (errors.length) {
     let couldRequest = true;
     errors.forEach((error: any) => {
-      if (error.status !== true) couldRequest = false;
+      if (error.status !== true) {
+        couldRequest = false;
+        return;
+      }
     });
     if (!couldRequest) return false;
   }
+
+  return true;
 };
 
 export const validation: IPlugin = {
   type: "data.request.before",
-  weight: 100,
+  priority: 200,
   callback,
   name: "validation"
 };

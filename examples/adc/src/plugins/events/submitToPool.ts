@@ -36,7 +36,7 @@ const callback: IPluginFunc = (uiNode: IUINode) => {
 
 export const submitToPool: IPlugin = {
   type: "ui.parser.event",
-  weight: 100,
+  priority: 100,
   callback,
   name: "submitToPool"
 };

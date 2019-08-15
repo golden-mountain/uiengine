@@ -12,7 +12,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const schemaRules: IPlugin = {
   type: "data.update.could",
-  weight: 0,
+  priority: 0,
   callback,
   name: "schemaRules"
 };
