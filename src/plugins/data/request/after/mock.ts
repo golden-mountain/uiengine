@@ -2,9 +2,9 @@ import _ from "lodash";
 import { IPluginFunc, IPlugin, IDataNode } from "../../../../../typings";
 
 const callback: IPluginFunc = (dataNode: IDataNode) => {
-  return {
-    fake: "data"
-  };
+  // return {
+  //   fake: "data"
+  // };
 };
 
 export const mock: IPlugin = {

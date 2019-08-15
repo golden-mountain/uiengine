@@ -98,7 +98,6 @@ export default class DataEngine implements IDataEngine {
           { stopWhenEmpty: true, returnLastValue: true },
           { source, data: _.cloneDeep(data) }
         );
-
         if (couldCommit === false) {
           this.errorInfo = {
             status: 1001,
