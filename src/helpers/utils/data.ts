@@ -89,7 +89,7 @@ export async function submitToAPI(
     const source = dataSources[index];
     result = _.merge(result, dataPool.get(source.source, true));
     result = await dataEngine.sendRequest(source, result, method, false);
-    responses.push(result);
+    if (result !== false) responses.push(result);
   }
 
   return responses;

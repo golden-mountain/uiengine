@@ -48,18 +48,9 @@ export default class DataEngine implements IDataEngine {
     method: string = "get",
     cache: boolean = false
   ) {
-    const validData = await this.pluginManager.executePlugins(
-      "data.commit.exclude",
-      { stopWhenEmpty: true, returnLastValue: true },
-      { source, data }
-    );
     // clear initial data;
     this.data = {};
-    if (validData !== undefined) {
-      this.requestOptions.params = validData;
-    } else {
-      this.requestOptions.params = data;
-    }
+    this.requestOptions.params = _.cloneDeep(data);
     this.requestOptions.method = method;
     this.errorInfo = null;
     if (!this.request[method] || !_.isFunction(this.request[method])) {
@@ -101,10 +92,12 @@ export default class DataEngine implements IDataEngine {
           stopWhenEmpty: true,
           returnLastValue: true
         };
+
         const couldCommit = await this.pluginManager.executePlugins(
-          "data.request.could",
-          exeConfig
+          "data.request.before",
+          { stopWhenEmpty: true, returnLastValue: true }
         );
+
         if (couldCommit === false) {
           this.errorInfo = {
             status: 1001,

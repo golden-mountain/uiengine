@@ -9,7 +9,7 @@ const callback: IPluginFunc = (stateNode: IStateNode) => {
 
 export const valid: IPlugin = {
   type: "state.resolver",
-  weight: 0,
+  priority: 0,
   callback,
   name: "valid"
 };

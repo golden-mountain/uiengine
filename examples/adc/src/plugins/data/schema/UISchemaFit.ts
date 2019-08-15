@@ -43,7 +43,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const UISchemaFit: IPlugin = {
   type: "data.schema.parser",
-  weight: 100,
+  priority: 100,
   callback,
   name: "fit-ui-schema"
 };

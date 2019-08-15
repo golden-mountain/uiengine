@@ -25,7 +25,7 @@ const callback: IPluginFunc = (
 
 export const could: IPlugin = {
   type: "data.commit.workflow.could",
-  weight: 100,
+  priority: 100,
   callback,
   name: "could"
 };
