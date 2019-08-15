@@ -1,7 +1,16 @@
 # UI Engine
 
-## Directories
+## Start the Example
 
+```
+cd examples/adc
+npm install
+npm start
+```
+
+# Devloper Manual
+## Directories
+```
 | doc
 Architecture UML and docs
 | examples
@@ -13,14 +22,62 @@ UIEngine framework source code
 UIEngine type define
 | test
 all UIEngine test code
-
-## Start the Example
-
 ```
-cd examples/adc
-npm install
-npm start
+
+## Schema 
+To separate the data & UI design, the architecture used 2 kinds of schema, UI Schema and Data Schema
+
+### UI Schema
+UI Schema we can treat it as an JSX, all HTML tags & 3rd part libraries are compatiable,
+the schema keeps some preserved keys, like component, children, props, also we allow users define them by requirements.
+
+
+#### Preserved Keys
+1. component
+  * Buildin HTML tags
+  No need install anything
+  ```
+  {
+    "component": "div"
+  }
+  ```
+  * 3rd Components
+  
+  Notice: 
+  
+   a. Make sure you need add them into package.json at "dependencies" section
+   
+   b. Need registered at a certain place, see examples/adc/src/components
+   
+   ```
+   import * as antd from "antd";
+import { BrowserRouter, Route } from "react-router-dom";
+
+export default {
+  a10,
+  demo,
+  antd,
+  rr: {
+    BrowserRouter,
+    Route
+  }
+};
 ```
+   c. At the bootstrap script, register the components, see examples/adc/src/App.tsx
+```
+   UIEngineRegister.registerComponents(components);
+```
+   
+  Usage: add library 
+```
+  {
+    "component": "antd:Button"
+  }
+```
+
+### Data Schema
+#### Definiation
+
 
 ## TODO:
 
