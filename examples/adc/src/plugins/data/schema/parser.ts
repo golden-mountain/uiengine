@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataNode } from "UIEngine/typings";
+import { IPluginFunc, IPlugin, IDataNode } from "uiengine/typings";
 
 /**
  * get cm lineage by UI schema

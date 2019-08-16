@@ -12,7 +12,7 @@ import {
   UIEngine,
   submitToAPI,
   NodeController
-} from "UIEngine";
+} from "uiengine";
 import "./App.css";
 
 UIEngineRegister.registerComponents(components);
@@ -43,7 +43,7 @@ const App: React.FC = () => {
   const headers: any = requestConfig.headers;
   const handleOK = () => {
     // const uiNode = controller.getUINode(loginLayout);
-    const result = submitToAPI([{ source: 'credentials' }]);
+    const result = submitToAPI([{ source: "credentials" }]);
     result.then((res: any) => {
       const token = _.get(res[0], "credentials.authresponse.signature");
 
@@ -72,7 +72,7 @@ const App: React.FC = () => {
     <BrowserRouter>
       <PageHeader
         onBack={() => null}
-        title="UIEngine Examples"
+        title="uiengine Examples"
         subTitle=" Demo Box"
         extra={[
           <Button key="1" onClick={showLogin}>

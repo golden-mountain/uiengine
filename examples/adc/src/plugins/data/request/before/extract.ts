@@ -5,7 +5,7 @@ import {
   IPluginExecutionConfig,
   IDataEngine,
   IUINode
-} from "UIEngine/typings";
+} from "uiengine/typings";
 
 /**
  * exclude data

@@ -5,8 +5,8 @@ import {
   IPluginExecutionConfig,
   IDataEngine,
   IUINode
-} from "UIEngine/typings";
-import { NodeController, formatSource } from "UIEngine";
+} from "uiengine/typings";
+import { NodeController, formatSource } from "uiengine";
 
 type MatchFunction = (uiNode: IUINode) => boolean;
 type ExecuteFunction = (uiNode: IUINode) => void;

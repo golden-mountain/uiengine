@@ -1,5 +1,5 @@
 {
-  "name": "UIEngine",
+  "name": "uiengine",
   "version": "1.0.0",
   "description": "JSON Schema based extendable UI Engine",
   "main": "lib/index.js",
@@ -11,11 +11,11 @@
     "test:w": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors --watch-extensions ts,tsx -w ./test/**/*.spec.ts*",
     "test:sw": "mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors --watch-extensions ts,tsx -w ",
     "test:cover": "cross-env NODE_ENV=test nyc mocha -r ts-node/register -r jsdom-global/register -r ./unitTestSetup.ts --colors ./test/**/*.spec.ts*",
-    "repl": "node -i -e \"$(< ./lib/UIEngine.js)\""
+    "repl": "node -i -e \"$(< ./lib/uiengine.js)\""
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zuopingli/UIEngine.git"
+    "url": "https://github.com/zuopingli/uiengine.git"
   },
   "keywords": [
     "json",
@@ -28,9 +28,9 @@
   "author": "Zuoping Li",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/zuopingli/UIEngine/issues"
+    "url": "https://github.com/zuopingli/uiengine/issues"
   },
-  "homepage": "https://github.com/zuopingli/UIEngine",
+  "homepage": "https://github.com/zuopingli/uiengine",
   "devDependencies": {
     "@babel/cli": "^7.0.0-beta.51",
     "@babel/core": "^7.0.0-beta.51",

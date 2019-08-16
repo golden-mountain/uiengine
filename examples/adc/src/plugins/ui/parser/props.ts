@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { Event } from "UIEngine";
-import { IPluginFunc, IPlugin, IUINode } from "UIEngine/typings";
+import { Event } from "uiengine";
+import { IPluginFunc, IPlugin, IUINode } from "uiengine/typings";
 
 const callback: IPluginFunc = async (uiNode: IUINode) => {
   const schema = uiNode.getSchema();

@@ -1,5 +1,5 @@
 // import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataEngine } from "UIEngine/typings";
+import { IPluginFunc, IPlugin, IDataEngine } from "uiengine/typings";
 
 /**
  * add prefix to data

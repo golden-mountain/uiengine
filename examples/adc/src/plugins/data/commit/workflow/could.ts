@@ -1,6 +1,6 @@
 import _ from "lodash";
-import { IPluginFunc, IPlugin, INodeController } from "UIEngine/typings";
-import { DataPool } from "UIEngine";
+import { IPluginFunc, IPlugin, INodeController } from "uiengine/typings";
+import { DataPool } from "uiengine";
 
 /**
  * could we commit

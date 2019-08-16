@@ -1,5 +1,5 @@
 // import _ from "lodash";
-import { IPluginFunc, IPlugin, IUINode } from "UIEngine/typings";
+import { IPluginFunc, IPlugin, IUINode } from "uiengine/typings";
 
 const callback: IPluginFunc = (uiNode: IUINode) => {
   return (e: any, options: any) => {

@@ -2,7 +2,7 @@ import React from "react";
 import _ from "lodash";
 import { Form, Input } from "antd";
 // import components from '../';
-import { getComponent } from "UIEngine";
+import { getComponent } from "uiengine";
 
 const { Item } = Form;
 
