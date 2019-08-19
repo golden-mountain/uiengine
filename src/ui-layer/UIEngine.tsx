@@ -126,7 +126,7 @@ export default class UIEngine extends React.Component<
     return (
       <UIEngineContext.Provider value={context}>
         <Messager {...error} />
-        {renderNodes(validNodes, rest)}
+        {renderNodes(validNodes, { config, ...rest })}
       </UIEngineContext.Provider>
     );
   }

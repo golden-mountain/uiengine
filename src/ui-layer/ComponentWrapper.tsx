@@ -7,7 +7,8 @@ import {
   IComponentWrapper,
   IComponentState,
   IPluginManager,
-  IPluginExecutionConfig
+  IPluginExecutionConfig,
+  IComponentWrapperProps
 } from "../../typings";
 
 class ComponentWrapper extends React.Component<
@@ -39,7 +40,7 @@ class ComponentWrapper extends React.Component<
   }
 
   render() {
-    const { uiNode, ...rest } = this.props;
+    const { uiNode, config, ...rest } = this.props;
     if (!_.get(this.state, "state.visible", true)) {
       return null;
     }
@@ -68,7 +69,7 @@ class ComponentWrapper extends React.Component<
             exeConfig
           );
 
-          let props = {
+          let props: IComponentWrapperProps = {
             ...rest,
             ...uiNode.props,
             key: `key-of-child-${uiNode.id}`,
@@ -82,8 +83,15 @@ class ComponentWrapper extends React.Component<
             childrenObjects.push(uiNode.schema.content);
           }
 
+          // HOC Wrapper
+          let HOCWrapper = (props: any) => <>{props.children}</>;
+          // only show once error
+          if (_.has(config, "widgetConfig.componentWrapper")) {
+            HOCWrapper = _.get(config, "widgetConfig.componentWrapper", null);
+          }
+
           return (
-            <>
+            <HOCWrapper {...props}>
               {childrenObjects.length ? (
                 <WrappedComponent {...props}>
                   {childrenObjects}
@@ -92,7 +100,7 @@ class ComponentWrapper extends React.Component<
                 <WrappedComponent {...props} />
               )}
               {renderNodes(uiNode.nodes)}
-            </>
+            </HOCWrapper>
           );
         } catch (e) {
           console.error(e.message);

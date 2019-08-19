@@ -104,8 +104,7 @@ describe("Given an instance of Workflow library", () => {
       };
 
       workflow.removeNodes(props);
-      const expectedHTML =
-        "<div></div><div>Demo Container<div>Demo sub container</div></div>";
+      const expectedHTML = `<div></div><div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div>`;
       expect(wrapper.html()).to.equal(expectedHTML);
     });
 
