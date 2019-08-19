@@ -11,7 +11,7 @@ import {
   IComponentWrapperProps
 } from "../../typings";
 
-const DefaultWrapper: React.FC = (props: any) => <>{props.children}</>
+const DefaultWrapper: React.FC = (props: any) => <>{props.children}</>;
 
 class ComponentWrapper extends React.Component<
   IComponentWrapper,
@@ -54,7 +54,7 @@ class ComponentWrapper extends React.Component<
 
       // map children as components
       let childrenObjects = uiNode.children.map((child: any, key: any) => {
-        const props = { ...rest, uiNode: child, key: child.id || key };
+        const props = { config, ...rest, uiNode: child, key: child.id || key };
         return <ComponentWrapper {...props} />;
       });
 
@@ -86,10 +86,15 @@ class ComponentWrapper extends React.Component<
           }
 
           // HOC Wrapper
-          let HOCWrapper = DefaultWrapper
+          let HOCWrapper = DefaultWrapper;
+
           // only show once error
           if (_.has(config, "widgetConfig.componentWrapper")) {
-            HOCWrapper = _.get(config, "widgetConfig.componentWrapper", DefaultWrapper)
+            HOCWrapper = _.get(
+              config,
+              "widgetConfig.componentWrapper",
+              DefaultWrapper
+            );
           }
 
           return (

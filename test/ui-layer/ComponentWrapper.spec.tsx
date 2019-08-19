@@ -90,7 +90,7 @@ describe("Given an instance of ComponentWrapper library", () => {
         />
       );
       const expectedHTML =
-        "<div><div>foo:bar<div>demo-element-2</div><div>hello<p>foo:bar.baz.0.name</p><p>foo:bar.baz.0.age</p><p>foo:bar.baz.1.name</p><p>foo:bar.baz.1.age</p></div></div></div>";
+        "<div><div>foo:bar<div><div>demo-element-2</div></div><div><div>hello<div><div><p>foo:bar.baz.0.name</p></div><div><p>foo:bar.baz.0.age</p></div></div><div><div><p>foo:bar.baz.1.name</p></div><div><p>foo:bar.baz.1.age</p></div></div></div></div></div></div>";
       expect(wrapper.html()).to.equal(expectedHTML);
     });
   });

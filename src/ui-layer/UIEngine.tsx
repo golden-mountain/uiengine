@@ -20,7 +20,8 @@ import {
   IUINodeRenderer
 } from "../../typings";
 
-const DefaultMessager: React.FC = (props: any) => <div />
+const DefaultMessager: React.FC = (props: any) => <div />;
+const DefaultUIEngineWrapper: React.FC = (props: any) => <>{props.children}</>;
 
 export default class UIEngine extends React.Component<
   IUIEngineProps,
@@ -96,11 +97,11 @@ export default class UIEngine extends React.Component<
 
     // error handler
     const { error, time } = this.state;
-    let Messager = DefaultMessager
+    let Messager = DefaultMessager;
     // only show once error
     if (_.has(error, "code") && !_.isEqual(error, this.error)) {
       if (_.has(config, "widgetConfig.messager")) {
-        Messager = _.get(config, "widgetConfig.messager", DefaultMessager)
+        Messager = _.get(config, "widgetConfig.messager", DefaultMessager);
       } else {
         Messager = (props: any) => {
           return (
@@ -111,6 +112,16 @@ export default class UIEngine extends React.Component<
         };
       }
       this.error = error;
+    }
+
+    // UIEngine Wrapper
+    let UIEngineWrapper = DefaultUIEngineWrapper;
+    if (_.has(config, "widgetConfig.uiengineWrapper")) {
+      UIEngineWrapper = _.get(
+        config,
+        "widgetConfig.uiengineWrapper",
+        DefaultUIEngineWrapper
+      );
     }
 
     // only get nodes for this engine
@@ -127,8 +138,10 @@ export default class UIEngine extends React.Component<
 
     return (
       <UIEngineContext.Provider value={context}>
-        <Messager {...error} />
-        {renderNodes(validNodes, { config, ...rest })}
+        <UIEngineWrapper {...this.props}>
+          <Messager {...error} />
+          {renderNodes(validNodes, { config, ...rest })}
+        </UIEngineWrapper>
       </UIEngineContext.Provider>
     );
   }
