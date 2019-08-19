@@ -20,6 +20,8 @@ import {
   IUINodeRenderer
 } from "../../typings";
 
+const DefaultMessager: React.FC = (props: any) => <div />
+
 export default class UIEngine extends React.Component<
   IUIEngineProps,
   IUIEngineStates
@@ -94,11 +96,11 @@ export default class UIEngine extends React.Component<
 
     // error handler
     const { error, time } = this.state;
-    let Messager = (props: any) => <div />;
+    let Messager = DefaultMessager
     // only show once error
     if (_.has(error, "code") && !_.isEqual(error, this.error)) {
       if (_.has(config, "widgetConfig.messager")) {
-        Messager = _.get(config, "widgetConfig.messager", null);
+        Messager = _.get(config, "widgetConfig.messager", DefaultMessager)
       } else {
         Messager = (props: any) => {
           return (

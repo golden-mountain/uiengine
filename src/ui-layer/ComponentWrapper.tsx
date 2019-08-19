@@ -11,6 +11,8 @@ import {
   IComponentWrapperProps
 } from "../../typings";
 
+const DefaultWrapper: React.FC = (props: any) => <>{props.children}</>
+
 class ComponentWrapper extends React.Component<
   IComponentWrapper,
   IComponentState
@@ -84,10 +86,10 @@ class ComponentWrapper extends React.Component<
           }
 
           // HOC Wrapper
-          let HOCWrapper = (props: any) => <>{props.children}</>;
+          let HOCWrapper = DefaultWrapper
           // only show once error
           if (_.has(config, "widgetConfig.componentWrapper")) {
-            HOCWrapper = _.get(config, "widgetConfig.componentWrapper", null);
+            HOCWrapper = _.get(config, "widgetConfig.componentWrapper", DefaultWrapper)
           }
 
           return (
