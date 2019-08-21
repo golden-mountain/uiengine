@@ -1,0 +1,76 @@
+{
+  "version": "3.0.0#Autoform v1.5",
+  "axapi": "slb/virtual-server/{name}/port/{port-number}+{protocol}",
+  "endpoint": {
+    "default": {
+      "path": "mock-data/slb.virtual-server.json"
+    },
+    "post": "/axapi/v3/slb/virtual-server/{name}/port/{port-number}+{protocol}"
+  },
+  "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
+  "cm-lineage": "wizard-vport",
+  "cm-object-meta": {
+    "obj-occurences": "multi"
+  },
+  "fields": [
+    {
+      "key": "tcp",
+      "label": "TCP",
+      "type": "switch",
+      "cm-lineage": "wizard-vport.tcp",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "TCP"
+      }
+    },
+    {
+      "key": "tcp-number",
+      "label": "TCP Port Number",
+      "type": "input-number",
+      "cm-lineage": "wizard-vport.tcp-number",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mvm",
+        "object-key": true,
+        "range": "0-65534",
+        "help": "TCP Port"
+      }
+    },
+    {
+      "key": "tcp",
+      "label": "UDP",
+      "type": "switch",
+      "cm-lineage": "wizard-vport.udp",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "UDP"
+      }
+    },
+    {
+      "key": "udp-number",
+      "label": "UDP Port Number",
+      "type": "input-number",
+      "cm-lineage": "wizard-vport.udp-number",
+      "cm-meta": {
+        "format": "number",
+        "flags": "mvm",
+        "object-key": true,
+        "range": "0-65534",
+        "help": "UDP Port"
+      }
+    },
+    {
+      "key": "source-nat",
+      "label": "Source NAT",
+      "type": "switch",
+      "cm-lineage": "wizard-vport.source-nat",
+      "cm-meta": {
+        "format": "flag",
+        "flags": "ok",
+        "help": "Source NAT"
+      }
+    }
+  ]
+}

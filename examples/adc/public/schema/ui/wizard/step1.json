@@ -1,0 +1,95 @@
+{
+  "component": "div",
+  "state": {
+    "visible": {
+      "deps": [
+        {
+          "selector": {
+            "datasource.source": "$dummy.step"
+          },
+          "data": 0
+        }
+      ]
+    }
+  },
+  "children": [
+    {
+      "component": "antd:Row",
+      "children": [
+        {
+          "component": "antd:Col",
+          "children": [
+            {
+              "component": "div",
+              "props": {
+                "style": {
+                  "width": 700,
+                  "marginTop": 10,
+                  "marginBottom": 10,
+                  "marginLeft": "auto",
+                  "marginRight": "auto"
+                }
+              },
+              "content": "The A10 ACOS device load balances DNS traffic across DNS servers. Users will access a Virtual Server IP (VIP) address, representing a pool of DNS servers. The DNS firewall feature also provides connection-rate limiting and helps the target DNS server avoid overload."
+            },
+            {
+              "component": "div",
+              "props": {
+                "style": {
+                  "margin": "0 auto",
+                  "width": 645,
+                  "height": 360,
+                  "background": "url(images/deployment.png) no-repeat"
+                }
+              }
+            },
+            {
+              "component": "div",
+              "props": {
+                "style": {
+                  "width": 700,
+                  "marginTop": 10,
+                  "marginBottom": 10,
+                  "marginLeft": "auto",
+                  "marginRight": "auto"
+                }
+              },
+              "content": "Source-NAT allows you to place the ACOS device anywhere in your network. It replaces the client IP address with its own IP address when sending DNS traffic to DNS servers. If you are not sure about your deployment mode, select Source-NAT."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "antd:Row",
+      "props": {
+        "type": "flex",
+        "justify": "center"
+      },
+      "children": [
+        {
+          "component": "antd:Col",
+          "props": {},
+          "children": [
+            {
+              "component": "antd:Radio.Group",
+              "props": {
+                "value": "source-nat",
+                "options": [
+                  {
+                    "label": "SOURCE-NAT",
+                    "value": "source-nat"
+                  },
+                  {
+                    "label": "INLINE",
+                    "value": "inline"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "component": "div",
+  "state": {
+    "visible": {
+      "deps": [
+        {
+          "selector": {
+            "datasource.source": "$dummy.step"
+          },
+          "data": 1
+        }
+      ]
+    }
+  },
+  "children": [
+    {
+      "component": "antd:Row",
+      "children": [
+        {
+          "component": "antd:Col",
+          "props": {
+            "span": 6
+          },
+          "children": [
+            {
+              "component": "antd:Form",
+              "props": {
+                "name": "VIP"
+              },
+              "children": [
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "active-partition:name",
+                  "props": {
+                    "type": "a10:DataSelect",
+                    "select": {
+                      "datasource": "partition-list:partition-list",
+                      "optionmap": {
+                        "title": "partition-name",
+                        "value": "partition-name"
+                      }
+                    },
+                    "$events": [
+                      {
+                        "event": "onSelect",
+                        "action": "change"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "wizard-vip:ip-address"
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "wizard-vport:tcp"
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "wizard-vport:tcp-number"
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "wizard-vport:udp"
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "wizard-vport:udp-number"
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "wizard-dns:cache"
+                },
+                {
+                  "component": "a10:FormItem",
+                  "datasource": "wizard-vport:source-nat"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "component": "antd:Col",
+          "props": {
+            "span": 6
+          },
+          "children": [
+            {
+              "component": "div",
+              "props": {
+                "style": {
+                  "margin": "0 auto",
+                  "width": 645,
+                  "height": 360,
+                  "background": "url(images/deployment.png) no-repeat"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

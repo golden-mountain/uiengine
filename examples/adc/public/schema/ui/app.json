@@ -24,6 +24,21 @@
     {
       "component": "a10:Router",
       "props": {
+        "path": "/wizard",
+        "layouts": [
+          {
+            "layout": "schema/ui/wizard.json",
+            "workingMode": {
+              "mode": "edit",
+              "options": {}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "component": "a10:Router",
+      "props": {
         "exact": true,
         "path": "/virtual-port",
         "layouts": [

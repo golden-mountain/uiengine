@@ -1,0 +1,40 @@
+{
+  "version": "3.0.0#Autoform v1.5",
+  "endpoint": {
+    "default": {
+      "path": "mock-data/slb.virtual-server.json"
+    },
+    "post": "/axapi/v3/slb/virtual-server/{name}"
+  },
+  "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
+  "cm-lineage": "slb.virtual-server",
+  "cm-object-meta": {
+    "obj-occurences": "multi"
+  },
+  "fields": [
+    {
+      "key": "name",
+      "label": "Name",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.name",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mvm",
+        "object-key": true,
+        "range": "1-127",
+        "help": "SLB Virtual Server Name"
+      }
+    },
+    {
+      "key": "ip-address",
+      "label": "IP Address",
+      "type": "input",
+      "cm-lineage": "slb.virtual-server.ip-address",
+      "cm-meta": {
+        "format": "ipv4-address",
+        "flags": "ovi",
+        "help": "IP Address"
+      }
+    }
+  ]
+}

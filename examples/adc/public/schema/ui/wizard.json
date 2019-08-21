@@ -1,11 +1,44 @@
 {
-  "component": "a10:WizardSteps",
-  "props": {
-    "templates": [
-      "schema/ui/step1.json",
-      "schema/ui/step2.json",
-      "schema/ui/step3.json",
-      "schema/ui/step4.json"
-    ]
-  }
+  "component": "div",
+  "children": [
+    {
+      "component": "a10:CustomSteps",
+      "datasource": {
+        "source": "$dummy.step",
+        "defaultValue": 0
+      },
+      "props": {
+        "stepList": [
+          {
+            "key": "step1",
+            "title": "Deployment Choice"
+          },
+          {
+            "key": "step2",
+            "title": "Virtual Server"
+          },
+          {
+            "key": "step3",
+            "title": "Pool"
+          },
+          {
+            "key": "step4",
+            "title": "Security"
+          },
+          {
+            "key": "step5",
+            "title": "Review"
+          }
+        ]
+      }
+    },
+    {
+      "component": "div",
+      "$template": "wizard/step1.json"
+    },
+    {
+      "component": "div",
+      "$template": "wizard/step2.json"
+    }
+  ]
 }

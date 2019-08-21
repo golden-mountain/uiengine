@@ -1,0 +1,91 @@
+{
+  "component": "div",
+  "children": [
+    {
+      "component": "antd:Row",
+      "children": [
+        {
+          "component": "antd:Col",
+          "children": [
+            {
+              "component": "antd:Form",
+              "props": {
+                "name": "vPort",
+                "title": {
+                  "create": "Add New ${name}",
+                  "update": "Edit ${name}"
+                },
+                "description": {
+                  "create": "Please provide following information to create a new ${name}",
+                  "update": "Please provide following information to edit ${name}"
+                }
+              },
+              "children": [
+                {
+                  "component": "a10:Section",
+                  "props": {
+                    "title": "Basic"
+                  },
+                  "children": [
+                    {
+                      "component": "a10:FormItem",
+                      "datasource": "slb.virtual-server.port:port-number"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "component": "antd:Row",
+      "props": {
+        "type": "flex",
+        "justify": "center"
+      },
+      "children": [
+        {
+          "component": "antd:Col",
+          "props": {},
+          "children": [
+            {
+              "component": "a10:Button",
+              "props": {
+                "size": "large",
+                "type": "primary",
+                "htmlType": "submit",
+                "text": "Submit",
+                "style": {
+                  "marginRight": "10px"
+                },
+                "$events": [
+                  {
+                    "event": "onClick",
+                    "action": "submitToPool"
+                  }
+                ]
+              }
+            },
+            {
+              "component": "a10:Button",
+              "props": {
+                "size": "large",
+                "type": "secondary",
+                "text": "Cancel",
+                "$events": [
+                  {
+                    "event": "onClick",
+                    "action": "hideNode",
+                    "options": {}
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

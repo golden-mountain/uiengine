@@ -1,0 +1,26 @@
+{
+  "version": "3.0.0#Autoform v1.5",
+  "endpoint": {
+    "default": {
+      "path": "mock-data/partition-list.json"
+    }
+  },
+  "fields": [
+    {
+      "key": "name",
+      "label": "Partition",
+      "type": "select",
+      "cm-lineage": "active-partition.name",
+      "cm-meta": {
+        "format": "string-rlx",
+        "flags": "mbi",
+        "range": "1-16",
+        "gui-section": "Basic",
+        "obj-association": [
+          "partition"
+        ],
+        "modify-ineligible": true
+      }
+    }
+  ]
+}

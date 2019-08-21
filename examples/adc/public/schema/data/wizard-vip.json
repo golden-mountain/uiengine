@@ -1,0 +1,27 @@
+{
+  "version": "3.0.0#Autoform v1.5",
+  "endpoint": {
+    "default": {
+      "path": "mock-data/slb.virtual-server.json"
+    },
+    "post": "/axapi/v3/slb/virtual-server/{name}"
+  },
+  "cm-branch": "bldsto/branches/dev/4-1-4-GR1-GUI-Object-Explorer",
+  "cm-lineage": "wizard-vip",
+  "cm-object-meta": {
+    "obj-occurences": "multi"
+  },
+  "fields": [
+    {
+      "key": "ip-address",
+      "label": "IP Address",
+      "type": "input",
+      "cm-lineage": "wizard-vip.ip-address",
+      "cm-meta": {
+        "format": "ipv4-address",
+        "flags": "ovi",
+        "help": "IP Address"
+      }
+    }
+  ]
+}

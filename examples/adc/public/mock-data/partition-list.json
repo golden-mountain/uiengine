@@ -1,0 +1,16 @@
+{
+  "partition-list": [
+    {
+      "partition-name": "l3v",
+      "id": 1,
+      "uuid": "0074e1ce-b85f-11e9-b01b-c549c89a8300",
+      "a10-url": "/axapi/v3/partition/l3v"
+    },
+    {
+      "partition-name": "p2",
+      "id": 3,
+      "uuid": "0c43c042-b85f-11e9-b01b-c549c89a8300",
+      "a10-url": "/axapi/v3/partition/p2"
+    }
+  ]
+}
