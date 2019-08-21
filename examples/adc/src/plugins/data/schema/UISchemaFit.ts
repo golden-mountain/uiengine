@@ -1,5 +1,5 @@
 // import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataNode } from "UIEngine/typings";
+import { IPluginFunc, IPlugin, IDataNode } from "uiengine/typings";
 
 /**
  * transfer the data schema to UI deps
@@ -43,7 +43,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const UISchemaFit: IPlugin = {
   type: "data.schema.parser",
-  weight: 100,
+  priority: 100,
   callback,
   name: "fit-ui-schema"
 };

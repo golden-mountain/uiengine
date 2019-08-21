@@ -1,6 +1,6 @@
 import React from "react";
 import { Modal } from "antd";
-import { UIEngineContext } from "UIEngine";
+import { UIEngineContext } from "uiengine";
 
 export class DemoModal extends React.Component<any, any> {
   static contextType = UIEngineContext;

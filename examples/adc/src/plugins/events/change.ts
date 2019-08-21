@@ -1,5 +1,5 @@
 // import _ from "lodash";
-import { IPluginFunc, IPlugin, IUINode } from "UIEngine/typings";
+import { IPluginFunc, IPlugin, IUINode } from "uiengine/typings";
 
 const callback: IPluginFunc = (uiNode: IUINode) => {
   return (e: any, options: any) => {
@@ -18,7 +18,7 @@ const callback: IPluginFunc = (uiNode: IUINode) => {
 
 export const change: IPlugin = {
   type: "ui.parser.event",
-  weight: 100,
+  priority: 100,
   callback,
   name: "change"
 };

@@ -26,6 +26,11 @@ npm start
 
 ### extension for core nodes
 
+### example
+
+    trigger all validation  when submit
+    show backend responsed error message
+
 ### DEBUG TOOL
 
 Add a debug component to access all the debug info, structure like
@@ -59,4 +64,4 @@ data choose commit
 
 ### setState always slow one step
 
-### working mode can control on each separate node
+### working mode can control on each separate node [Fixed]

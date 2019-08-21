@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataNode } from "UIEngine/typings";
+import { IPluginFunc, IPlugin, IDataNode } from "uiengine/typings";
 
 /**
  * get cm lineage by UI schema
@@ -25,7 +25,7 @@ const callback: IPluginFunc = (dataNode: IDataNode) => {
 
 export const schemaParser: IPlugin = {
   type: "data.schema.parser",
-  weight: 99,
+  priority: 99,
   callback,
   name: "parse-schema"
 };

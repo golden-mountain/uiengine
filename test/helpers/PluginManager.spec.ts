@@ -16,7 +16,7 @@ const callSeq: any = [];
 const plugins = {
   external_plugin_1: {
     type: "foo",
-    weight: 3,
+    priority: 3,
     callback: () => {
       callSeq.push(1);
       return 1;
@@ -25,7 +25,7 @@ const plugins = {
   },
   external_plugin_2: {
     type: "foo",
-    weight: 2,
+    priority: 2,
     callback: () => {
       callSeq.push(2);
       return 2;
@@ -34,7 +34,7 @@ const plugins = {
   },
   external_plugin_3: {
     type: "baz",
-    weight: 1,
+    priority: 1,
     callback: () => {
       callSeq.push(3);
       return 3;

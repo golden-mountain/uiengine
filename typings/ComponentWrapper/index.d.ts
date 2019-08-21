@@ -6,5 +6,10 @@ export interface IComponentWrapper {
   [anyKey: string]: any;
 }
 
+export interface IComponentWrapperProps {
+  uinode: IUINode;
+  key?: string;
+}
+
 // used cross modules
 export interface IComponentState extends IStateInfo {}

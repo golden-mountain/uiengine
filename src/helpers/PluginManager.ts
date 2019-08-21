@@ -54,11 +54,14 @@ export default class PluginManager implements IPluginManager {
 
   static loadPlugins(newPlugins: IPlugins): IPlugins {
     _.forIn(newPlugins, (p: IPlugin, key: string) => {
-      let { type, weight } = p;
+      let { type, priority } = p;
       if (type) {
         const name = p.name || key;
         const originPlugin = _.get(PluginManager.plugins, `${type}.${name}`);
-        if (!originPlugin || (originPlugin && weight > originPlugin.weight)) {
+        if (
+          !originPlugin ||
+          (originPlugin && priority > originPlugin.priority)
+        ) {
           _.set(PluginManager.plugins, `${type}.${name}`, p);
         }
       }
@@ -89,9 +92,9 @@ export default class PluginManager implements IPluginManager {
   ) {
     const plugins: IPlugins = _.get(PluginManager.plugins, type);
     let result;
-    // sort by weight asc
+    // sort by priority asc
     let sortedPlugins = _.values(plugins);
-    sortedPlugins = _.sortBy(sortedPlugins, ["weight"]);
+    sortedPlugins = _.sortBy(sortedPlugins, ["priority"]);
     // console.log(sortedPlugins);
 
     sortedPlugins.forEach((p: IPlugin, k: number) => {

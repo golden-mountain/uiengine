@@ -2,7 +2,7 @@
 import React from "react";
 
 import chai from "chai";
-import reqConfig from "../config/request";
+import requestConfig from "../config/request";
 import _ from "lodash";
 import { mount } from "enzyme";
 import chaiSpies from "chai-spies";
@@ -43,13 +43,13 @@ describe("Given an instance of Workflow library", () => {
 
     PluginManager.loadPlugins(plugins);
     nodeController = NodeController.getInstance();
-    nodeController.setRequestConfig(reqConfig);
+    nodeController.setRequestConfig(requestConfig);
     workflow = nodeController.workflow;
     nodeController.setWorkingMode(workflowMain, { mode: "edit" });
 
     // component set
     const layouts = [workflowMain];
-    const component = <UIEngine layouts={layouts} reqConfig={reqConfig} />;
+    const component = <UIEngine layouts={layouts} config={{ requestConfig }} />;
     wrapper = mount(component);
 
     // datapool
@@ -66,7 +66,7 @@ describe("Given an instance of Workflow library", () => {
       // could get component's html correct
       wrapper.update();
       const expectedHTML =
-        '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div>';
+        '<div></div><div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div>';
       expect(wrapper.html()).to.equal(expectedHTML);
 
       // could fetch layout from existing nodes
@@ -78,7 +78,7 @@ describe("Given an instance of Workflow library", () => {
       await childNode.props.onClick.call();
       wrapper.update();
       const expectHTML =
-        '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a><main container="main" parentnode="[object Object]"><div>Demo Container<div>foo.bar.name</div></div></main></div>';
+        '<div></div><div>Demo Container<div>Demo sub container</div><a title="Title">link</a><main container="main" parentnode="[object Object]"><div>Demo Container<div>foo.bar.name</div></div></main></div>';
       expect(wrapper.html()).to.equal(expectHTML);
 
       // activelayout should change on node controller
@@ -91,7 +91,7 @@ describe("Given an instance of Workflow library", () => {
       workflow.deactiveLayout();
       wrapper.update();
       const expectedHTML =
-        '<div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div>';
+        '<div></div><div>Demo Container<div>Demo sub container</div><a title="Title">link</a></div>';
       expect(wrapper.html()).to.equal(expectedHTML);
       // activelayout should change on node controller
       expect(nodeController.activeLayout).to.equal(workflowMain);
@@ -104,8 +104,7 @@ describe("Given an instance of Workflow library", () => {
       };
 
       workflow.removeNodes(props);
-      const expectedHTML =
-        "<div>Demo Container<div>Demo sub container</div></div>";
+      const expectedHTML = `<div></div><div>Demo Container<div>Demo sub container</div></div>`;
       expect(wrapper.html()).to.equal(expectedHTML);
     });
 

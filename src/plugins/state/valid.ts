@@ -1,15 +1,14 @@
-import _ from "lodash";
-import { IStateNode } from "../../../typings/StateNode";
-import { stateDepsResolver } from "../../helpers";
-import { IPluginFunc, IPlugin } from "../../../typings";
+import _ from 'lodash'
+import { stateDepsResolver } from '../../helpers'
+import { IPluginFunc, IPlugin, IStateNode } from '../../../typings'
 
 const callback: IPluginFunc = (stateNode: IStateNode) => {
-  return stateDepsResolver(stateNode, "valid");
-};
+  return stateDepsResolver(stateNode, 'valid', true)
+}
 
 export const valid: IPlugin = {
-  type: "state.resolver",
-  weight: 0,
+  type: 'state.resolver',
+  priority: 0,
   callback,
-  name: "valid"
-};
+  name: 'valid'
+}

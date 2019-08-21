@@ -267,7 +267,54 @@
                     },
                     {
                       "component": "a10:FormItem",
-                      "datasource": "slb.virtual-server:use-if-ip"
+                      "datasource": "slb.virtual-server:use-if-ip",
+                      "state": {
+                        "visible": {
+                          "strategy": "and",
+                          "deps": [
+                            {
+                              "strategy": "or",
+                              "deps": [
+                                {
+                                  "selector": {
+                                    "datasource": "slb.virtual-server:ip-address"
+                                  },
+                                  "state": {
+                                    "visible": false
+                                  }
+                                },
+                                {
+                                  "selector": {
+                                    "datasource": "slb.virtual-server:ip-address"
+                                  },
+                                  "data": "",
+                                  "dataCompareRule": "empty"
+                                }
+                              ]
+                            },
+                            {
+                              "strategy": "or",
+                              "deps": [
+                                {
+                                  "selector": {
+                                    "datasource": "slb.virtual-server:ipv6-address"
+                                  },
+                                  "state": {
+                                    "visible": false
+                                  }
+                                },
+                                {
+                                  "selector": {
+                                    "datasource": "slb.virtual-server:ipv6-address"
+                                  },
+                                  "data": "",
+                                  "dataCompareRule": "empty"
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
                     }
                   ]
                 },
@@ -475,7 +522,7 @@
                     "options": {
                       "method": "POST",
                       "params": {},
-                      "target": "slb.virtual-server"
+                      "target": "slb.virtual-server:"
                     }
                   }
                 ]

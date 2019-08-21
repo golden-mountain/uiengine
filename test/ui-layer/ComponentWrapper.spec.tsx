@@ -15,6 +15,7 @@ import {
 } from "../../src/";
 import reactComponentTestJson from "../layouts/react-component-test.json";
 import reqConfig from "../config/request";
+import widgetConfig from "../config/widgets";
 
 // import components
 import components from "../components";
@@ -78,6 +79,19 @@ describe("Given an instance of ComponentWrapper library", () => {
       expected =
         "<div>foo:bar<div>demo-element-2</div><div>hello<p>foo:bar.baz.0.name</p><p>foo:bar.baz.0.age</p><p>foo:bar.baz.1.name</p><p>foo:bar.baz.1.age</p></div></div>";
       expect(wrapper.html()).to.equal(expected);
+    });
+
+    it("should show componentWrapper from config", async () => {
+      wrapper = mount(
+        <ComponentWrapper
+          uiNode={uiNode}
+          key="test"
+          config={{ widgetConfig }}
+        />
+      );
+      const expectedHTML =
+        "<div><div>foo:bar<div><div>demo-element-2</div></div><div><div>hello<div><div><p>foo:bar.baz.0.name</p></div><div><p>foo:bar.baz.0.age</p></div></div><div><div><p>foo:bar.baz.1.name</p></div><div><p>foo:bar.baz.1.age</p></div></div></div></div></div></div>";
+      expect(wrapper.html()).to.equal(expectedHTML);
     });
   });
 });

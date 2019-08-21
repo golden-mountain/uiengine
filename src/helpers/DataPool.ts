@@ -77,7 +77,6 @@ export default class DataPool implements IDataPool {
   }
 
   clear(path?: string) {
-    console.log(path, "to be cleared");
     if (path) {
       const domainName = getDomainName(path);
       path = formatSource(path);

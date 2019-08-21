@@ -1,7 +1,11 @@
 import React from "react";
 import _ from "lodash";
-import { UIEngineRegister, Cache, parseRootName } from "../";
-import { IUINode, ILayoutSchema } from "../../../typings";
+import { UIEngineRegister, Cache } from "../";
+import {
+  IUINode,
+  ILayoutSchema,
+  IPluginExecutionConfig
+} from "../../../typings";
 
 /**
  * From schema define, get registered components
@@ -44,6 +48,12 @@ export function getComponent(componentLine?: string) {
  * Search UINodes which has the search condition props
  *
  * @param prop the schema defined props
+ *  example:
+ *            { datasource: /^slb.virtual-server:/} will match by regexp
+ *            or string
+ *           { datasource: 'slb.virtual-server:name}
+ *            or callback allowed
+ *           { datasource: (schemaValue) => {}}
  * @param rootName the root name of the loaded schema nodes
  * @return UINodes has the props
  */
@@ -72,11 +82,22 @@ export function searchNodes(prop: object, rootName: string = "") {
         if (name.indexOf("$") > -1 && schema._index !== undefined) {
           name = name.replace("$", schema._index);
         }
-        const schemaValue = _.get(schema, name);
-        if (v !== schemaValue) {
-          finded = false;
-          return;
+
+        let schemaValue = _.get(schema, name);
+        // add special rule to search datasource
+        // since datasource could be { source: 'a.b.c' } or 'a.b.c'
+        if (name === "datasource" && _.isObject(schemaValue)) {
+          schemaValue = _.get(schemaValue, "source");
         }
+
+        if (v instanceof RegExp) {
+          finded = v.test(schemaValue);
+        } else if (v !== schemaValue) {
+          finded = false;
+        } else if (typeof v === "function") {
+          finded = v(schemaValue);
+        }
+        if (!finded) return;
       });
       if (finded) {
         nodes.push(target);
@@ -87,47 +108,78 @@ export function searchNodes(prop: object, rootName: string = "") {
 }
 
 /**
- * Search the node who deps on me
- * A => Dep => B(myNode)
+ * Search the nodes who depend on the target
+ * A => Dep => B(targetNode)
  *
- * @param myNode depend on node
- * @returns UINodes which depends on my result
+ * @param targetNode depend on the node
+ * @returns An array of UINodes which depend on target
  */
-export function searchDepsNodes(myNode: IUINode) {
-  let schema: ILayoutSchema = myNode.getSchema();
-  let root = myNode.rootName;
+export function searchDepsNodes(targetNode: IUINode) {
+  const rootName: string = targetNode.rootName
 
-  let nodes: Array<any> = [];
+  const depNodes: IUINode[] = []
   // to fix: rootName should not be empty
-  let allUINodes = Cache.getUINode(root) as IUINode;
-  _.forIn(allUINodes, (node: IUINode) => {
-    if (!node.schema) return;
-    const sch = node.getSchema();
-    if (sch.state) {
-      _.forIn(sch.state, (state: any, key: string) => {
-        if (state.deps) {
-          _.forEach(state.deps, (dep: any) => {
-            if (dep.selector) {
-              let finded = false;
-              //k=id, v:id-of-demo-element-1
-              _.forIn(dep.selector, (v: any, k: any) => {
-                const depValue = _.get(schema, k);
-                if (v !== depValue) {
-                  finded = false;
-                  return;
-                } else {
-                  finded = true;
-                }
-              });
-
-              if (finded) {
-                nodes.push(node);
-              }
-            }
-          });
-        }
-      });
+  const allUINodes: { [key: string]: IUINode } = Cache.getUINode(rootName)
+  _.forIn(allUINodes, (node: IUINode, key: string) => {
+    if (isDependantNode(node, targetNode)) {
+      depNodes.push(node)
     }
-  });
-  return nodes;
+  })
+  return depNodes
+}
+
+/**
+ * Whether the node depends on target node
+ *
+ * @param node
+ * @param targetNode
+ * @returns true, if depend on the target
+ */
+function isDependantNode(node: IUINode, targetNode: IUINode) {
+  const targetSchema: ILayoutSchema = targetNode.getSchema()
+
+  let isDepNode: boolean = false
+  if (node.schema) {
+    const { state } = node.getSchema()
+    if (!_.isEmpty(state)) {
+      _.forIn(state, (condition: any, stateName: string) => {
+        if (matchOneSelector(condition, targetSchema)) {
+          isDepNode = true
+        }
+      })
+    }
+  }
+  return isDepNode
+}
+
+/**
+ * Whether the target schema matches one selector in the condition
+ *
+ * @param condition
+ * @param targetSchema
+ * @returns true, if matches any one
+ */
+function matchOneSelector(condition: any, targetSchema: ILayoutSchema) {
+  const { deps, selector } = condition
+
+  let isMatched: boolean = false
+  if (!_.isEmpty(deps)) {
+    _.forEach(deps, (depCondition: any) => {
+      if(matchOneSelector(depCondition, targetSchema)) {
+        isMatched = true
+      }
+    })
+  } else if (!_.isEmpty(selector)) {
+    let isEqual = true
+    _.forIn(selector, (expectValue: any, key: any) => {
+      const actualValue = _.get(targetSchema, key);
+      if (actualValue !== expectValue) {
+        isEqual = false
+      }
+    })
+    if (isEqual) {
+      isMatched = true
+    }
+  }
+  return isMatched
 }

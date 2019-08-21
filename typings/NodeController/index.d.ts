@@ -33,6 +33,7 @@ export interface INodeController {
   hideUINode(layout: string, clearSource: boolean = false);
   getUINode(layout: string, uiNodeOnly: boolean = false);
   castMessage(nodeSelector: INodeProps, data: any, ids?: [string]);
+  sendMessage(info: any, force: boolean = false);
   setRequestConfig(requestConfig: IRequestConfig);
   pushLayout(layout: string);
   setWorkingMode(layout: string, workingMode: IWorkingMode);

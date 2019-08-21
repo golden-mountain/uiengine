@@ -1,5 +1,5 @@
 // import _ from "lodash";
-import { IPluginFunc, IPlugin } from "UIEngine/typings";
+import { IPluginFunc, IPlugin } from "uiengine/typings";
 
 const callback: IPluginFunc = (component: any) => {
   // TO FIX, when add and delete row, the state did not update in time using setState on messager
@@ -9,7 +9,7 @@ const callback: IPluginFunc = (component: any) => {
 
 export const propsGet: IPlugin = {
   type: "component.props.get",
-  weight: 100,
+  priority: 100,
   callback,
   name: "props-get"
 };

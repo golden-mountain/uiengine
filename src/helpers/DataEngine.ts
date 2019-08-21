@@ -50,7 +50,7 @@ export default class DataEngine implements IDataEngine {
   ) {
     // clear initial data;
     this.data = {};
-    this.requestOptions.params = data;
+    this.requestOptions.params = _.cloneDeep(data);
     this.requestOptions.method = method;
     this.errorInfo = null;
     if (!this.request[method] || !_.isFunction(this.request[method])) {
@@ -92,10 +92,12 @@ export default class DataEngine implements IDataEngine {
           stopWhenEmpty: true,
           returnLastValue: true
         };
+
         const couldCommit = await this.pluginManager.executePlugins(
-          "data.request.could",
-          exeConfig
+          "data.request.before",
+          { stopWhenEmpty: true, returnLastValue: true }
         );
+
         if (couldCommit === false) {
           this.errorInfo = {
             status: 1001,

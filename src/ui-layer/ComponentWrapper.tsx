@@ -7,8 +7,11 @@ import {
   IComponentWrapper,
   IComponentState,
   IPluginManager,
-  IPluginExecutionConfig
+  IPluginExecutionConfig,
+  IComponentWrapperProps
 } from "../../typings";
+
+const DefaultWrapper: React.FC = (props: any) => <>{props.children}</>;
 
 class ComponentWrapper extends React.Component<
   IComponentWrapper,
@@ -39,7 +42,7 @@ class ComponentWrapper extends React.Component<
   }
 
   render() {
-    const { uiNode, ...rest } = this.props;
+    const { uiNode, config, ...rest } = this.props;
     if (!_.get(this.state, "state.visible", true)) {
       return null;
     }
@@ -51,7 +54,7 @@ class ComponentWrapper extends React.Component<
 
       // map children as components
       let childrenObjects = uiNode.children.map((child: any, key: any) => {
-        const props = { ...rest, uiNode: child, key: child.id || key };
+        const props = { config, ...rest, uiNode: child, key: child.id || key };
         return <ComponentWrapper {...props} />;
       });
 
@@ -68,7 +71,7 @@ class ComponentWrapper extends React.Component<
             exeConfig
           );
 
-          let props = {
+          let props: IComponentWrapperProps = {
             ...rest,
             ...uiNode.props,
             key: `key-of-child-${uiNode.id}`,
@@ -82,8 +85,20 @@ class ComponentWrapper extends React.Component<
             childrenObjects.push(uiNode.schema.content);
           }
 
+          // HOC Wrapper
+          let HOCWrapper = DefaultWrapper;
+
+          // only show once error
+          if (_.has(config, "widgetConfig.componentWrapper")) {
+            HOCWrapper = _.get(
+              config,
+              "widgetConfig.componentWrapper",
+              DefaultWrapper
+            );
+          }
+
           return (
-            <>
+            <HOCWrapper {...props}>
               {childrenObjects.length ? (
                 <WrappedComponent {...props}>
                   {childrenObjects}
@@ -92,7 +107,7 @@ class ComponentWrapper extends React.Component<
                 <WrappedComponent {...props} />
               )}
               {renderNodes(uiNode.nodes)}
-            </>
+            </HOCWrapper>
           );
         } catch (e) {
           console.error(e.message);

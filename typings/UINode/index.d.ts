@@ -20,6 +20,24 @@ export interface ILayoutSchema {
   [key: string]: any;
 }
 
+export interface IDependanceTree {
+  deps: Array<IDependanceTree | IDependanceNode>
+  strategy?: string
+}
+
+export interface IDependanceNode {
+  selector: {
+    [key: string]: any
+  }
+  data?: any
+  dataCompareRule?: string
+  state?: {
+    [key: string]: boolean
+  }
+  stateCompareRule?: string
+  stateCompareStrategy?: string
+}
+
 export interface IUINode {
   request: IRequest;
   dataNode: IDataNode;
@@ -38,7 +56,7 @@ export interface IUINode {
   workingMode?: IWorkingMode;
   nodes: {
     [name: string]: IUINodeRenderer;
-  } = {}; 
+  } = {};
 
   loadLayout(schema?: ILayoutSchema | string, workingMode?: IWorkingMode);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;

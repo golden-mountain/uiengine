@@ -8,7 +8,7 @@ import {
   NodeController,
   ComponentWrapper,
   DataPool
-} from "UIEngine";
+} from "uiengine";
 import { IWorkingMode } from "../../../../../typings";
 const EditableContext = React.createContext({});
 
