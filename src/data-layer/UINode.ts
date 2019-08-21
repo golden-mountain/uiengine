@@ -204,7 +204,6 @@ export default class UINode implements IUINode {
     newSchema: ILayoutSchema | string,
     workingMode?: IWorkingMode
   ) {
-    this.clearLayout();
     const schemaReplaced = await this.loadLayout(newSchema, workingMode);
     return schemaReplaced;
   }
@@ -219,9 +218,6 @@ export default class UINode implements IUINode {
     this.schema = {};
     this.errorInfo = {};
     this.children = [];
-    this.rootName = "";
-    this.isLiveChildren = false;
-    this.id = "";
     return this;
   }
 
