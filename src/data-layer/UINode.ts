@@ -66,9 +66,9 @@ export default class UINode implements IUINode {
     }
 
     // initial id, the id can't change
-    if (!this.schema._id) {
-      this.schema._id = _.uniqueId("node-");
-    }
+    // if (!this.schema._id) {
+    this.schema._id = _.uniqueId("node-");
+    // }
     this.id = this.schema._id;
 
     // new messager
