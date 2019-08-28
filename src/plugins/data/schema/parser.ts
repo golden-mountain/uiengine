@@ -10,10 +10,14 @@ import { IPluginFunc, IPlugin, IDataNode } from "../../../../typings";
 const callback: IPluginFunc = (dataNode: IDataNode) => {
   const rootSchema = dataNode.rootSchema;
   let schemaPath = dataNode.source.schema || dataNode.source.source;
-  let name = schemaPath.replace(":", ".");
-  const regex = /\[\d+\]/;
-  name = name.replace(regex, "");
-  return _.get(rootSchema, `definition.${name}`);
+  if (schemaPath) {
+    let name = schemaPath.replace(":", ".");
+    const regex = /\[\d+\]/;
+    name = name.replace(regex, "");
+    return _.get(rootSchema, `definition.${name}`);
+  } else {
+    return "";
+  }
 };
 
 export const schemaParser: IPlugin = {
