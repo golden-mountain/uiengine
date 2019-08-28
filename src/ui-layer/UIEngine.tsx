@@ -90,7 +90,7 @@ export default class UIEngine extends React.Component<
   }
 
   render() {
-    const { layouts, config, onEngineCreate, ...rest } = this.props;
+    const { layouts, config, ideMode, onEngineCreate, ...rest } = this.props;
     const context = {
       controller: this.nodeController
     };

@@ -43,7 +43,11 @@ class ComponentWrapper extends React.Component<
 
   render() {
     const { uiNode, config, ...rest } = this.props;
-    if (!_.get(this.state, "state.visible", true)) {
+    if (
+      !_.get(this.state, "state.visible", true) &&
+      !_.get(config, "ideMode", false)
+    ) {
+      console.log(_.get(config, "ideMode", false), " is ide mode");
       return null;
     }
     // console.log(_.keys(uiNode.nodes), "will render on component side");
