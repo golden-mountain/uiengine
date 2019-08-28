@@ -86,6 +86,7 @@ export default class NodeController implements INodeController {
 
     // use cached nodes
     let uiNode: IUINode = _.get(this.nodes[rootName], "uiNode");
+
     const workingMode = this.getWorkingMode(rootName);
     if (!uiNode) {
       // default we load all default plugins

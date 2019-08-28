@@ -69,7 +69,7 @@ export default class UIEngine extends React.Component<
         layout = layouts[index]["layout"];
         workingMode = layouts[index]["workingMode"];
       } else {
-        layout = layouts[index];
+        layout = _.isObject(layouts[index]) ? "default" : layouts[index];
       }
 
       // no refresh the state from NodeController,

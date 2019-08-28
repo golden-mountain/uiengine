@@ -67,7 +67,24 @@ const App: React.FC = () => {
   if (token) {
     headers["Authorization"] = `A10 ${token}`;
   }
-
+  const schema = "schema/ui/app.json";
+  // const schema = {
+  //   component: "antd:Layout",
+  //   children: [
+  //     {
+  //       component: "antd:Layout.Content",
+  //       children: [
+  //         {
+  //           component: "antd:Col",
+  //           _id: "node-63",
+  //           datasource: "$dummy.node-63"
+  //         }
+  //       ],
+  //       _id: "node-62",
+  //       datasource: "$dummy.node-113"
+  //     }
+  //   ]
+  // };
   return (
     <BrowserRouter>
       <PageHeader
@@ -93,10 +110,7 @@ const App: React.FC = () => {
         </Menu.Item>
       </Menu>
 
-      <UIEngine
-        layouts={["schema/ui/app.json"]}
-        config={{ requestConfig, widgetConfig }}
-      />
+      <UIEngine layouts={[schema]} config={{ requestConfig, widgetConfig }} />
     </BrowserRouter>
   );
 };
