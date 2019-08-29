@@ -1,6 +1,11 @@
 import _ from "lodash";
 import { searchNodes } from ".";
-import { IUINode, IStateNode, IDependanceTree, IDependanceNode } from "../../../typings";
+import {
+  IUINode,
+  IStateNode,
+  IDependanceTree,
+  IDependanceNode
+} from "../../../typings";
 
 export function setComponentState(this: any, state: any) {
   return this.setState(state);
@@ -28,101 +33,101 @@ export function setComponentState(this: any, state: any) {
  */
 const compareRules = {
   is: (actual: any, expected: any) => {
-    return _.isEqual(actual, expected)
+    return _.isEqual(actual, expected);
   },
   not: (actual: any, expected: any) => {
-    return !_.isEqual(actual, expected)
+    return !_.isEqual(actual, expected);
   },
   above: (actual: any, expected: any) => {
-    return actual > expected
+    return actual > expected;
   },
   below: (actual: any, expected: any) => {
-    return actual < expected
+    return actual < expected;
   },
   include: (actual: any, expected: any) => {
     if (_.hasIn(actual, expected)) {
-      return !_.isNil(_.get(actual, expected))
+      return !_.isNil(_.get(actual, expected));
     }
-    return false
+    return false;
   },
   exclude: (actual: any, expected: any) => {
     if (_.hasIn(actual, expected)) {
-      return _.isNil(_.get(actual, expected))
+      return _.isNil(_.get(actual, expected));
     }
-    return true
+    return true;
   },
   matchOne: (actual: any, expected: any) => {
     if (_.isObject(expected) && !_.isEmpty(expected)) {
-      let result = false
+      let result = false;
       _.forIn(expected, (value, key) => {
-        const actualValue = _.get(actual, key)
+        const actualValue = _.get(actual, key);
         if (_.isEqual(actualValue, value)) {
-          result = true
+          result = true;
         }
-      })
-      return result
+      });
+      return result;
     }
-    return false
+    return false;
   },
   matchAll: (actual: any, expected: any) => {
     if (_.isObject(expected)) {
-      let result = true
+      let result = true;
       _.forIn(expected, (value, key) => {
-        const actualValue = _.get(actual, key)
+        const actualValue = _.get(actual, key);
         if (!_.isEqual(actualValue, value)) {
-          result = false
+          result = false;
         }
-      })
-      return result
+      });
+      return result;
     }
-    return false
+    return false;
   },
   dismatchOne: (actual: any, expected: any) => {
     if (_.isObject(expected) && !_.isEmpty(expected)) {
-      let result = false
+      let result = false;
       _.forIn(expected, (value, key) => {
-        const actualValue = _.get(actual, key)
+        const actualValue = _.get(actual, key);
         if (!_.isEqual(actualValue, value)) {
-          result = true
+          result = true;
         }
-      })
-      return result
+      });
+      return result;
     }
-    return false
+    return false;
   },
   dismatchAll: (actual: any, expected: any) => {
     if (_.isObject(expected)) {
-      let result = true
+      let result = true;
       _.forIn(expected, (value, key) => {
-        const actualValue = _.get(actual, key)
+        const actualValue = _.get(actual, key);
         if (_.isEqual(actualValue, value)) {
-          result = false
+          result = false;
         }
-      })
-      return result
+      });
+      return result;
     }
-    return false
+    return false;
   },
   empty: (actual: any, expected: any) => {
-    return _.isEmpty(actual)
+    return _.isEmpty(actual);
   },
   notEmpty: (actual: any, expected: any) => {
-    return !_.isEmpty(actual)
+    return !_.isEmpty(actual);
   },
   or: (actual: any, expected: any) => {
-    return actual || expected
+    return actual || expected;
   },
   regexp: (actual: any, expected: any) => {
-    const regexp = new RegExp(expected)
-    return regexp.test(actual)
+    const regexp = new RegExp(expected);
+    return regexp.test(actual);
   }
-}
+};
 function compare(actual: any, expected: any, rule: string = "is") {
-  const compareLogic = compareRules[rule]
+  const compareLogic = compareRules[rule];
   if (_.isFunction(compareLogic)) {
-    return compareLogic(actual, expected)
+    return compareLogic(actual, expected);
   } else {
-    return _.isEqual(actual, expected)
+    return _.isEqual(actual, expected);
   }
 }
 
@@ -130,107 +135,112 @@ export function dataCompare(
   target: IUINode,
   expectedData: any,
   compareRule: string = "is",
-  defaultResult?: boolean,
+  defaultResult?: boolean
 ) {
-  const { dataNode } = target
+  const { dataNode } = target;
   if (dataNode) {
-    const actual = dataNode.getData()
-    const expected = expectedData
-    return compare(actual, expected, compareRule)
+    const actual = dataNode.getData();
+    const expected = expectedData;
+    return compare(actual, expected, compareRule);
   }
   // When can not find target dataNode, return the default value or false
-  return defaultResult || false
+  return defaultResult || false;
 }
 
 export function stateCompare(
   target: IUINode,
   expectedState: { [key: string]: any },
-  compareRule:string = 'is',
-  compareStrategy: string = 'and',
-  defaultResult?: boolean,
+  compareRule: string = "is",
+  compareStrategy: string = "and",
+  defaultResult?: boolean
 ) {
-  const { stateNode } = target
+  const { stateNode } = target;
   if (stateNode) {
-    if (compareStrategy === 'and') {
+    if (compareStrategy === "and") {
       return Object.keys(expectedState).every((stateName: string) => {
-        const actual = stateNode.getState(stateName)
-        const expected = expectedState[stateName]
-        return compare(actual, expected, compareRule)
-      })
-    } else if (compareStrategy === 'or') {
+        const actual = stateNode.getState(stateName);
+        const expected = expectedState[stateName];
+        return compare(actual, expected, compareRule);
+      });
+    } else if (compareStrategy === "or") {
       return Object.keys(expectedState).some((stateName: string) => {
-        const actual = stateNode.getState(stateName)
-        const expected = expectedState[stateName]
-        return compare(actual, expected, compareRule)
-      })
+        const actual = stateNode.getState(stateName);
+        const expected = expectedState[stateName];
+        return compare(actual, expected, compareRule);
+      });
     }
   }
   // When can not find target stateNode or strategy logic, return the default value or false
-  return defaultResult || false
+  return defaultResult || false;
 }
 
 export function stateDepsResolver(
   stateNode: IStateNode,
   stateName: string,
-  defaultState?: boolean,
+  defaultState?: boolean
 ): boolean {
-  const uiNode = stateNode.getUINode()
-  const schema = uiNode.getSchema()
-  const stateDepConfig = _.get(schema, `state.${stateName}`)
+  const uiNode = stateNode.getUINode();
+  const schema = uiNode.getSchema();
+  const stateDepConfig = _.get(schema, `state.${stateName}`);
 
   if (_.isObject(stateDepConfig) as any) {
-    return resolveDependance(uiNode, stateName, stateDepConfig)
+    return resolveDependance(uiNode, stateName, stateDepConfig);
   } else {
     // When can not find stateDepConfig, return the default value or false
-    return defaultState || false
+    return defaultState || false;
   }
 }
 
 function resolveDependance(
   uiNode: IUINode,
   stateName: string,
-  condition: IDependanceTree & IDependanceNode,
+  condition: IDependanceTree & IDependanceNode
 ): boolean {
   const {
     // dependance tree
     deps,
-    strategy = 'and',
+    strategy = "and",
     // dependance node
     selector,
     data,
-    dataCompareRule = 'is',
+    dataCompareRule = "is",
     state,
-    stateCompareRule = 'is',
-    stateCompareStrategy = 'and',
-  } = condition
+    stateCompareRule = "is",
+    stateCompareStrategy = "and"
+  } = condition;
   if (_.isArray(deps) && deps.length > 0) {
-    if (strategy === 'and') {
+    if (strategy === "and") {
       return deps.every((dep: any) => {
-        return resolveDependance(uiNode, stateName, dep)
-      })
-    } else if (strategy === 'or') {
+        return resolveDependance(uiNode, stateName, dep);
+      });
+    } else if (strategy === "or") {
       return deps.some((dep: any) => {
-        return resolveDependance(uiNode, stateName, dep)
-      })
+        return resolveDependance(uiNode, stateName, dep);
+      });
     }
   } else if (_.isObject(selector) && !_.isEmpty(selector)) {
     const depUINodes = searchNodes(selector, uiNode.rootName);
 
     if (_.isArray(depUINodes) && depUINodes.length > 0) {
       return depUINodes.every((targetUINode: any) => {
-        let dataMatched = true
+        let dataMatched = true;
         if (data !== undefined) {
-          dataMatched = dataCompare(targetUINode, data, dataCompareRule)
+          dataMatched = dataCompare(targetUINode, data, dataCompareRule);
         }
-        let stateMatched = true
+        let stateMatched = true;
         if (_.isObject(state)) {
-          stateMatched = stateCompare(targetUINode, state, stateCompareRule, stateCompareStrategy)
+          stateMatched = stateCompare(
+            targetUINode,
+            state,
+            stateCompareRule,
+            stateCompareStrategy
+          );
         }
-        return dataMatched && stateMatched
-      })
+        return dataMatched && stateMatched;
+      });
     } else {
-      return false
+      return false;
     }
   }
-  return true
+  return true;
 }
