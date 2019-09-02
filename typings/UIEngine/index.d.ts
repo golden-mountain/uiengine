@@ -1,28 +1,43 @@
-import { IUINode } from "../UINode";
-import { IErrorInfo, IRequestConfig } from "../Request";
-import { ReactNode } from "react";
+import { ReactNode } from 'react'
+import { IObject } from '../Common'
+import { IErrorInfo, IRequestConfig } from '../Request'
+import { IUINode } from '../UINode'
 
 export interface IUIEngineWidgetsConfig {
-  messager?: ReactNode;
-  componentWrapper?: ReactNode;
-  uiengineWrapper?: ReactNode;
+  messager?: ReactNode
+  componentWrapper?: ReactNode
+  uiengineWrapper?: ReactNode
 }
 
 export interface IUIEngineConfig {
-  requestConfig: IRequestConfig;
-  widgetConfig?: IUIEngineWidgetsConfig;
-  ideMode?: boolean;
+  requestConfig: IRequestConfig
+  widgetConfig?: IUIEngineWidgetsConfig
+  ideMode?: boolean
 }
 
 export interface IUIEngineProps {
-  layouts: any;
-  config: IUIEngineConfig;
-  [anyKey: string]: any;
+  layouts: Array<string | ILayoutInfo>
+  config: IUIEngineConfig
+  [anyKey: string]: any
 }
 
 export interface IUIEngineStates {
-  nodes: Array<IUINodeRenderer>;
-  activeNodeID: string;
-  error?: IErrorInfo;
-  [anyKey: string]: any;
+  nodes: Array<IUINodeRenderer>
+  activeNodeID: string
+  error?: IErrorInfo
+  [anyKey: string]: any
+}
+
+export interface ILayoutInfo {
+  id?: string
+  layout: string
+  workingMode?: IOperationMode[]
+}
+
+export interface IOperationMode {
+  domain: string
+  mode: 'create' | 'delete' | 'update' | 'view'
+  uriParam?: IObject
+  envParam?: IObject
+  submitMethod?: string
 }

@@ -20,24 +20,6 @@ export interface ILayoutSchema {
   [key: string]: any;
 }
 
-export interface IDependanceTree {
-  deps: Array<IDependanceTree | IDependanceNode>
-  strategy?: string
-}
-
-export interface IDependanceNode {
-  selector: {
-    [key: string]: any
-  }
-  data?: any
-  dataCompareRule?: string
-  state?: {
-    [key: string]: boolean
-  }
-  stateCompareRule?: string
-  stateCompareStrategy?: string
-}
-
 export interface IUINode {
   request: IRequest;
   dataNode: IDataNode;
