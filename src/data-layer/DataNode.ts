@@ -137,10 +137,11 @@ export default class DataNode implements IDataNode {
     // assign root schema if not $dummy data
     this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
     // load this node schema
-    this.schema = await this.pluginManager.executePlugins(
+    const schema = await this.pluginManager.executePlugins(
       "data.schema.parser",
       exeConfig
     );
+    if (schema) this.schema = schema;
     return result;
   }
 
