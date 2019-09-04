@@ -50,7 +50,7 @@ export default class Cache {
     if (parentId) {
       const allNodes = Cache.getUINode(rootName);
       _.forIn(allNodes, (node: any) => {
-        if (node.parent.id === parentId) {
+        if (_.get(node, "parent.id") === parentId) {
           Cache.clearCache("uiNodes", `${rootName}.${node.id}`);
         }
       });
