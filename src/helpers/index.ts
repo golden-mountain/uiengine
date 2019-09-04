@@ -10,6 +10,7 @@ export { default as Messager } from "./Messager";
 export { default as Cache } from "./Cache";
 export { default as Event } from "./Event";
 export { default as Workflow } from "./Workflow";
+export { default as StepProcess } from "./StepProcess";
 
 // other
 export * from "./UIEngineRegister";

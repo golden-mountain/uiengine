@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { IObject } from '../Common'
+import { IObject, IUISchema } from '../Common'
 import { IErrorInfo, IRequestConfig } from '../Request'
 import { IUINode } from '../UINode'
 
@@ -16,7 +16,7 @@ export interface IUIEngineConfig {
 }
 
 export interface IUIEngineProps {
-  layouts: Array<string | ILayoutInfo>
+  layouts: Array<string | IUISchema | ILayoutInfo>
   config: IUIEngineConfig
   [anyKey: string]: any
 }
@@ -30,7 +30,7 @@ export interface IUIEngineStates {
 
 export interface ILayoutInfo {
   id?: string
-  layout: string
+  layout: string | IUISchema
   workingMode?: IOperationMode[]
 }
 
