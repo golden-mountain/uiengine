@@ -38,8 +38,10 @@ export default class DataPool implements IDataPool {
         d.push(cloneData);
       } else {
         // compare with the cloneData is equal, if equal, then ignore it
-        d = _.unionWith(d, cloneData, _.isEqual);
+        // d = _.unionWith(d, cloneData, _.isEqual);
+        d = cloneData;
       }
+      // console.log(p, d, "path, data");
       _.set(this.data, p, d);
     } else {
       _.set(this.data, p, cloneData);

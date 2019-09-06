@@ -50,27 +50,21 @@ class ComponentWrapper extends React.Component<
       !_.get(this.state, "state.visible", true) &&
       !_.get(config, "ideMode", false)
     ) {
-      console.log(_.get(config, "ideMode", false), " is ide mode");
       return null;
     }
     // console.log(_.keys(uiNode.nodes), "will render on component side");
     if (uiNode.schema) {
       // render logic
       const componentLine = _.get(uiNode.schema, "component");
-      if (!componentLine) {
-        console.error(
-          'schema did not provide critical keyword "component"',
-          _.cloneDeep(uiNode.schema)
-        );
-        return null;
-      }
-      const WrappedComponent = getComponent(componentLine);
-      if (!WrappedComponent) {
-        console.error(
+      let WrappedComponent;
+
+      WrappedComponent = getComponent(componentLine);
+      if (componentLine && !WrappedComponent) {
+        console.warn(
           `Component ${componentLine} has no correspond Component registered`
         );
-        return null;
       }
+
       // map children as components
       let childrenObjects = uiNode.children.map((child: any, key: any) => {
         const props = { config, ...rest, uiNode: child, key: child.id || key };

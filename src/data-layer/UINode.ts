@@ -251,7 +251,11 @@ export default class UINode implements IUINode {
       _.forIn(target, function(value: any, key: string) {
         if (typeof value === "object") {
           updatePropRow(value, index);
-        } else if (_.isString(value) && value.indexOf("$") > -1) {
+        } else if (
+          _.isString(value) &&
+          value.indexOf("$dummy") === -1 &&
+          value.indexOf("$") > -1
+        ) {
           _.set(target, key, value.replace("$", index));
         }
       });
