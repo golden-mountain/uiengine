@@ -1,4 +1,5 @@
-import _ from "lodash";
+import _ from 'lodash'
+import { AxiosPromise } from 'axios'
 
 import {
   Request,
@@ -8,84 +9,93 @@ import {
   PluginManager,
   Messager,
   parseRootName
-} from "..";
+} from '../index'
 
-import { AxiosPromise } from "axios";
 import {
+  IUINode,
   IDataNode,
   IStateNode,
-  IUINode,
-  ILayoutSchema,
-  IRequest,
   IErrorInfo,
-  IPluginManager,
+  ILayoutSchema,
   IMessager,
+  IPluginManager,
+  IRequest,
   IStateInfo,
+  IUINodeRenderer,
   IWorkingMode,
-  IUINodeRenderer
-} from "../../typings";
+} from '../../typings'
 
 export default class UINode implements IUINode {
-  request: IRequest = Request.getInstance();
-  dataNode: IDataNode;
-  stateNode: IStateNode = new StateNode(this);
-  children: Array<UINode> = [];
-  pluginManager: IPluginManager = new PluginManager(this);
-  errorInfo: IErrorInfo = {};
-  schema: ILayoutSchema = {};
-  rootName: string = "";
-  isLiveChildren: boolean = false;
-  id: string = "";
-  messager: IMessager;
-  props: object = {};
-  parent?: IUINode;
+  readonly id: string
+  dataNode: IDataNode
+  stateNode: IStateNode = new StateNode(this)
+  pluginManager: IPluginManager
+  request: IRequest = Request.getInstance()
+  children: Array<UINode> = []
+  errorInfo: IErrorInfo = {}
+  schema: ILayoutSchema = {}
+  rootName: string = ''
+  isLiveChildren: boolean = false
+  messager: IMessager
+  props: object = {}
+  parent?: IUINode
   stateInfo: IStateInfo = {
     data: null,
     state: {},
     time: 0
-  };
-  workingMode?: IWorkingMode;
+  }
+  workingMode?: IWorkingMode
   nodes: {
-    [name: string]: IUINodeRenderer;
-  } = {};
+    [name: string]: IUINodeRenderer
+  } = {}
 
   constructor(
     schema: ILayoutSchema,
     request?: IRequest,
-    root: string = "",
+    root: string = '',
     parent?: IUINode
   ) {
     if (request) {
-      this.request = request;
+      this.request = request
     }
-    this.schema = schema;
+    this.schema = schema
 
     // cache root object if given root name
     if (root) {
-      this.rootName = root;
+      this.rootName = root
     }
 
     // initial id, the id can't change
     // if (!this.schema._id) {
-    this.schema._id = _.uniqueId(`node-`);
+    this.schema._id = _.uniqueId(`UINode-`)
     // }
 
-    this.id = this.schema._id;
+    this.id = this.schema._id
+    this.pluginManager = PluginManager.getInstance()
+    this.pluginManager.register(
+      this.id,
+      {
+        categories: [
+          'ui.parser',
+          'ui.parser.event'
+        ]
+      }
+    )
 
     // new messager
-    this.messager = Messager.getInstance();
+    this.messager = Messager.getInstance()
 
     // assign parent
-    this.parent = parent;
+    this.parent = parent
 
     // data node initial
-    const emptyDataNodeName = `$dummy.${this.id}`;
-    if (!schema.datasource) schema.datasource = emptyDataNodeName;
-    this.dataNode = new DataNode(schema.datasource, this, this.request);
+    const emptyDataNodeName = `$dummy.${this.id}`
+    if (!schema.datasource) schema.datasource = emptyDataNodeName
+    this.dataNode = new DataNode(schema.datasource, this, this.request)
   }
 
   private setRootName(root: string) {
-    this.rootName = parseRootName(root);
+    this.rootName = parseRootName(root)
   }
 
   async loadLayout(
@@ -93,51 +103,51 @@ export default class UINode implements IUINode {
     workingMode?: IWorkingMode
   ) {
     // load remote node
-    let returnSchema: any = schema;
-    if (!returnSchema) returnSchema = this.schema;
-    if (typeof schema === "string" && schema) {
-      returnSchema = await this.loadRemoteLayout(schema);
-      this.setRootName(schema);
+    let returnSchema: any = schema
+    if (!returnSchema) returnSchema = this.schema
+    if (typeof schema === 'string' && schema) {
+      returnSchema = await this.loadRemoteLayout(schema)
+      this.setRootName(schema)
     }
 
     // assign the schema to this and it's children
     if (returnSchema) {
-      await this.assignSchema(returnSchema, workingMode);
+      await this.assignSchema(returnSchema, workingMode)
     }
 
     // cache this node
-    Cache.setUINode(this.rootName, this);
-    return returnSchema;
+    Cache.setUINode(this.rootName, this)
+    return returnSchema
   }
 
   getSchema(path?: string): ILayoutSchema {
     // if (_.isEmpty(this.schema)) {
-    //   console.warn("did you execute loadLayout before using getSchema method?");
+    //   console.warn('did you execute loadLayout before using getSchema method?')
     // }
     if (path) {
-      return _.get(this.schema, path);
+      return _.get(this.schema, path)
     }
-    return this.schema;
+    return this.schema
   }
 
   async loadRemoteLayout(url: string): Promise<AxiosPromise> {
-    this.setRootName(url);
-    let result: any = Cache.getLayoutSchema(this.rootName);
+    this.setRootName(url)
+    let result: any = Cache.getLayoutSchema(this.rootName)
     if (!result) {
       try {
-        let response: any = await this.request.get(url);
+        let response: any = await this.request.get(url)
         if (response.data) {
-          result = response.data;
-          Cache.setLayoutSchema(this.rootName, result);
+          result = response.data
+          Cache.setLayoutSchema(this.rootName, result)
         }
       } catch (e) {
         this.errorInfo = {
           status: 400,
           code: `Error loading from ${url}`
-        };
+        }
       }
     }
-    return result;
+    return result
   }
 
   /**
@@ -152,96 +162,100 @@ export default class UINode implements IUINode {
     workingMode?: IWorkingMode
   ) {
     // assign workingMode
-    if (workingMode) this.workingMode = workingMode;
+    if (workingMode) this.workingMode = workingMode
 
-    let liveSchema = schema;
-    if (liveSchema["datasource"]) {
-      await this.dataNode.loadData(liveSchema["datasource"]);
+    let liveSchema = schema
+    if (liveSchema['datasource']) {
+      await this.dataNode.loadData(liveSchema['datasource'])
     }
 
-    if (liveSchema["$children"] && this.dataNode) {
-      const data = this.dataNode.data;
-      liveSchema = await this.genLiveLayout(liveSchema, data);
+    if (liveSchema['$children'] && this.dataNode) {
+      const data = this.dataNode.data
+      liveSchema = await this.genLiveLayout(liveSchema, data)
     }
 
     if (liveSchema.children) {
-      const children: any = [];
+      const children: any = []
       for (let index in liveSchema.children) {
-        let node: any;
-        let s: any = liveSchema.children[index];
+        let node: any
+        let s: any = liveSchema.children[index]
         if (_.isArray(s)) {
-          node = new UINode({}, this.request, this.rootName, this);
+          node = new UINode({}, this.request, this.rootName, this)
           for (let i in s) {
-            const subnode = new UINode(s[i], this.request, this.rootName, this);
-            await subnode.loadLayout(s[i], this.workingMode);
-            node.children.push(subnode);
+            const subnode = new UINode(s[i], this.request, this.rootName, this)
+            await subnode.loadLayout(s[i], this.workingMode)
+            node.children.push(subnode)
           }
         } else {
-          node = new UINode(s, this.request, this.rootName, this);
-          await node.loadLayout(s, this.workingMode);
+          node = new UINode(s, this.request, this.rootName, this)
+          await node.loadLayout(s, this.workingMode)
         }
-        children.push(node);
+        children.push(node)
       }
-      this.children = children;
+      this.children = children
     }
 
-    this.schema = liveSchema;
+    this.schema = liveSchema
     // load State
-    this.stateNode = new StateNode(this);
-    await this.stateNode.renewStates();
+    this.stateNode = new StateNode(this)
+    await this.stateNode.renewStates()
 
     // load ui.parser plugin
     try {
-      await this.pluginManager.executePlugins("ui.parser");
+      await this.pluginManager.executePlugins(
+        this.id,
+        'ui.parser',
+        { uiNode: this },
+      )
     } catch (e) {
-      console.log(e.message);
+      console.log(e.message)
     }
 
     // state info default
-    return this;
+    return this
   }
 
   async replaceLayout(
     newSchema: ILayoutSchema | string,
     workingMode?: IWorkingMode
   ) {
-    const schemaReplaced = await this.loadLayout(newSchema, workingMode);
-    return schemaReplaced;
+    const schemaReplaced = await this.loadLayout(newSchema, workingMode)
+    return schemaReplaced
   }
 
   async updateLayout(workingMode?: IWorkingMode) {
-    const newSchema = await this.assignSchema(this.schema, workingMode);
-    return newSchema;
+    const newSchema = await this.assignSchema(this.schema, workingMode)
+    return newSchema
   }
 
   clearLayout() {
-    Cache.clearUINodes(this.rootName);
-    this.schema = {};
-    this.errorInfo = {};
-    this.children = [];
-    return this;
+    Cache.clearUINodes(this.rootName)
+    this.schema = {}
+    this.errorInfo = {}
+    this.children = []
+    return this
   }
 
   getNode(path?: string) {
     if (path) {
-      return _.get(this, path);
+      return _.get(this, path)
     }
-    return this;
+    return this
   }
 
   getChildren(route?: Array<Number>) {
     // if (_.isEmpty(this.children)) {
     //   console.warn(
-    //     "did you execute loadLayout before using getChildren method?"
-    //   );
+    //     'did you execute loadLayout before using getChildren method?'
+    //   )
     // }
     if (route) {
       const path = route.map((v: Number) => {
-        return `children[${v}]`;
-      });
-      return _.get(this, path.join("."));
+        return `children[${v}]`
+      })
+      return _.get(this, path.join('.'))
     } else {
-      return this.children;
+      return this.children
     }
   }
 
@@ -249,36 +263,36 @@ export default class UINode implements IUINode {
     // replace $ to row number
     const updatePropRow = (target: ILayoutSchema, index: string) => {
       _.forIn(target, function(value: any, key: string) {
-        if (typeof value === "object") {
-          updatePropRow(value, index);
+        if (typeof value === 'object') {
+          updatePropRow(value, index)
         } else if (
           _.isString(value) &&
-          value.indexOf("$dummy") === -1 &&
-          value.indexOf("$") > -1
+          value.indexOf('$dummy') === -1 &&
+          value.indexOf('$') > -1
         ) {
-          _.set(target, key, value.replace("$", index));
+          _.set(target, key, value.replace('$', index))
         }
-      });
-    };
+      })
+    }
 
-    const liveSchema = schema;
-    const rowTemplate: any = liveSchema.$children;
+    const liveSchema = schema
+    const rowTemplate: any = liveSchema.$children
     if (rowTemplate && data) {
       liveSchema.children = data.map((d: any, index: string) =>
         rowTemplate.map((s: any) => {
-          const newSchema = _.cloneDeep(s);
+          const newSchema = _.cloneDeep(s)
           if (newSchema.datasource) {
-            updatePropRow(newSchema, index);
-            newSchema._index = index; // row id
+            updatePropRow(newSchema, index)
+            newSchema._index = index // row id
           }
-          return newSchema;
+          return newSchema
         })
-      );
+      )
     }
 
     // add a new children
-    this.isLiveChildren = true;
-    return liveSchema;
+    this.isLiveChildren = true
+    return liveSchema
   }
 
   sendMessage(force: boolean = false) {
@@ -287,13 +301,13 @@ export default class UINode implements IUINode {
       data: _.cloneDeep(this.dataNode.data),
       state: _.cloneDeep(this.stateNode.state),
       time: force ? new Date().getTime() : 0
-    };
+    }
     // if (!_.isEmpty(newState.nodes)) {
-    //   console.log(_.cloneDeep(newState), "at send message on UINode");
+    //   console.log(_.cloneDeep(newState), 'at send message on UINode')
     // }
     if (!_.isEqual(newState, this.stateInfo)) {
-      this.stateInfo = newState;
-      this.messager.sendMessage(this.id, this.stateInfo);
+      this.stateInfo = newState
+      this.messager.sendMessage(this.id, this.stateInfo)
     }
   }
 }

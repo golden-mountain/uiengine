@@ -1,6 +1,7 @@
 import { IUINode } from "../UINode";
 import { IErrorInfo } from "../Request";
 import { IWorkflow, ILoadOptions, IWorkingMode } from "../Workflow";
+import { IPluginManager } from '../PluginManager'
 
 export interface IUINodeRenderer {
   uiNode: IUINode;
@@ -11,6 +12,7 @@ export interface IUINodeRenderer {
 }
 
 export interface INodeController {
+  id: string
   pluginManager: IPluginManager;
   errorInfo: IErrorInfo;
   // layouts: object;

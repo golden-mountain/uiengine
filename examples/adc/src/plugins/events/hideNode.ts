@@ -1,17 +1,25 @@
-// import _ from "lodash";
-import { NodeController } from "uiengine";
-import { IPluginFunc, IPlugin, IUINode } from "uiengine/typings";
+import _ from 'lodash'
+import { NodeController } from 'uiengine'
 
-const callback: IPluginFunc = (uiNode: IUINode) => {
+import {
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+  IUINode,
+} from 'uiengine/typings'
+
+const execution: IPluginExecution = (param: IPluginParam) => {
+  const uiNode: IUINode = _.get(param, 'uiNode')
   return (e: any, options: any) => {
-    const nodeController = NodeController.getInstance();
-    nodeController.workflow.deactiveLayout();
-  };
-};
+    const nodeController = NodeController.getInstance()
+    nodeController.workflow.deactiveLayout()
+  }
+}
 
 export const hideNode: IPlugin = {
-  type: "ui.parser.event",
+  name: 'hideNode',
+  categories: ['ui.parser.event'],
+  paramKeys: ['uiNode'],
+  execution,
   priority: 100,
-  callback,
-  name: "hideNode"
-};
+}

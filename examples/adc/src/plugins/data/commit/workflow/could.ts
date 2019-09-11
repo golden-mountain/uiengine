@@ -1,31 +1,38 @@
-import _ from "lodash";
-import { IPluginFunc, IPlugin, INodeController } from "uiengine/typings";
-import { DataPool } from "uiengine";
+import _ from 'lodash'
+
+import { DataPool } from 'uiengine'
+
+import {
+  INodeController,
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+} from 'uiengine/typings'
 
 /**
  * could we commit
  * @param nodeController
  */
-const callback: IPluginFunc = (
-  nodeController: INodeController,
-  options?: any
-) => {
-  const dataPool = DataPool.getInstance();
+const execution: IPluginExecution = (param: IPluginParam) => {
+  const nodeController: INodeController = _.get(param, 'nodeController')
+  const sources: any = _.get(param, 'sources')
 
-  // const allError = { status: false, code: 'Please make sure every items are good, then submit again'};
-  if (_.has(options, "source")) {
+  // const allError = { status: false, code: 'Please make sure every items are good, then submit again'}
+  if (_.has(sources, 'source')) {
     // any errors?
-    const errors = dataPool.getError(options.source);
-    const isError = _.isEmpty(errors);
-    return isError;
+    const dataPool = DataPool.getInstance()
+    const errors = dataPool.getError(sources.source)
+    const isError = _.isEmpty(errors)
+    return isError
   }
 
-  return true;
-};
+  return true
+}
 
 export const could: IPlugin = {
-  type: "data.commit.workflow.could",
+  name: 'could',
+  categories: ['data.commit.workflow.could'],
+  paramKeys: ['nodeController', 'sources'],
+  execution,
   priority: 100,
-  callback,
-  name: "could"
-};
+}

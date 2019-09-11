@@ -7,11 +7,12 @@ import {
   IDataSource,
   INodeProps,
   IConnectOptions,
-  IPluginExecutionConfig
+  IPluginExecuteOption
 } from "../../typings";
 
 import { searchNodes, parseRootName, DataPool, submitToAPI } from "../helpers";
 import { UINode } from "../data-layer";
+import PluginManager from "./PluginManager";
 
 export default class Workflow implements IWorkflow {
   static instance: IWorkflow;
@@ -22,8 +23,21 @@ export default class Workflow implements IWorkflow {
     return Workflow.instance as Workflow;
   };
 
+  id: string
+  pluginManager: PluginManager
   nodeController: INodeController = {} as INodeController;
   activeNode?: IUINode;
+
+  constructor() {
+    this.id = _.uniqueId('Workflow-')
+    this.pluginManager = PluginManager.getInstance()
+    this.pluginManager.register(
+      this.id,
+      {
+        categories: []
+      }
+    )
+  }
 
   setNodeController(nodeController: INodeController) {
     this.nodeController = nodeController;
@@ -129,15 +143,23 @@ export default class Workflow implements IWorkflow {
 
   async submit(sources: Array<IDataSource>) {
     // could stop the commit
-    const exeConfig: IPluginExecutionConfig = {
-      stopWhenEmpty: true,
-      returnLastValue: true
+    const exeConfig: IPluginExecuteOption = {
+      afterExecute: (plugin, param, result) => {
+        if (!result) {
+          return { stop: true }
+        }
+        return {}
+      }
     };
-    const couldCommit = await this.nodeController.pluginManager.executePlugins(
+    const exeResult = await this.nodeController.pluginManager.executePlugins(
+      this.nodeController.id,
       "data.commit.workflow.could",
+      { nodeController: this.nodeController, sources },
       exeConfig,
-      sources
     );
+    const couldCommit = exeResult.results.every((result) => {
+      return result.result
+    })
     if (couldCommit === undefined || couldCommit === true) {
       return await submitToAPI(sources);
     } else {
@@ -147,15 +169,23 @@ export default class Workflow implements IWorkflow {
 
   async submitToPool(connectOptions: IConnectOptions, refreshLayout?: string) {
     // could stop the commit
-    const exeConfig: IPluginExecutionConfig = {
-      stopWhenEmpty: true,
-      returnLastValue: true
+    const exeConfig: IPluginExecuteOption = {
+      afterExecute: (plugin, param, result) => {
+        if (!result) {
+          return { stop: true }
+        }
+        return {}
+      }
     };
-    const couldCommit = await this.nodeController.pluginManager.executePlugins(
+    const exeResult = await this.nodeController.pluginManager.executePlugins(
+      this.nodeController.id,
       "data.commit.workflow.could",
+      { nodeController: this.nodeController,  sources: connectOptions },
       exeConfig,
-      connectOptions
     );
+    const couldCommit = exeResult.results.every((result) => {
+      return result.result
+    })
     if (couldCommit === undefined || couldCommit === true) {
       const dataPool = DataPool.getInstance();
       const { source, target, options } = connectOptions;

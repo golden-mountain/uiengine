@@ -2,6 +2,7 @@ import { AxiosPromise } from "axios";
 import { IDataPool } from "../DataPool";
 import { IWorkingMode } from "../Workflow";
 import { IErrorInfo } from "../Request";
+import { IPluginManager } from '../PluginManager'
 
 export interface IDataSchema {
   endpoint: {};
@@ -26,6 +27,7 @@ export interface IDataConnector {
 }
 
 export interface IDataNode {
+  id: string
   errorInfo?: IErrorInfo;
   pluginManager: IPluginManager;
   dataEngine: IDataEngine;

@@ -1,25 +1,34 @@
-import _ from "lodash";
-import { NodeController } from "../..";
-import { IPluginFunc, IPlugin, IUINode } from "../../../typings";
+import _ from 'lodash'
 
-const callback: IPluginFunc = async (uiNode: IUINode) => {
+import { NodeController } from '../..'
+
+import {
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+  IUINode,
+} from '../../../typings'
+
+const execution: IPluginExecution = async (param: IPluginParam) => {
+  const uiNode: IUINode = _.get(param, 'uiNode')
   return (e: any, options: any) => {
-    // console.log(uiNode.schema, options, "... on loadUI plugin");
-    const { layout, container } = options;
+    // console.log(uiNode.schema, options, '... on loadUI plugin')
+    const { layout, container } = options
     if (!layout) {
-      return false;
+      return false
     }
-    const nodeController = NodeController.getInstance();
+    const nodeController = NodeController.getInstance()
     return nodeController.workflow.activeLayout(layout, {
       container,
       parentNode: uiNode
-    });
-  };
-};
+    })
+  }
+}
 
 export const loadLayout: IPlugin = {
-  type: "ui.parser.event",
+  name: 'loadUI',
+  categories: ['ui.parser.event'],
+  paramKeys: ['uiNode'],
+  execution,
   priority: 0,
-  callback,
-  name: "loadUI"
-};
+}

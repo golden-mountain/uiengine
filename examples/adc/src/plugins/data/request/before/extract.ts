@@ -1,35 +1,39 @@
-import _ from "lodash";
+import _ from 'lodash'
+
 import {
-  IPluginFunc,
-  IPlugin,
-  IPluginExecutionConfig,
   IDataEngine,
-  IUINode
-} from "uiengine/typings";
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+  IPluginExecuteOption,
+  IUINode,
+} from 'uiengine/typings'
 
 /**
  * exclude data
  * @param dataEngine
  */
-const callback: IPluginFunc = (dataEngine: IDataEngine) => {
-  const { params } = dataEngine.requestOptions;
-  const dataSource = dataEngine.source;
+const execution: IPluginExecution = (param: IPluginParam) => {
+  const dataEngine: IDataEngine = _.get(param, 'dataEngine')
+  const { params } = dataEngine.requestOptions
+  const dataSource = dataEngine.source
   if (!dataSource || !dataSource.source) {
-    return true;
+    return true
   }
-  const dataLineage: string = _.trimEnd(dataSource.source, ":");
-  const dataPath = dataLineage.split(".");
-  dataPath.pop();
-  const extractedData = _.get(params, dataPath);
+  const dataLineage: string = _.trimEnd(dataSource.source, ':')
+  const dataPath = dataLineage.split('.')
+  dataPath.pop()
+  const extractedData = _.get(params, dataPath)
   if (extractedData) {
-    dataEngine.requestOptions.params = extractedData;
+    dataEngine.requestOptions.params = extractedData
   }
-  return true;
-};
+  return true
+}
 
 export const extract: IPlugin = {
-  type: "data.request.before",
+  name: 'extract',
+  categories: ['data.request.before'],
+  paramKeys: ['dataEngine'],
+  execution,
   priority: 199,
-  callback,
-  name: "extract"
-};
+}

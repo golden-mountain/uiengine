@@ -1,5 +1,11 @@
-// import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataNode } from "uiengine/typings";
+import _ from 'lodash'
+
+import {
+  IDataNode,
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+} from 'uiengine/typings'
 
 /**
  * transfer the data schema to UI deps
@@ -7,43 +13,45 @@ import { IPluginFunc, IPlugin, IDataNode } from "uiengine/typings";
  *
  * @param dataNode
  */
-const callback: IPluginFunc = (dataNode: IDataNode) => {
-  const schema = dataNode.schema;
+const execution: IPluginExecution = (param: IPluginParam) => {
+  const dataNode: IDataNode = _.get(param, 'dataNode')
+  const schema = dataNode.schema
   if (schema) {
-    // const toMergeSchema = {};
+    // const toMergeSchema = {}
     // // condition turns to visible deps
-    // let exclusions = _.get(schema, "cm-meta.m-exclusion");
+    // let exclusions = _.get(schema, 'cm-meta.m-exclusion')
     // if (_.isArray(exclusions)) {
     //   let deps = exclusions.map((ex: any) => {
     //     return {
     //       selector: {
     //         datasource: ex
     //       },
-    //       comparerule: "empty",
-    //       data: ""
-    //     };
-    //   });
-    //   const depLine = "state.visible.deps";
-    //   _.set(toMergeSchema, depLine, deps);
+    //       comparerule: 'empty',
+    //       data: ''
+    //     }
+    //   })
+    //   const depLine = 'state.visible.deps'
+    //   _.set(toMergeSchema, depLine, deps)
     // }
     // // merge ui schema
-    // const uiSchema = dataNode.uiNode.schema;
-    // _.merge(uiSchema, toMergeSchema);
+    // const uiSchema = dataNode.uiNode.schema
+    // _.merge(uiSchema, toMergeSchema)
     /**new start */
-    // const toMergeSchema = {};
-    // let associations = _.get(schema, "cm-meta.obj-association");
-    // _.set(toMergeSchema, "props.associations", associations);
+    // const toMergeSchema = {}
+    // let associations = _.get(schema, 'cm-meta.obj-association')
+    // _.set(toMergeSchema, 'props.associations', associations)
     // // merge ui schema
-    // const uiSchema = dataNode.uiNode.schema;
-    // _.merge(uiSchema, toMergeSchema);
+    // const uiSchema = dataNode.uiNode.schema
+    // _.merge(uiSchema, toMergeSchema)
   }
 
-  return schema;
-};
+  return schema
+}
 
 export const UISchemaFit: IPlugin = {
-  type: "data.schema.parser",
+  name: 'fit-ui-schema',
+  categories: ['data.schema.parser'],
+  paramKeys: ['dataNode'],
+  execution,
   priority: 100,
-  callback,
-  name: "fit-ui-schema"
-};
+}

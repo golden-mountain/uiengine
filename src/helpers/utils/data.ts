@@ -1,6 +1,12 @@
-import _ from "lodash";
-import { DataPool, DataEngine, searchNodes } from "..";
-import { IDataSource, IPluginExecutionConfig } from "../../../typings";
+import _ from 'lodash'
+
+import { DataPool, DataEngine, searchNodes } from '..'
+
+import {
+  IDataSource,
+  IPluginExecuteOption,
+  IUINode,
+} from '../../../typings'
 
 /**
  * convert a.b.c:d to a.b.c.d
@@ -9,11 +15,11 @@ import { IDataSource, IPluginExecutionConfig } from "../../../typings";
  * @param prefix
  */
 export function formatSource(source: string, prefix?: string) {
-  const formatted = _.trim(source.replace(":", "."), ".");
+  const formatted = _.trim(source.replace(':', '.'), '.')
   if (prefix) {
-    return `${prefix}.${formatted}`;
+    return `${prefix}.${formatted}`
   }
-  return formatted;
+  return formatted
 }
 
 /**
@@ -26,21 +32,21 @@ export function getDomainName(
   snakeCase: boolean = true
 ) {
   // it's a IDataSource
-  // {source: "slb.virtual-server:template-policy", autoload: true}
-  if (typeof id === "object") {
-    id = _.get(id, "source", "");
+  // {source: 'slb.virtual-server:template-policy', autoload: true}
+  if (typeof id === 'object') {
+    id = _.get(id, 'source', '')
   }
 
   if (id && _.isString(id)) {
-    const splitter = id.indexOf(":") > -1 ? ":" : ".";
-    let [schemaPath] = id.split(splitter);
+    const splitter = id.indexOf(':') > -1 ? ':' : '.'
+    let [schemaPath] = id.split(splitter)
     if (snakeCase) {
-      return _.snakeCase(schemaPath);
+      return _.snakeCase(schemaPath)
     } else {
-      return schemaPath;
+      return schemaPath
     }
   } else {
-    return "$dummy";
+    return '$dummy'
   }
 }
 
@@ -49,8 +55,8 @@ export function getDomainName(
  * @param source
  */
 export function parseSchemaPath(source: string) {
-  let schemaPath = getDomainName(source, false);
-  return `${schemaPath}.json`;
+  let schemaPath = getDomainName(source, false)
+  return `${schemaPath}.json`
 }
 
 /**
@@ -60,11 +66,11 @@ export function parseSchemaPath(source: string) {
  * @param parsePath
  */
 export function parseCacheID(source: string, parsePath: boolean = true) {
-  let path = source;
+  let path = source
   if (parsePath) {
-    path = parseSchemaPath(source);
+    path = parseSchemaPath(source)
   }
-  return _.snakeCase(path);
+  return _.snakeCase(path)
 }
 
 /**
@@ -73,57 +79,71 @@ export function parseCacheID(source: string, parsePath: boolean = true) {
  * @param root like a-b-c.json
  */
 export function parseRootName(root: string) {
-  root = root.replace(".json", "");
-  return _.snakeCase(root);
+  root = root.replace('.json', '')
+  return _.snakeCase(root)
 }
 
 export async function submitToAPI(
   dataSources: Array<IDataSource>,
-  method: string = "post"
+  method: string = 'post'
 ) {
-  let result = {};
-  let responses: any = [];
-  const dataPool = DataPool.getInstance();
-  const dataEngine = DataEngine.getInstance();
+  let result = {}
+  let responses: any = []
+  const dataPool = DataPool.getInstance()
+  const dataEngine = DataEngine.getInstance()
   for (let index in dataSources) {
-    const source = dataSources[index];
-    result = _.merge(result, dataPool.get(source.source, true));
-    result = await dataEngine.sendRequest(source, result, method, false);
-    if (result !== false) responses.push(result);
+    const source = dataSources[index]
+    result = _.merge(result, dataPool.get(source.source, true))
+    result = await dataEngine.sendRequest(source, result, method, false)
+    if (result !== false) responses.push(result)
   }
 
-  return responses;
+  return responses
 }
 
 export async function validateAll(dataSources: Array<any>) {
-  let validateResults: any = [];
+  let validateResults: any = []
   // dataSources.forEach((dataSource: any) => {
   for (let j in dataSources) {
-    let dataSource = dataSources[j];
+    let dataSource = dataSources[j]
     const props = {
       datasource: dataSource
-    };
-    const nodes = searchNodes(props);
+    }
+    const nodes = searchNodes(props)
     // nodes.forEach((uiNode: IUINode) => {
     for (let i in nodes) {
-      const uiNode = nodes[i];
+      const uiNode: IUINode = nodes[i]
       // check data from update plugins
-      const exeConfig: IPluginExecutionConfig = {
-        stopWhenEmpty: true,
-        returnLastValue: true
-      };
-      const errorInfo = uiNode.dataNode.pluginManager.executeSyncPlugins(
-        "data.update.could",
+      const exeConfig: IPluginExecuteOption = {
+        afterExecute: (plugin, param, result) => {
+          if (!result) {
+            return { stop: true }
+          }
+          return {}
+        }
+      }
+      const exeResult = uiNode.dataNode.pluginManager.syncExecutePlugins(
+        uiNode.dataNode.id,
+        'data.update.could',
+        { dataNode: uiNode.dataNode },
         exeConfig
-      );
-      if (errorInfo) {
-        uiNode.dataNode.errorInfo = errorInfo;
-        validateResults.push(errorInfo);
-        // await uiNode.updateLayout();
-        await uiNode.pluginManager.executePlugins("ui.parser");
-        uiNode.sendMessage(true);
+      )
+      if (exeResult) {
+        exeResult.results.forEach((result) => {
+          if (result.result) {
+            uiNode.dataNode.errorInfo = result.result
+            validateResults.push(result.result)
+          }
+        })
+        // await uiNode.updateLayout()
+        await uiNode.pluginManager.executePlugins(
+          uiNode.id,
+          'ui.parser',
+          { uiNode },
+        )
+        uiNode.sendMessage(true)
       }
     }
   }
-  return validateResults;
+  return validateResults
 }

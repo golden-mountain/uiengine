@@ -1,6 +1,8 @@
 import { IUINode } from "../UINode";
 
-export interface IState {}
+export interface IState {
+  [stateKey: string]: any
+}
 
 export type StatePluginFunc = (
   this: IStateNode,
@@ -8,10 +10,11 @@ export type StatePluginFunc = (
 ) => IState;
 
 export interface IStateNode {
+  id: string
+  pluginManager: IPluginManager;
   errorInfo: IErrorInfo;
   state: IState;
   uiNode: IUINode;
-  pluginManager: IPluginManager;
   getUINode(): IUINode;
   getState(key?: string): IState;
   renewStates();

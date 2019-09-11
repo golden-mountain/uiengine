@@ -1,18 +1,25 @@
-import _ from "lodash";
-import { IUINode } from "../../../typings";
-import { IPluginFunc, IPlugin } from "../../../typings";
+import _ from 'lodash'
 
-const callback: IPluginFunc = async (uiNode: IUINode) => {
+import {
+  IPlugin,
+  IPluginExecution,
+  IUINode,
+  IPluginParam,
+} from '../../../typings'
+
+const execution: IPluginExecution = async (param: IPluginParam) => {
+  const uiNode: IUINode = _.get(param, 'uiNode')
   return (e: any, options: any) => {
     if (e.stopPropagation) {
-      e.stopPropagation();
+      e.stopPropagation()
     }
-  };
-};
+  }
+}
 
 export const routeTo: IPlugin = {
-  type: "ui.parser.event",
+  name: 'routeTo',
+  categories: ['ui.parser.event'],
+  paramKeys: ['uiNode'],
+  execution,
   priority: 0,
-  callback,
-  name: "routeTo"
-};
+}

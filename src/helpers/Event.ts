@@ -5,16 +5,26 @@ import { PluginManager } from ".";
 import { IPluginManager, IEvent, IUINode } from "../../typings";
 
 export default class Event implements IEvent {
+  uiNode: IUINode
   pluginManager: IPluginManager;
 
   constructor(caller: IUINode) {
-    this.pluginManager = new PluginManager(caller);
+    this.uiNode = caller
+    this.pluginManager = PluginManager.getInstance()
   }
 
   async loadEvents(events: Array<any>) {
-    const eventPlugins = await this.pluginManager.executePlugins(
-      "ui.parser.event"
+    const exeResult = await this.pluginManager.executePlugins(
+      this.uiNode.id,
+      'ui.parser.event',
+      { uiNode: this.uiNode }
     );
+    const eventPlugins: { [key: string]: (e: any, o: any) => {} } = exeResult.results.reduce((map, result) => {
+      if (_.isFunction(result.result)) {
+        map[result.name] = result.result
+      }
+      return map
+    }, {})
     const eventsBinded: any = {};
     events.forEach((v: any) => {
       const { action, event, options } = v;

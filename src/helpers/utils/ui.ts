@@ -4,7 +4,7 @@ import { UIEngineRegister, Cache } from "../";
 import {
   IUINode,
   ILayoutSchema,
-  IPluginExecutionConfig
+  IPluginExecuteOption
 } from "../../../typings";
 
 /**

@@ -1,19 +1,27 @@
-// import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataEngine } from "uiengine/typings";
+import _ from 'lodash'
+
+import {
+  IDataEngine,
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+} from 'uiengine/typings'
 
 /**
  * add prefix to data
  * @param dataEngine
  */
-const callback: IPluginFunc = (dataEngine: IDataEngine) => {
-  const { endpoint = "" } = dataEngine.requestOptions;
-  dataEngine.requestOptions.endpoint = endpoint.replace(/\{(.*?)\}/, "");
-  return true;
-};
+const execution: IPluginExecution = (param: IPluginParam) => {
+  const dataEngine: IDataEngine = _.get(param, 'dataEngine')
+  const { endpoint = '' } = dataEngine.requestOptions
+  dataEngine.requestOptions.endpoint = endpoint.replace(/\{(.*?)\}/, '')
+  return true
+}
 
 export const urlFitter: IPlugin = {
-  type: "data.request.could",
+  name: 'urlFitter',
+  categories: ['data.request.could'],
+  paramKeys: ['dataEngine'],
+  execution,
   priority: 100,
-  callback,
-  name: "urlFitter"
-};
+}

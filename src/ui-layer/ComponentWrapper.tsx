@@ -7,7 +7,7 @@ import {
   IComponentWrapper,
   IComponentState,
   IPluginManager,
-  IPluginExecutionConfig,
+  IPluginExecuteOption,
   IComponentWrapperProps
 } from "../../typings";
 
@@ -17,7 +17,8 @@ class ComponentWrapper extends React.Component<
   IComponentWrapper,
   IComponentState
 > {
-  pluginManager: IPluginManager = new PluginManager(this);
+  id: string
+  pluginManager: IPluginManager
 
   constructor(props: IComponentWrapper) {
     super(props);
@@ -27,6 +28,15 @@ class ComponentWrapper extends React.Component<
       data: uiNode.dataNode.data
     };
     this.state = initialState;
+
+    this.id = _.uniqueId('ComponentWrapper-')
+    this.pluginManager = PluginManager.getInstance()
+    this.pluginManager.register(
+      this.id,
+      {
+        categories: ['component.props.get']
+      }
+    )
   }
 
   componentDidMount() {
@@ -73,16 +83,14 @@ class ComponentWrapper extends React.Component<
 
       if (WrappedComponent) {
         try {
-          const exeConfig: IPluginExecutionConfig = {
-            returnLastValue: true
-          };
-
           // TO FIX, when add and delete row, the state did not update in time using setState on messager
           // console.log(uiNode.id, this.state, "<<<<<<<< rendering");
-          let newProps: any = this.pluginManager.executeSyncPlugins(
+          const exeResult = this.pluginManager.syncExecutePlugins(
+            this.id,
             "component.props.get",
-            exeConfig
+            { component: this }
           );
+          let newProps: any = exeResult.results[0].result
 
           let props: IComponentWrapperProps = {
             ...rest,

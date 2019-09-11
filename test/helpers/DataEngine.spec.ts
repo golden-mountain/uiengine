@@ -99,17 +99,14 @@ describe("Given all the DataEngine", () => {
       expect(dataEngine.errorInfo).to.deep.equal(errorInfo);
 
       // blocked by before plugins
-      const plugins = {
-        before_blocker: {
-          type: "data.request.before",
-          initialize: false,
-          callback: () => {
-            return false;
-          },
-          name: "before_blocker"
-        }
-      };
-      dataEngine.pluginManager.loadPlugins(plugins);
+      const beforeBlocker = {
+        name: "before_blocker",
+        categories: ["data.request.before"],
+        execution: () => {
+          return false;
+        },
+      }
+      dataEngine.pluginManager.loadPlugins(beforeBlocker);
       await dataEngine.sendRequest({ source: "foo.bar.baz" });
       errorInfo = {
         status: 1001,
@@ -122,6 +119,6 @@ describe("Given all the DataEngine", () => {
 
   after(() => {
     Cache.clearCache();
-    PluginManager.unloadPlugins();
+    PluginManager.getInstance().unloadPlugins();
   });
 });

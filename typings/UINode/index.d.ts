@@ -1,7 +1,7 @@
 import { IRequest } from "../Request";
 import { IMessager } from "../Messager";
 import { IDataNode } from "../DataNode";
-import { IState } from "../StateNode";
+import { IState, IStateNode } from "../StateNode";
 
 export interface INodeProps {}
 
@@ -21,24 +21,27 @@ export interface ILayoutSchema {
 }
 
 export interface IUINode {
-  request: IRequest;
-  dataNode: IDataNode;
-  stateNode: IStateNode = new StateNode(this);
-  children: Array<UINode> = [];
-  pluginManager: IPluginManager = new PluginManager(this);
-  errorInfo: IErrorInfo;
-  schema: ILayoutSchema;
-  rootName: string;
-  isLiveChildren: boolean;
-  id: string;
-  messager: IMessager;
-  props: object;
-  parent?: IUINode;
-  stateInfo: IStateInfo;
-  workingMode?: IWorkingMode;
+  id: string
+  dataNode: IDataNode
+  stateNode: IStateNode
+  request: IRequest
+  messager: IMessager
+  pluginManager: IPluginManager
+
+  parent?: IUINode
+  children: Array<IUINode>
+
+  schema: ILayoutSchema
+  rootName: string
+  errorInfo: IErrorInfo
+  isLiveChildren: boolean
+
+  props: object
+  stateInfo: IStateInfo
+  workingMode?: IWorkingMode
   nodes: {
-    [name: string]: IUINodeRenderer;
-  } = {};
+    [name: string]: IUINodeRenderer
+  } = {}
 
   loadLayout(schema?: ILayoutSchema | string, workingMode?: IWorkingMode);
   loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
@@ -51,5 +54,5 @@ export interface IUINode {
   getChildren(route?: Array<Number>);
   getNode(path?: string);
   // updateState();
-  sendMessage(force: boolean = false) {
+  sendMessage(force: boolean = false)
 }

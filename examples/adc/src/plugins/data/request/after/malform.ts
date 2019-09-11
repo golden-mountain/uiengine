@@ -1,35 +1,44 @@
-import _ from "lodash";
-import { getDomainName } from "uiengine";
-import { IPluginFunc, IPlugin, IDataEngine } from "uiengine/typings";
+import _ from 'lodash'
+
+import { getDomainName } from 'uiengine'
+
+import {
+  IDataEngine,
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+} from 'uiengine/typings'
 
 /**
  * add prefix to data
  * @param dataEngine
  */
-const callback: IPluginFunc = (dataEngine: IDataEngine) => {
-  const data = dataEngine.data;
+const execution: IPluginExecution = (param: IPluginParam) => {
+  const dataEngine: IDataEngine = _.get(param, 'dataEngine')
+  const data = dataEngine.data
   if (dataEngine.source !== undefined) {
-    const sourceSegs = getDomainName(dataEngine.source, false).split(".");
-    let result: any = {};
-    let validSegs: any = [];
-    let validData: any = {};
+    const sourceSegs = getDomainName(dataEngine.source, false).split('.')
+    let result: any = {}
+    let validSegs: any = []
+    let validData: any = {}
     for (let index in sourceSegs) {
-      validSegs.push(sourceSegs[index]);
+      validSegs.push(sourceSegs[index])
       if (_.has(data, sourceSegs[index])) {
-        validData = _.get(data, sourceSegs[index]);
-        break;
+        validData = _.get(data, sourceSegs[index])
+        break
       }
     }
 
-    if (_.isEmpty(validData)) validData = data;
-    _.set(result, validSegs, validData);
-    return result;
+    if (_.isEmpty(validData)) validData = data
+    _.set(result, validSegs, validData)
+    return result
   }
-};
+}
 
 export const malform: IPlugin = {
-  type: "data.request.after",
+  name: 'malform',
+  categories: ['data.request.after'],
+  paramKeys: ['dataEngine'],
+  execution,
   priority: 100,
-  callback,
-  name: "malform"
-};
+}

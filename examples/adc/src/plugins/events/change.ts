@@ -1,24 +1,32 @@
-// import _ from "lodash";
-import { IPluginFunc, IPlugin, IUINode } from "uiengine/typings";
+import _ from 'lodash'
 
-const callback: IPluginFunc = (uiNode: IUINode) => {
+import {
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+  IUINode,
+} from 'uiengine/typings'
+
+const execution: IPluginExecution = (param: IPluginParam) => {
+  const uiNode: IUINode = _.get(param, 'uiNode')
   return (e: any, options: any) => {
     if (e.stopPropagation) {
-      e.stopPropagation();
+      e.stopPropagation()
     }
-    let value;
+    let value
     if (e.target) {
-      value = e.target.value;
+      value = e.target.value
     } else {
-      value = e;
+      value = e
     }
-    uiNode.dataNode.updateData(value);
-  };
-};
+    uiNode.dataNode.updateData(value)
+  }
+}
 
 export const change: IPlugin = {
-  type: "ui.parser.event",
+  name: 'change',
+  categories: ['ui.parser.event'],
+  paramKeys: ['uiNode'],
+  execution,
   priority: 100,
-  callback,
-  name: "change"
-};
+}

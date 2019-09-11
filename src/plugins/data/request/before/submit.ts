@@ -1,17 +1,25 @@
-import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataNode } from "../../../../../typings";
+import _ from 'lodash'
 
-const callback: IPluginFunc = (dataNode: IDataNode) => {
-  // const errors = dataNode.dataPool.errors;
+import {
+  IDataNode,
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+} from '../../../../../typings'
+
+const execution: IPluginExecution = (param: IPluginParam) => {
+  const dataNode: IDataNode = _.get(param, 'dataNode')
+  // const errors = dataNode.dataPool.errors
   // return {
   //   status: _.isEmpty(errors),
   //   errors
-  // };
-};
+  // }
+}
 
 export const submit: IPlugin = {
-  type: "data.request.before",
+  name: 'submit-handler',
+  categories: ['data.request.before'],
+  paramKeys: ['dataNode'],
+  execution,
   priority: 0,
-  callback,
-  name: "submit-handler"
-};
+}

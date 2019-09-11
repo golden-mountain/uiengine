@@ -5,7 +5,7 @@ import {
   IRequest,
   IPluginManager,
   IUINode,
-  IPluginExecutionConfig,
+  IPluginExecuteOption,
   IDataEngine,
   IDataPool,
   IDataSource,
@@ -14,8 +14,9 @@ import {
 import { DataEngine } from "../helpers";
 
 export default class DataNode implements IDataNode {
+  id: string
+  pluginManager: IPluginManager
   private request: IRequest = {} as IRequest;
-  pluginManager: IPluginManager = new PluginManager(this);
   dataEngine: IDataEngine;
   uiNode: IUINode;
   source: IDataSource;
@@ -28,6 +29,20 @@ export default class DataNode implements IDataNode {
     uiNode: IUINode,
     request?: IRequest
   ) {
+    this.id = _.uniqueId('DataNode-')
+    this.pluginManager = PluginManager.getInstance()
+    this.pluginManager.register(
+      this.id,
+      {
+        categories: [
+          'data.data.parser',
+          'data.schema.parser',
+          'data.update.could',
+          'data.delete.could',
+        ]
+      }
+    )
+
     // get instance of data pool
     this.dataPool = DataPool.getInstance();
 
@@ -47,7 +62,11 @@ export default class DataNode implements IDataNode {
   private async refreshLayout(noUpdateLayout: boolean) {
     // update state without sending message
     if (noUpdateLayout) {
-      await this.uiNode.pluginManager.executePlugins("ui.parser");
+      await this.uiNode.pluginManager.executePlugins(
+        this.uiNode.id,
+        'ui.parser',
+        { uiNode: this.uiNode }
+      );
       await this.uiNode.stateNode.renewStates();
     } else {
       await this.uiNode.updateLayout();
@@ -112,14 +131,12 @@ export default class DataNode implements IDataNode {
       this.setDataSource(source);
     }
 
-    const exeConfig: IPluginExecutionConfig = {
-      returnLastValue: true
-    };
-
-    let result = await this.pluginManager.executePlugins(
-      "data.data.parser",
-      exeConfig
+    const exeResult = await this.pluginManager.executePlugins(
+      this.id,
+      'data.data.parser',
+      { dataNode: this }
     );
+    let result = exeResult.results[0].result
 
     if (result === undefined) {
       const mode = _.get(this.uiNode.workingMode, "mode");
@@ -137,11 +154,17 @@ export default class DataNode implements IDataNode {
     // assign root schema if not $dummy data
     this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
     // load this node schema
-    const schema = await this.pluginManager.executePlugins(
-      "data.schema.parser",
-      exeConfig
+    const schemaResult = await this.pluginManager.executePlugins(
+      this.id,
+      'data.schema.parser',
+      { dataNode: this }
     );
-    if (schema) this.schema = schema;
+    if (schemaResult) {
+      let schema = schemaResult.results[schemaResult.results.length - 1].result
+      if (schema) {
+        this.schema = schema
+      }
+    }
     return result;
   }
 
@@ -159,15 +182,27 @@ export default class DataNode implements IDataNode {
       this.data = value;
     }
     // check data from update plugins
-    const exeConfig: IPluginExecutionConfig = {
-      stopWhenEmpty: true,
-      returnLastValue: true
+    const exeConfig: IPluginExecuteOption = {
+      afterExecute: (plugin, param, result) => {
+        if (!_.get(result, 'status')) {
+          return { stop: true }
+        }
+        return {}
+      },
     };
-    this.errorInfo = await this.pluginManager.executePlugins(
-      "data.update.could",
-      // when one validation got false value, break; the rest plugins execution
+    const exeResult = await this.pluginManager.executePlugins(
+      this.id,
+      'data.update.could',
+      { dataNode: this },
       exeConfig
     );
+    if (exeResult) {
+      exeResult.results.forEach((result) => {
+        if (!_.get(result.result, 'status')) {
+          this.errorInfo = result.result
+        }
+      })
+    }
 
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
@@ -195,14 +230,27 @@ export default class DataNode implements IDataNode {
   }
 
   async deleteData(path?: any) {
-    const exeConfig: IPluginExecutionConfig = {
-      stopWhenEmpty: true,
-      returnLastValue: true
+    const exeConfig: IPluginExecuteOption = {
+      afterExecute: (plugin, param, result) => {
+        if (!_.get(result, 'status')) {
+          return { stop: true }
+        }
+        return {}
+      },
     };
-    this.errorInfo = await this.pluginManager.executePlugins(
-      "data.delete.could",
+    const exeResult = await this.pluginManager.executePlugins(
+      this.id,
+      'data.delete.could',
+      { dataNode: this },
       exeConfig
     );
+    if (exeResult) {
+      exeResult.results.forEach((result) => {
+        if (!_.get(result.result, 'status')) {
+          this.errorInfo = result.result
+        }
+      })
+    }
     let noUpdateLayout = true;
 
     const status = _.get(this.errorInfo, "status", true);

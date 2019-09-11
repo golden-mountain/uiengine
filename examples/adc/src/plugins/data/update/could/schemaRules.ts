@@ -1,18 +1,26 @@
-// import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataNode } from "uiengine/typings";
+import _ from 'lodash'
 
-const callback: IPluginFunc = (dataNode: IDataNode) => {
-  // console.log(dataNode.schema, dataNode.rootSchema);
-  // const errors = dataNode.dataPool.errors;
+import {
+  IDataNode,
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+} from 'uiengine/typings'
+
+const execution: IPluginExecution = (param: IPluginParam) => {
+  // const dataNode: IDataNode = _.get(param, 'dataNode')
+  // console.log(dataNode.schema, dataNode.rootSchema)
+  // const errors = dataNode.dataPool.errors
   // return {
   //   status: _.isEmpty(errors),
   //   errors
-  // };
-};
+  // }
+}
 
 export const schemaRules: IPlugin = {
-  type: "data.update.could",
+  name: 'schemaRules',
+  categories: ['data.update.could'],
+  // paramKeys: ['dataNode'],
+  execution,
   priority: 0,
-  callback,
-  name: "schemaRules"
-};
+}

@@ -23,8 +23,17 @@ export default class DataMapper implements IDataMapper {
   errorInfo?: IErrorInfo;
   source: IDataSource = { source: "", schema: "" };
   rootSchema?: IDataSchema;
-  pluginManager: IPluginManager = new PluginManager(this);
+  id: string
+  pluginManager: IPluginManager
   cacheID: string = "";
+
+  constructor() {
+    this.id = _.uniqueId('DataMapper-')
+    this.pluginManager = PluginManager.getInstance()
+    this.pluginManager.register(
+      this.id
+    )
+  }
 
   setRequest(request: IRequest) {
     this.request = request;

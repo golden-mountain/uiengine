@@ -33,7 +33,8 @@ export default class NodeController implements INodeController {
     }
     return NodeController.instance as NodeController;
   };
-  pluginManager: IPluginManager = new PluginManager(this);
+  id: string
+  pluginManager: IPluginManager
   // layout path
   errorInfo: IErrorInfo = {};
   // layouts: object = {};
@@ -51,6 +52,15 @@ export default class NodeController implements INodeController {
   constructor() {
     this.workflow = Workflow.getInstance();
     this.workflow.setNodeController(this);
+
+    this.id = _.uniqueId('NodeController-')
+    this.pluginManager = PluginManager.getInstance()
+    this.pluginManager.register(
+      this.id,
+      {
+        categories: ['data.commit.workflow.could'],
+      }
+    )
   }
 
   activeEngine(engineId: string) {

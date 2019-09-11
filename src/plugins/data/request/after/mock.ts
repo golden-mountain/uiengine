@@ -1,15 +1,20 @@
-import _ from "lodash";
-import { IPluginFunc, IPlugin, IDataNode } from "../../../../../typings";
+import _ from 'lodash'
 
-const callback: IPluginFunc = (dataNode: IDataNode) => {
+import {
+  IDataNode,
+  IPlugin,
+  IPluginExecution,
+} from '../../../../../typings'
+
+const execution: IPluginExecution = () => {
   // return {
-  //   fake: "data"
-  // };
-};
+  //   fake: 'data'
+  // }
+}
 
-export const mock: IPlugin = {
-  type: "data.request.after",
+export const mockData: IPlugin = {
+  name: 'mock-data',
+  categories: ['data.request.after'],
+  execution,
   priority: 0,
-  callback,
-  name: "mock-data"
-};
+}

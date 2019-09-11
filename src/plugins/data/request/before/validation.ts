@@ -1,46 +1,62 @@
-import _ from "lodash";
-import { validateAll } from "../../../../helpers/utils/data";
-import { IPluginFunc, IPlugin, IDataEngine } from "../../../../../typings";
+import _ from 'lodash'
+
+import { validateAll } from '../../../../helpers/utils/data'
+
+import {
+  IDataSource,
+  IPlugin,
+  IPluginExecution,
+  IPluginParam,
+} from '../../../../../typings'
 
 /**
  * add prefix to data
  * @param dataEngine
  */
-const callback: IPluginFunc = async (dataEngine: IDataEngine) => {
+const execution: IPluginExecution = async (param: IPluginParam) => {
+  const dataSource: IDataSource = _.get(param, 'dataSource')
   // validation
-  let errors: any = [];
+  let errors: any = []
   const validate = async (target: string) => {
     // validate all values
-    if (target[target.length - 1] === ":") {
-      const regExp = new RegExp(target);
-      const errorInfos = await validateAll([regExp]);
+    if (target[target.length - 1] === ':') {
+      const regExp = new RegExp(target)
+      const errorInfos = await validateAll([regExp])
       if (errorInfos.length) {
-        errors = errors.concat(errorInfos);
+        errors = errors.concat(errorInfos)
       }
     }
-  };
+  }
 
-  if (dataEngine.source !== undefined) {
-    await validate(dataEngine.source.source);
+  if (!_.isNil(dataSource)) {
+    await validate(dataSource.source)
   }
 
   if (errors.length) {
-    let couldRequest = true;
+    let couldRequest = true
     errors.forEach((error: any) => {
       if (error.status !== true) {
-        couldRequest = false;
-        return;
+        couldRequest = false
+        return
       }
-    });
-    if (!couldRequest) return false;
+    })
+    if (!couldRequest) return false
   }
 
-  return true;
-};
+  return true
+}
 
 export const validation: IPlugin = {
-  type: "data.request.before",
+  name: 'validation',
+  categories: [
+    {
+      name: 'data.request.before',
+      adapter: {
+        dataSource: 'dataEngine.source',
+      }
+    }
+  ],
+  paramKeys: ['dataSource'],
+  execution,
   priority: 200,
-  callback,
-  name: "validation"
-};
+}
