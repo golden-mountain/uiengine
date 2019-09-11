@@ -516,12 +516,35 @@ describe('PluginManager Unit Test:', () => {
           },
         ]
       })
-      const history = manager.getHistory('Jason')
-      expect(history).to.deep.equal({
-        total: 1,
-        multiCall: {
+      const records = manager.searchHistoryRecords('Jason', 'say-hello')
+      expect(records).to.deep.equal([
+        {
+          id: 'Jason',
+          category: 'say-hello',
+          queue: ['hello', 'weather'],
+          records: [
+            {
+              pluginName: 'hello',
+              originInfo: { target: 'Tom', source: 'Jason' },
+              finialInfo: { target: 'Tom', source: 'Jason' },
+              result: 'Hello Tom! This is Jason.'
+            },
+            {
+              pluginName: 'weather',
+              originInfo: { weather: true },
+              finialInfo: { weather: true },
+              result: 'It is a good day!'
+            }
+          ],
+          number: 1,
+        }
+      ])
+      const icMap = manager.exportHistoryRecords({ struct: 'id-category-tree' })
+      expect(icMap).to.deep.equal({
+        'Jason': {
           'say-hello': [
             {
+              id: 'Jason',
               category: 'say-hello',
               queue: ['hello', 'weather'],
               records: [
@@ -538,11 +561,37 @@ describe('PluginManager Unit Test:', () => {
                   result: 'It is a good day!'
                 }
               ],
-              num: 1,
+              number: 1,
             }
           ]
-        },
-        singleCall: []
+        }
+      })
+      const ciMap = manager.exportHistoryRecords({ struct: 'category-id-tree' })
+      expect(ciMap).to.deep.equal({
+        'say-hello': {
+          'Jason': [
+            {
+              id: 'Jason',
+              category: 'say-hello',
+              queue: ['hello', 'weather'],
+              records: [
+                {
+                  pluginName: 'hello',
+                  originInfo: { target: 'Tom', source: 'Jason' },
+                  finialInfo: { target: 'Tom', source: 'Jason' },
+                  result: 'Hello Tom! This is Jason.'
+                },
+                {
+                  pluginName: 'weather',
+                  originInfo: { weather: true },
+                  finialInfo: { weather: true },
+                  result: 'It is a good day!'
+                }
+              ],
+              number: 1,
+            }
+          ]
+        }
       })
     })
   })
@@ -551,6 +600,7 @@ describe('PluginManager Unit Test:', () => {
     const manager = PluginManager.getInstance()
     manager.unloadPlugins('global')
     manager.unloadPlugins('global.detail')
+    manager.resetHistory()
   })
   after(() => {
   })

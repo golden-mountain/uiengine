@@ -17,7 +17,20 @@ export class PluginManager implements TYPES.IPluginManager {
       subScopes: {},
     }
   }
-  private registry: TYPES.IPluginCallerRegistry = {}
+  private registry: TYPES.IPluginCallerRegistry = {
+  }
+  private history: TYPES.IPluginHistory = {
+    capacity: 100,
+    lastNumber: 0,
+    records: [],
+    indexTree: {
+      idTree: {
+      },
+      categoryTree: {
+      }
+    },
+    indexOffset: 0,
+  }
 
   private searchPluginScope(
     scopeMap: TYPES.IPluginScopeMap,
@@ -305,11 +318,6 @@ export class PluginManager implements TYPES.IPluginManager {
         registerInfo = {
           categories: [],
           scopePaths: ['global'],
-          history: {
-            total: 0,
-            multiCall: {},
-            singleCall: [],
-          },
         }
       } else {
         const { categories, scopePaths } = registerInfo
@@ -317,11 +325,6 @@ export class PluginManager implements TYPES.IPluginManager {
         const infoObj = {
           categories: [] as string[],
           scopePaths: [] as string[],
-          history: {
-            total: 0,
-            multiCall: {},
-            singleCall: [],
-          },
         }
 
         if (_.isArray(categories) && categories.length > 0) {
@@ -377,17 +380,125 @@ export class PluginManager implements TYPES.IPluginManager {
     }
     return null
   }
-  getHistory(id: string) {
-    if (_.isString(id) && id.length > 0) {
-      const info = this.registry[id]
-      if (!_.isNil(info)) {
-        const history = _.cloneDeep(info.history)
-        if (!_.isNil(history)) {
-          return history
+
+  private mapHistoryRecords(indexes: number[]) {
+    const history = this.history
+    const indexOffset = history.indexOffset
+    return indexes.map((index: number) => {
+      return _.cloneDeep(history.records[index + indexOffset])
+    }).filter((record: any) => {
+      return !_.isNil(record)
+    })
+  }
+  resetHistory(capacity?: number) {
+    this.history = {
+      capacity: !_.isNil(capacity) && _.isFinite(capacity) ? capacity : 100,
+      lastNumber: 0,
+      records: [],
+      indexTree: {
+        idTree: {
+        },
+        categoryTree: {
+        }
+      },
+      indexOffset: 0,
+    }
+  }
+  searchHistoryRecords(id?: string, category?: string) {
+    const history = this.history
+    const indexOffset = history.indexOffset
+
+    if (!_.isNil(id) && _.isString(id) && !_.isEmpty(id)) {
+      const node = history.indexTree.idTree[id]
+
+      if (!_.isNil(node)) {
+        if (!_.isNil(category) && _.isString(category) && !_.isEmpty(category)) {
+          const subNode = node.categoryTree[category]
+          if (!_.isNil(subNode)) {
+            return this.mapHistoryRecords(subNode.indexes)
+          }
+        } else {
+          return this.mapHistoryRecords(node.indexes)
         }
       }
+    } else if (!_.isNil(category) && _.isString(category) && !_.isEmpty(category)) {
+      const node = history.indexTree.categoryTree[category]
+
+      if (!_.isNil(node)) {
+        if (!_.isNil(id) && _.isString(id) && !_.isEmpty(id)) {
+          const subNode = node.idTree[id]
+          if (!_.isNil(subNode)) {
+            return this.mapHistoryRecords(subNode.indexes)
+          }
+        } else {
+          return this.mapHistoryRecords(node.indexes)
+        }
+      }
+    } else {
+      return _.cloneDeep(history.records)
     }
-    return null
+    return []
+  }
+  exportHistoryRecords(options?: TYPES.IPluginExportOption) {
+    const history = this.history
+    const idTree = history.indexTree.idTree
+    const categoryTree = history.indexTree.categoryTree
+    const indexOffset = history.indexOffset
+
+    let exportHistory: TYPES.IPluginExportTree | TYPES.IPluginExecuteRecord[] = {}
+    if (!_.isNil(options) && _.isObject(options)) {
+      const { struct, clean } = options
+
+      switch (struct) {
+        case 'id-tree':
+          Object.keys(idTree).forEach((id: string) => {
+            exportHistory[id] = this.mapHistoryRecords(idTree[id].indexes)
+          })
+          break
+        case 'id-category-tree':
+          Object.keys(idTree).forEach((id: string) => {
+            const cTree = idTree[id].categoryTree
+
+            exportHistory[id] = {}
+            Object.keys(cTree).forEach((category: string) => {
+              exportHistory[id][category] = this.mapHistoryRecords(cTree[category].indexes)
+            })
+          })
+          break
+        case 'category-tree':
+          Object.keys(categoryTree).forEach((category: string) => {
+            exportHistory[category] = this.mapHistoryRecords(categoryTree[category].indexes)
+          })
+          break
+        case 'category-id-tree':
+          Object.keys(categoryTree).forEach((category: string) => {
+            const iTree = categoryTree[category].idTree
+
+            exportHistory[category] = {}
+            Object.keys(iTree).forEach((id: string) => {
+              exportHistory[category][id] = this.mapHistoryRecords(iTree[id].indexes)
+            })
+          })
+          break
+        case 'sequence':
+        default:
+          exportHistory = _.cloneDeep(history.records)
+          break
+      }
+
+      if (clean === true) {
+        history.records = []
+        history.indexTree = {
+          idTree: {},
+          categoryTree: {},
+        }
+        history.indexOffset = 0
+      }
+
+      return exportHistory
+    }
+
+    return _.cloneDeep(history.records)
   }
 
   private sortPluginsByPriority (
@@ -444,7 +555,7 @@ export class PluginManager implements TYPES.IPluginManager {
       } as TYPES.IPluginExecutionResult
     } else {
       const { categories: validCategory, scopePaths: workScope } = registerInfo
-      if (!validCategory.includes(category)) {
+      if (_.isNil(validCategory) || !validCategory.includes(category)) {
         return {
           status: 'IN_ERROR',
           errorInfo: `The category ${category} is not registered by the id ${id}`,
@@ -598,38 +709,63 @@ export class PluginManager implements TYPES.IPluginManager {
     queue: string[],
     records: TYPES.IPluginRecord[]
   ) {
-    let registerInfo: TYPES.IPluginCallerRegisterInfo | null = null
-    if (_.isString(id) && id.length > 0) {
-      registerInfo = this.registry[id] || null
+    const history = this.history
+    const list = history.records
+    const idTree = history.indexTree.idTree
+    const categoryTree = history.indexTree.categoryTree
+
+    while (list.length >= history.capacity) {
+      list.shift()
+      history.indexOffset--
     }
 
-    if (!_.isNil(registerInfo)) {
-      const { history } = registerInfo
-      if (!_.isNil(history)) {
-        const { total, multiCall, singleCall } = history
-        if (_.isNil(category)) {
-          singleCall.push({
-            category,
-            queue,
-            records,
-            num: total + 1,
-          })
-        } else {
-          if (_.isNil(multiCall[category])) {
-            multiCall[category] = []
-          }
-          multiCall[category].push({
-            category,
-            queue,
-            records,
-            num: total + 1,
-          })
-        }
-        history.total++
+    const index = list.push({
+      id,
+      category,
+      queue,
+      records,
+      number: ++history.lastNumber,
+    }) - 1 - history.indexOffset
+
+    const categoryName = category || 'undefined'
+
+    let idNode = idTree[id]
+    if (_.isNil(idNode)) {
+      idTree[id] = {
+        indexes: [],
+        categoryTree: {}
       }
-    } else {
-      console.log(`The id ${id} has been unregistered`)
+      idNode = idTree[id]
     }
+    idNode.indexes.push(index)
+
+    let subCNode = idNode.categoryTree[categoryName]
+    if (_.isNil(subCNode)) {
+      idNode.categoryTree[categoryName] = {
+        indexes: []
+      }
+      subCNode = idNode.categoryTree[categoryName]
+    }
+    subCNode.indexes.push(index)
+
+    let categoryNode = categoryTree[categoryName]
+    if (_.isNil(categoryNode)) {
+      categoryTree[categoryName] = {
+        indexes: [],
+        idTree: {}
+      }
+      categoryNode = categoryTree[categoryName]
+    }
+    categoryNode.indexes.push(index)
+
+    let subINode = categoryNode.idTree[id]
+    if (_.isNil(subINode)) {
+      categoryNode.idTree[id] = {
+        indexes: []
+      }
+      subINode = categoryNode.idTree[id]
+    }
+    subINode.indexes.push(index)
   }
   private defaultPluginExecution(
     plugin: TYPES.IPlugin,

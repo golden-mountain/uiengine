@@ -81,22 +81,52 @@ export interface IPluginCallerRegistry {
   [callerId: string]: IPluginCallerRegisterInfo
 }
 export interface IPluginCallerRegisterInfo {
-  categories: string[]
+  categories?: string[]
   scopePaths?: string[]
-  history?: IPluginCallerHistory
 }
-export interface IPluginCallerHistory {
-  total: number
-  multiCall: {
-    [category: string]: IPluginExecuteRecord[]
+
+export interface IPluginHistory {
+  capacity: number
+  lastNumber: number
+  records: IPluginExecuteRecord[]
+  indexTree: {
+    idTree: {
+      [id: string]: {
+        indexes: number[]
+        categoryTree: {
+          [category: string]: {
+            indexes: number[]
+          }
+        }
+      }
+    }
+    categoryTree: {
+      [category: string]: {
+        indexes: number[]
+        idTree: {
+          [id: string]: {
+            indexes: number[]
+          }
+        }
+      }
+    }
   }
-  singleCall: IPluginExecuteRecord[]
+  indexOffset: number
 }
+export interface IPluginExportOption {
+  struct?: 'sequence' | 'id-tree' | 'id-category-tree' | 'category-tree' | 'category-id-tree'
+  clean?: boolean
+}
+export interface IPluginExportTree {
+  [key: string]: IPluginExecuteRecord[] | { [subKey: string]: IPluginExecuteRecord[] }
+}
+
 export interface IPluginExecuteRecord {
+  id: string
   category: string | null
   queue: string[]
   records: IPluginRecord[]
-  num?: number
+  number?: number
 }
 export interface IPluginRecord {
   pluginName: string
@@ -157,7 +187,10 @@ export interface IPluginManager {
   register: (id: string, info?: IPluginCallerRegisterInfo) => boolean
   unregister: (id: string) => boolean
   getRegisterInfo: (id: string) => IPluginCallerRegisterInfo | null
-  getHistory: (id: string) => IPluginCallerHistory | null
+  // get & export history records
+  resetHistory: (capacity?: number) => void
+  searchHistoryRecords: (id?: string, category?: string) => IPluginExecuteRecord[]
+  exportHistoryRecords: (options?: IPluginExportOption) => IPluginExecuteRecord[] | IPluginExportTree
   // execute plugins
   executePlugin: (id: string, plugin: IPlugin, param: any) => Promise<IPluginExecutionResult>
   executePlugins: (id: string, category: string, param: any, options?: IPluginExecuteOption) => Promise<IPluginExecutionResult>
