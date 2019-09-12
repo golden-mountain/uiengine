@@ -529,32 +529,50 @@ export class PluginManager implements TYPES.IPluginManager {
       switch (struct) {
         case 'id-tree':
           Object.keys(idTree).forEach((id: string) => {
-            exportHistory[id] = this.filterHistoryRecords(this.mapHistoryRecords(idTree[id].indexes), exclude)
+            const records = this.filterHistoryRecords(this.mapHistoryRecords(idTree[id].indexes), exclude)
+            if (_.isArray(records) && records.length > 0) {
+              exportHistory[id] = records
+            }
           })
           break
         case 'id-category-tree':
           Object.keys(idTree).forEach((id: string) => {
             const cTree = idTree[id].categoryTree
 
-            exportHistory[id] = {}
+            const categoryMap = {}
             Object.keys(cTree).forEach((category: string) => {
-              exportHistory[id][category] = this.filterHistoryRecords(this.mapHistoryRecords(cTree[category].indexes), exclude)
+              const records = this.filterHistoryRecords(this.mapHistoryRecords(cTree[category].indexes), exclude)
+              if (_.isArray(records) && records.length > 0) {
+                categoryMap[category] = records
+              }
             })
+            if (!_.isEmpty(categoryMap)) {
+              exportHistory[id] = categoryMap
+            }
           })
           break
         case 'category-tree':
           Object.keys(categoryTree).forEach((category: string) => {
-            exportHistory[category] = this.filterHistoryRecords(this.mapHistoryRecords(categoryTree[category].indexes), exclude)
+            const records = this.filterHistoryRecords(this.mapHistoryRecords(categoryTree[category].indexes), exclude)
+            if (_.isArray(records) && records.length > 0) {
+              exportHistory[category] = records
+            }
           })
           break
         case 'category-id-tree':
           Object.keys(categoryTree).forEach((category: string) => {
             const iTree = categoryTree[category].idTree
 
-            exportHistory[category] = {}
+            const idMap = {}
             Object.keys(iTree).forEach((id: string) => {
-              exportHistory[category][id] = this.filterHistoryRecords(this.mapHistoryRecords(iTree[id].indexes), exclude)
+              const records = this.filterHistoryRecords(this.mapHistoryRecords(iTree[id].indexes), exclude)
+              if (_.isArray(records) && records.length > 0) {
+                idMap[id] = records
+              }
             })
+            if (!_.isEmpty(idMap)) {
+              exportHistory[category] = idMap
+            }
           })
           break
         case 'sequence':
