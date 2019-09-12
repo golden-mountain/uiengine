@@ -17,8 +17,8 @@ class ComponentWrapper extends React.Component<
   IComponentWrapper,
   IComponentState
 > {
-  id: string
-  pluginManager: IPluginManager
+  id: string;
+  pluginManager: IPluginManager;
 
   constructor(props: IComponentWrapper) {
     super(props);
@@ -29,14 +29,11 @@ class ComponentWrapper extends React.Component<
     };
     this.state = initialState;
 
-    this.id = _.uniqueId('ComponentWrapper-')
-    this.pluginManager = PluginManager.getInstance()
-    this.pluginManager.register(
-      this.id,
-      {
-        categories: ['component.props.get']
-      }
-    )
+    this.id = _.uniqueId("ComponentWrapper-");
+    this.pluginManager = PluginManager.getInstance();
+    this.pluginManager.register(this.id, {
+      categories: ["component.props.get"]
+    });
   }
 
   componentDidMount() {
@@ -85,21 +82,20 @@ class ComponentWrapper extends React.Component<
         try {
           // TO FIX, when add and delete row, the state did not update in time using setState on messager
           // console.log(uiNode.id, this.state, "<<<<<<<< rendering");
-          const exeResult = this.pluginManager.syncExecutePlugins(
-            this.id,
-            "component.props.get",
-            { component: this }
-          );
-          let newProps: any = exeResult.results[0].result
-
           let props: IComponentWrapperProps = {
             ...rest,
             ...uiNode.props,
             key: `key-of-child-${uiNode.id}`,
-            ...newProps,
             uinode: uiNode
             // state: this.state
           };
+
+          this.pluginManager.syncExecutePlugins(
+            this.id,
+            "component.props.get",
+            { component: this, props }
+          );
+          // let newProps: any = _.get(exeResult, `results[0].result`);
 
           // simple text
           if (uiNode.schema.content) {
