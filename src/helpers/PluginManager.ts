@@ -397,6 +397,7 @@ export class PluginManager implements TYPES.IPluginManager {
   private filterHistoryRecords(
     records: TYPES.IPluginExecuteRecord[],
     exclude?: TYPES.IPluginExportExclude,
+    include?: TYPES.IPluginExportInclude,
   ) {
     let excludeEmptyQueue = false
     let excludeNonEmptyQueue = false
@@ -436,11 +437,42 @@ export class PluginManager implements TYPES.IPluginManager {
       })
     }
 
+    const includeId: string[] = []
+    const includeCategory: Array<string|null> = []
+    if (!_.isNil(include)) {
+      const id = _.get(include, 'id')
+      if (_.isArray(id) && id.length > 0) {
+        id.forEach((item: any) => {
+          if (_.isString(item)) {
+            includeId.push(item)
+          }
+        })
+      } else if (_.isString(id)) {
+        includeId.push(id)
+      }
+      const category = _.get(include, 'category')
+      if (_.isArray(category) && category.length > 0) {
+        category.forEach((item: any) => {
+          if (_.isString(item)) {
+            includeCategory.push(item)
+          } else if (item === null) {
+            includeCategory.push(item)
+          }
+        })
+      } else if (_.isString(category)) {
+        includeCategory.push(category)
+      } else if (category === null) {
+        includeCategory.push(category)
+      }
+    }
+
     return records.filter((record?: TYPES.IPluginExecuteRecord) => {
       let passFilter: boolean = true
       if (_.isNil(record)) {
         passFilter = false
       } else {
+        const id = _.get(record, 'id')
+        const category = _.get(record, 'category')
         const queue = _.get(record, 'queue', [])
         const records = _.get(record, 'records', [])
         if (excludeEmptyQueue && queue.length === 0) {
@@ -453,6 +485,13 @@ export class PluginManager implements TYPES.IPluginManager {
           passFilter = false
         }
         if (excludeNonEmptyRecord && records.length > 0) {
+          passFilter = false
+        }
+
+        if (includeId.length > 0 && !includeId.includes(id)) {
+          passFilter = false
+        }
+        if (includeCategory.length > 0 && !includeCategory.includes(category)) {
           passFilter = false
         }
       }
@@ -481,7 +520,6 @@ export class PluginManager implements TYPES.IPluginManager {
     exclude?: TYPES.IPluginExportExclude,
   ) {
     const history = this.history
-    const indexOffset = history.indexOffset
 
     if (!_.isNil(id) && _.isString(id) && !_.isEmpty(id)) {
       const node = history.indexTree.idTree[id]
@@ -520,16 +558,19 @@ export class PluginManager implements TYPES.IPluginManager {
     const history = this.history
     const idTree = history.indexTree.idTree
     const categoryTree = history.indexTree.categoryTree
-    const indexOffset = history.indexOffset
 
     let exportHistory: TYPES.IPluginExportTree | TYPES.IPluginExecuteRecord[] = {}
     if (!_.isNil(options) && _.isObject(options)) {
-      const { struct, exclude, clean } = options
+      const { struct, exclude, include, clean } = options
 
       switch (struct) {
         case 'id-tree':
           Object.keys(idTree).forEach((id: string) => {
-            const records = this.filterHistoryRecords(this.mapHistoryRecords(idTree[id].indexes), exclude)
+            const records = this.filterHistoryRecords(
+              this.mapHistoryRecords(idTree[id].indexes),
+              exclude,
+              include,
+              )
             if (_.isArray(records) && records.length > 0) {
               exportHistory[id] = records
             }
@@ -541,7 +582,11 @@ export class PluginManager implements TYPES.IPluginManager {
 
             const categoryMap = {}
             Object.keys(cTree).forEach((category: string) => {
-              const records = this.filterHistoryRecords(this.mapHistoryRecords(cTree[category].indexes), exclude)
+              const records = this.filterHistoryRecords(
+                this.mapHistoryRecords(cTree[category].indexes),
+                exclude,
+                include,
+              )
               if (_.isArray(records) && records.length > 0) {
                 categoryMap[category] = records
               }
@@ -553,7 +598,11 @@ export class PluginManager implements TYPES.IPluginManager {
           break
         case 'category-tree':
           Object.keys(categoryTree).forEach((category: string) => {
-            const records = this.filterHistoryRecords(this.mapHistoryRecords(categoryTree[category].indexes), exclude)
+            const records = this.filterHistoryRecords(
+              this.mapHistoryRecords(categoryTree[category].indexes),
+              exclude,
+              include,
+            )
             if (_.isArray(records) && records.length > 0) {
               exportHistory[category] = records
             }
@@ -565,7 +614,11 @@ export class PluginManager implements TYPES.IPluginManager {
 
             const idMap = {}
             Object.keys(iTree).forEach((id: string) => {
-              const records = this.filterHistoryRecords(this.mapHistoryRecords(iTree[id].indexes), exclude)
+              const records = this.filterHistoryRecords(
+                this.mapHistoryRecords(iTree[id].indexes),
+                exclude,
+                include,
+              )
               if (_.isArray(records) && records.length > 0) {
                 idMap[id] = records
               }
@@ -577,7 +630,11 @@ export class PluginManager implements TYPES.IPluginManager {
           break
         case 'sequence':
         default:
-          exportHistory = this.filterHistoryRecords(_.cloneDeep(history.records), exclude)
+          exportHistory = this.filterHistoryRecords(
+            _.cloneDeep(history.records),
+            exclude,
+            include,
+          )
           break
       }
 

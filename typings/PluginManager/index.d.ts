@@ -116,11 +116,23 @@ export interface IPluginHistory {
 export interface IPluginExportOption {
   struct?: IPluginExportStruct
   exclude?: IPluginExportExclude
+  include?: IPluginExportInclude
   clean?: boolean
 }
-export type IPluginExportStruct = 'sequence' | 'id-tree' | 'id-category-tree' | 'category-tree' | 'category-id-tree'
+export type IPluginExportStruct = 'sequence'
+  | 'id-tree'
+  | 'id-category-tree'
+  | 'category-tree'
+  | 'category-id-tree'
 export type IPluginExportExclude = IPluginExcludeType | Array<IPluginExcludeType>
-export type IPluginExcludeType = 'empty-queue' | 'non-empty-queue' | 'empty-record' | 'non-empty-record'
+export type IPluginExcludeType = 'empty-queue'
+  | 'non-empty-queue'
+  | 'empty-record'
+  | 'non-empty-record'
+export interface IPluginExportInclude {
+  id?: string | string[]
+  category?: string | null | Array<string|null>
+}
 export interface IPluginExportTree {
   [key: string]: IPluginExecuteRecord[] | { [subKey: string]: IPluginExecuteRecord[] }
 }
