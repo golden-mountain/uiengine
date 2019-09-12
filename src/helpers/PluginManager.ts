@@ -400,8 +400,8 @@ export class PluginManager implements TYPES.IPluginManager {
   ) {
     let excludeEmptyQueue = false
     let excludeNonEmptyQueue = false
-    let excludeEmptyResult = false
-    let excludeNonEmptyResult = false
+    let excludeEmptyRecord = false
+    let excludeNonEmptyRecord = false
     if (_.isString(exclude)) {
       switch (exclude) {
         case 'empty-queue':
@@ -410,15 +410,15 @@ export class PluginManager implements TYPES.IPluginManager {
         case 'non-empty-queue':
           excludeNonEmptyQueue = true
           break
-        case 'empty-result':
-          excludeEmptyResult = true
+        case 'empty-record':
+          excludeEmptyRecord = true
           break
-        case 'non-empty-result':
-          excludeNonEmptyResult = true
+        case 'non-empty-record':
+          excludeNonEmptyRecord = true
           break
       }
     } else if (_.isArray(exclude)) {
-      exclude.forEach((item: any) => {
+      exclude.forEach((item: TYPES.IPluginExcludeType) => {
         switch (item) {
           case 'empty-queue':
             excludeEmptyQueue = true
@@ -426,11 +426,11 @@ export class PluginManager implements TYPES.IPluginManager {
           case 'non-empty-queue':
             excludeNonEmptyQueue = true
             break
-          case 'empty-result':
-            excludeEmptyResult = true
+          case 'empty-record':
+            excludeEmptyRecord = true
             break
-          case 'non-empty-result':
-            excludeNonEmptyResult = true
+          case 'non-empty-record':
+            excludeNonEmptyRecord = true
             break
         }
       })
@@ -449,10 +449,10 @@ export class PluginManager implements TYPES.IPluginManager {
         if (excludeNonEmptyQueue && queue.length > 0) {
           passFilter = false
         }
-        if (excludeEmptyResult && records.length === 0) {
+        if (excludeEmptyRecord && records.length === 0) {
           passFilter = false
         }
-        if (excludeNonEmptyResult && records.length > 0) {
+        if (excludeNonEmptyRecord && records.length > 0) {
           passFilter = false
         }
       }

@@ -120,7 +120,7 @@ export interface IPluginExportOption {
 }
 export type IPluginExportStruct = 'sequence' | 'id-tree' | 'id-category-tree' | 'category-tree' | 'category-id-tree'
 export type IPluginExportExclude = IPluginExcludeType | Array<IPluginExcludeType>
-export type IPluginExcludeType = 'empty-queue' | 'non-empty-queue' | 'empty-result' | 'non-empty-result'
+export type IPluginExcludeType = 'empty-queue' | 'non-empty-queue' | 'empty-record' | 'non-empty-record'
 export interface IPluginExportTree {
   [key: string]: IPluginExecuteRecord[] | { [subKey: string]: IPluginExecuteRecord[] }
 }
