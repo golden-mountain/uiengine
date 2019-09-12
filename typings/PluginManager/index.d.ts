@@ -114,9 +114,13 @@ export interface IPluginHistory {
   indexOffset: number
 }
 export interface IPluginExportOption {
-  struct?: 'sequence' | 'id-tree' | 'id-category-tree' | 'category-tree' | 'category-id-tree'
+  struct?: IPluginExportStruct
+  exclude?: IPluginExportExclude
   clean?: boolean
 }
+export type IPluginExportStruct = 'sequence' | 'id-tree' | 'id-category-tree' | 'category-tree' | 'category-id-tree'
+export type IPluginExportExclude = IPluginExcludeType | Array<IPluginExcludeType>
+export type IPluginExcludeType = 'empty-queue' | 'non-empty-queue' | 'empty-result' | 'non-empty-result'
 export interface IPluginExportTree {
   [key: string]: IPluginExecuteRecord[] | { [subKey: string]: IPluginExecuteRecord[] }
 }
@@ -189,7 +193,7 @@ export interface IPluginManager {
   getRegisterInfo: (id: string) => IPluginCallerRegisterInfo | null
   // get & export history records
   resetHistory: (capacity?: number) => void
-  searchHistoryRecords: (id?: string, category?: string) => IPluginExecuteRecord[]
+  searchHistoryRecords: (id?: string, category?: string, exclude?: IPluginExportExclude) => IPluginExecuteRecord[]
   exportHistoryRecords: (options?: IPluginExportOption) => IPluginExecuteRecord[] | IPluginExportTree
   // execute plugins
   executePlugin: (id: string, plugin: IPlugin, param: any) => Promise<IPluginExecutionResult>
