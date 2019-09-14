@@ -46,9 +46,9 @@ class ComponentWrapper extends React.Component<
 
   componentWillUnmount() {
     this.props.uiNode.messager.removeStateFunc(this.props.uiNode.id);
-    const rootName = _.get(this.props.uiNode, "rootName");
-    const id = _.get(this.props.uiNode, "id");
-    if (id) Cache.clearUINodes(rootName, id);
+    // const rootName = _.get(this.props.uiNode, "rootName");
+    // const id = _.get(this.props.uiNode, "id");
+    // if (id) Cache.clearUINodes(rootName, id);
   }
 
   render() {

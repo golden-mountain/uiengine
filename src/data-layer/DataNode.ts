@@ -14,8 +14,8 @@ import {
 import { DataEngine } from "../helpers";
 
 export default class DataNode implements IDataNode {
-  id: string
-  pluginManager: IPluginManager
+  id: string;
+  pluginManager: IPluginManager;
   private request: IRequest = {} as IRequest;
   dataEngine: IDataEngine;
   uiNode: IUINode;
@@ -29,19 +29,16 @@ export default class DataNode implements IDataNode {
     uiNode: IUINode,
     request?: IRequest
   ) {
-    this.id = _.uniqueId('DataNode-')
-    this.pluginManager = PluginManager.getInstance()
-    this.pluginManager.register(
-      this.id,
-      {
-        categories: [
-          'data.data.parser',
-          'data.schema.parser',
-          'data.update.could',
-          'data.delete.could',
-        ]
-      }
-    )
+    this.id = _.uniqueId("DataNode-");
+    this.pluginManager = PluginManager.getInstance();
+    this.pluginManager.register(this.id, {
+      categories: [
+        "data.data.parser",
+        "data.schema.parser",
+        "data.update.could",
+        "data.delete.could"
+      ]
+    });
 
     // get instance of data pool
     this.dataPool = DataPool.getInstance();
@@ -64,7 +61,7 @@ export default class DataNode implements IDataNode {
     if (noUpdateLayout) {
       await this.uiNode.pluginManager.executePlugins(
         this.uiNode.id,
-        'ui.parser',
+        "ui.parser",
         { uiNode: this.uiNode }
       );
       await this.uiNode.stateNode.renewStates();
@@ -133,10 +130,10 @@ export default class DataNode implements IDataNode {
 
     const exeResult = await this.pluginManager.executePlugins(
       this.id,
-      'data.data.parser',
+      "data.data.parser",
       { dataNode: this }
     );
-    let result = exeResult.results[0].result
+    let result = exeResult.results[0].result;
 
     if (result === undefined) {
       const mode = _.get(this.uiNode.workingMode, "mode");
@@ -156,13 +153,13 @@ export default class DataNode implements IDataNode {
     // load this node schema
     const schemaResult = await this.pluginManager.executePlugins(
       this.id,
-      'data.schema.parser',
+      "data.schema.parser",
       { dataNode: this }
     );
     if (schemaResult) {
-      let schema = schemaResult.results[schemaResult.results.length - 1].result
+      let schema = schemaResult.results[schemaResult.results.length - 1].result;
       if (schema) {
-        this.schema = schema
+        this.schema = schema;
       }
     }
     return result;
@@ -184,24 +181,24 @@ export default class DataNode implements IDataNode {
     // check data from update plugins
     const exeConfig: IPluginExecuteOption = {
       afterExecute: (plugin, param, result) => {
-        if (!_.get(result, 'status')) {
-          return { stop: true }
+        if (!_.get(result, "status")) {
+          return { stop: true };
         }
-        return {}
-      },
+        return {};
+      }
     };
     const exeResult = await this.pluginManager.executePlugins(
       this.id,
-      'data.update.could',
+      "data.update.could",
       { dataNode: this },
       exeConfig
     );
     if (exeResult) {
-      exeResult.results.forEach((result) => {
-        if (!_.get(result.result, 'status')) {
-          this.errorInfo = result.result
+      exeResult.results.forEach(result => {
+        if (!_.get(result.result, "status")) {
+          this.errorInfo = result.result;
         }
-      })
+      });
     }
 
     const status = _.get(this.errorInfo, "status", true);
@@ -232,24 +229,24 @@ export default class DataNode implements IDataNode {
   async deleteData(path?: any) {
     const exeConfig: IPluginExecuteOption = {
       afterExecute: (plugin, param, result) => {
-        if (!_.get(result, 'status')) {
-          return { stop: true }
+        if (!_.get(result, "status")) {
+          return { stop: true };
         }
-        return {}
-      },
+        return {};
+      }
     };
     const exeResult = await this.pluginManager.executePlugins(
       this.id,
-      'data.delete.could',
+      "data.delete.could",
       { dataNode: this },
       exeConfig
     );
     if (exeResult) {
-      exeResult.results.forEach((result) => {
-        if (!_.get(result.result, 'status')) {
-          this.errorInfo = result.result
+      exeResult.results.forEach(result => {
+        if (!_.get(result.result, "status")) {
+          this.errorInfo = result.result;
         }
-      })
+      });
     }
     let noUpdateLayout = true;
 
