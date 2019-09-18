@@ -573,7 +573,7 @@ export class ListenerManager implements TYPES.IListenerManager {
           const paramRef = param
           // save target config
           const targetConfig = {
-            name: _.isString(target) ? target : _.get(target, 'name', ''),
+            name: _.isString(target) ? target : _.get(target, 'name'),
             reference: _.get(target, 'reference'),
           }
           // save debug config
@@ -591,12 +591,16 @@ export class ListenerManager implements TYPES.IListenerManager {
               eventRecord.startNumber = ++(this.history.lastStartNumber)
             }
 
-            if (!_.isNil(targetConfig.name) && targetConfig.name) {
+            if (_.isString(targetConfig.name) && targetConfig.name) {
               if (_.isNil(targetConfig.reference)) {
                 eventRecord.target = targetConfig.name
               } else {
-                eventRecord.target = targetConfig
+                eventRecord.target = targetConfig as TYPES.IEventTargetConfig
               }
+            } else if (!_.isNil(targetConfig.reference)) {
+              eventRecord.target = {
+                reference: targetConfig.reference,
+              } as TYPES.IEventTargetConfig
             }
 
             if (_.isArray(debugConfig) && debugConfig.length > 0) {
@@ -625,7 +629,7 @@ export class ListenerManager implements TYPES.IListenerManager {
 
             this.storeHistoryRecord(eventRecord)
 
-            return {
+            const eventResult: TYPES.IEventResult = {
               eventName: eventRecord.eventName,
               eventObject: eventRecord.eventObject,
               results: eventRecord.records.map((record: TYPES.IListenerRecord) => {
@@ -634,7 +638,11 @@ export class ListenerManager implements TYPES.IListenerManager {
                   result: record.result,
                 } as TYPES.IListenerResult
               })
-            } as TYPES.IEventResult
+            }
+            if (!_.isNil(eventRecord.target)) {
+              eventResult.target = eventRecord.target
+            }
+            return eventResult
           }
         }
       }
@@ -716,7 +724,7 @@ export class ListenerManager implements TYPES.IListenerManager {
 
           this.storeHistoryRecord(eventRecord)
 
-          return {
+          const eventResult: TYPES.IEventResult = {
             eventName: eventRecord.eventName,
             eventObject: eventRecord.eventObject,
             results: eventRecord.records.map((record: TYPES.IListenerRecord) => {
@@ -725,7 +733,11 @@ export class ListenerManager implements TYPES.IListenerManager {
                 result: record.result,
               } as TYPES.IListenerResult
             })
-          } as TYPES.IEventResult
+          }
+          if (!_.isNil(eventRecord.target)) {
+            eventResult.target = eventRecord.target
+          }
+          return eventResult
         }
       }
     })
