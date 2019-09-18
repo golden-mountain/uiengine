@@ -570,7 +570,7 @@ export class ListenerManager implements TYPES.IListenerManager {
           // save listener config
           const listenerQueue = this.prepareListenerQueue(config)
           // save param config
-          const paramRef = param
+          const paramConfig = _.isObject(param) ? { ...param } : {}
           // save target config
           const targetConfig = {
             name: _.isString(target) ? target : _.get(target, 'name'),
@@ -604,7 +604,7 @@ export class ListenerManager implements TYPES.IListenerManager {
             }
 
             if (_.isArray(debugConfig) && debugConfig.length > 0) {
-              eventRecord.originInfo = this.getDebugInfo(paramRef, debugConfig)
+              eventRecord.originInfo = this.getDebugInfo(paramConfig, debugConfig)
             }
 
             if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
@@ -613,7 +613,7 @@ export class ListenerManager implements TYPES.IListenerManager {
 
                 const record = await this.callEventListener(
                   eventObject,
-                  paramRef,
+                  paramConfig,
                   eventRecord,
                   listenerConfig,
                 )
@@ -624,7 +624,7 @@ export class ListenerManager implements TYPES.IListenerManager {
             }
 
             if (_.isArray(debugConfig) && debugConfig.length > 0) {
-              eventRecord.finialInfo = this.getDebugInfo(paramRef, debugConfig)
+              eventRecord.finialInfo = this.getDebugInfo(paramConfig, debugConfig)
             }
 
             this.storeHistoryRecord(eventRecord)
