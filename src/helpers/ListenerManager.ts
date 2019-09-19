@@ -517,7 +517,9 @@ export class ListenerManager implements TYPES.IListenerManager {
             const receivedParam = defaultConfig
             receiveConfig.forEach((paramKey: string, index: number) => {
               if (_.isString(paramKey) && paramKey) {
-                receivedParam[paramKey] = args[index]
+                if (!_.isUndefined(args[index])) {
+                  receivedParam[paramKey] = args[index]
+                }
               }
             })
 
@@ -622,7 +624,9 @@ export class ListenerManager implements TYPES.IListenerManager {
         if (_.isArray(receiveParams) && receiveParams.length > 0) {
           receiveParams.forEach((paramKey: string, index: number) => {
             if (_.isString(paramKey) && paramKey) {
-              receivedParam[paramKey] = args[index]
+              if (!_.isUndefined(args[index])) {
+                receivedParam[paramKey] = args[index]
+              }
             }
           })
         }

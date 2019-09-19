@@ -19,8 +19,8 @@ const listenerA1: IListenerConfig = {
   name: 'hello',
   paramKeys: ['target'],
   debugList: ['target'],
-  listener: (event: Event, param: IListenerParam, helper: IListenerHelper) => {
-    const target = _.get(param, 'target')
+  listener: (directParam: IListenerParam, helper: IListenerHelper) => {
+    const target = _.get(directParam, 'target')
     if (!_.isNil(target)) {
       return `Hello ${target}!`
     }
@@ -32,9 +32,9 @@ const listenerA2: IListenerConfig = {
   name: 'hello',
   paramKeys: ['target', 'source'],
   debugList: ['target', 'source'],
-  listener: (event: Event, param: IListenerParam, helper: IListenerHelper) => {
-    const target = _.get(param, 'target')
-    const source = _.get(param, 'source')
+  listener: (directParam: IListenerParam, helper: IListenerHelper) => {
+    const target = _.get(directParam, 'target')
+    const source = _.get(directParam, 'source')
     if (!_.isNil(target) && !_.isNil(source)) {
       return `Hello ${target}! This is ${source}.`
     }
@@ -46,8 +46,8 @@ const listenerB1: IListenerConfig = {
   name: 'weather',
   paramKeys: ['weather'],
   debugList: ['weather'],
-  listener: (event: Event, param: IListenerParam, helper: IListenerHelper) => {
-    const weather = _.get(param, 'weather')
+  listener: (directParam: IListenerParam, helper: IListenerHelper) => {
+    const weather = _.get(directParam, 'weather')
     if (weather === true) {
       return 'It is a good day!'
     } else {
@@ -59,11 +59,11 @@ const listenerB1: IListenerConfig = {
 
 const listenerB2: IListenerConfig = {
   name: 'weather',
-  paramKeys: ['weather'],
-  debugList: ['weather'],
-  listener: (event: Event, param: IListenerParam, helper: IListenerHelper) => {
-    const target = _.get(event, 'target')
-    const weather = _.get(param, 'weather')
+  paramKeys: ['event', 'weather'],
+  debugList: ['event', 'weather'],
+  listener: (directParam: IListenerParam, helper: IListenerHelper) => {
+    const target = _.get(directParam, 'event.target')
+    const weather = _.get(directParam, 'weather')
     if (weather === true) {
       return `The weather ${_.isString(target) && target ? `in ${target} ` : ''}is good today.`
     } else {
@@ -77,8 +77,8 @@ const listenerC1: IListenerConfig = {
   name: 'goodbye',
   paramKeys: ['date'],
   debugList: ['date'],
-  listener: async (event: Event, param: IListenerParam, helper: IListenerHelper) => {
-    const date = _.get(param, 'date')
+  listener: async (directParam: IListenerParam, helper: IListenerHelper) => {
+    const date = _.get(directParam, 'date')
     return await new Promise((resolve) => {
       setTimeout(() => {
         if (!_.isNil(date)) {
@@ -148,155 +148,132 @@ describe('ListenerManager Unit Test:', () => {
   })
 
   describe('Test static event props:', () => {
-    it('should call the single listener successfully:', (done: any) => {
+    it('should call the single listener successfully:', () => {
       const manager = ListenerManager.getInstance()
       manager.loadListeners([listenerA1, listenerB1, listenerC1])
 
       const eventConfig: IEventConfig = {
-        event: 'onClick',
-        listener: 'hello',
-        param: { target: 'Tom', source: 'Jason' },
-        target: 'Button1',
+        eventName: 'onClick',
+        defaultParams: { target: 'Tom', source: 'Jason' },
         debugList: ['target', 'source'],
+        target: 'Button1',
+        listener: 'hello',
       }
       const props = manager.getStaticEventProps(eventConfig)
 
       manager.loadListeners([listenerA2, listenerB2])
-      eventConfig.event = 'onFocus'
-      eventConfig.listener = 'weather'
-      eventConfig.param.target = 'Peter'
-      eventConfig.param = { weather: true }
+      eventConfig.eventName = 'onFocus'
+      if (!_.isNil(eventConfig.defaultParams)) {
+        eventConfig.defaultParams.target = 'Peter'
+        eventConfig.defaultParams = { weather: true }
+      }
       eventConfig.target = 'Button2'
+      eventConfig.listener = 'weather'
 
-      const clickEvent = new Event('click')
-      const promise = props.onClick(clickEvent)
-
-      promise.then((result) => {
-        try {
-          expect(result).to.deep.equal({
-            eventName: 'onClick',
-            eventObject: clickEvent,
-            target: 'Button1',
-            results: [
-              {
-                listenerName: 'hello',
-                result: 'Hello Tom!',
-              }
-            ],
-          })
-          done()
-        } catch(e) {
-          done(e)
-        }
+      const result = props.onClick()
+      expect(result).to.deep.equal({
+        eventName: 'onClick',
+        target: 'Button1',
+        queue: ['hello'],
+        results: [
+          {
+            listenerName: 'hello',
+            result: 'Hello Tom!',
+          }
+        ],
       })
     })
 
-    it('should call the multiple listeners successfully:', (done: any) => {
+    it('should call the multiple listeners successfully:', () => {
       const manager = ListenerManager.getInstance()
       manager.loadListeners([listenerA1, listenerB1, listenerC1])
 
       const eventConfig: IEventConfig = {
-        event: 'onClick',
-        listener: ['hello', 'weather'],
-        param: { target: 'Tom', source: 'Jason', weather: true },
-        target: 'Button1',
+        eventName: 'onClick',
+        receiveParams: ['target', 'source', 'weather'],
+        defaultParams: { target: '', source: '', weather: false },
         debugList: ['target', 'source', 'weather'],
+        target: 'Button1',
+        listener: ['hello', 'weather'],
       }
       const props = manager.getStaticEventProps(eventConfig)
 
       manager.loadListeners([listenerA2, listenerB2])
-      eventConfig.event = 'onFocus'
-      eventConfig.listener = 'goodbye'
-      eventConfig.param.target = 'Peter'
-      eventConfig.param = { date: 'next week' }
+      eventConfig.eventName = 'onFocus'
+      eventConfig.receiveParams = []
+      if (!_.isNil(eventConfig.defaultParams)) {
+        eventConfig.defaultParams.target = 'Peter'
+        eventConfig.defaultParams = { date: 'next week' }
+      }
       eventConfig.target = 'Button2'
+      eventConfig.listener = 'goodbye'
 
-      const clickEvent = new Event('click')
-      const promise = props.onClick(clickEvent)
+      const result = props.onClick('Tom', 'Jason', true)
 
-      promise.then((result) => {
-        try {
-          expect(result).to.deep.equal({
-            eventName: 'onClick',
-            eventObject: clickEvent,
-            target: 'Button1',
-            results: [
-              {
-                listenerName: 'hello',
-                result: 'Hello Tom!',
-              },
-              {
-                listenerName: 'weather',
-                result: 'It is a good day!',
-              }
-            ],
-          })
-          done()
-        } catch(e) {
-          done(e)
-        }
+      expect(result).to.deep.equal({
+        eventName: 'onClick',
+        target: 'Button1',
+        queue: ['hello', 'weather'],
+        results: [
+          {
+            listenerName: 'hello',
+            result: 'Hello Tom!',
+          },
+          {
+            listenerName: 'weather',
+            result: 'It is a good day!',
+          }
+        ],
       })
     })
   })
 
-  describe('Test dynamic event props:', () => {
-    it('should call the single listener successfully:', (done: any) => {
+  describe('Test dynamic event listener:', () => {
+    it('should call the single listener successfully:', () => {
       const manager = ListenerManager.getInstance()
       manager.loadListeners([listenerA1, listenerB1, listenerC1])
 
       const eventConfig: IEventConfig = {
-        event: 'onClick',
-        listener: 'hello',
-        param: { target: 'Tom', source: 'Jason' },
-        target: 'Button1',
+        eventName: 'onClick',
+        receiveParams: ['target', 'source'],
+        defaultParams: { target: 'Tom', source: 'Jason' },
         debugList: ['target', 'source'],
+        target: 'Button1',
+        listener: 'hello',
       }
-      const props = manager.getDynamicEventProps(eventConfig)
+      const listener = manager.getDynamicEventListener(eventConfig)
 
       manager.loadListeners([listenerA2, listenerB2])
-      eventConfig.param = { target: 'Peter', source: 'John' }
-      const promise = props.onClick({ type: 'mock-event' } as any)
+      eventConfig.defaultParams = { target: 'Peter', source: 'John' }
+      const hResult = listener()
+      expect(hResult).to.deep.equal({
+        eventName: 'onClick',
+        target: 'Button1',
+        queue: ['hello'],
+        results: [
+          {
+            listenerName: 'hello',
+            result: 'Hello Peter! This is John.',
+          }
+        ],
+      })
 
-      promise.then((result) => {
-        try {
-          expect(result).to.deep.equal({
-            eventName: 'onClick',
-            eventObject: { type: 'mock-event' },
-            target: 'Button1',
-            results: [
-              {
-                listenerName: 'hello',
-                result: 'Hello Peter! This is John.',
-              }
-            ],
-          })
-
-          eventConfig.event = 'onFocus'
-          eventConfig.listener = 'weather'
-          eventConfig.param = { weather: true }
-          eventConfig.target = 'Button2'
-          const promise = props.onClick({ target: 'Beijing' } as any)
-          promise.then((result) => {
-            try {
-              expect(result).to.deep.equal({
-                eventName: 'onFocus',
-                eventObject: { target: 'Beijing' },
-                target: 'Button2',
-                results: [
-                  {
-                    listenerName: 'weather',
-                    result: 'The weather in Beijing is good today.',
-                  }
-                ],
-              })
-              done()
-            } catch(e) {
-              done(e)
-            }
-          })
-        } catch(e) {
-          done(e)
-        }
+      eventConfig.eventName = 'onFocus'
+      eventConfig.receiveParams = ['weather', 'event']
+      eventConfig.defaultParams = { weather: false }
+      eventConfig.target = 'Button2'
+      eventConfig.listener = 'weather'
+      const wResult = listener(true, { target: 'Beijing' })
+      expect(wResult).to.deep.equal({
+        eventName: 'onFocus',
+        target: 'Button2',
+        queue: ['weather'],
+        results: [
+          {
+            listenerName: 'weather',
+            result: 'The weather in Beijing is good today.',
+          }
+        ],
       })
 
     })
@@ -306,28 +283,29 @@ describe('ListenerManager Unit Test:', () => {
       manager.loadListeners([listenerA1, listenerB1])
 
       const eventConfig: IEventConfig = {
-        event: 'onClick',
-        listener: ['hello', 'weather'],
-        param: { target: 'Tom', source: 'Jason', weather: true },
-        target: 'Button1',
+        eventName: 'onClick',
+        defaultParams: { target: 'Tom', source: 'Jason', weather: true },
         debugList: ['target', 'source', 'weather'],
+        target: 'Button1',
+        listener: ['hello', 'weather'],
       }
-      const props = manager.getDynamicEventProps(eventConfig)
+      const listener = manager.getDynamicEventListener(eventConfig)
 
       manager.loadListeners([listenerA2, listenerB2, listenerC1])
-      eventConfig.event = 'onFocus'
-      eventConfig.listener = ['hello', 'weather', 'goodbye']
-      eventConfig.param = { target: 'Peter', source: 'John', weather: false, date: 'next week' }
+      eventConfig.eventName = 'onFocus'
+      eventConfig.receiveParams = ['event']
+      eventConfig.defaultParams = { target: 'Peter', source: 'John', weather: false, date: 'next week' }
       eventConfig.target = 'Button2'
+      eventConfig.listener = ['hello', 'weather', 'goodbye']
 
-      const promise = props.onClick({ target: 'Beijing' } as any)
-
-      promise.then((result) => {
+      const result = listener({ target: 'Beijing' })
+      const promise = result.results[2].result
+      promise.then(() => {
         try {
           expect(result).to.deep.equal({
             eventName: 'onFocus',
-            eventObject: { target: 'Beijing' },
             target: 'Button2',
+            queue: ['hello' ,'weather', 'goodbye'],
             results: [
               {
                 listenerName: 'hello',
@@ -357,21 +335,23 @@ describe('ListenerManager Unit Test:', () => {
       manager.loadListeners([listenerA2, listenerB2, listenerC1])
 
       const eventConfig: IEventConfig = {
-        event: 'onClick',
-        listener: ['hello', 'weather', 'goodbye'],
-        param: { target: 'Tom', source: 'Jason', weather: false, date: 'tomorrow' },
+        eventName: 'onClick',
+        receiveParams: ['event'],
+        defaultParams: { target: 'Tom', source: 'Jason', weather: false, date: 'tomorrow' },
+        debugList: ['target', 'source', 'weather', 'date', 'event'],
         target: 'Button1',
-        debugList: ['target', 'source', 'weather'],
+        listener: ['hello', 'weather', 'goodbye'],
       }
-      const props = manager.getStaticEventProps(eventConfig)
-      const promise = props.onClick({ type: 'click', target: 'NewYork' } as any)
+      const props = manager.getStaticEventProps([eventConfig])
+      const result = props.onClick({ type: 'click', target: 'NewYork' })
+      const promise = result.results[2].result
 
-      promise.then((result) => {
+      promise.then(() => {
         try {
           expect(result).to.deep.equal({
             eventName: 'onClick',
-            eventObject: { type: 'click', target: 'NewYork' },
             target: 'Button1',
+            queue: ['hello', 'weather', 'goodbye'],
             results: [
               {
                 listenerName: 'hello',
@@ -391,10 +371,9 @@ describe('ListenerManager Unit Test:', () => {
           let historyRecords: any = manager.searchHistoryRecords()
           let expectRecord: any = {
             eventName: 'onClick',
-            eventObject: { type: 'click', target: 'NewYork' },
             target: 'Button1',
-            originInfo: { target: 'Tom', source: 'Jason', weather: false },
-            finialInfo: { target: 'Tom', source: 'Jason', weather: false },
+            originInfo: { target: 'Tom', source: 'Jason', weather: false, date: 'tomorrow', event: { type: 'click', target: 'NewYork' } },
+            finialInfo: { target: 'Tom', source: 'Jason', weather: false, date: 'tomorrow', event: { type: 'click', target: 'NewYork' } },
             queue: ['hello', 'weather', 'goodbye'],
             records: [
               {
@@ -405,8 +384,8 @@ describe('ListenerManager Unit Test:', () => {
               },
               {
                 listenerName: 'weather',
-                originInfo: { weather: false },
-                finialInfo: { weather: false },
+                originInfo: { weather: false, event: { type: 'click', target: 'NewYork' } },
+                finialInfo: { weather: false, event: { type: 'click', target: 'NewYork' } },
                 result: 'The weather in NewYork is bad today.',
               },
               {
