@@ -1080,6 +1080,7 @@ export class ListenerManager implements TYPES.IListenerManager {
               exportHistory[listenerName] = records
             }
           })
+          break
         case 'sequence':
         default:
           exportHistory = this.filterEventRecords(
