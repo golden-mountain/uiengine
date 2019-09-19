@@ -1,11 +1,10 @@
-import { IPluginExcludeType } from "../PluginManager"
 
 // Listener interfaces
 export interface IListenerConfig {
   name: string
   paramKeys?: Array<string|IListenerParamConfig>
   debugList?: Array<string|IListenerDebugConfig>
-  listener: IEventListener
+  listener: IListener
   weight?: number
   [anyKey: string]: any
 }
@@ -18,48 +17,48 @@ export interface IListenerDebugConfig {
   lineage: string
   label?: string
 }
-export type IEventListener = (
-  event: Event,
-  param: IListenerParam,
+export type IListener = (
+  directParam: IListenerParam,
   helper: IListenerHelper
 ) => any | Promise<any>
 
 export interface IListenerParam{
   [paramKey: string]: any
 }
-export type IListenerParamAdapter = (
-  param: any
-) => IListenerParam | Promise<IListenerParam>
-export interface IListenerParamRouteMap {
-  [paramKey: string]: string
-}
 export interface IListenerHelper {
-  getEventType: () => string
+  getEventName: () => string
   getListenerQueue: () => string[]
   getListenerRecords: () => IListenerRecord[]
 }
 
 // Event interfaces
 export interface IEventConfig {
-  event: string
-  listener: string | IEventListenerConfig | IEventListenerQueue
-  param: any
-  target?: string | IEventTargetConfig
+  eventName: string
+  receiveParams?: string[]
+  defaultParams?: IListenerParam
   debugList?: Array<string|IEventDebugConfig>
+  target?: string | IEventTargetConfig
+  listener: string | IEventListenerConfig | Array<string|IEventListenerConfig>
+  resultSolver?: IEventResultSolver
 }
 
-export type IEventListenerQueue = Array<string|IEventListenerConfig>
+export interface IEventDebugConfig {
+  lineage: string
+  label?: string
+}
+export interface IEventTargetConfig {
+  name?: string
+  reference?: object
+}
 export interface IEventListenerConfig {
   name: string
   adapter?: IListenerParamRouteMap | IListenerParamAdapter
 }
-export interface IEventTargetConfig {
-  name: string
-  reference?: object
-}
-export interface IEventDebugConfig {
-  lineage: string
-  label?: string
+export type IListenerParamAdapter = (
+  receivedParam: IListenerParam
+) => IListenerParam
+export interface IListenerParamRouteMap {
+  [paramKey: string]: string
 }
 
 // Listener Manager interfaces
@@ -104,12 +103,11 @@ export interface IEventHistory {
 }
 export interface IEventRecord {
   eventName: string
-  eventObject: Event
   target?: string | IEventTargetConfig
-  originInfo?: { [debugKey: string]: any }
-  finialInfo?: { [debugKey: string]: any }
   queue: string[]
   records: IListenerRecord[]
+  originInfo?: { [debugKey: string]: any }
+  finialInfo?: { [debugKey: string]: any }
   startNumber?: number
   storeNumber?: number
 }
@@ -126,18 +124,24 @@ export type IListenerConflictResolver = (
   listenerB: IListenerConfig,
 ) => IListenerConfig
 
+export type IEventResultSolver = (
+  eventResult: IEventResult,
+) => any
 export interface IEventResult {
   eventName: string
-  eventObject: Event
   target?: string | IEventTargetConfig
+  queue: string[]
   results: IListenerResult[]
 }
 export interface IListenerResult {
   listenerName: string
   result: any
 }
+export type IEventListener = (
+  ...args: any[],
+) => IEventResult | any
 export interface IEventProps {
-  [eventName: string]: (event: Event) => Promise<IEventResult>
+  [eventName: string]: IEventListener
 }
 
 export interface IEventExportOption {
@@ -181,7 +185,7 @@ export interface IListenerManager {
   getListenerConfig: (name: string) => IListenerConfig | null
 
   getStaticEventProps: (events: IEventConfig | IEventConfig[]) => IEventProps
-  getDynamicEventProps: (events: IEventConfig | IEventConfig[]) => IEventProps
+  getDynamicEventListener: (event: IEventConfig) => IEventListener
 
   resetHistory: (capacity?: number) => void
   setHistoryCapacity: (capacity: number) => boolean
