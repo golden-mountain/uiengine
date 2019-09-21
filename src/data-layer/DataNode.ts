@@ -144,7 +144,7 @@ export default class DataNode implements IDataNode {
         let data = await this.dataEngine.loadData(this.source);
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource);
-        this.data = result;
+        if (result !== undefined) this.data = result;
       }
     }
 

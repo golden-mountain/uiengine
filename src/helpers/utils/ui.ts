@@ -1,11 +1,7 @@
 import React from "react";
 import _ from "lodash";
 import { UIEngineRegister, Cache } from "../";
-import {
-  IUINode,
-  ILayoutSchema,
-  IPluginExecuteOption
-} from "../../../typings";
+import { IUINode, ILayoutSchema, IPluginExecuteOption } from "../../../typings";
 
 /**
  * From schema define, get registered components
@@ -115,17 +111,17 @@ export function searchNodes(prop: object, rootName: string = "") {
  * @returns An array of UINodes which depend on target
  */
 export function searchDepsNodes(targetNode: IUINode) {
-  const rootName: string = targetNode.rootName
+  const rootName: string = targetNode.rootName;
 
-  const depNodes: IUINode[] = []
+  const depNodes: IUINode[] = [];
   // to fix: rootName should not be empty
-  const allUINodes: { [key: string]: IUINode } = Cache.getUINode(rootName)
+  const allUINodes: { [key: string]: IUINode } = Cache.getUINode(rootName);
   _.forIn(allUINodes, (node: IUINode, key: string) => {
     if (isDependantNode(node, targetNode)) {
-      depNodes.push(node)
+      depNodes.push(node);
     }
-  })
-  return depNodes
+  });
+  return depNodes;
 }
 
 /**
@@ -136,20 +132,20 @@ export function searchDepsNodes(targetNode: IUINode) {
  * @returns true, if depend on the target
  */
 function isDependantNode(node: IUINode, targetNode: IUINode) {
-  const targetSchema: ILayoutSchema = targetNode.getSchema()
+  const targetSchema: ILayoutSchema = targetNode.getSchema();
 
-  let isDepNode: boolean = false
+  let isDepNode: boolean = false;
   if (node.schema) {
-    const { state } = node.getSchema()
+    const { state } = node.getSchema();
     if (!_.isEmpty(state)) {
       _.forIn(state, (condition: any, stateName: string) => {
         if (matchOneSelector(condition, targetSchema)) {
-          isDepNode = true
+          isDepNode = true;
         }
-      })
+      });
     }
   }
-  return isDepNode
+  return isDepNode;
 }
 
 /**
@@ -160,26 +156,26 @@ function isDependantNode(node: IUINode, targetNode: IUINode) {
  * @returns true, if matches any one
  */
 function matchOneSelector(condition: any, targetSchema: ILayoutSchema) {
-  const { deps, selector } = condition
+  const { deps, selector } = condition;
 
-  let isMatched: boolean = false
+  let isMatched: boolean = false;
   if (!_.isEmpty(deps)) {
     _.forEach(deps, (depCondition: any) => {
-      if(matchOneSelector(depCondition, targetSchema)) {
-        isMatched = true
+      if (matchOneSelector(depCondition, targetSchema)) {
+        isMatched = true;
       }
-    })
+    });
   } else if (!_.isEmpty(selector)) {
-    let isEqual = true
+    let isEqual = true;
     _.forIn(selector, (expectValue: any, key: any) => {
       const actualValue = _.get(targetSchema, key);
       if (actualValue !== expectValue) {
-        isEqual = false
+        isEqual = false;
       }
-    })
+    });
     if (isEqual) {
-      isMatched = true
+      isMatched = true;
     }
   }
-  return isMatched
+  return isMatched;
 }
