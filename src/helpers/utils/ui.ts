@@ -125,6 +125,22 @@ export function searchDepsNodes(targetNode: IUINode) {
 }
 
 /**
+ * For using clone table schema purpose
+ *
+ * @param schema
+ */
+export function cloneTemplateSchema(schema: ILayoutSchema) {
+  _.forIn(schema, (s: any, k: any) => {
+    if (_.isString(k) && k[0] === "_") {
+      _.unset(schema, k);
+    } else if (_.isObject(s) || _.isArray(s)) {
+      cloneTemplateSchema(s);
+    }
+  });
+  return schema;
+}
+
+/**
  * Whether the node depends on target node
  *
  * @param node

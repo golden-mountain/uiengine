@@ -8,7 +8,8 @@ import {
   StateNode,
   PluginManager,
   Messager,
-  parseRootName
+  parseRootName,
+  cloneTemplateSchema
 } from "../index";
 
 import {
@@ -268,8 +269,9 @@ export default class UINode implements IUINode {
     };
 
     const liveSchema = schema;
-    const rowTemplate: any = liveSchema.$children;
+    let rowTemplate: any = liveSchema.$children;
     if (rowTemplate && data) {
+      cloneTemplateSchema(rowTemplate);
       liveSchema.children = data.map((d: any, index: string) =>
         rowTemplate.map((s: any) => {
           const newSchema = _.cloneDeep(s);
