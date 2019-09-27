@@ -502,8 +502,8 @@ export class ListenerManager implements TYPES.IListenerManager {
           // save listener config
           const listenerQueue = this.prepareListenerQueue(config)
           // save param config
-          const receiveConfig = _.isArray(receiveParams) ? _.cloneDeep(receiveParams) : []
-          const defaultConfig = _.isObject(defaultParams) ? _.cloneDeep(defaultParams) : {}
+          const receiveConfig = _.isArray(receiveParams) ? [...receiveParams] : []
+          const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : {}
           // save target config
           const targetConfig = {
             name: _.isString(target) ? target : _.get(target, 'name'),
@@ -620,7 +620,7 @@ export class ListenerManager implements TYPES.IListenerManager {
         const listenerQueue = this.prepareListenerQueue(event)
 
         // copy the received param
-        const receivedParam = _.isObject(defaultParams) ? _.cloneDeep(defaultParams) : {}
+        const receivedParam = _.isObject(defaultParams) ? {...defaultParams} : {}
         if (_.isArray(receiveParams) && receiveParams.length > 0) {
           receiveParams.forEach((paramKey: string, index: number) => {
             if (_.isString(paramKey) && paramKey) {
