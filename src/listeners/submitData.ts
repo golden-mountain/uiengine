@@ -1,8 +1,12 @@
 import _ from 'lodash'
 
+import NodeController from '../data-layer/NodeController'
 import {
+  Cache,
   Request,
   StepProcess,
+  DataPool,
+  DataEngine,
 } from '../helpers'
 
 import {
@@ -27,6 +31,7 @@ export interface ISubmitTarget {
   dependOn?: string | ISubmitDependConfig
 }
 export interface ISubmitOption {
+  urlParam?: IObject
   envParam?: IObject
   /**
    * Call this callback when each target is submited successfully
@@ -526,9 +531,132 @@ async function submitTarget(
   options?: ISubmitOption,
   targetRecordMap?: ITargetRecordMap,
 ) {
+  const { dataSource, dataSchema } = target
+
+  // create a target record
   const targetRecord: ISubmitTargetRecord = {
     status: 'NORMAL',
     errorInfo: [],
+  }
+
+  let sourceStr: string = ''
+  let wrapPath: string = ''
+  let excludes: string[] = []
+  if (_.isString(dataSource)) {
+    sourceStr = dataSource
+  } else if (_.isObject(dataSource)) {
+    const { source, wrappedIn, exclude } = dataSource
+    sourceStr = source
+    if (_.isString(wrappedIn) && wrappedIn) {
+      wrapPath = wrappedIn
+    }
+    if (_.isString(exclude)) {
+      excludes.push(exclude)
+    } else if (_.isArray(exclude) && exclude.length) {
+      exclude.forEach((item: any) => {
+        if (_.isString(item)) {
+          excludes.push(item)
+        }
+      })
+    }
+  }
+
+  let schemaStr: string = sourceStr
+  let submitMethod: string = 'post'
+  if (_.isString(dataSchema)) {
+    schemaStr = dataSchema
+  } else if (_.isObject(dataSchema)) {
+    const { lineage, method } = dataSchema
+    schemaStr = lineage
+    if (method === 'put') {
+      submitMethod = 'put'
+    }
+  }
+
+  // deal with data
+  const dataPool = DataPool.getInstance()
+  let submitData = dataPool.get(sourceStr, false)
+  if (_.isObject(submitData) && excludes.length > 0) {
+    excludes.forEach((key: string) => {
+      delete submitData[key]
+    })
+  }
+  if (_.isString(wrapPath) && wrapPath) {
+    submitData = _.set({}, wrapPath, submitData)
+  } else {
+    const defaultWrapper = _.trim(schemaStr.replace(':', '.'), '.').split('.').pop()
+    if (_.isString(defaultWrapper)) {
+      submitData = _.set({}, defaultWrapper, submitData)
+    }
+  }
+
+  // deal with params
+  let urlMapper = {}
+  if (_.isObject(options)) {
+    const { envParam, urlParam } = options
+    if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
+      urlMapper = { ...urlMapper, ...urlParam }
+    }
+  }
+  const controller = NodeController.getInstance()
+  const layoutName = `schema/ui/${_.trim(schemaStr.replace(':', '.'), '.')}.json`
+  const wMode = controller.getWorkingMode(layoutName)
+  if (_.isObject(wMode)) {
+    const urlParam = _.get(wMode, 'options.urlParam')
+    if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
+      urlMapper = { ...urlMapper, ...urlParam }
+    }
+  }
+
+  // deal with URL
+  const status = dataPool.getStatus(sourceStr)
+  const engine = DataEngine.getInstance()
+  const schema = await engine.mapper.getSchema({ source: sourceStr })
+  let url: string = ''
+  if (_.isObject(schema)) {
+    const { endpoint } = schema as any
+    if (_.has(endpoint, submitMethod)) {
+      url = endpoint[submitMethod]
+    }
+
+    if (status === 'view' || status === 'update') {
+      const matchBraces = /\{.*\}/g
+      const matchParam = /\{(.*)\}/
+      const result = url.match(matchBraces)
+      if (_.isArray(result)) {
+        result.forEach((item: string) => {
+          const res = item.match(matchParam)
+          if (_.isArray(res) && _.isString(res[1])) {
+            const paramKey = res[1]
+            const paramStr = urlMapper[paramKey]
+            if (_.isString(paramStr)) {
+              url = url.replace(`{${paramKey}}`, paramStr)
+            }
+          }
+        })
+      }
+    } else if (status === 'create') {
+      const slices = _.trimEnd(url, '/').split('/')
+      const lastPath = slices.pop()
+      if (_.isString(lastPath)) {
+        if (lastPath.match(/\{.*\}/) ) {
+          url = slices.join('/')
+        } else {
+          slices.push(lastPath)
+          url = slices.join('/')
+        }
+      }
+    } else if (status === 'delete') {
+      submitMethod = 'delete'
+      // To do uuid delete
+    }
+  }
+  console.log(url)
+
+  // send request
+  if (submitMethod === 'post') {
+    const result = await engine.request.post(url, submitData)
+    console.log(result)
   }
 
   return targetRecord
@@ -567,7 +695,8 @@ const listener: IListener = (directParam: IListenerParam) => {
     }
   }
 
-  console.log('target:', target, 'options:', options)
+  console.log(target, options)
+  submit(target, options)
 
 }
 

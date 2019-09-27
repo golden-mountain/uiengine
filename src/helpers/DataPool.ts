@@ -3,15 +3,16 @@ import { formatSource, getDomainName } from "../";
 import { IDataPool } from "../../typings";
 
 export default class DataPool implements IDataPool {
-  static instance: IDataPool;
+  static instance: DataPool;
   static getInstance = () => {
     if (!DataPool.instance) {
       DataPool.instance = new DataPool();
     }
-    return DataPool.instance as DataPool;
+    return DataPool.instance;
   };
 
   data: any = {};
+  status: any = {};
   errors: any = {};
 
   private getRealPath(source: string) {
@@ -95,6 +96,26 @@ export default class DataPool implements IDataPool {
       }
     } else {
       this.data = {};
+    }
+  }
+
+  setStatus(path: string, status: string) {
+    const domainName = getDomainName(path)
+    const domainStatus = this.status[domainName] || {}
+
+    path = formatSource(path)
+    domainStatus[path] = status
+
+    this.status[domainName] = domainStatus
+  }
+
+  getStatus(path: string) {
+    const domainName = getDomainName(path)
+    const domainStatus = this.status[domainName]
+
+    if (domainStatus) {
+      path = formatSource(path)
+      return _.get(domainStatus, path)
     }
   }
 

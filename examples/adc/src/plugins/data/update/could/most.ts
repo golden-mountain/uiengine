@@ -67,7 +67,7 @@ const execution: IPluginExecution = (param: IPluginParam) => {
   const meta = dataNode.getSchema('cm-meta')
 
   if (meta) {
-    if (meta['object-key'] && _.isEmpty(data)) {
+    if (meta['object-key'] && _.isNil(data)) {
       return {
         status: false,
         code: `Field ${dataNode.source.source} required`

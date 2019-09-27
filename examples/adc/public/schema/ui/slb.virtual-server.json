@@ -522,8 +522,14 @@
                     "eventName": "onClick",
                     "receiveParams": ["event"],
                     "defaultParams": {
-                      "target": {},
+                      "target": {
+                        "dataSource": {
+                          "source": "slb.virtual-server:",
+                          "exclude": "port-list"
+                        }
+                      },
                       "options": {
+                        "urlParam": {},
                         "envParam": {}
                       }
                     },

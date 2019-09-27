@@ -15,7 +15,9 @@
             "layout": "schema/ui/slb.virtual-server.json",
             "workingMode": {
               "mode": "edit",
-              "options": {}
+              "options": {
+                "urlParam": { "name": "test" }
+              }
             }
           }
         ]

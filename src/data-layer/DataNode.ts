@@ -144,7 +144,21 @@ export default class DataNode implements IDataNode {
         let data = await this.dataEngine.loadData(this.source);
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource);
-        if (result !== undefined) this.data = result;
+        if (result !== undefined) {
+          this.data = result
+        }
+        if (_.isObject(data) && this.source.source.includes(':')) {
+          const slices = this.source.source.split(':')
+          if (_.isString(slices[1]) && slices[1].includes('[') && slices[1].includes(']')) {
+            const i = slices[1].indexOf('[')
+            const j = slices[1].indexOf(']')
+            slices[1] = slices[1].slice(0, i) + '.' + slices[1].slice(i + 1, j) + slices[1].slice(j + 1)
+          }
+          let objLineage = slices[0] + ':' + slices[1].split('.').slice(0, -1).join('.')
+          if (this.dataPool.getStatus(objLineage) === undefined) {
+            this.dataPool.setStatus(objLineage, 'view')
+          }
+        }
       }
     }
 
@@ -178,6 +192,20 @@ export default class DataNode implements IDataNode {
     } else {
       this.data = value;
     }
+
+    const slices = this.source.source.split(':')
+    if (_.isString(slices[1]) && slices[1].includes('[') && slices[1].includes(']')) {
+      const i = slices[1].indexOf('[')
+      const j = slices[1].indexOf(']')
+      slices[1] = slices[1].slice(0, i) + '.' + slices[1].slice(i + 1, j) + slices[1].slice(j + 1)
+    }
+    if (slices.length > 2) {
+      let objLineage = slices[0] + ':' + slices[1].split('.').slice(0, -1).join('.')
+      if (this.dataPool.getStatus(objLineage) === 'view') {
+        this.dataPool.setStatus(objLineage, 'update')
+      }
+    }
+
     // check data from update plugins
     const exeConfig: IPluginExecuteOption = {
       afterExecute: (plugin, param, result) => {
@@ -216,12 +244,30 @@ export default class DataNode implements IDataNode {
     if (this.uiNode.schema.$children) {
       const currentValue = this.data || [];
 
+      let index = currentValue.length
       if (insertHead) {
+        index = 0
         currentValue.unshift(value);
       } else {
         currentValue.push(value);
       }
       status = await this.updateData(currentValue, "");
+
+      if (index === currentValue.length - 1) {
+        let lineage = this.source.source + '.' + index
+        this.dataPool.setStatus(lineage, 'create')
+      } else if (index === 0) {
+        for (let i = currentValue.length - 1; i > 0; i--) {
+          let oldLineage = this.source.source + '.' + (i - 1)
+          const status = this.dataPool.getStatus(oldLineage)
+          if (status !== undefined) {
+            let newLineage = this.source.source + '.' + i
+            this.dataPool.setStatus(newLineage, status)
+          }
+        }
+        let lineage = this.source.source + '.0'
+        this.dataPool.setStatus(lineage, 'create')
+      }
     }
     return status;
   }
@@ -259,9 +305,15 @@ export default class DataNode implements IDataNode {
             noUpdateLayout = false;
           }
 
-          _.remove(data, (e: any, index: number) => {
-            return _.isArray(path) ? path.indexOf(index) > -1 : index === path;
-          });
+          let objLineage = this.source.source + '.' + path
+          if (this.dataPool.getStatus(objLineage) !== 'delete') {
+            this.dataPool.setStatus(objLineage, 'delete')
+          }
+
+          // _.remove(data, (e: any, index: number) => {
+          //   return _.isArray(path) ? path.indexOf(index) > -1 : index === path;
+          // });
+
         } else {
           _.unset(data, path);
         }

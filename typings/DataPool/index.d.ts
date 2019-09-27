@@ -16,6 +16,8 @@ export interface IDataPool {
   set(data: any, path?: string);
   get(paths?: any, withKey?: boolean);
   merge(fromPath: string, toPath: string, clearFromPath: boolean = false);
+  setStatus(path: string, status: string);
+  getStatus(path: string);
   clear(path?: string);
   setError(field: string, error: any);
   getError(source: string);
