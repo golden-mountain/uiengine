@@ -102,7 +102,7 @@ export class ListenerManager implements TYPES.IListenerManager {
     if (_.isString(name) && name.length > 0) {
       return _.cloneDeep(this.listeners[name]) || null
     }
-    return null
+    return this.listeners
   }
 
   private prepareListenerQueue(

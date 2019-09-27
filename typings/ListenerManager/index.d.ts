@@ -182,7 +182,7 @@ export interface IListenerExportTree {
 export interface IListenerManager {
   loadListeners: (listeners: IListenerConfig | IListenerConfig[], resolver?: IListenerConflictResolver) => boolean
   unloadListeners: (name?: string) => boolean
-  getListenerConfig: (name: string) => IListenerConfig | null
+  getListenerConfig: (name: string) => IListenerMap | IListenerConfig | null
 
   getStaticEventProps: (events: IEventConfig | IEventConfig[]) => IEventProps
   getDynamicEventListener: (event: IEventConfig) => IEventListener
