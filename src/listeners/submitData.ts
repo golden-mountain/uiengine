@@ -577,4 +577,36 @@ export const submitData: IListenerConfig = {
   debugList: ['event', 'uiNode.id', 'target', 'options'],
   listener,
   weight: 0,
+  describe: {
+    target: {
+      type: 'template',
+      tempalte: [
+        {
+          dataSource: 'domain:',
+          dataSchema: 'a.b.c',
+        },
+        {
+          key: 'submit key',
+          dataSource: {
+            source: 'domain:',
+            wrappedIn: 'wrapper name',
+            exclude: ['field name'],
+          },
+          dataSchema: {
+            lineage: 'a.b.c',
+            method: 'post or put',
+          },
+          dependOn: {
+            targetKey: 'submit key',
+            dependList: ['field name'],
+          },
+        },
+      ]
+    },
+    options: [
+      {
+        envParam: 'object',
+      }
+    ]
+  }
 }

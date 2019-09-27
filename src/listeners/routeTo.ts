@@ -27,4 +27,11 @@ export const routeTo: IListenerConfig = {
   debugList: ['options.redirect'],
   listener,
   weight: 0,
+  describe: {
+    options: [
+      {
+        redirect: 'string'
+      }
+    ]
+  }
 }

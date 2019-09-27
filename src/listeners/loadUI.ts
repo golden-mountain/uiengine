@@ -34,4 +34,8 @@ export const loadUI: IListenerConfig = {
   debugList: ['uiNode.id', 'layout', 'container'],
   listener,
   weight: 0,
+  describe: {
+    layout: 'string',
+    container: 'string',
+  }
 }
