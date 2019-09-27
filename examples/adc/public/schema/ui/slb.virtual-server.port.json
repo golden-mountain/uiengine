@@ -838,8 +838,9 @@
                 },
                 "$events": [
                   {
-                    "event": "onClick",
-                    "action": "submitToPool"
+                    "eventName": "onClick",
+                    "receiveParams": ["event"],
+                    "listener": "submitToPool"
                   }
                 ]
               }
@@ -852,9 +853,12 @@
                 "text": "Cancel",
                 "$events": [
                   {
-                    "event": "onClick",
-                    "action": "hideNode",
-                    "options": {}
+                    "eventName": "onClick",
+                    "receiveParams": ["event"],
+                    "defaultParams": {
+                      "options": {}
+                    },
+                    "listener": "hideNode"
                   }
                 ]
               }

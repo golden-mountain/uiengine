@@ -10,7 +10,9 @@ import {
 } from "..";
 
 import * as plugins from "../plugins";
+import * as listeners from "../listeners";
 UIEngineRegister.registerPlugins(plugins);
+UIEngineRegister.registerListeners(listeners);
 
 import {
   INodeController,

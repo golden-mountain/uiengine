@@ -10,7 +10,12 @@ export const FormItem = (props: any) => {
   let { children, type, error, ...rest } = props;
   let element: any = children;
   if (type) {
-    if (type.indexOf(":") === -1) type = "antd:" + _.upperFirst(type);
+    if (type === 'input-number') {
+      type = 'InputNumber'
+    }
+    if (type.indexOf(":") === -1) {
+      type = "antd:" + _.upperFirst(type)
+    }
     const InputComponent: any = getComponent(type);
     if (InputComponent) {
       element = <InputComponent {...rest} />;

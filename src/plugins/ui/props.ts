@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { Event } from '../../helpers'
+import { ListenerManager } from '../../helpers'
 
 import {
   IPlugin,
@@ -14,12 +14,12 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
   const schema = uiNode.getSchema()
   const props = _.get(schema, 'props')
   let result = { key: uiNode.id }
-  if (props) {
+  if (_.isObject(props)) {
     const { $events, ...rest } = props as any
     let eventFuncs = {}
-    if ($events) {
-      const event = new Event(uiNode)
-      eventFuncs = await event.loadEvents($events)
+    if (_.isArray($events)) {
+      const manager = ListenerManager.getInstance()
+      eventFuncs = manager.getStaticEventProps($events)
     }
 
     // assign props to uiNode

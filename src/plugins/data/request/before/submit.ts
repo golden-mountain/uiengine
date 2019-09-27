@@ -9,6 +9,7 @@ import {
 
 const execution: IPluginExecution = (param: IPluginParam) => {
   const dataNode: IDataNode = _.get(param, 'dataNode')
+  return true
   // const errors = dataNode.dataPool.errors
   // return {
   //   status: _.isEmpty(errors),

@@ -223,8 +223,10 @@
                         },
                         "$events": [
                           {
-                            "event": "onSelect",
-                            "action": "change"
+                            "eventName": "onSelect",
+                            "receiveParams": ["value", "option"],
+                            "defaultParams": {},
+                            "listener": "updateData"
                           }
                         ]
                       },
@@ -517,13 +519,15 @@
                 },
                 "$events": [
                   {
-                    "event": "onClick",
-                    "action": "request",
-                    "options": {
-                      "method": "POST",
-                      "params": {},
-                      "target": "slb.virtual-server:"
-                    }
+                    "eventName": "onClick",
+                    "receiveParams": ["event"],
+                    "defaultParams": {
+                      "target": {},
+                      "options": {
+                        "envParam": {}
+                      }
+                    },
+                    "listener": "submitData"
                   }
                 ]
               }
@@ -536,11 +540,14 @@
                 "text": "Cancel",
                 "$events": [
                   {
-                    "event": "onClick",
-                    "action": "routeTo",
-                    "options": {
-                      "redirect": "#/"
-                    }
+                    "eventName": "onClick",
+                    "receiveParams": ["event"],
+                    "defaultParams": {
+                      "options": {
+                        "redirect": "#/"
+                      }
+                    },
+                    "listener": "routeTo"
                   }
                 ]
               }

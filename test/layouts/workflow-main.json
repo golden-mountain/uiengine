@@ -19,12 +19,13 @@
         "title": "Title",
         "$events": [
           {
-            "event": "onClick",
-            "action": "loadUI",
-            "options": {
+            "eventName": "onClick",
+            "receiveParams": ["event"],
+            "defaultParams": {
               "layout": "layouts/react-component-test-2.json",
               "container": "main"
-            }
+            },
+            "listener": "loadUI"
           }
         ]
       }

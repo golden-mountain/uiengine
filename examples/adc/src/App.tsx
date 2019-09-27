@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 
 import { default as components } from "./components";
 import * as plugins from "./plugins";
+import * as listeners from "./listeners";
 import { requestConfig, widgetConfig } from "./config";
 import {
   UIEngineRegister,
@@ -17,6 +18,7 @@ import "./App.css";
 
 UIEngineRegister.registerComponents(components);
 UIEngineRegister.registerPlugins(plugins);
+UIEngineRegister.registerListeners(listeners);
 
 const App: React.FC = () => {
   const [current, setCurrent] = useState();

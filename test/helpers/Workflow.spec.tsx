@@ -41,7 +41,7 @@ describe("Given an instance of Workflow library", () => {
     Cache.clearCache();
     UIEngineRegister.registerComponents(components);
 
-    PluginManager.loadPlugins(plugins);
+    PluginManager.getInstance().loadPlugins(Object.values(plugins));
     nodeController = NodeController.getInstance();
     nodeController.setRequestConfig(requestConfig);
     workflow = nodeController.workflow;
@@ -297,7 +297,7 @@ describe("Given an instance of Workflow library", () => {
 
     after(() => {
       Cache.clearCache();
-      PluginManager.unloadPlugins();
+      PluginManager.getInstance().unloadPlugins();
     });
   });
 });
