@@ -523,10 +523,21 @@
                     "receiveParams": ["event"],
                     "defaultParams": {
                       "target": {
-                        "dataSource": {
-                          "source": "slb.virtual-server:",
-                          "exclude": "port-list"
-                        }
+                        "targets": [
+                          {
+                            "key": "main",
+                            "dataSource": {
+                              "source": "slb.virtual-server:",
+                              "exclude": "port-list"
+                            }
+                          },
+                          {
+                            "dataSource": "slb.virtual-server:port-list",
+                            "dataSchema": "slb.virtual-server.port:",
+                            "dependOn": "main"
+                          }
+                        ],
+                        "mode": "sync"
                       },
                       "options": {
                         "urlParam": {},

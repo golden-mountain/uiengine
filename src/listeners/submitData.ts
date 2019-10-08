@@ -187,7 +187,7 @@ const SubmitTargetEndStatus = [
   'FAILURE',
 ]
 
-export interface ITargetRecordMap {
+export interface ISubmitRecordMap {
   [targetKey: string]: ISubmitTargetRecord
 }
 
@@ -195,7 +195,9 @@ async function submit(
   target: ISubmitProcess | ISubmitTarget,
   options?: ISubmitOption,
 ) {
-  const targetRecordMap: ITargetRecordMap = {}
+  // to store the target records
+  const targetRecordMap: ISubmitRecordMap = {}
+
   if (_.has(target, 'targets')) {
     const processConfig = target as ISubmitProcess
     return await submitProcess(processConfig, options, targetRecordMap)
@@ -208,7 +210,7 @@ async function submit(
 async function submitProcess(
   process: ISubmitProcess,
   options?: ISubmitOption,
-  targetRecordMap?: ITargetRecordMap,
+  targetRecordMap?: ISubmitRecordMap,
 ) {
   const processRecord: ISubmitProcessRecord = {
     status: 'NORMAL',
@@ -506,17 +508,17 @@ async function submitProcess(
     const { status } = processRecord
 
     if (status === 'COMPLETED' && _.isFunction(onProcessCompleted)) {
-      onProcessCompleted(
+      await onProcessCompleted(
         _.cloneDeep(process),
         _.cloneDeep(processRecord),
       )
     } else if (status === 'FAILED' && _.isFunction(onProcessFailed)) {
-      onProcessFailed(
+      await onProcessFailed(
         _.cloneDeep(process),
         _.cloneDeep(processRecord),
       )
     } else if (status === 'TERMINATED' && _.isFunction(onProcessTerminated)) {
-      onProcessTerminated(
+      await onProcessTerminated(
         _.cloneDeep(process),
         _.cloneDeep(processRecord),
       )
@@ -529,16 +531,20 @@ async function submitProcess(
 async function submitTarget(
   target: ISubmitTarget,
   options?: ISubmitOption,
-  targetRecordMap?: ITargetRecordMap,
+  targetRecordMap?: ISubmitRecordMap,
 ) {
-  const { dataSource, dataSchema } = target
+  const { key, dataSource, dataSchema, dependOn } = target
 
-  // create a target record
+  // create target submit record
   const targetRecord: ISubmitTargetRecord = {
     status: 'NORMAL',
     errorInfo: [],
   }
+  if (_.isString(key) && key) {
+    targetRecord.key = key
+  }
 
+  // get target data config
   let sourceStr: string = ''
   let wrapPath: string = ''
   let excludes: string[] = []
@@ -546,7 +552,9 @@ async function submitTarget(
     sourceStr = dataSource
   } else if (_.isObject(dataSource)) {
     const { source, wrappedIn, exclude } = dataSource
-    sourceStr = source
+    if (_.isString(source)) {
+      sourceStr = source
+    }
     if (_.isString(wrappedIn) && wrappedIn) {
       wrapPath = wrappedIn
     }
@@ -561,104 +569,329 @@ async function submitTarget(
     }
   }
 
+  // get target schema config
   let schemaStr: string = sourceStr
   let submitMethod: string = 'post'
   if (_.isString(dataSchema)) {
     schemaStr = dataSchema
   } else if (_.isObject(dataSchema)) {
     const { lineage, method } = dataSchema
-    schemaStr = lineage
+    if (_.isString(lineage)) {
+      schemaStr = lineage
+    }
     if (method === 'put') {
       submitMethod = 'put'
     }
   }
 
   // deal with data
+  // get data from datapool
   const dataPool = DataPool.getInstance()
-  let submitData = dataPool.get(sourceStr, false)
-  if (_.isObject(submitData) && excludes.length > 0) {
-    excludes.forEach((key: string) => {
-      delete submitData[key]
-    })
-  }
-  if (_.isString(wrapPath) && wrapPath) {
-    submitData = _.set({}, wrapPath, submitData)
-  } else {
-    const defaultWrapper = _.trim(schemaStr.replace(':', '.'), '.').split('.').pop()
-    if (_.isString(defaultWrapper)) {
-      submitData = _.set({}, defaultWrapper, submitData)
+  let submitData = _.cloneDeep(dataPool.get(sourceStr, false))
+  if (!_.isArray(submitData)) {
+    // get uuid if exist
+    let dataUUID = _.get(submitData, 'uuid')
+    // remove the excludes keys
+    if (_.isObject(submitData) && excludes.length > 0) {
+      excludes.forEach((excludeKey: string) => {
+        delete submitData[excludeKey]
+      })
     }
-  }
+    // filter the valid data (Todo: through plugins)
+    if (_.isObject(submitData) && !_.isEmpty(submitData)) {
+      const layoutLineage = _.trim(schemaStr.replace(':', '.'), '.')
+      const layoutName = `schema/ui/${layoutLineage}.json`
+      const controller = NodeController.getInstance()
+      const rootNode = controller.getUINode(layoutName, true) as IUINode
+      const nodeMap = {} as {[source: string]: IUINode}
+      storeUINodes(rootNode, nodeMap)
 
-  // deal with params
-  let urlMapper = {}
-  if (_.isObject(options)) {
-    const { envParam, urlParam } = options
-    if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
-      urlMapper = { ...urlMapper, ...urlParam }
-    }
-  }
-  const controller = NodeController.getInstance()
-  const layoutName = `schema/ui/${_.trim(schemaStr.replace(':', '.'), '.')}.json`
-  const wMode = controller.getWorkingMode(layoutName)
-  if (_.isObject(wMode)) {
-    const urlParam = _.get(wMode, 'options.urlParam')
-    if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
-      urlMapper = { ...urlMapper, ...urlParam }
-    }
-  }
-
-  // deal with URL
-  const status = dataPool.getStatus(sourceStr)
-  const engine = DataEngine.getInstance()
-  const schema = await engine.mapper.getSchema({ source: sourceStr })
-  let url: string = ''
-  if (_.isObject(schema)) {
-    const { endpoint } = schema as any
-    if (_.has(endpoint, submitMethod)) {
-      url = endpoint[submitMethod]
-    }
-
-    if (status === 'view' || status === 'update') {
-      const matchBraces = /\{.*\}/g
-      const matchParam = /\{(.*)\}/
-      const result = url.match(matchBraces)
-      if (_.isArray(result)) {
-        result.forEach((item: string) => {
-          const res = item.match(matchParam)
-          if (_.isArray(res) && _.isString(res[1])) {
-            const paramKey = res[1]
-            const paramStr = urlMapper[paramKey]
-            if (_.isString(paramStr)) {
-              url = url.replace(`{${paramKey}}`, paramStr)
-            }
+      Object.keys(submitData).forEach((dataKey: string) => {
+        const targetSource = layoutLineage + `:${dataKey}`
+        const targetNode = nodeMap[targetSource]
+        if (_.isObject(targetNode)) {
+          const state: any = _.get(targetNode, 'stateNode.state')
+          if (_.has(state, 'visible') && state.visible === false) {
+            delete submitData[dataKey]
           }
-        })
+        }
+      })
+    }
+    if (_.isString(wrapPath) && wrapPath) {
+      submitData = _.set({}, wrapPath, submitData)
+    } else {
+      const defaultWrapper = _.trim(schemaStr.replace(':', '.'), '.').split('.').pop()
+      if (_.isString(defaultWrapper)) {
+        submitData = _.set({}, defaultWrapper, submitData)
       }
-    } else if (status === 'create') {
-      const slices = _.trimEnd(url, '/').split('/')
-      const lastPath = slices.pop()
-      if (_.isString(lastPath)) {
-        if (lastPath.match(/\{.*\}/) ) {
-          url = slices.join('/')
-        } else {
-          slices.push(lastPath)
-          url = slices.join('/')
+    }
+    console.log('data:', submitData)
+
+    // deal with URL
+    // get url param map
+    let urlMapper = {}
+    if (_.isObject(options)) {
+      const { urlParam } = options
+      if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
+        urlMapper = { ...urlMapper, ...urlParam }
+      }
+    }
+    const controller = NodeController.getInstance()
+    const layoutName = `schema/ui/${_.trim(schemaStr.replace(':', '.'), '.')}.json`
+    const wMode = controller.getWorkingMode(layoutName)
+    if (_.isObject(wMode)) {
+      const urlParam = _.get(wMode, 'options.urlParam')
+      if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
+        urlMapper = { ...urlMapper, ...urlParam }
+      }
+    }
+    // replace the url param
+    const status = dataPool.getStatus(sourceStr) || 'create'
+    const engine = DataEngine.getInstance()
+    const schema = await engine.mapper.getSchema({ source: sourceStr, schema: schemaStr })
+    let url: string = ''
+    if (_.isObject(schema)) {
+      const { endpoint } = schema as any
+      if (_.has(endpoint, submitMethod)) {
+        url = endpoint[submitMethod]
+      } else {
+        url = _.get(endpoint, 'default.path')
+      }
+
+      if (status === 'view' || status === 'update') {
+        const matchBraces = /\{.*\}/g
+        const matchParam = /\{(.*)\}/
+        const results = url.match(matchBraces)
+        if (_.isArray(results)) {
+          results.forEach((item: string) => {
+            const result = item.match(matchParam)
+            if (_.isArray(result) && _.isString(result[1])) {
+              const paramKey = result[1]
+              const paramStr = urlMapper[paramKey]
+              if (_.isString(paramStr)) {
+                url = url.replace(`{${paramKey}}`, paramStr)
+              }
+            }
+          })
+        }
+      } else if (status === 'create') {
+        const matchBraces = /\{.*\}/g
+        const matchParam = /\{(.*)\}/
+        const results = url.match(matchBraces)
+        if (_.isArray(results)) {
+          results.forEach((item: string) => {
+            const result = item.match(matchParam)
+            if (_.isArray(result) && _.isString(result[1])) {
+              const paramKey = result[1]
+              const paramStr = urlMapper[paramKey]
+              if (_.isString(paramStr)) {
+                url = url.replace(`{${paramKey}}`, paramStr)
+              }
+            }
+          })
+        }
+
+        // remove the last path when the param is not replaced
+        const slices = _.trimEnd(url, '/').split('/')
+        const lastPath = slices.pop()
+        if (_.isString(lastPath)) {
+          if (lastPath.match(/\{.*\}/) ) {
+            url = slices.join('/')
+          } else {
+            slices.push(lastPath)
+            url = slices.join('/')
+          }
+        }
+      } else if (status === 'delete') {
+        submitMethod = 'delete'
+        // To do uuid delete
+        url = `/axapi/v3/uuid/${dataUUID}`
+      }
+    }
+    console.log(url)
+
+    try {
+      // send request
+      if (submitMethod === 'post') {
+        const result = await engine.request.post(url, submitData)
+        if (_.has(result, 'data')) {
+          targetRecord.response = _.get(result, 'data')
+        }
+      } else if (submitMethod === 'put') {
+        const result = await engine.request.put(url, submitData)
+        if (_.has(result, 'data')) {
+          targetRecord.response = _.get(result, 'data')
+        }
+      } else if (submitMethod === 'delete') {
+        const result = await engine.request.delete(url)
+        if (_.has(result, 'data')) {
+          targetRecord.response = _.get(result, 'data')
         }
       }
-    } else if (status === 'delete') {
-      submitMethod = 'delete'
-      // To do uuid delete
+    } catch (e) {
+      console.error(e)
+      targetRecord.status = 'HAS_ERROR'
+      if (_.isArray(targetRecord.errorInfo)) {
+        targetRecord.errorInfo.push(`Failed to submit target ${target.key || sourceStr}`)
+      }
+      if (_.has(e, 'response.data')) {
+        targetRecord.response = _.get(e, 'response.data')
+      }
+    }
+
+  } else {
+    for(let index = 0; index < submitData.length; index++) {
+      let dataItem = submitData[index]
+
+      // get uuid if exist
+      let dataUUID = _.get(dataItem, 'uuid')
+
+      // remove the excludes keys
+      if (_.isObject(dataItem) && excludes.length > 0) {
+        excludes.forEach((excludeKey: string) => {
+          delete dataItem[excludeKey]
+        })
+      }
+      if (_.isString(wrapPath) && wrapPath) {
+        dataItem = _.set({}, wrapPath, dataItem)
+      } else {
+        const defaultWrapper = _.trim(schemaStr.replace(':', '.'), '.').split('.').pop()
+        if (_.isString(defaultWrapper)) {
+          dataItem = _.set({}, defaultWrapper, dataItem)
+        }
+      }
+      console.log('data:', dataItem)
+
+      // deal with URL
+      // get url param map
+      let urlMapper = {}
+      if (_.isObject(options)) {
+        const { urlParam } = options
+        if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
+          urlMapper = { ...urlMapper, ...urlParam }
+        }
+      }
+      const controller = NodeController.getInstance()
+      const layoutName = `schema/ui/${_.trim(schemaStr.replace(':', '.'), '.')}.json`
+      const wMode = controller.getWorkingMode(layoutName)
+      if (_.isObject(wMode)) {
+        const urlParam = _.get(wMode, 'options.urlParam')
+        if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
+          urlMapper = { ...urlMapper, ...urlParam }
+        }
+      }
+      // replace the url param
+      const status = dataPool.getStatus(sourceStr) || 'create'
+      const engine = DataEngine.getInstance()
+      const schema = await engine.mapper.getSchema({ source: sourceStr, schema: schemaStr })
+      let url: string = ''
+      if (_.isObject(schema)) {
+        const { endpoint } = schema as any
+        if (_.has(endpoint, submitMethod)) {
+          url = endpoint[submitMethod]
+        } else {
+          url = _.get(endpoint, 'default.path')
+        }
+
+        if (status === 'view' || status === 'update') {
+          const matchBraces = /\{.*\}/g
+          const matchParam = /\{(.*)\}/
+          const results = url.match(matchBraces)
+          if (_.isArray(results)) {
+            results.forEach((item: string) => {
+              const result = item.match(matchParam)
+              if (_.isArray(result) && _.isString(result[1])) {
+                const paramKey = result[1]
+                const paramStr = urlMapper[paramKey]
+                if (_.isString(paramStr)) {
+                  url = url.replace(`{${paramKey}}`, paramStr)
+                }
+              }
+            })
+          }
+        } else if (status === 'create') {
+          const matchBraces = /\{.*\}/g
+          const matchParam = /\{(.*)\}/
+          const results = url.match(matchBraces)
+          if (_.isArray(results)) {
+            results.forEach((item: string) => {
+              const result = item.match(matchParam)
+              if (_.isArray(result) && _.isString(result[1])) {
+                const paramKey = result[1]
+                const paramStr = urlMapper[paramKey]
+                if (_.isString(paramStr)) {
+                  url = url.replace(`{${paramKey}}`, paramStr)
+                }
+              }
+            })
+          }
+
+          // remove the last path when the param is not replaced
+          const slices = _.trimEnd(url, '/').split('/')
+          const lastPath = slices.pop()
+          if (_.isString(lastPath)) {
+            if (lastPath.match(/\{.*\}/) ) {
+              url = slices.join('/')
+            } else {
+              slices.push(lastPath)
+              url = slices.join('/')
+            }
+          }
+        } else if (status === 'delete') {
+          submitMethod = 'delete'
+          // To do uuid delete
+          url = `/axapi/v3/uuid/${dataUUID}`
+        }
+      }
+      console.log(url)
+
     }
   }
-  console.log(url)
 
-  // send request
-  if (submitMethod === 'post') {
-    const result = await engine.request.post(url, submitData)
-    console.log(result)
+  switch (targetRecord.status) {
+    case 'NORMAL':
+      targetRecord.status = 'SUCCESS'
+      break
+    case 'HAS_ERROR':
+      targetRecord.status = 'FAILURE'
+      break
+    default:
+      if (_.isArray(targetRecord.errorInfo)) {
+        targetRecord.errorInfo.push(
+          `Found unexpected status "${
+            targetRecord.status
+          }" in the end of the target ${
+            target.key || target.dataSource
+          }`
+        )
+      }
+      break
+  }
+  if (_.isEmpty(targetRecord.errorInfo)) {
+    delete targetRecord.errorInfo
   }
 
+  if (_.isObject(options)) {
+    const {
+      onTargetSuccess,
+      onTargetFailure,
+    } = options
+    const { status } = targetRecord
+
+    if (status === 'SUCCESS' && _.isFunction(onTargetSuccess)) {
+      await onTargetSuccess(
+        _.cloneDeep(target),
+        _.cloneDeep(targetRecord),
+      )
+    } else if (status === 'FAILURE' && _.isFunction(onTargetFailure)) {
+      await onTargetFailure(
+        _.cloneDeep(target),
+        _.cloneDeep(targetRecord),
+      )
+    }
+  }
+
+  console.log(targetRecord)
   return targetRecord
 }
 
@@ -681,13 +914,30 @@ function setErrorInfo(errorInfo?: string[], info?: string, index?: number) {
   return -1
 }
 
+function storeUINodes(rootNode: IUINode, nodeMap: {[source: string]: IUINode}) {
+  if (_.isObject(rootNode)) {
+    const { dataNode, children } = rootNode
+    if (!_.isNil(dataNode) && _.isObject(dataNode)) {
+      const { source: { source } } = dataNode
+      if (_.isString(source) && source) {
+        nodeMap[source] = rootNode
+      }
+    }
+    if (_.isArray(children) && children.length) {
+      children.forEach((child: IUINode) => {
+        storeUINodes(child, nodeMap)
+      })
+    }
+  }
+}
+
 const listener: IListener = (directParam: IListenerParam) => {
   const event: Event = _.get(directParam, 'event')
   const uiNode: IUINode = _.get(directParam, 'uiNode')
-  const target: ISubmitProcess = _.get(directParam, 'target')
+  const target: ISubmitProcess | ISubmitTarget = _.get(directParam, 'target')
   const options: ISubmitOption = _.get(directParam, 'options')
 
-  if (event instanceof Event) {
+  if (_.isObject(event)) {
     if (_.isFunction(event.stopPropagation)) {
       event.stopPropagation()
     } else if (event.cancelBubble === false) {
@@ -696,7 +946,9 @@ const listener: IListener = (directParam: IListenerParam) => {
   }
 
   console.log(target, options)
-  submit(target, options)
+  if (_.isObject(target)) {
+    submit(target, options)
+  }
 
 }
 
@@ -709,7 +961,7 @@ export const submitData: IListenerConfig = {
   describe: {
     target: {
       type: 'template',
-      tempalte: [
+      template: [
         {
           dataSource: 'domain:',
           dataSchema: 'a.b.c',
