@@ -584,13 +584,35 @@ async function submitTarget(
     }
   }
 
+  // get depend on config
+  let dependTarget: string = ''
+  const dependKeys: string[] = []
+  if (_.isString(dependOn)) {
+    dependTarget = dependOn
+  } else if (_.isObject(dependOn)) {
+    const { targetKey, dependList } = dependOn
+    if (_.isString(targetKey)) {
+      dependTarget = targetKey
+    }
+    if (_.isArray(dependList)) {
+      dependList.forEach((item: string) => {
+        if (_.isString(item)) {
+          dependKeys.push(item)
+        }
+      })
+    }
+  }
+
   // deal with data
   // get data from datapool
   const dataPool = DataPool.getInstance()
-  let submitData = _.cloneDeep(dataPool.get(sourceStr, false))
+  const submitData = _.cloneDeep(dataPool.get(sourceStr, false))
   if (!_.isArray(submitData)) {
+    let payload = submitData
+
     // get uuid if exist
     let dataUUID = _.get(submitData, 'uuid')
+
     // remove the excludes keys
     if (_.isObject(submitData) && excludes.length > 0) {
       excludes.forEach((excludeKey: string) => {
@@ -618,18 +640,32 @@ async function submitTarget(
       })
     }
     if (_.isString(wrapPath) && wrapPath) {
-      submitData = _.set({}, wrapPath, submitData)
+      payload = _.set({}, wrapPath, submitData)
     } else {
       const defaultWrapper = _.trim(schemaStr.replace(':', '.'), '.').split('.').pop()
       if (_.isString(defaultWrapper)) {
-        submitData = _.set({}, defaultWrapper, submitData)
+        payload = _.set({}, defaultWrapper, submitData)
       }
     }
-    console.log('data:', submitData)
+    console.log('payload:', payload)
 
     // deal with URL
     // get url param map
     let urlMapper = {}
+    if (!_.isNil(targetRecordMap)) {
+      const dependRecord = targetRecordMap[dependTarget]
+      if (!_.isNil(dependRecord)) {
+        const { response } = dependRecord
+        if (_.isObject(response) && dependKeys.length) {
+          dependKeys.forEach((key: string) => {
+            const value = _.get(response, [Object.keys(response)[0], key])
+            if (_.isString(value) || _.isFinite(value)) {
+              urlMapper[key] = value
+            }
+          })
+        }
+      }
+    }
     if (_.isObject(options)) {
       const { urlParam } = options
       if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
@@ -659,7 +695,7 @@ async function submitTarget(
       }
 
       if (status === 'view' || status === 'update') {
-        const matchBraces = /\{.*\}/g
+        const matchBraces = /\{[\w\-]*\}/g
         const matchParam = /\{(.*)\}/
         const results = url.match(matchBraces)
         if (_.isArray(results)) {
@@ -667,15 +703,18 @@ async function submitTarget(
             const result = item.match(matchParam)
             if (_.isArray(result) && _.isString(result[1])) {
               const paramKey = result[1]
-              const paramStr = urlMapper[paramKey]
-              if (_.isString(paramStr)) {
-                url = url.replace(`{${paramKey}}`, paramStr)
+              let paramStr = urlMapper[paramKey]
+              if (!paramStr) {
+                paramStr = submitData[paramKey]
+              }
+              if (_.isString(paramStr) || _.isFinite(paramStr)) {
+                url = url.replace(`{${paramKey}}`, `${paramStr}`)
               }
             }
           })
         }
       } else if (status === 'create') {
-        const matchBraces = /\{.*\}/g
+        const matchBraces = /\{[\w\-]*\}/g
         const matchParam = /\{(.*)\}/
         const results = url.match(matchBraces)
         if (_.isArray(results)) {
@@ -703,22 +742,26 @@ async function submitTarget(
           }
         }
       } else if (status === 'delete') {
-        submitMethod = 'delete'
-        // To do uuid delete
-        url = `/axapi/v3/uuid/${dataUUID}`
+        if (_.isString(dataUUID)) {
+          submitMethod = 'delete'
+          url = `/axapi/v3/uuid/${dataUUID}`
+        } else {
+          submitMethod = ''
+          url = ''
+        }
       }
     }
-    console.log(url)
+    console.log(submitMethod, url)
 
     try {
       // send request
       if (submitMethod === 'post') {
-        const result = await engine.request.post(url, submitData)
+        const result = await engine.request.post(url, payload)
         if (_.has(result, 'data')) {
           targetRecord.response = _.get(result, 'data')
         }
       } else if (submitMethod === 'put') {
-        const result = await engine.request.put(url, submitData)
+        const result = await engine.request.put(url, payload)
         if (_.has(result, 'data')) {
           targetRecord.response = _.get(result, 'data')
         }
@@ -741,7 +784,8 @@ async function submitTarget(
 
   } else {
     for(let index = 0; index < submitData.length; index++) {
-      let dataItem = submitData[index]
+      const dataItem = submitData[index]
+      let payload = dataItem
 
       // get uuid if exist
       let dataUUID = _.get(dataItem, 'uuid')
@@ -753,18 +797,32 @@ async function submitTarget(
         })
       }
       if (_.isString(wrapPath) && wrapPath) {
-        dataItem = _.set({}, wrapPath, dataItem)
+        payload = _.set({}, wrapPath, dataItem)
       } else {
         const defaultWrapper = _.trim(schemaStr.replace(':', '.'), '.').split('.').pop()
         if (_.isString(defaultWrapper)) {
-          dataItem = _.set({}, defaultWrapper, dataItem)
+          payload = _.set({}, defaultWrapper, dataItem)
         }
       }
-      console.log('data:', dataItem)
+      console.log('payload:', payload)
 
       // deal with URL
       // get url param map
       let urlMapper = {}
+      if (!_.isNil(targetRecordMap)) {
+        const dependRecord = targetRecordMap[dependTarget]
+        if (!_.isNil(dependRecord)) {
+          const { response } = dependRecord
+          if (_.isObject(response) && dependKeys.length) {
+            dependKeys.forEach((key: string) => {
+              const value = _.get(response, [Object.keys(response)[0], key])
+              if (_.isString(value) || _.isFinite(value)) {
+                urlMapper[key] = value
+              }
+            })
+          }
+        }
+      }
       if (_.isObject(options)) {
         const { urlParam } = options
         if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
@@ -781,7 +839,7 @@ async function submitTarget(
         }
       }
       // replace the url param
-      const status = dataPool.getStatus(sourceStr) || 'create'
+      let status = dataPool.getStatus(sourceStr + `.${index}`) || 'create'
       const engine = DataEngine.getInstance()
       const schema = await engine.mapper.getSchema({ source: sourceStr, schema: schemaStr })
       let url: string = ''
@@ -794,7 +852,7 @@ async function submitTarget(
         }
 
         if (status === 'view' || status === 'update') {
-          const matchBraces = /\{.*\}/g
+          const matchBraces = /\{[\w\-]*\}/g
           const matchParam = /\{(.*)\}/
           const results = url.match(matchBraces)
           if (_.isArray(results)) {
@@ -802,15 +860,18 @@ async function submitTarget(
               const result = item.match(matchParam)
               if (_.isArray(result) && _.isString(result[1])) {
                 const paramKey = result[1]
-                const paramStr = urlMapper[paramKey]
-                if (_.isString(paramStr)) {
-                  url = url.replace(`{${paramKey}}`, paramStr)
+                let paramStr = urlMapper[paramKey]
+                if (!paramStr) {
+                  paramStr = dataItem[paramKey]
+                }
+                if (_.isString(paramStr) || _.isFinite(paramStr)) {
+                  url = url.replace(`{${paramKey}}`, `${paramStr}`)
                 }
               }
             })
           }
         } else if (status === 'create') {
-          const matchBraces = /\{.*\}/g
+          const matchBraces = /\{[\w\-]*\}/g
           const matchParam = /\{(.*)\}/
           const results = url.match(matchBraces)
           if (_.isArray(results)) {
@@ -838,13 +899,45 @@ async function submitTarget(
             }
           }
         } else if (status === 'delete') {
-          submitMethod = 'delete'
-          // To do uuid delete
-          url = `/axapi/v3/uuid/${dataUUID}`
+          if (_.isString(dataUUID)) {
+            submitMethod = 'delete'
+            url = `/axapi/v3/uuid/${dataUUID}`
+          } else {
+            submitMethod = ''
+            url = ''
+          }
         }
       }
-      console.log(url)
+      console.log(submitMethod, url)
 
+      try {
+        // send request
+        if (submitMethod === 'post') {
+          const result = await engine.request.post(url, payload)
+          if (_.has(result, 'data')) {
+            _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
+          }
+        } else if (submitMethod === 'put') {
+          const result = await engine.request.put(url, payload)
+          if (_.has(result, 'data')) {
+            _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
+          }
+        } else if (submitMethod === 'delete') {
+          const result = await engine.request.delete(url)
+          if (_.has(result, 'data')) {
+            _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
+          }
+        }
+      } catch (e) {
+        console.error(e)
+        targetRecord.status = 'HAS_ERROR'
+        if (_.isArray(targetRecord.errorInfo)) {
+          targetRecord.errorInfo.push(`Failed to submit target ${target.key || sourceStr}`)
+        }
+        if (_.has(e, 'response.data')) {
+          targetRecord.response = _.get(e, 'response.data')
+        }
+      }
     }
   }
 

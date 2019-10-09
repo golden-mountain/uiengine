@@ -46,8 +46,7 @@
         "no-dest-nat": 0,
         "cpu-compute": 0,
         "memory-compute": 0,
-        "substitute-source-mac": 0,
-        "uuid": "c7a531d6-9979-11e9-9617-001fa010fe32",
+        "uuid": "5bd27280-ea9a-11e9-ba1c-4d43042f8524",
         "a10-url": "/axapi/v3/slb/virtual-server/test/port/80+tcp"
       },
       {
@@ -83,8 +82,7 @@
         "no-dest-nat": 0,
         "cpu-compute": 0,
         "memory-compute": 0,
-        "substitute-source-mac": 0,
-        "uuid": "ce0dba2a-9979-11e9-9617-001fa010fe32",
+        "uuid": "61e0e8fa-ea9a-11e9-ba1c-4d43042f8524",
         "a10-url": "/axapi/v3/slb/virtual-server/test/port/8080+tcp"
       }
     ],

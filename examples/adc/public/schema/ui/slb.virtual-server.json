@@ -534,7 +534,10 @@
                           {
                             "dataSource": "slb.virtual-server:port-list",
                             "dataSchema": "slb.virtual-server.port:",
-                            "dependOn": "main"
+                            "dependOn": {
+                              "targetKey": "main",
+                              "dependList": ["name"]
+                            }
                           }
                         ],
                         "mode": "sync"
