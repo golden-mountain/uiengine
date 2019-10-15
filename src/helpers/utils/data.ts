@@ -9,41 +9,75 @@ import {
 } from '../../../typings'
 
 /**
- * convert a.b.c:d to a.b.c.d
- * if Prefix provided, convert to prefix.a.b.c.d
+ * get the access route from the string, eg:
+ * convert 'a.b.c.d' to 'a.b.c.d'
+ * convert 'a.b.c:d' to 'a.b.c.d'
+ * convert 'a.b.c:' to 'a.b.c'
+ * convert 'a.b$c:d' to 'a.b'
+ * convert 'a.b.c$:d' to 'a.b.c'
+ * convert 'a.b.c:$d' to 'a.b.c'
+ * convert '$a.b.c:d' to ''
+ * if prefix is provided, add it before the string, convert to prefix.xxx.xxx
  * @param source
  * @param prefix
  */
 export function formatSource(source: string, prefix?: string) {
-  const formatted = _.trim(source.replace(':', '.'), '.')
-  if (prefix) {
-    return `${prefix}.${formatted}`
+  let srcString: string = source
+  // replace the ':'
+  srcString = srcString.replace(':', '.')
+  // splice the string by '$'
+  srcString = srcString.split('$')[0]
+  // remove the '.' at both ends
+  srcString = _.trim(srcString, '.')
+
+  if (_.isString(prefix) && prefix) {
+    if (srcString.length) {
+      return `${prefix}.${srcString}`
+    } else {
+      return prefix
+    }
   }
-  return formatted
+  return srcString
 }
 
 /**
- * convert id to a_b_c
- *
+ * get the domain name from the string, eg:
+ * convert 'a.b.c.d' to 'a'
+ * convert 'a.b.c:d' to 'a.b.c'/'a_b_c'
+ * convert 'a.b.c:' to 'a.b.c'/'a_b_c'
+ * convert 'a.b$c:d' to 'a.b.c'/'a_b_c'
+ * convert 'a.b.c$:d' to 'a.b.c'/'a_b_c'
+ * convert 'a.b.c:$d' to 'a.b.c'/'a_b_c'
+ * convert '$a.b.c:d' to 'a.b.c'/'a_b_c'
  * @param id a.b.c:d
  */
 export function getDomainName(
-  id: IDataSource | string,
+  source: IDataSource | string,
   snakeCase: boolean = true
 ) {
-  // it's a IDataSource
+  let srcString = source
+  // if it's an IDataSource instance, eg:
   // {source: 'slb.virtual-server:template-policy', autoload: true}
-  if (typeof id === 'object') {
-    id = _.get(id, 'source', '')
+  if (_.isObject(srcString)) {
+    srcString = _.get(srcString, 'source', '')
   }
 
-  if (id && _.isString(id)) {
-    const splitter = id.indexOf(':') > -1 ? ':' : '.'
-    let [schemaPath] = id.split(splitter)
-    if (snakeCase) {
-      return _.snakeCase(schemaPath)
+  if (_.isString(srcString) && srcString) {
+    // replace the '$'
+    srcString = srcString.replace('$', '.')
+    if (srcString.includes(':')) {
+      // splice the string by ':'
+      srcString = srcString.split(':')[0]
+      // remove the '.' at both ends
+      srcString = _.trim(srcString, '.')
     } else {
-      return schemaPath
+      // splice the string by '.'
+      srcString = srcString.split('.')[0]
+    }
+    if (snakeCase) {
+      return _.snakeCase(srcString)
+    } else {
+      return srcString
     }
   } else {
     return '$dummy'
