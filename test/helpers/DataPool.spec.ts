@@ -187,7 +187,7 @@ describe('DataPool Unit Test:', () => {
       )
 
       const sixthSet = dataPool.set(
-        '$a.b:',
+        '#a.b:',
         { root: 'this is the root node' },
         { createPath: false, createChild: false },
       )
@@ -206,7 +206,7 @@ describe('DataPool Unit Test:', () => {
       const dataPool = DataPool.getInstance()
 
       const firstSet = dataPool.set(
-        '$a.b:',
+        '#a.b:',
         'this is root node',
         { dataInfo: { status: { value: 'create' } } }
       )
@@ -325,7 +325,7 @@ describe('DataPool Unit Test:', () => {
     it('should clear the data info successfully:', () => {
       const dataPool = DataPool.getInstance()
       const firstSet = dataPool.set(
-        '$a.b:',
+        '#a.b:',
         {
           a: {
             b: {
@@ -381,7 +381,7 @@ describe('DataPool Unit Test:', () => {
         }
       )
 
-      dataPool.clear('$a.b:')
+      dataPool.clear('#a.b:')
       wholeData = dataPool.get()
       expect(wholeData).to.deep.equal({})
 

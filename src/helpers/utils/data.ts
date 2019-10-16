@@ -13,10 +13,10 @@ import {
  * convert 'a.b.c.d' to 'a.b.c.d'
  * convert 'a.b.c:d' to 'a.b.c.d'
  * convert 'a.b.c:' to 'a.b.c'
- * convert 'a.b$c:d' to 'a.b'
- * convert 'a.b.c$:d' to 'a.b.c'
- * convert 'a.b.c:$d' to 'a.b.c'
- * convert '$a.b.c:d' to ''
+ * convert 'a.b#c:d' to 'a.b'
+ * convert 'a.b.c#:d' to 'a.b.c'
+ * convert 'a.b.c:#d' to 'a.b.c'
+ * convert '#a.b.c:d' to ''
  * if prefix is provided, add it before the string, convert to prefix.xxx.xxx
  * @param source
  * @param prefix
@@ -25,8 +25,8 @@ export function formatSource(source: string, prefix?: string) {
   let srcString: string = source
   // replace the ':'
   srcString = srcString.replace(':', '.')
-  // splice the string by '$'
-  srcString = srcString.split('$')[0]
+  // splice the string by '#'
+  srcString = srcString.split('#')[0]
   // remove the '.' at both ends
   srcString = _.trim(srcString, '.')
 
@@ -45,10 +45,10 @@ export function formatSource(source: string, prefix?: string) {
  * convert 'a.b.c.d' to 'a'
  * convert 'a.b.c:d' to 'a.b.c'/'a_b_c'
  * convert 'a.b.c:' to 'a.b.c'/'a_b_c'
- * convert 'a.b$c:d' to 'a.b.c'/'a_b_c'
- * convert 'a.b.c$:d' to 'a.b.c'/'a_b_c'
- * convert 'a.b.c:$d' to 'a.b.c'/'a_b_c'
- * convert '$a.b.c:d' to 'a.b.c'/'a_b_c'
+ * convert 'a.b#c:d' to 'a.b.c'/'a_b_c'
+ * convert 'a.b.c#:d' to 'a.b.c'/'a_b_c'
+ * convert 'a.b.c:#d' to 'a.b.c'/'a_b_c'
+ * convert '#a.b.c:d' to 'a.b.c'/'a_b_c'
  * @param id a.b.c:d
  */
 export function getDomainName(
@@ -63,8 +63,8 @@ export function getDomainName(
   }
 
   if (_.isString(srcString) && srcString) {
-    // replace the '$'
-    srcString = srcString.replace('$', '.')
+    // replace the '#'
+    srcString = srcString.replace('#', '.')
     if (srcString.includes(':')) {
       // splice the string by ':'
       srcString = srcString.split(':')[0]
