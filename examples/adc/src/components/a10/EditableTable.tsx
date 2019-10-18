@@ -249,11 +249,13 @@ export class EditableTable extends React.Component<any, any> {
       }
     };
     // add the key for each dataSource
-    if (dataSource && dataSource.length) {
+    if (_.isArray(dataSource) && dataSource.length) {
       dataSource.forEach((record: any, index: number) => {
         record.key = index;
         record.uinode = this.props.uinode.children[index];
       });
+    } else if (_.isNil(dataSource)) {
+      this.props.uinode.dataNode.data = []
     }
     const columns = this.columns.map((col: any, index: number) => {
       if (!col.editable) {

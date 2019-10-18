@@ -607,7 +607,7 @@ async function submitTarget(
   // get data from datapool
   const dataPool = DataPool.getInstance()
   const submitData = _.cloneDeep(dataPool.get(sourceStr, { withPath: false }))
-  if (!_.isArray(submitData)) {
+  if (_.isObject(submitData) && !_.isArray(submitData)) {
     let payload = submitData
 
     // get uuid if exist
@@ -780,7 +780,7 @@ async function submitTarget(
       }
     }
 
-  } else {
+  } else if (_.isArray(submitData)) {
     for(let index = 0; index < submitData.length; index++) {
       const dataItem: any = submitData[index]
       let payload = dataItem
@@ -856,7 +856,6 @@ async function submitTarget(
       }
       // replace the url param
       let status = dataPool.getInfo(sourceStr + `[${index}]`, 'status') || 'create'
-      console.log(sourceStr + `[${index}]`, status, dataPool)
       const engine = DataEngine.getInstance()
       const schema = await engine.mapper.getSchema({ source: sourceStr, schema: schemaStr })
       let url: string = ''
@@ -955,6 +954,11 @@ async function submitTarget(
           targetRecord.response = _.get(e, 'response.data')
         }
       }
+    }
+  } else {
+    targetRecord.status = 'HAS_ERROR'
+    if (_.isArray(targetRecord.errorInfo)) {
+      targetRecord.errorInfo.push(`Bad format: The data of ${sourceStr} can\'t be submited.`)
     }
   }
 
