@@ -3,7 +3,7 @@ import _ from 'lodash'
 import {
   getDomainName,
   formatSource,
-} from '../'
+} from './utils/data'
 
 import {
   IDataPool,
@@ -104,6 +104,9 @@ export class DataPool implements IDataPool {
                   accessList.push(indexNum)
                 }
               })
+              if (restStr) {
+                accessList.push(restStr)
+              }
             } else {
               accessList.push(slice)
             }
