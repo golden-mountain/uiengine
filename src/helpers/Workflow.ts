@@ -189,8 +189,9 @@ export default class Workflow implements IWorkflow {
     if (couldCommit === undefined || couldCommit === true) {
       const dataPool = DataPool.getInstance();
       const { source, target, options } = connectOptions;
-      let clearSource = _.get(options, "clearSource");
-      const result = dataPool.merge(source, target, clearSource);
+      let clearSrc = _.get(options, "clearSource");
+      const result = dataPool.transfer(source, target, { clearSrc });
+      dataPool.clear(source, { clearDomain: true })
       // refresh target ui node
 
       let selector = connectOptions.targetSelector;
@@ -233,7 +234,7 @@ export default class Workflow implements IWorkflow {
 
   async updatePool(source: string, data: any, refreshLayout?: string) {
     const dataPool = DataPool.getInstance();
-    dataPool.set(data, source);
+    dataPool.set(source, data);
 
     // refresh target ui node
     const selector = {

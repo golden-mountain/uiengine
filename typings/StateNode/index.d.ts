@@ -19,6 +19,8 @@ export interface IStateNode {
   getState(key?: string): IState;
   renewStates();
   setState(key: string | IState, value?: any);
+  setStateToDataPool();
+  getStateFromDataPool();
   updateState(state: IState);
   getPluginManager(): IPluginManager;
 }

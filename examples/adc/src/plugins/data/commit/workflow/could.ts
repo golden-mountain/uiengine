@@ -21,7 +21,7 @@ const execution: IPluginExecution = (param: IPluginParam) => {
   if (_.has(sources, 'source')) {
     // any errors?
     const dataPool = DataPool.getInstance()
-    const errors = dataPool.getError(sources.source)
+    const errors = dataPool.getInfo(sources.source, 'error')
     const isError = _.isEmpty(errors)
     return isError
   }

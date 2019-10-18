@@ -606,7 +606,7 @@ async function submitTarget(
   // deal with data
   // get data from datapool
   const dataPool = DataPool.getInstance()
-  const submitData = _.cloneDeep(dataPool.get(sourceStr, false))
+  const submitData = _.cloneDeep(dataPool.get(sourceStr, { withPath: false }))
   if (!_.isArray(submitData)) {
     let payload = submitData
 
@@ -621,18 +621,16 @@ async function submitTarget(
     }
     // filter the valid data (Todo: through plugins)
     if (_.isObject(submitData) && !_.isEmpty(submitData)) {
-      const layoutLineage = _.trim(schemaStr.replace(':', '.'), '.')
-      const layoutName = `schema/ui/${layoutLineage}.json`
-      const controller = NodeController.getInstance()
-      const rootNode = controller.getUINode(layoutName, true) as IUINode
-      const nodeMap = {} as {[source: string]: IUINode}
-      storeUINodes(rootNode, nodeMap)
-
       Object.keys(submitData).forEach((dataKey: string) => {
-        const targetSource = layoutLineage + `:${dataKey}`
-        const targetNode = nodeMap[targetSource]
-        if (_.isObject(targetNode)) {
-          const state: any = _.get(targetNode, 'stateNode.state')
+        let fieldSource: string = ''
+        if (sourceStr.endsWith(':') || sourceStr.endsWith(']') || sourceStr.endsWith('.')) {
+          fieldSource = sourceStr + dataKey
+        } else {
+          fieldSource = sourceStr + '.' + dataKey
+        }
+
+        if (_.isString(fieldSource) && fieldSource) {
+          const state: any = dataPool.getInfo(fieldSource, 'state')
           if (_.has(state, 'visible') && state.visible === false) {
             delete submitData[dataKey]
           }
@@ -682,7 +680,7 @@ async function submitTarget(
       }
     }
     // replace the url param
-    const status = dataPool.getStatus(sourceStr) || 'create'
+    const status = dataPool.getInfo(sourceStr, 'status') || 'create'
     const engine = DataEngine.getInstance()
     const schema = await engine.mapper.getSchema({ source: sourceStr, schema: schemaStr })
     let url: string = ''
@@ -784,7 +782,7 @@ async function submitTarget(
 
   } else {
     for(let index = 0; index < submitData.length; index++) {
-      const dataItem = submitData[index]
+      const dataItem: any = submitData[index]
       let payload = dataItem
 
       // get uuid if exist
@@ -794,6 +792,24 @@ async function submitTarget(
       if (_.isObject(dataItem) && excludes.length > 0) {
         excludes.forEach((excludeKey: string) => {
           delete dataItem[excludeKey]
+        })
+      }
+      // filter the valid data (Todo: through plugins)
+      if (_.isObject(dataItem) && !_.isEmpty(dataItem)) {
+        Object.keys(dataItem).forEach((dataKey: string) => {
+          let fieldSource: string = ''
+          if (sourceStr.endsWith(':') || sourceStr.endsWith(']') || sourceStr.endsWith('.')) {
+            fieldSource = sourceStr + `[${index}]` + dataKey
+          } else {
+            fieldSource = sourceStr + `[${index}]` + dataKey
+          }
+
+          if (_.isString(fieldSource) && fieldSource) {
+            const state: any = dataPool.getInfo(fieldSource, 'state')
+            if (_.has(state, 'visible') && state.visible === false) {
+              delete dataItem[dataKey]
+            }
+          }
         })
       }
       if (_.isString(wrapPath) && wrapPath) {
@@ -839,7 +855,8 @@ async function submitTarget(
         }
       }
       // replace the url param
-      let status = dataPool.getStatus(sourceStr + `.${index}`) || 'create'
+      let status = dataPool.getInfo(sourceStr + `[${index}]`, 'status') || 'create'
+      console.log(sourceStr + `[${index}]`, status, dataPool)
       const engine = DataEngine.getInstance()
       const schema = await engine.mapper.getSchema({ source: sourceStr, schema: schemaStr })
       let url: string = ''
@@ -1005,23 +1022,6 @@ function setErrorInfo(errorInfo?: string[], info?: string, index?: number) {
     }
   }
   return -1
-}
-
-function storeUINodes(rootNode: IUINode, nodeMap: {[source: string]: IUINode}) {
-  if (_.isObject(rootNode)) {
-    const { dataNode, children } = rootNode
-    if (!_.isNil(dataNode) && _.isObject(dataNode)) {
-      const { source: { source } } = dataNode
-      if (_.isString(source) && source) {
-        nodeMap[source] = rootNode
-      }
-    }
-    if (_.isArray(children) && children.length) {
-      children.forEach((child: IUINode) => {
-        storeUINodes(child, nodeMap)
-      })
-    }
-  }
 }
 
 const listener: IListener = (directParam: IListenerParam) => {

@@ -127,7 +127,7 @@ export async function submitToAPI(
   const dataEngine = DataEngine.getInstance()
   for (let index in dataSources) {
     const source = dataSources[index]
-    result = _.merge(result, dataPool.get(source.source, true))
+    result = _.merge(result, dataPool.get(source.source, { withPath: true }))
     result = await dataEngine.sendRequest(source, result, method, false)
     if (result !== false) responses.push(result)
   }

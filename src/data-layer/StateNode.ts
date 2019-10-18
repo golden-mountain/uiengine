@@ -5,16 +5,31 @@ import {
   IStateNode,
   IErrorInfo,
   IPluginManager,
-  IUINode
+  IPluginResult,
+  IUINode,
+  IDataNode,
+  IDataPool,
 } from "../../typings";
 import { searchDepsNodes, PluginManager } from "../helpers";
 
 export default class StateNode implements IStateNode {
   id: string;
+  uiNode: IUINode;
   pluginManager: IPluginManager;
   errorInfo: IErrorInfo = {};
-  state: IState = {};
-  uiNode: IUINode;
+
+  private localState: IState = {}
+  set state(newState: IState) {
+    if (_.isObject(newState)) {
+      this.localState = _.cloneDeep(newState)
+    }
+
+    this.setStateToDataPool()
+  }
+
+  get state() {
+    return _.cloneDeep(this.localState)
+  }
 
   constructor(uiNode: IUINode) {
     this.uiNode = uiNode;
@@ -31,8 +46,32 @@ export default class StateNode implements IStateNode {
   }
 
   getState(key?: string) {
-    if (key) return _.get(this.state, key);
+    if (_.isString(key) && key) {
+      return _.get(this.state, key)
+    }
     return this.state;
+  }
+
+  setStateToDataPool() {
+    const dataNode: IDataNode = _.get(this, 'uiNode.dataNode')
+    const dataPool: IDataPool = _.get(this, 'uiNode.dataNode.dataPool')
+    if (!_.isNil(dataNode) && !_.isNil(dataPool)) {
+      const dataSource = _.get(dataNode, ['source', 'source'])
+      if (_.isString(dataSource) && dataSource) {
+        dataPool.setInfo(dataSource, { key: 'state', value: this.localState })
+      }
+    }
+  }
+
+  getStateFromDataPool() {
+    const dataNode: IDataNode = _.get(this, 'uiNode.dataNode')
+    const dataPool: IDataPool = _.get(this, 'uiNode.dataNode.dataPool')
+    if (!_.isNil(dataNode) && !_.isNil(dataPool)) {
+      const dataSource = _.get(dataNode, ['source', 'source'])
+      if (_.isString(dataSource) && dataSource) {
+        return dataPool.getInfo(dataSource, 'state')
+      }
+    }
   }
 
   async renewStates() {
@@ -42,31 +81,36 @@ export default class StateNode implements IStateNode {
       { stateNode: this.uiNode.stateNode }
     );
     if (exeResult) {
-      exeResult.results.forEach(result => {
-        if (!_.isEmpty(result.result)) {
-          Object.assign(this.state, result.result);
+      const currentState = this.state
+      exeResult.results.forEach((item: IPluginResult) => {
+        const newState = item.result
+        if (_.isObject(newState) && !_.isEmpty(newState)) {
+          _.merge(currentState, newState)
         }
-      });
+      })
+      this.state = currentState
     }
 
     // update dependence state
     const depNodes = searchDepsNodes(this.uiNode);
-    for (let key in depNodes) {
-      const node = depNodes[key];
+    for (let node of depNodes) {
       await node.stateNode.renewStates();
     }
+
     this.uiNode.sendMessage();
     return this.state;
   }
 
   setState(key: string | IState, value?: any): IState {
-    if (typeof key === "object") {
-      _.merge(this.state, key);
-    } else {
-      _.set(this.state, key, value);
+    let currentState = this.state
+    if (_.isObject(key)) {
+      _.merge(currentState, key)
+    } else if (_.isString(key) && key) {
+      _.set(currentState, key, value)
     }
 
-    return this.state;
+    this.state = currentState
+    return currentState
   }
 
   async updateState(state: IState) {
@@ -75,8 +119,7 @@ export default class StateNode implements IStateNode {
 
     // update dependence state
     const depNodes = searchDepsNodes(this.uiNode);
-    for (let key in depNodes) {
-      const node = depNodes[key];
+    for (let node of depNodes) {
       await node.stateNode.renewStates();
     }
   }

@@ -9,16 +9,16 @@ export class A10Modal extends React.Component<any, any> {
 
   componentDidMount() {
     const dataPool = DataPool.getInstance();
-    dataPool.merge(
+    dataPool.transfer(
       `slb.virtual-server:port-list[${this.props.datakey}]`,
       "slb.virtual-server.port:",
-      false
+      { clearSrc: false }
     );
     this.setState({ visible: true });
     // this.context.controller
     //   .loadUINode(this.props.layout)
     //   .then((node: IUINode) => {
-    //     const data = dataPool.get("slb.virtual-server.port:", false);
+    //     const data = dataPool.get("slb.virtual-server.port:");
     //     node.dataNode.updateData(data).then(() => {
     //       this.setState({ uiNode: node, visible: true });
     //     });
@@ -28,10 +28,10 @@ export class A10Modal extends React.Component<any, any> {
   handleOk = async (e: any) => {
     if (this.state.uiNode !== undefined) {
       const uiNode: any = this.state.uiNode;
-      uiNode.dataNode.dataPool.merge(
+      uiNode.dataNode.dataPool.transfer(
         "slb.virtual-server.port:",
-        "slb.virtual-server:port-list[]",
-        true
+        `slb.virtual-server:port-list[${this.props.datakey}]`,
+        { clearSrc: true }
       );
     }
 

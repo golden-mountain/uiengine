@@ -3,11 +3,12 @@ import _ from "lodash";
 import {
   NodeController,
   ComponentWrapper,
-  UIEngineRegister,
   UIEngineContext,
   setComponentState,
   getComponent
 } from "..";
+
+import { UIEngineRegister } from '../helpers/UIEngineRegister'
 
 import * as plugins from "../plugins";
 import * as listeners from "../listeners";

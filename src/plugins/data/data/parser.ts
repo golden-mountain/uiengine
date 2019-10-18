@@ -30,10 +30,9 @@ const execution: IPluginExecution = (param: IPluginParam) => {
       }
       // console.log(source, target, index);
       const dataPool = DataPool.getInstance()
-      dataPool.merge(target, source)
+      dataPool.transfer(target, source, { createDst: true })
     }
-    let data = dataNode.dataPool.get(dataNode.source.source, false)
-    return data
+    return dataNode.data
   }
   return
 }
