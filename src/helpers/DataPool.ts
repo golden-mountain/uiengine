@@ -14,6 +14,7 @@ import {
   IDataPoolInfoConfig,
   IDataPoolConnectObject,
   IDataPoolConnectOption,
+  IDataPoolHandle,
 } from '../../typings'
 
 interface IDataElement {
@@ -192,7 +193,6 @@ export class DataPool implements IDataPool {
           }
 
           this.solveDataInfo(
-            item,
             route + `[${index}]`,
             nextItemNode,
             prevItemNode,
@@ -230,7 +230,6 @@ export class DataPool implements IDataPool {
           }
 
           this.solveDataInfo(
-            value,
             route + `.${key}`,
             nextKeyNode,
             prevKeyNode,
@@ -244,23 +243,18 @@ export class DataPool implements IDataPool {
     }
   }
   private solveDataInfo(
-    data: any,
     route: string,
     targetElement: IDataElement,
     prevElement?: IDataElement,
     options?: IDataPoolSetOption,
   ) {
-    let infoConfig: {
-      [infoKey: string]: {
-        value?: any
-        defaultValue?: any
-        setDataInfo?: (path: string, data: any, prevInfo?: any) => any
-      }
-    } = {}
+    let infoConfig: IDataPoolInfoConfig[] = []
     if (_.isObject(options)) {
       const { dataInfo } = options
-      if (_.isObject(dataInfo) && !_.isEmpty(dataInfo)) {
+      if (_.isArray(dataInfo)) {
         infoConfig = dataInfo
+      } else if (_.isObject(dataInfo)) {
+        infoConfig.push(dataInfo)
       }
     }
 
@@ -271,29 +265,27 @@ export class DataPool implements IDataPool {
         dataInfo = prevDataInfo
       }
     }
+    targetElement.dataInfo = dataInfo
 
-    Object.keys(infoConfig).forEach((infoKey: string) => {
-      const config = infoConfig[infoKey]
-
+    infoConfig.forEach((config: IDataPoolInfoConfig) => {
       if (_.isObject(config)) {
-        const { value, defaultValue, setDataInfo } = config
+        const { key, value, defaultValue, setDataInfo } = config
 
-        if (value !== undefined) {
-          dataInfo[infoKey] = value
-        } else if (defaultValue !== undefined && dataInfo[infoKey] === undefined) {
-          dataInfo[infoKey] = defaultValue
-        }
-        if (_.isFunction(setDataInfo)) {
-          const nextInfoValue = setDataInfo(route, data, dataInfo[infoKey])
-          if (nextInfoValue !== undefined) {
-            dataInfo[infoKey] = nextInfoValue
+        if (_.isString(key) && key) {
+          if (value !== undefined) {
+            dataInfo[key] = value
+          } else if (defaultValue !== undefined && dataInfo[key] === undefined) {
+            dataInfo[key] = defaultValue
+          }
+          if (_.isFunction(setDataInfo)) {
+            setDataInfo(key, new DataPoolHandle(route, targetElement))
           }
         }
       }
     })
 
-    if (!_.isEmpty(dataInfo)) {
-      targetElement.dataInfo = dataInfo
+    if (_.isEmpty(targetElement.dataInfo)) {
+      delete targetElement.dataInfo
     }
 
   }
@@ -357,7 +349,6 @@ export class DataPool implements IDataPool {
 
         // set data info
         this.solveDataInfo(
-          data,
           targetRoute,
           targetNode,
           targetNode,
@@ -399,30 +390,12 @@ export class DataPool implements IDataPool {
       // get target node
       const targetNode = this.routeExplorer(domainRoot, targetRoute, { createPath: false })
       if (!_.isNil(targetNode)) {
-        const infoConfig = {}
-        if (_.isArray(config)) {
-          config.forEach((item: IDataPoolInfoConfig) => {
-            if (_.isObject(item)) {
-              const { key, value, defaultValue } = item
-              if (_.isString(key) && key) {
-                infoConfig[key] = { value, defaultValue }
-              }
-            }
-          })
-        } else if (_.isObject(config)) {
-          const { key, value, defaultValue } = config
-          if (_.isString(key) && key) {
-            infoConfig[key] = { value, defaultValue }
-          }
-        }
-
         // set data info
         this.solveDataInfo(
-          null,
           targetRoute,
           targetNode,
           targetNode,
-          { dataInfo: infoConfig },
+          { dataInfo: config },
         )
 
       } else {
@@ -1075,6 +1048,184 @@ export class DataPool implements IDataPool {
   }
   disconnect(path: string, object: IDataPoolConnectObject) {
 
+  }
+}
+
+export class DataPoolHandle implements IDataPoolHandle {
+  dataRoute: string | null
+  dataElement: IDataElement | null
+  constructor(targetRoute?: string, targetElement?: IDataElement) {
+    if (_.isString(targetRoute) && targetRoute) {
+      this.dataRoute = targetRoute
+    } else {
+      this.dataRoute = null
+    }
+
+    if (!_.isNil(targetElement)) {
+      this.dataElement = targetElement
+    } else {
+      this.dataElement = null
+    }
+  }
+
+  getRoute() {
+    const route = this.dataRoute
+    if (_.isString(route)) {
+      return route
+    }
+    return undefined
+  }
+
+  private getElementValue(
+    dataElement: IDataElement
+  ) {
+    if (_.has(dataElement, 'dataValue')) {
+      return dataElement.dataValue
+    } else if (_.has(dataElement, 'children')) {
+      let dataValue
+      const children = dataElement.children
+      if (_.isArray(children)) {
+        const arrValue: any[] = []
+        children.forEach((child: IDataElement, index: number) => {
+          arrValue[index] = this.getElementValue(child)
+        })
+        dataValue = arrValue
+      } else if (_.isObject(children)) {
+        const objValue = {}
+        Object.keys(children).forEach((key: string) => {
+          const child = children[key]
+          objValue[key] = this.getElementValue(child)
+        })
+        dataValue = objValue
+      }
+      return dataValue
+    }
+    return undefined
+  }
+  getData() {
+    const element = this.dataElement
+    if (!_.isNil(element)) {
+      return this.getElementValue(element)
+    }
+    return undefined
+  }
+
+  getInfo(infoKey?: string | string[]) {
+    const element = this.dataElement
+    if (!_.isNil(element)) {
+      const { dataInfo } = element
+      if (_.isObject(dataInfo)) {
+        if (_.isArray(infoKey)) {
+          const returnObj = {}
+          infoKey.forEach((key: string) => {
+            if (_.isString(key) && key) {
+              returnObj[key] = dataInfo[key]
+            }
+          })
+          return returnObj
+        } else if (_.isString(infoKey) && infoKey) {
+          return dataInfo[infoKey]
+        } else if (infoKey === undefined) {
+          return { ...dataInfo }
+        }
+      }
+    }
+    return undefined
+  }
+  setInfo(infoKey: string, value: any) {
+    const element = this.dataElement
+    if (!_.isNil(element)) {
+      const { dataInfo } = element
+      if (_.isObject(dataInfo)) {
+        _.set(dataInfo, [infoKey], value)
+      } else {
+        _.set(element, ['dataInfo'], { [infoKey]: value })
+      }
+    } else {
+      return false
+    }
+    return true
+  }
+
+  private getParentRoute(route: string) {
+    // analyze route
+    const accessQueue: Array<string|number> = []
+    route.split('.').forEach((slice: string) => {
+      const arrayAccess = /\[\d*\]/g
+      const matchResult = slice.match(arrayAccess)
+      if (!_.isNil(matchResult)) {
+        let restStr = slice
+        matchResult.forEach((matchStr: string) => {
+          const startIndex = restStr.indexOf(matchStr)
+          const endIndex = startIndex + matchStr.length
+
+          accessQueue.push(restStr.slice(0, startIndex))
+          restStr = restStr.slice(endIndex)
+
+          const arrayIndex = /\[(\d*)\]/
+          const mResult = matchStr.match(arrayIndex)
+          if (!_.isNil(mResult)) {
+            const indexStr = mResult[1]
+            const indexNum = Number(indexStr)
+            accessQueue.push(indexNum)
+          }
+        })
+        if (restStr) {
+          accessQueue.push(restStr)
+        }
+      } else {
+        accessQueue.push(slice)
+      }
+    })
+
+    // remove the last access item
+    const lastItem = accessQueue.pop()
+    if (_.isNumber(lastItem)) {
+      const lastAccessStr = `[${lastItem}]`
+      const lastAccessIndex = route.lastIndexOf(lastAccessStr)
+      return route.slice(0, lastAccessIndex)
+    } else if (_.isString(lastItem)) {
+      const lastAccessIndex = route.lastIndexOf(lastItem)
+      return _.trim(route.slice(0, lastAccessIndex), '.')
+    }
+    return route
+  }
+  getParent() {
+    const route = this.dataRoute
+    const element = this.dataElement
+    if (!_.isNil(element)) {
+      const { parent: parentElement } = element
+      if (!_.isNil(parentElement)) {
+        let parentRoute
+        if (_.isString(route)) {
+          parentRoute = this.getParentRoute(route)
+        }
+        return new DataPoolHandle(parentRoute, parentElement)
+      }
+    }
+    return null
+  }
+  getChildren() {
+    const route = this.dataRoute
+    const element = this.dataElement
+    if (!_.isNil(element)) {
+      const { children } = element
+      if (_.isArray(children)) {
+        const childrenHandle: DataPoolHandle[] = []
+        children.forEach((child: IDataElement, index: number) => {
+          childrenHandle[index] = new DataPoolHandle(route + `[${index}]`, child)
+        })
+        return childrenHandle
+      } else if (_.isObject(children)) {
+        const childrenHandle: { [key: string]: DataPoolHandle } = {}
+        Object.keys(children).forEach((key: string) => {
+          const child = children[key]
+          childrenHandle[key] = new DataPoolHandle(route + `.${key}`, child)
+        })
+        return childrenHandle
+      }
+    }
+    return null
   }
 }
 

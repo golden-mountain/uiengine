@@ -1,28 +1,17 @@
-import { INodeProps } from "../UINode";
+import { INodeProps } from '../UINode'
 
 export interface IConnectOptions {
-  source: string; // from data source like a.b.c
-  target: string; // target data source like foo.bar
+  source: string // from data source like a.b.c
+  target: string // target data source like foo.bar
   options?: {
-    clearSource: boolean;
-    [name: string]: any;
-  };
-  targetSelector?: INodeProps;
+    clearSource: boolean
+    [name: string]: any
+  }
+  targetSelector?: INodeProps
 }
 
 export interface IDataPoolSetOption {
-  dataInfo?: {
-    status?: {
-      value?: string
-      defaultValue?: string
-      setDataInfo?: (path: string, data: any, prevStatus?: string) => string | undefined
-    }
-    [infoKey: string]: {
-      value?: any
-      defaultValue?: any
-      setDataInfo?: (path: string, data: any, prevInfo?: any) => any
-    }
-  }
+  dataInfo?: IDataPoolInfoConfig | IDataPoolInfoConfig[]
   createPath?: boolean
   createChild?: boolean
 }
@@ -52,6 +41,7 @@ export interface IDataPoolInfoConfig {
   key: string
   value?: any
   defaultValue?: any
+  setDataInfo?: (infoKey: string, handle: IDataPoolHandle) => void
 }
 
 export interface IDataPoolConnectObject {
@@ -78,4 +68,13 @@ export interface IDataPool {
 
   connnect: (path: string, object: IDataPoolConnectObject, options?: IDataPoolConnectOption) => void
   disconnect: (path: string, object: IDataPoolConnectObject) => void
+}
+export interface IDataPoolHandle {
+  getRoute: () => string | undefined
+  getData: () => any | undefined
+  getInfo: (infoKey?: string | string[]) => any
+  setInfo: (infoKey: string, value: any) => boolean
+
+  getParent: () => IDataPoolHandle | null
+  getChildren: () => { [key: string]: IDataPoolHandle } | IDataPoolHandle[] | null
 }
