@@ -11,6 +11,7 @@ import {
   IDataSource,
   IErrorInfo,
   IStateNode,
+  IDataPoolHandle,
 } from "../../typings";
 import { DataEngine } from "../helpers";
 
@@ -162,9 +163,9 @@ export default class DataNode implements IDataNode {
       }
     }
 
-    const data = this.data
-    if (_.isArray(data)) {
-      result.forEach((item: any, index: number) => {
+    const loadedData = this.data
+    if (_.isArray(loadedData)) {
+      loadedData.forEach((item: any, index: number) => {
         const downSource = this.source.source + `[${index}]`
         if (this.dataPool.getInfo(downSource, 'status') === undefined) {
           if (mode === "new") {
@@ -174,7 +175,7 @@ export default class DataNode implements IDataNode {
           }
         }
       })
-    } else if (_.isObject(data)) {
+    } else if (_.isObject(loadedData)) {
       if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
         if (mode === "new") {
           this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create' })
@@ -182,59 +183,24 @@ export default class DataNode implements IDataNode {
           this.dataPool.setInfo(this.source.source, { key: 'status', value: 'view' })
         }
       }
-    } else if (!_.isObject(data)) {
-      if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
-        if (mode === "new") {
-          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create' })
-        } else {
-          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'view' })
-        }
-      }
-
-      const accessList: Array<string|number> = []
-      const routeSlices = formatSource(this.source.source).split('.')
-      routeSlices.forEach((slice: string) => {
-        const accessArray = /\[\d*\]/g
-        const matchResult = slice.match(accessArray)
-        if (!_.isNil(matchResult)) {
-          let restStr = slice
-          matchResult.forEach((matchStr: string) => {
-            const startIndex = restStr.indexOf(matchStr)
-            const endIndex = startIndex + matchStr.length
-
-            accessList.push(restStr.slice(0, startIndex))
-            restStr = restStr.slice(endIndex)
-
-            const arrayIndex = /\[(\d*)\]/
-            const mResult = matchStr.match(arrayIndex)
-            if (!_.isNil(mResult)) {
-              const indexStr = mResult[1]
-              const indexNum = Number(indexStr)
-              accessList.push(indexNum)
+    } else {
+      const setDataInfo = (infoKey: string, handle: IDataPoolHandle) => {
+        const parentHandle = handle.getParent()
+        if (!_.isNil(parentHandle)) {
+          if (parentHandle.getInfo('status') === undefined) {
+            if (mode === "new") {
+              parentHandle.setInfo('status', 'create')
+            } else {
+              parentHandle.setInfo('status', 'view')
             }
-          })
-          if (restStr) {
-            accessList.push(restStr)
           }
-        } else {
-          accessList.push(slice)
         }
-      })
-      const lastItem = accessList.pop()
-
-      let upSource = this.source.source
-      if (_.isNumber(lastItem)) {
-        upSource = _.trim(upSource.replace(`[${lastItem}]`, ''), '.')
-      } else if (_.isString(lastItem)) {
-        upSource = _.trim(upSource.replace(lastItem, ''), '.')
       }
-      if (upSource !== this.source.source) {
-        if (this.dataPool.getInfo(upSource, 'status') === undefined) {
-          if (mode === "new") {
-            this.dataPool.setInfo(upSource, { key: 'status', value: 'create' })
-          } else {
-            this.dataPool.setInfo(upSource, { key: 'status', value: 'view' })
-          }
+      if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
+        if (mode === "new") {
+          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create', setDataInfo })
+        } else {
+          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'view', setDataInfo })
         }
       }
     }
