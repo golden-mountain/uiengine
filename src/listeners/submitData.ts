@@ -277,8 +277,21 @@ async function submitProcess(
                 targetRecordMap
               )
 
-              if (!_.isNil(targetRecordMap) && _.isString(tConfig.key)) {
-                targetRecordMap[tConfig.key] = tRecord
+              if (!_.isNil(targetRecordMap)) {
+                if (_.isString(tConfig.key)) {
+                  targetRecordMap[tConfig.key] = tRecord
+                } else {
+                  let sourceStr = ''
+                  const dataSource = tConfig.dataSource
+                  if (_.isObject(dataSource)) {
+                    sourceStr = dataSource.source
+                  } else if (_.isString(dataSource)) {
+                    sourceStr = dataSource
+                  }
+                  if (_.isString(sourceStr) && sourceStr) {
+                    targetRecordMap[sourceStr] = tRecord
+                  }
+                }
               }
 
               let ignore: boolean = false
@@ -409,8 +422,21 @@ async function submitProcess(
               targetRecordMap
             )
 
-            if (!_.isNil(targetRecordMap) && _.isString(tConfig.key)) {
-              targetRecordMap[tConfig.key] = tRecord
+            if (!_.isNil(targetRecordMap)) {
+              if (_.isString(tConfig.key)) {
+                targetRecordMap[tConfig.key] = tRecord
+              } else {
+                let sourceStr = ''
+                const dataSource = tConfig.dataSource
+                if (_.isObject(dataSource)) {
+                  sourceStr = dataSource.source
+                } else if (_.isString(dataSource)) {
+                  sourceStr = dataSource
+                }
+                if (_.isString(sourceStr) && sourceStr) {
+                  targetRecordMap[sourceStr] = tRecord
+                }
+              }
             }
 
             let stop: boolean = false
