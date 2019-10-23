@@ -1,7 +1,7 @@
 {
   "version": "3.0.0#Autoform v1.5",
   "endpoint": {
-    "default": {
+    "defaults": {
       "path": "mock-data/slb.virtual-server.json"
     },
     "post": "/axapi/v3/slb/virtual-server/{name}"

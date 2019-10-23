@@ -38,9 +38,9 @@ export interface IDependanceNode {
 // Data schema
 export interface IDataSchema {
   version: string
-  endpoint: {
-    default: { path: string }
-    [method: string]: string
+  endpoints: {
+    default: { path: string } | string
+    [method: string]: { path: string } | string
   }
   'cm-lineage': string
   'cm-object-meta': IObject

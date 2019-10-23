@@ -58,7 +58,6 @@ export default class DataEngine implements IDataEngine {
     method: string = "get",
     cache: boolean = false
   ) {
-    console.log(source, data, method, cache);
     // clear initial data
     this.data = {};
     this.requestOptions.params = _.cloneDeep(data);

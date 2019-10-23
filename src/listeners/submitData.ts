@@ -180,12 +180,17 @@ async function submit(
   // to store the target records
   const targetRecordMap: ISubmitRecordMap = {}
 
-  if (_.has(target, 'targets')) {
-    const processConfig = target as ISubmitProcess
-    return await submitProcess(processConfig, options, targetRecordMap)
-  } else {
-    const targetConfig = target as ISubmitTarget
-    return await submitTarget(targetConfig, options, targetRecordMap)
+  try {
+    if (_.has(target, 'targets')) {
+      const processConfig = target as ISubmitProcess
+      return await submitProcess(processConfig, options, targetRecordMap)
+    } else {
+      const targetConfig = target as ISubmitTarget
+      return await submitTarget(targetConfig, options, targetRecordMap)
+    }
+  } catch (e) {
+    console.error(e)
+    console.error(`Above error happens when submit the target `, target)
   }
 }
 
@@ -701,11 +706,27 @@ async function submitTarget(
     })
     let url: string = ''
     if (_.isObject(schema)) {
-      const { endpoint } = schema as any
-      if (_.has(endpoint, submitMethod)) {
-        url = endpoint[submitMethod]
+      const { endpoints } = schema as any
+      if (_.has(endpoints, submitMethod)) {
+        const urlTemplate = endpoints[submitMethod]
+        if (_.isString(urlTemplate) && urlTemplate) {
+          url = urlTemplate
+        } else if (_.isObject(urlTemplate)) {
+          const { path } = urlTemplate as any
+          if (_.isString(path) && path) {
+            url = path
+          }
+        }
       } else {
-        url = _.get(endpoint, 'default.path')
+        const defaultConfig = _.get(endpoints, 'default')
+        if (_.isString(defaultConfig) && defaultConfig) {
+          url = defaultConfig
+        } else if (_.isObject(defaultConfig)) {
+          const { path } = defaultConfig as any
+          if (_.isString(path) && path) {
+            url = path
+          }
+        }
       }
 
       if (status === 'view' || status === 'update') {
@@ -890,11 +911,27 @@ async function submitTarget(
       })
       let url: string = ''
       if (_.isObject(schema)) {
-        const { endpoint } = schema as any
-        if (_.has(endpoint, submitMethod)) {
-          url = endpoint[submitMethod]
+        const { endpoints } = schema as any
+        if (_.has(endpoints, submitMethod)) {
+          const urlTemplate = endpoints[submitMethod]
+          if (_.isString(urlTemplate) && urlTemplate) {
+            url = urlTemplate
+          } else if (_.isObject(urlTemplate)) {
+            const { path } = urlTemplate as any
+            if (_.isString(path) && path) {
+              url = path
+            }
+          }
         } else {
-          url = _.get(endpoint, 'default.path')
+          const defaultConfig = _.get(endpoints, 'default')
+          if (_.isString(defaultConfig) && defaultConfig) {
+            url = defaultConfig
+          } else if (_.isObject(defaultConfig)) {
+            const { path } = defaultConfig as any
+            if (_.isString(path) && path) {
+              url = path
+            }
+          }
         }
 
         if (status === 'view' || status === 'update') {

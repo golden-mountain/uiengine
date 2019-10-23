@@ -1,5 +1,5 @@
 {
-  "endpoint": {
+  "endpoints": {
     "default": {
       "path": "foo.json"
     },

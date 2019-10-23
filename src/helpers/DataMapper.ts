@@ -41,9 +41,9 @@ export default class DataMapper implements IDataMapper {
 
   getDataEntryPoint(method: string): string {
     let schema: any = this.rootSchema;
-    const defaultEndPoint = _.get(schema, `endpoint.default.path`, "");
-    const withoutPath = _.get(schema, `endpoint.${method}`, defaultEndPoint);
-    const endpoint = _.get(schema, `endpoint.${method}.path`, withoutPath);
+    const defaultEndPoint = _.get(schema, `endpoints.default.path`, "");
+    const withoutPath = _.get(schema, `endpoints.${method}`, defaultEndPoint);
+    const endpoint = _.get(schema, `endpoints.${method}.path`, withoutPath);
     const dataURLPrefix = this.request.getConfig("dataPathPrefix");
     return `${dataURLPrefix}${endpoint}`;
   }

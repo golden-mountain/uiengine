@@ -5,7 +5,7 @@ import { IErrorInfo } from "../Request";
 import { IPluginManager } from '../PluginManager'
 
 export interface IDataSchema {
-  endpoint: {};
+  endpoints: {};
   definition: {};
 }
 
