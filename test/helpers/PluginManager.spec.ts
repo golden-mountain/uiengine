@@ -536,7 +536,8 @@ describe('PluginManager Unit Test:', () => {
               result: 'It is a good day!'
             }
           ],
-          number: 1,
+          startNumber: 1,
+          storeNumber: 1,
         }
       ])
       const icMap = manager.exportHistoryRecords({ struct: 'id-category-tree' })
@@ -561,7 +562,8 @@ describe('PluginManager Unit Test:', () => {
                   result: 'It is a good day!'
                 }
               ],
-              number: 1,
+              startNumber: 1,
+              storeNumber: 1,
             }
           ]
         }
@@ -588,7 +590,8 @@ describe('PluginManager Unit Test:', () => {
                   result: 'It is a good day!'
                 }
               ],
-              number: 1,
+              startNumber: 1,
+              storeNumber: 1,
             }
           ]
         }

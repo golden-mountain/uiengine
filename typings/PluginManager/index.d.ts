@@ -87,7 +87,8 @@ export interface IPluginCallerRegisterInfo {
 
 export interface IPluginHistory {
   capacity: number
-  lastNumber: number
+  lastStartNumber: number
+  lastStoreNumber: number
   records: IPluginExecuteRecord[]
   indexTree: {
     idTree: {
@@ -142,7 +143,8 @@ export interface IPluginExecuteRecord {
   category: string | null
   queue: string[]
   records: IPluginRecord[]
-  number?: number
+  startNumber?: number
+  storeNumber?: number
 }
 export interface IPluginRecord {
   pluginName: string

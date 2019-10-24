@@ -21,7 +21,8 @@ export class PluginManager implements TYPES.IPluginManager {
   }
   private history: TYPES.IPluginHistory = {
     capacity: 100,
-    lastNumber: 0,
+    lastStartNumber: 0,
+    lastStoreNumber: 0,
     records: [],
     indexTree: {
       idTree: {
@@ -503,7 +504,8 @@ export class PluginManager implements TYPES.IPluginManager {
   ) {
     this.history = {
       capacity: !_.isNil(capacity) && _.isFinite(capacity) ? capacity : 100,
-      lastNumber: 0,
+      lastStartNumber: 0,
+      lastStoreNumber: 0,
       records: [],
       indexTree: {
         idTree: {
@@ -859,7 +861,8 @@ export class PluginManager implements TYPES.IPluginManager {
     id: string,
     category: string | null,
     queue: string[],
-    records: TYPES.IPluginRecord[]
+    records: TYPES.IPluginRecord[],
+    startNumber: number,
   ) {
     const history = this.history
     const list = history.records
@@ -876,7 +879,8 @@ export class PluginManager implements TYPES.IPluginManager {
       category,
       queue,
       records,
-      number: ++history.lastNumber,
+      startNumber,
+      storeNumber: ++history.lastStoreNumber,
     }) - 1 - history.indexOffset
 
     const categoryName = category || 'undefined'
@@ -1019,7 +1023,11 @@ export class PluginManager implements TYPES.IPluginManager {
       try {
         record.result = await execution(exeParam, exeHelper)
       } catch(e) {
-        console.log(e)
+        const caller = _.get(info, 'caller', null)
+        const category = _.get(info, 'category', null)
+        console.error(e)
+        console.error(`The above error happens in the execution of plugin ${name}, which is called by ${caller}
+          ${category ? ` for ${category}` : ''}.`)
       }
     } else {
       this.defaultPluginExecution(plugin, exeParam, exeHelper)
@@ -1035,6 +1043,8 @@ export class PluginManager implements TYPES.IPluginManager {
     plugin: TYPES.IPlugin,
     param: any,
   ) {
+    const startNumber = ++this.history.lastStartNumber
+
     let registerInfo: TYPES.IPluginCallerRegisterInfo | null = null
     if (_.isString(id) && id.length > 0) {
       registerInfo = this.registry[id] || null
@@ -1055,7 +1065,7 @@ export class PluginManager implements TYPES.IPluginManager {
         [],
       )
 
-      this.storeExecuteRecord(id, null, queue, [record])
+      this.storeExecuteRecord(id, null, queue, [record], startNumber)
 
       return {
         status: 'COMPLETED',
@@ -1069,6 +1079,8 @@ export class PluginManager implements TYPES.IPluginManager {
     param: any,
     options?: TYPES.IPluginExecuteOption
   ) {
+    const startNumber = ++this.history.lastStartNumber
+
     const executeQueue = this.preparePluginQueue(id, category, options)
     if (!_.isArray(executeQueue)) {
       return executeQueue
@@ -1135,6 +1147,7 @@ export class PluginManager implements TYPES.IPluginManager {
       category,
       executeQueue.map((p: TYPES.IPlugin) => p.name),
       records,
+      startNumber,
     )
 
     return {
@@ -1226,7 +1239,11 @@ export class PluginManager implements TYPES.IPluginManager {
           record.result = result
         }
       } catch(e) {
-        console.log(e)
+        const caller = _.get(info, 'caller', null)
+        const category = _.get(info, 'category', null)
+        console.error(e)
+        console.error(`The above error happens in the execution of plugin ${name}, which is called by ${caller}
+          ${category ? ` for ${category}` : ''}.`)
       }
     } else {
       this.defaultPluginExecution(plugin, exeParam, exeHelper)
@@ -1242,6 +1259,8 @@ export class PluginManager implements TYPES.IPluginManager {
     plugin: TYPES.IPlugin,
     param: any,
   ) {
+    const startNumber = ++this.history.lastStartNumber
+
     let registerInfo: TYPES.IPluginCallerRegisterInfo | null = null
     if (_.isString(id) && id.length > 0) {
       registerInfo = this.registry[id] || null
@@ -1262,7 +1281,7 @@ export class PluginManager implements TYPES.IPluginManager {
         [],
       )
 
-      this.storeExecuteRecord(id, null, queue, [record])
+      this.storeExecuteRecord(id, null, queue, [record], startNumber)
 
       const pluginResult: TYPES.IPluginResult = {
         name: record.pluginName,
@@ -1288,6 +1307,8 @@ export class PluginManager implements TYPES.IPluginManager {
     param: any,
     options?: TYPES.IPluginExecuteOption
   ) {
+    const startNumber = ++this.history.lastStartNumber
+
     const executeQueue = this.preparePluginQueue(id, category, options)
     if (!_.isArray(executeQueue)) {
       return executeQueue
@@ -1360,6 +1381,7 @@ export class PluginManager implements TYPES.IPluginManager {
       category,
       executeQueue.map((p: TYPES.IPlugin) => p.name),
       records,
+      startNumber,
     )
 
     return {
