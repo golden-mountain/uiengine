@@ -11,7 +11,7 @@ const widgetsConfig = {
   //     return null;
   //   }
   componentWrapper: (props: any) => {
-    return <div>{props.children}</div>;
+    return <div>{props.children || null}</div>;
   }
 };
 

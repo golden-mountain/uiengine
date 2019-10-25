@@ -1,7 +1,7 @@
 import React from "react";
 export default (props: any) => (
   <p>
-    {props.title}
-    {props.children}
+    {props.title || null}
+    {props.children || null}
   </p>
 );

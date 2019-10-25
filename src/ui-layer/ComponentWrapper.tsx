@@ -11,9 +11,9 @@ import {
   IComponentWrapperProps
 } from "../../typings";
 
-const DefaultWrapper: React.FC = (props: any) => <>{props.children}</>;
+const DefaultWrapper: React.FC = (props: any) => <>{props.children || null}</>;
 
-class ComponentWrapper extends React.Component<
+export class ComponentWrapper extends React.Component<
   IComponentWrapper,
   IComponentState
 > {

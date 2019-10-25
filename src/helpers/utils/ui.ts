@@ -10,7 +10,7 @@ import { IUINode, ILayoutSchema, IPluginExecuteOption } from "../../../typings";
 export function getComponent(componentLine?: string) {
   let WrappedComponent: any;
   if (!componentLine) {
-    WrappedComponent = (props: any) => props.children;
+    WrappedComponent = (props: any) => props.children || null;
   } else {
     // get registered component
     const componentMap = UIEngineRegister.componentsLibrary;

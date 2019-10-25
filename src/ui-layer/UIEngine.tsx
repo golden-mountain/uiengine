@@ -24,7 +24,7 @@ import {
 } from "../../typings";
 
 const DefaultMessager: React.FC = (props: any) => <div />;
-const DefaultUIEngineWrapper: React.FC = (props: any) => <>{props.children}</>;
+const DefaultUIEngineWrapper: React.FC = (props: any) => <>{props.children || null}</>;
 
 export default class UIEngine extends React.Component<
   IUIEngineProps,
