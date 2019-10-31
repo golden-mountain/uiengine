@@ -74,7 +74,7 @@ export default class UINode implements IUINode {
     this.id = this.schema._id;
     this.pluginManager = PluginManager.getInstance();
     this.pluginManager.register(this.id, {
-      categories: ["ui.parser", "ui.parser.event"]
+      categories: ["ui.parser.before", "ui.parser", "ui.parser.event"]
     });
 
     // new messager
@@ -160,6 +160,24 @@ export default class UINode implements IUINode {
     if (workingMode) this.workingMode = workingMode;
 
     let liveSchema = schema;
+    // load ui.parser.before plugin
+    try {
+      const results = await this.pluginManager.executePlugins(
+        this.id,
+        "ui.parser.before",
+        {
+          uiNode: this,
+          schema
+        }
+      );
+      if (!_.isEmpty(results)) {
+        const finalResult: any = results.results.pop();
+        liveSchema = finalResult.result;
+      }
+    } catch (e) {
+      console.log(e.message);
+    }
+
     if (liveSchema["datasource"]) {
       await this.dataNode.loadData(liveSchema["datasource"]);
     }
@@ -270,6 +288,7 @@ export default class UINode implements IUINode {
 
     const liveSchema = schema;
     let rowTemplate: any = liveSchema.$children;
+    console.log("rowTemplate", rowTemplate);
     if (rowTemplate && data) {
       cloneTemplateSchema(rowTemplate);
       liveSchema.children = data.map((d: any, index: string) =>
