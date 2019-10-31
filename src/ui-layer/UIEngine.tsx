@@ -8,7 +8,7 @@ import {
   getComponent
 } from "..";
 
-import { UIEngineRegister } from '../helpers/UIEngineRegister'
+import { UIEngineRegister } from "../helpers/UIEngineRegister";
 
 import * as plugins from "../plugins";
 import * as listeners from "../listeners";
@@ -68,6 +68,7 @@ export default class UIEngine extends React.Component<
     this.nodeController.activeEngine(this.engineId);
     for (let index in layouts) {
       let layout, workingMode;
+      const id = _.get(layouts[index], "id", "default");
       if (layouts[index]["layout"]) {
         layout = layouts[index]["layout"];
         workingMode = layouts[index]["workingMode"];
@@ -80,7 +81,7 @@ export default class UIEngine extends React.Component<
       this.nodeController.setWorkingMode(layout, workingMode);
       // console.log(layout, workingMode);
       this.nodeController
-        .loadUINode(layout, "", loadOptions, false)
+        .loadUINode(layout, id, loadOptions, false)
         .then((uiNode: IUINode) => {
           const nodes = this.nodeController.nodes;
           this.setState({ nodes });
