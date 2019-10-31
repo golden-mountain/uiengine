@@ -288,7 +288,6 @@ export default class UINode implements IUINode {
 
     const liveSchema = schema;
     let rowTemplate: any = liveSchema.$children;
-    console.log("rowTemplate", rowTemplate);
     if (rowTemplate && data) {
       cloneTemplateSchema(rowTemplate);
       liveSchema.children = data.map((d: any, index: string) =>
