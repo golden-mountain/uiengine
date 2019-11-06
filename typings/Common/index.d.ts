@@ -8,13 +8,14 @@ export interface IObject {
 // UI schema
 export interface IUISchema {
   component?: string | JSX.Element
-  dataSource?: IDataSource
+  datasource?: IDataSource
   props?: IObject
   state?: {
     [stateName: string]: IDependanceTree | IDependanceNode
   }
-  children?: IUISchema[]
-  $children?: IUISchema[]
+  children?: Array<IUISchema|IUISchema[]>
+  $children?: IUISchema|IUISchema[]
+  [otherKey: string]: any
 }
 
 export interface IDependanceTree {

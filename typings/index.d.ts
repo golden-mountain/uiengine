@@ -1,3 +1,4 @@
+export * from './Cache'
 export * from './Common'
 export * from './ComponentWrapper'
 export * from './DataEngine'

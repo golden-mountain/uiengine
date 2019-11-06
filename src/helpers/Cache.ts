@@ -1,131 +1,251 @@
-import { ICache } from "../../typings/DataNode";
-import _ from "lodash";
-import { IUINode } from "../../typings/UINode";
+import _ from 'lodash'
 
-export default class Cache {
+import {
+  ICache,
+  ICacheBlock,
+  ICachePiece,
+  ICacheSetOption,
+  ICacheGetOption,
+  ICacheClearOption,
+  IUINode,
+} from '../../typings'
+
+export class Cache {
   static cache: ICache = {
     dataSchema: {},
     data: {},
     layoutSchema: {},
-    uiNodes: {}
-  };
-
-  // static schema: ICache = {};
-  static clearCache = (type?: string, schemaPath?: string) => {
-    if (schemaPath) {
-      _.unset(Cache.cache, `${type}.${schemaPath}`);
-      //   Cache.cache[type][schemaPath] = {};
-    } else if (type) {
-      _.unset(Cache.cache, type);
-    } else {
-      Cache.cache = {};
-    }
-  };
-
-  static clearDataCache(path?: string) {
-    if (path) {
-      Cache.clearCache("data", path);
-    } else {
-      Cache.clearCache("data");
-    }
-  }
-
-  static clearDataSchemaCache(path?: string) {
-    if (path) {
-      Cache.clearCache("dataSchema", path);
-    } else {
-      Cache.clearCache("dataSchema");
-    }
-  }
-
-  static clearLayoutSchemaCache(path?: string) {
-    if (path) {
-      Cache.clearCache("layoutSchema", path);
-    } else {
-      Cache.clearCache("layoutSchema");
-    }
-  }
-
-  static clearUINodes(rootName: string, parentId?: string) {
-    if (parentId) {
-      const allNodes = Cache.getUINode(rootName);
-      _.forIn(allNodes, (node: any) => {
-        if (_.get(node, "parent.id") === parentId) {
-          Cache.clearCache("uiNodes", `${rootName}.${node.id}`);
-        }
-      });
-    } else {
-      Cache.clearCache("uiNodes", rootName);
-    }
+    layoutNode: {}
   }
 
   static setCache = (
-    type: string,
-    schemaPath: string,
+    cacheType: string,
+    uniqueId: string,
     data: any,
-    replace: boolean = true
+    options?: ICacheSetOption,
   ) => {
-    if (replace) {
-      _.set(Cache.cache, `${type}.${schemaPath}`, data);
-    } else {
-      const cache = Cache.getCache(type, schemaPath);
-      if (!cache) {
-        _.set(Cache.cache, `${type}.${schemaPath}`, data);
+    const wholeCache = Cache.cache
+    if (_.isString(cacheType) && cacheType) {
+      let cacheBlock = wholeCache[cacheType]
+      if (_.isNil(cacheBlock)) {
+        wholeCache[cacheType] = {}
+        cacheBlock = wholeCache[cacheType]
       }
-    }
-  };
 
-  static getCache(type: string, schemaPath?: string) {
-    if (schemaPath) {
-      return _.get(Cache.cache, `${type}.${schemaPath}`);
+      if (_.isString(uniqueId) && uniqueId) {
+        let cachePiece = cacheBlock[uniqueId]
+        if (_.isNil(cachePiece)) {
+          cacheBlock[uniqueId] = {}
+          cachePiece = cacheBlock[uniqueId]
+        }
+
+        let cToken: string | undefined
+        if (_.isObject(options)) {
+          const { cacheKey, defaultValue } = options
+          if (_.isString(cacheKey) && cacheKey) {
+            cToken = cacheKey
+          }
+          if (defaultValue !== undefined) {
+            cachePiece.defaultValue = defaultValue
+          }
+        }
+
+        if (!_.isNil(cToken)) {
+          let subPieces = cachePiece.subPieces
+          if (_.isNil(subPieces)) {
+            cachePiece.subPieces = {}
+            subPieces = cachePiece.subPieces
+          }
+
+          if (!_.isNil(subPieces)) {
+            subPieces[cToken] = data
+          }
+        } else {
+          cachePiece.data = data
+        }
+
+      } else {
+        console.warn(`Cache id is invalid, so the data may be lost.`)
+      }
     } else {
-      return _.get(Cache.cache, type);
+      console.warn(`Cache type is invalid, so the data may be lost.`)
     }
   }
+  static getCache(
+    cacheType: string,
+    uniqueId?: string,
+    options?: ICacheGetOption,
+  ) {
+    const wholeCache = Cache.cache
+    if (_.isString(cacheType) && cacheType) {
+      let cacheBlock = wholeCache[cacheType]
+      if (_.isNil(cacheBlock)) {
+        return undefined
+      }
 
-  static setDataSchema(path: string, data: any) {
-    Cache.setCache("dataSchema", path, data);
-  }
+      if (_.isString(uniqueId) && uniqueId) {
+        let cachePiece = cacheBlock[uniqueId]
+        if (_.isNil(cachePiece)) {
+          return undefined
+        }
 
-  static setData(rootName: string, path: string, data: any) {
-    // if (path.indexOf(".json") > -1 || path.indexOf("/") > -1) return;
-    path = path.replace(":", ".");
-    Cache.setCache("data", `${rootName}.${path}`, data);
-  }
+        let returnWhole = false
+        let cToken: string | undefined
+        if (_.isObject(options)) {
+          const { cacheKey, allCacheKeys } = options
+          if (allCacheKeys === true) {
+            returnWhole = true
+          } else if (_.isString(cacheKey) && cacheKey) {
+            cToken = cacheKey
+          }
+        }
 
-  static setLayoutSchema(path: string, data: any) {
-    Cache.setCache("layoutSchema", path, data);
-  }
+        if (returnWhole) {
+          return cachePiece.subPieces
+        } else if (!_.isNil(cToken)) {
+          let subPieces = cachePiece.subPieces
+          if (_.isNil(subPieces)) {
+            return undefined
+          } else {
+            return subPieces[cToken] || cachePiece.defaultValue
+          }
+        } else {
+          return cachePiece.data || cachePiece.defaultValue
+        }
 
-  static setUINode(path: string, node: IUINode, replace: boolean = false) {
-    let currentCache = Cache.getCache("uiNodes", path);
-    if (currentCache) {
-      currentCache[node.id] = node;
+      } else {
+        return cacheBlock
+      }
     } else {
-      currentCache = {
-        [node.id]: node
-      };
+      console.warn(`Cache type is invalid, so can't get cache data.`)
     }
-    Cache.setCache("uiNodes", path, currentCache, replace);
-  }
 
-  static getDataSchema(path?: string) {
-    return Cache.getCache("dataSchema", path);
+    return undefined
   }
+  static clearCache = (
+    cacheType: string,
+    uniqueId: string,
+    options?: ICacheClearOption,
+  ) => {
+    const wholeCache = Cache.cache
+    if (_.isString(cacheType) && cacheType) {
+      let cacheBlock = wholeCache[cacheType]
+      if (_.isNil(cacheBlock)) {
+        return
+      }
 
-  static getData(rootName: string, path?: string) {
-    if (path) {
-      path = path.replace(":", ".");
-      return Cache.getCache("data", `${rootName}.${path}`);
+      if (_.isString(uniqueId) && uniqueId) {
+        let cachePiece = cacheBlock[uniqueId]
+        if (_.isNil(cachePiece)) {
+          return
+        }
+
+        let cToken: string | undefined
+        if (_.isObject(options)) {
+          const { cacheKey } = options
+          if (_.isString(cacheKey) && cacheKey) {
+            cToken = cacheKey
+          }
+        }
+
+        if (!_.isNil(cToken)) {
+          let subPieces = cachePiece.subPieces
+          if (_.isNil(subPieces)) {
+            return
+          } else {
+            delete subPieces[cToken]
+          }
+        } else {
+          delete cacheBlock[uniqueId]
+        }
+
+      } else {
+        console.warn(`Cache id is invalid, so can't find cache data to clear.`)
+      }
+    } else {
+      console.warn(`Cache type is invalid, so can't find cache data to clear.`)
     }
-    return Cache.getCache("data", rootName);
   }
 
-  static getLayoutSchema(path?: string) {
-    return Cache.getCache("layoutSchema", path);
+  static setDataSchema(
+    uniqueId: string,
+    schema: any,
+    options?: ICacheSetOption,
+  ) {
+    Cache.setCache('dataSchema', uniqueId, schema, options)
+  }
+  static getDataSchema(
+    uniqueId?: string,
+    options?: ICacheGetOption,
+  ) {
+    return Cache.getCache('dataSchema', uniqueId, options)
+  }
+  static clearDataSchema(
+    uniqueId: string,
+    options?: ICacheClearOption,
+  ) {
+    Cache.clearCache('dataSchema', uniqueId, options)
   }
 
-  static getUINode(path?: string) {
-    return Cache.getCache("uiNodes", path);
+  static setData(
+    uniqueId: string,
+    data: any,
+    options?: ICacheSetOption,
+  ) {
+    Cache.setCache('data', uniqueId, data, options)
+  }
+  static getData(
+    uniqueId?: string,
+    options?: ICacheGetOption,
+  ) {
+    return Cache.getCache('data', uniqueId, options)
+  }
+  static clearData(
+    uniqueId: string,
+    options?: ICacheClearOption,
+  ) {
+    Cache.clearCache('data', uniqueId, options)
+  }
+
+  static setLayoutSchema(
+    uniqueId: string,
+    schema: any,
+    options?: ICacheSetOption,
+  ) {
+    Cache.setCache('layoutSchema', uniqueId, schema, options)
+  }
+  static getLayoutSchema(
+    uniqueId?: string,
+    options?: ICacheGetOption,
+  ) {
+    return Cache.getCache('layoutSchema', uniqueId, options)
+  }
+  static clearLayoutSchema(
+    uniqueId: string,
+    options?: ICacheClearOption,
+  ) {
+    Cache.clearCache('layoutSchema', uniqueId, options)
+  }
+
+  static setLayoutNode(
+    uniqueId: string,
+    node: any,
+    options?: ICacheSetOption,
+  ) {
+    Cache.setCache('layoutNode', uniqueId, node, options)
+  }
+  static getLayoutNode(
+    uniqueId?: string,
+    options?: ICacheGetOption,
+  ) {
+    return Cache.getCache('layoutNode', uniqueId, options)
+  }
+  static clearLayoutNode(
+    uniqueId: string,
+    options?: ICacheClearOption,
+  ) {
+    Cache.clearCache('layoutNode', uniqueId, options)
   }
 }
+
+export default Cache

@@ -1,7 +1,7 @@
 import React from "react";
 import _ from "lodash";
 import { UIEngineRegister, Cache } from "../";
-import { IUINode, ILayoutSchema, IPluginExecuteOption } from "../../../typings";
+import { IUINode, IUISchema, IPluginExecuteOption } from "../../../typings";
 
 /**
  * From schema define, get registered components
@@ -45,7 +45,7 @@ export function getComponent(componentLine?: string) {
  *
  * @param prop the schema defined props
  *  example:
- *            { datasource: /^slb.virtual-server:/} will match by regexp
+ *           { datasource: /^slb.virtual-server:/} will match by regexp
  *            or string
  *           { datasource: 'slb.virtual-server:name}
  *            or callback allowed
@@ -129,7 +129,7 @@ export function searchDepsNodes(targetNode: IUINode) {
  *
  * @param schema
  */
-export function cloneTemplateSchema(schema: ILayoutSchema) {
+export function cloneTemplateSchema(schema: IUISchema) {
   _.forIn(schema, (s: any, k: any) => {
     if (_.isString(k) && k[0] === "_") {
       _.unset(schema, k);
@@ -148,7 +148,7 @@ export function cloneTemplateSchema(schema: ILayoutSchema) {
  * @returns true, if depend on the target
  */
 function isDependantNode(node: IUINode, targetNode: IUINode) {
-  const targetSchema: ILayoutSchema = targetNode.getSchema();
+  const targetSchema: IUISchema = targetNode.getSchema();
 
   let isDepNode: boolean = false;
   if (node.schema) {
@@ -171,7 +171,7 @@ function isDependantNode(node: IUINode, targetNode: IUINode) {
  * @param targetSchema
  * @returns true, if matches any one
  */
-function matchOneSelector(condition: any, targetSchema: ILayoutSchema) {
+function matchOneSelector(condition: any, targetSchema: IUISchema) {
   const { deps, selector } = condition;
 
   let isMatched: boolean = false;

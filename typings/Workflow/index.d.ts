@@ -1,4 +1,6 @@
+import { IObject } from '../Common'
 import { IUINode } from "../UINode";
+import { INodeController } from '../NodeController'
 
 export interface ILoadOptions {
   container?: string;
@@ -6,10 +8,37 @@ export interface ILoadOptions {
   parentNode?: IUINode; // parent ui node, default render in UIEngine
 }
 
-/// using working mode to decide how to load data from dataNode
+// using working mode to decide in the layout:
+// how to load data for each dataNode;
+// whether can edit the data of each dataNode;
 export interface IWorkingMode {
-  mode: string; // edit, new, if new ,defaultly we don't load data,
-  options?: any;
+  //  new: all dataNodes don't load data and are editable by default
+  // edit: all dataNodes load data and are editable by default
+  // view: all dataNodes load data and are not editable by default
+  // customize: define the operation mode for each data source
+  mode: 'new' | 'edit' | 'view' | 'customize';
+  operationModes?: IOperationMode | IOperationMode[];
+  options?: {
+    urlParam?: IObject
+    envParam?: IObject
+    submitMethod?: string
+    [otherKey: string]: any
+  };
+}
+
+export interface IOperationMode {
+  // create: the source needn't load remote data and is editable by default
+  // delete: the source need load remote data and isn't editable
+  // update: the source need load remote data and is editable by default
+  //  view : the source need load remote data and isn't editable
+  mode: 'create' | 'delete' | 'update' | 'view';
+  source: string
+  options?: {
+    urlParam?: IObject
+    envParam?: IObject
+    submitMethod?: string
+    [otherKey: string]: any
+  };
 }
 
 export interface IWorkflow {
