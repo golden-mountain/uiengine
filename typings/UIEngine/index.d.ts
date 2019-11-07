@@ -1,7 +1,10 @@
 import { ReactNode } from 'react'
+
 import { IObject, IUISchema } from '../Common'
+import { INodeController, IUINodeRenderer } from '../NodeController'
 import { IErrorInfo, IRequestConfig } from '../Request'
-import { IUINode } from '../UINode'
+import { IUINode, INodeProps } from '../UINode'
+import { ILoadOptions, IWorkingMode } from '../Workflow'
 
 export interface IUIEngineWidgetsConfig {
   messager?: ReactNode
@@ -10,34 +13,31 @@ export interface IUIEngineWidgetsConfig {
 }
 
 export interface IUIEngineConfig {
-  requestConfig: IRequestConfig
+  requestConfig?: IRequestConfig
   widgetConfig?: IUIEngineWidgetsConfig
   ideMode?: boolean
-}
-
-export interface IUIEngineProps {
-  layouts: Array<string | IUISchema | ILayoutInfo>
-  config: IUIEngineConfig
-  [anyKey: string]: any
-}
-
-export interface IUIEngineStates {
-  nodes: Array<IUINodeRenderer>
-  activeNodeID: string
-  error?: IErrorInfo
-  [anyKey: string]: any
 }
 
 export interface ILayoutInfo {
   id?: string
   layout: string | IUISchema
-  workingMode?: IOperationMode[]
+  workingMode?: IWorkingMode
 }
 
-export interface IOperationMode {
-  domain: string
-  mode: 'create' | 'delete' | 'update' | 'view'
-  uriParam?: IObject
-  envParam?: IObject
-  submitMethod?: string
+export interface IUIEngineProps {
+  layouts: Array<string | IUISchema | ILayoutInfo>
+  config?: IUIEngineConfig
+  loadOptions?: ILoadOptions
+  onEngineCreate?: (controller: INodeController) => void
+  [anyKey: string]: any
+}
+
+export interface IUIEngineStates {
+  layoutMap: {
+    [layoutKey: string]: IUINodeRenderer
+  }
+  activeNodeID: string
+  error?: IErrorInfo
+  time?: number
+  [anyKey: string]: any
 }
