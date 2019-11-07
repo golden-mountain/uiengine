@@ -39,7 +39,7 @@ export interface INodeController {
   loadLayout: (
     engineId?: string,
     layoutKey?: string,
-    schema: string | IUISchema,
+    schema?: string | IUISchema,
     options?: ILoadOptions,
     autoRefresh?: boolean,
   ) => Promise<IUINode>

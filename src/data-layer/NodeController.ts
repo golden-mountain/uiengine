@@ -263,7 +263,7 @@ export class NodeController implements INodeController {
   async loadLayout(
     engineId: string | undefined,
     layoutKey: string | undefined,
-    schema: string | IUISchema,
+    schema?: string | IUISchema,
     options?: ILoadOptions,
     autoRefresh?: boolean,
   ) {

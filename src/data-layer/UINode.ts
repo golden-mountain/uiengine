@@ -373,6 +373,8 @@ export class UINode implements IUINode {
       targetSchema = await this.getRemoteSchema(schema, {})
     } else if (_.isObject(schema)) {
       targetSchema = schema
+    } else {
+      targetSchema = this.schema
     }
 
     if (_.isObject(targetSchema)) {
