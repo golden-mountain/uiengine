@@ -122,7 +122,6 @@ export class UINode implements IUINode {
       {
         categories: [
           'ui.parser',
-          'ui.parser.event',
         ]
       }
     )
