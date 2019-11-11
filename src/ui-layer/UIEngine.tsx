@@ -96,6 +96,7 @@ export class UIEngine extends React.Component<
       }
 
       const { layouts, loadOptions = {} } = this.props
+      const promises: Promise<IUINode>[] = []
       if (_.isArray(layouts) && layouts.length) {
         layouts.forEach((layoutConfig: string | IUISchema | ILayoutInfo, index: number) => {
           let layoutKey: string = `${this.engineId}-layout[${index}]`
@@ -124,18 +125,36 @@ export class UIEngine extends React.Component<
             layoutSchema = layoutConfig as IUISchema
           }
 
-          // store the working mode
-          nodeController.setWorkingMode(layoutMode, layoutKey)
           // load the layout with the UISchema
-          nodeController
+          promises.push(
             // don't refresh the state from NodeController, otherwise it will cause deadloop
-            .loadLayout(this.engineId, layoutKey, layoutSchema, loadOptions, false)
-            .then((uiNode: IUINode) => {
-              this.setState({ layoutMap: nodeController.layoutMap })
-            })
+            nodeController
+              .loadLayout(this.engineId, layoutKey, layoutSchema, layoutMode, loadOptions, false)
+              .then((rootNode: IUINode) => {
+                this.setState({ layoutMap: nodeController.layoutMap })
+                return rootNode
+              })
+          )
         })
       }
-      nodeController.activateEngine(this.engineId)
+      if (promises.length) {
+        Promise.all(promises).then((rootNodes: IUINode[]) => {
+          nodeController.activateEngine(
+            this.engineId,
+            {
+              layoutKey: (loaded?: string[]) => {
+                if (_.isArray(loaded)) {
+                  return loaded[loaded.length - 1]
+                }
+                return ''
+              },
+              autoRefresh: false,
+            }
+          )
+        })
+      } else {
+        nodeController.activateEngine(this.engineId)
+      }
     }
   }
 

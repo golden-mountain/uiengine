@@ -14,6 +14,19 @@ export interface IUINodeRenderer {
   workingMode?: IWorkingMode
 }
 
+export interface IActivateEngineOption {
+  layoutKey?: string | ((loadedLayouts?: string[]) => string)
+  autoRefresh?: boolean | ((nextLayout: string, prevLayout: string) => boolean)
+  onLayoutRefresh?: (rootNode: IUINode) => void
+}
+
+export interface IActivateLayoutOption {
+  beforeEngineExchange?: (nextActive: string, prevActive: string) => boolean
+  beforeLayoutExchange?: (nextActive: string, prevActive: string) => boolean
+  autoRefresh?: boolean | ((nextLayout: string, prevLayout: string) => boolean)
+  onLayoutRefresh?: (rootNode: IUINode) => void
+}
+
 export interface INodeController {
   id: string
   messager: IMessager
@@ -31,15 +44,34 @@ export interface INodeController {
     [layoutKey: string]: IUINodeRenderer
   }
 
-  activateEngine: (engineId?: string, layoutKey?: string) => boolean
-  setRequestConfig: (requestConfig: IRequestConfig, id?: string) => void
-  getRequestConfig: (id?: string, devMode?: boolean) => IRequestConfig | undefined
-  setWorkingMode: (workingMode: IWorkingMode, layoutKey?: string) => boolean
-  getWorkingMode: (layoutKey?: string) => IWorkingMode | undefined
+  activateEngine: (
+    engineId?: string,
+    options?: IActivateEngineOption,
+  ) => boolean
+  activateLayout: (
+    layoutKey?: string | ((layoutsInActiveEngine?: string[]) => string),
+    options?: IActivateLayoutOption,
+  ) => boolean
+  setRequestConfig: (
+    requestConfig: IRequestConfig,
+    id?: string,
+  ) => void
+  getRequestConfig: (
+    id?: string,
+    devMode?: boolean,
+  ) => IRequestConfig | undefined
+  setWorkingMode: (
+    workingMode: IWorkingMode,
+    layoutKey?: string,
+  ) => boolean
+  getWorkingMode: (
+    layoutKey?: string,
+  ) => IWorkingMode | undefined
   loadLayout: (
     engineId?: string,
     layoutKey?: string,
     schema?: string | IUISchema,
+    workingMode?: IWorkingMode,
     options?: ILoadOptions,
     autoRefresh?: boolean,
   ) => Promise<IUINode>

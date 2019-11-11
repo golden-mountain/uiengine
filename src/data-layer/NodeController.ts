@@ -19,6 +19,8 @@ import {
   IRequestConfig,
   IMessager,
   INodeController,
+  IActivateEngineOption,
+  IActivateLayoutOption,
   INodeProps,
   IObject,
   IPluginManager,
@@ -28,6 +30,7 @@ import {
   IWorkflow,
   IWorkingMode,
 } from '../../typings'
+import { render } from 'enzyme'
 
 export class NodeController implements INodeController {
   private static instance: NodeController
@@ -101,90 +104,155 @@ export class NodeController implements INodeController {
   }
 
   /**
-   * activate the target UIEngine and its selected layout(if provided)
+   * activate the target UIEngine and its layout(if provided)
    * @param engineId the target UIEngine. If not provided, use current active UIEngine as default
-   * @param layoutKey the active Layout of target UIEngine. If not provided,
-   * use current active layout when active UIEngine doesn't change,
-   * use the last layout when active UIEngine changes
-   * @returns true when activated the UIEngine and layout, false when not
+   * @param options the options of the activation
+   * @returns true when activated the UIEngine, false when not
    */
-  activateEngine(engineId?: string, layoutKey?: string) {
+  activateEngine(engineId?: string, options?: IActivateEngineOption) {
     const prevActiveEngine = this.activeEngine
     const prevActiveLayout = this.activeLayout
 
-    if (_.isString(engineId) && engineId) {
-      const layouts = this.engineMap[engineId]
-      if (_.isNil(layouts)) {
-        // the target UIEngine hasn't loaded
-        console.warn(`The UIEngine '${engineId}' hasn't loaded, so can't activate yet.`)
-        return false
-      } else {
-        // activate UIEngine
-        this.activeEngine = engineId
+    let nextActiveEngine: string = prevActiveEngine
+    let nextActiveLayout: string = ''
+    let needRefresh: boolean = false
+    let onRefresh: (rootNode: IUINode) => void = _.noop
 
-        if (_.isString(layoutKey) && layoutKey) {
-          const hasLoaded = layouts.some((layout: string) => {
-            return layout === layoutKey
-          })
-          if (hasLoaded === true) {
-            // activate layout
-            this.activeLayout = layoutKey
-          } else {
-            // the selected layout hasn't loaded
-            console.warn(`The layout '${layoutKey}' hasn't loaded in '${engineId}', so can't activate.`)
-            this.activeLayout = ''
-            return false
+    if (_.isString(engineId) && engineId) {
+      nextActiveEngine = engineId
+    }
+    if (_.isObject(options)) {
+      const { layoutKey, autoRefresh, onLayoutRefresh } = options
+      if (_.isString(layoutKey) && layoutKey) {
+        nextActiveLayout = layoutKey
+      } else if (_.isFunction(layoutKey)) {
+        nextActiveLayout = layoutKey(this.engineMap[nextActiveEngine])
+      }
+      if (_.isBoolean(autoRefresh)) {
+        needRefresh = autoRefresh
+      } else if (_.isFunction(autoRefresh)) {
+        needRefresh = autoRefresh(nextActiveLayout, prevActiveLayout)
+      }
+      if (_.isFunction(onLayoutRefresh)) {
+        onRefresh = onLayoutRefresh
+      }
+    }
+
+    const loadedLayouts = this.engineMap[nextActiveEngine]
+    if (_.isNil(loadedLayouts)) {
+      // the target UIEngine hasn't loaded
+      console.warn(`The UIEngine '${nextActiveEngine}' hasn't loaded, so can't activate yet.`)
+      return false
+    } else {
+      // activate UIEngine
+      this.activeEngine = nextActiveEngine
+
+      if (_.isString(nextActiveLayout) && nextActiveLayout) {
+        const hasLoaded = loadedLayouts.some((layout: string) => {
+          return layout === nextActiveLayout
+        })
+        const renderer = this.layoutMap[nextActiveLayout]
+        if (hasLoaded && !_.isNil(renderer)) {
+          // activate layout
+          this.activeLayout = nextActiveLayout
+          renderer.visible = true
+          // refresh the layout
+          if (needRefresh) {
+            this.loadLayout(this.activeEngine, this.activeLayout)
+              .then(onRefresh)
           }
         } else {
-          if (prevActiveEngine === this.activeEngine) {
-            if (!this.activeLayout && layouts.length) {
-              // active UIEngine dosen't change, but has't active layout
-              this.activeLayout = layouts[layouts.length - 1]
+          // the selected layout hasn't loaded
+          console.warn(`The layout '${nextActiveLayout}' hasn't loaded in '${nextActiveEngine}', so can't activate.`)
+          this.activeLayout = ''
+        }
+      } else {
+        this.activeLayout = ''
+      }
+    }
+    return true
+  }
+
+  /**
+   * activate the target layout and its UIEngine
+   * @param layoutKey the key of the target layout, or a callback
+   * which receives the layouts of active engine to decide the target
+   * @param options the options of the activation
+   * @returns true when activated the layout, false when not
+   */
+  activateLayout(
+    layoutKey?: string | ((layoutsInActiveEngine?: string[]) => string),
+    options?: IActivateLayoutOption,
+  ) {
+    const prevActiveEngine = this.activeEngine
+    const prevActiveLayout = this.activeLayout
+
+    let nextActiveLayout: string = ''
+    if (_.isString(layoutKey) && layoutKey) {
+      nextActiveLayout = layoutKey
+    } else if (_.isFunction(layoutKey)) {
+      nextActiveLayout = layoutKey(this.engineMap[prevActiveEngine])
+    }
+
+    if (_.isString(nextActiveLayout) && nextActiveLayout) {
+      const renderer = this.layoutMap[nextActiveLayout]
+      if (_.isNil(renderer)) {
+        // the selected layout hasn't loaded
+        console.warn(`The layout '${nextActiveLayout}' hasn't loaded, so can't activate.`)
+        return false
+      } else {
+        const nextActiveEngine = renderer.engineId
+        if (
+          _.isString(nextActiveEngine) &&
+          !_.isNil(this.engineMap[nextActiveEngine])
+        ) {
+          if (_.isObject(options)) {
+            const { beforeEngineExchange, beforeLayoutExchange } = options
+            if (_.isFunction(beforeEngineExchange)) {
+              const shouldExchange = beforeEngineExchange(nextActiveEngine, prevActiveEngine)
+              if (shouldExchange === false) {
+                return false
+              }
             }
-          } else {
-            // active UIEngine changes, but has't selected active layout
-            if (layouts.length) {
-              this.activeLayout = layouts[layouts.length - 1]
-            } else {
-              this.activeLayout = ''
+            if (_.isFunction(beforeLayoutExchange)) {
+              const shouldExchange = beforeLayoutExchange(nextActiveLayout, prevActiveLayout)
+              if (shouldExchange === false) {
+                return false
+              }
             }
           }
+
+          this.activeEngine = nextActiveEngine
+          this.activeLayout = nextActiveLayout
+          renderer.visible = true
+
+          let needRefresh: boolean = false
+          let onRefresh: ((rootNode: IUINode) => void) = _.noop
+          if (_.isObject(options)) {
+            const { autoRefresh, onLayoutRefresh } = options
+            if (_.isBoolean(autoRefresh)) {
+              needRefresh = autoRefresh
+            } else if (_.isFunction(autoRefresh)) {
+              needRefresh = autoRefresh(nextActiveLayout, prevActiveLayout)
+            }
+            if (_.isFunction(onLayoutRefresh)) {
+              onRefresh = onLayoutRefresh
+            }
+          }
+          // refresh the layout
+          if (needRefresh) {
+            this.loadLayout(this.activeEngine, this.activeLayout)
+              .then(onRefresh)
+          }
+
+        } else {
+          console.warn('No valid engine that the layout belongs to, so can not activate.')
+          return false
         }
       }
     } else {
-      if (_.isString(prevActiveEngine) && prevActiveEngine) {
-        // if not provide engineId, use the current active one
-        const layouts = this.engineMap[prevActiveEngine]
-        if (_.isNil(layouts)) {
-          // lost the layouts of current active UIEngine
-          console.error(`Can't find the layouts of active UIEngine '${prevActiveEngine}'.`)
-          this.activeEngine = ''
-          this.activeLayout = ''
-          return false
-        } else {
-          if (_.isString(layoutKey) && layoutKey) {
-            const hasLoaded = layouts.some((layout: string) => {
-              return layout === layoutKey
-            })
-            if (hasLoaded === true) {
-              // activate layout
-              this.activeLayout = layoutKey
-            } else {
-              // the selected layout hasn't loaded
-              console.warn(`The layout '${layoutKey}' hasn't loaded in '${engineId}', so can't activate.`)
-              return false
-            }
-          } else if (!prevActiveLayout) {
-            if (layouts.length) {
-              // active UIEngine dosen't change, but has't active layout
-              this.activeLayout = layouts[layouts.length - 1]
-            }
-          }
-        }
-      } else if (_.isString(layoutKey) && layoutKey) {
-        console.warn(`No valid active UIEngine, so can't activate layout '${layoutKey}'`)
-        return false
-      }
+      console.warn('No valid layout to activate.')
+      return false
     }
     return true
   }
@@ -225,10 +293,8 @@ export class NodeController implements INodeController {
 
     if (_.isString(targetLayout) && targetLayout) {
       if (_.isNil(this.layoutMap[targetLayout])) {
-        this.layoutMap[targetLayout] = {
-          layoutKey: targetLayout,
-          workingMode: { mode: 'new' },
-        } as IUINodeRenderer
+        console.warn(`The layout '${targetLayout}' hasn't loaded yet, so can't set its working mode`)
+        return false
       }
 
       if (!_.isEmpty(workingMode)) {
@@ -264,6 +330,7 @@ export class NodeController implements INodeController {
     engineId: string | undefined,
     layoutKey: string | undefined,
     schema?: string | IUISchema,
+    workingMode?: IWorkingMode,
     options?: ILoadOptions,
     autoRefresh?: boolean,
   ) {
@@ -289,33 +356,22 @@ export class NodeController implements INodeController {
           undefined,
           { request: this.request }
         ),
-        options,
+        options: {},
+        workingMode: { mode: 'new' },
       }
     }
     const targetRenderer = this.layoutMap[targetLayout]
-    let rootNode = targetRenderer.uiNode
-    if (_.isNil(rootNode)) {
-      targetRenderer.uiNode = new UINode(
-        {},
-        targetEngine,
-        targetLayout,
-        undefined,
-        { request: this.request }
-      )
-      rootNode = targetRenderer.uiNode
+    if (_.isObject(workingMode) && !_.isEmpty(workingMode)) {
+      targetRenderer.workingMode = workingMode
+    }
+    if (_.isObject(options) && !_.isEmpty(options)) {
+      targetRenderer.options = options
     }
 
+    const rootNode = targetRenderer.uiNode
     try {
       await rootNode.loadLayout(schema)
-      _.merge(targetRenderer, {
-        engineId: targetEngine,
-        layoutKey: targetLayout,
-        uiNode: rootNode,
-        options,
-        visible: true,
-      })
-      this.activeEngine = targetEngine
-      this.activeLayout = targetLayout
+      targetRenderer.visible = true
 
       // update parent node
       const parentNode = _.get(options, 'parentNode')
