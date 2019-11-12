@@ -25,10 +25,11 @@ export interface ILayoutInfo {
 }
 
 export interface IUIEngineProps {
+  id?: string
   layouts: Array<string | IUISchema | ILayoutInfo>
   config?: IUIEngineConfig
   loadOptions?: ILoadOptions
-  onEngineCreate?: (controller: INodeController) => void
+  onEngineCreate?: (engineId: string, controller: INodeController) => void
   [anyKey: string]: any
 }
 

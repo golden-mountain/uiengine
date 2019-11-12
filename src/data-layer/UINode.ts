@@ -220,7 +220,7 @@ export class UINode implements IUINode {
           }
         }
         if (!_.isNil(node)) {
-          children.push(node)
+          childNodes.push(node)
         }
       }
       this.children = childNodes

@@ -50,7 +50,7 @@ export class UIEngine extends React.Component<
     loadOptions: {},
   }
   // bind to its own nodes in nodeController, so it can only show the nodes with same id
-  engineId: string = _.uniqueId('engine-')
+  readonly engineId: string = _.uniqueId('engine-')
   error: IErrorInfo = {}
   nodeController: INodeController = NodeController.getInstance()
 
@@ -63,6 +63,10 @@ export class UIEngine extends React.Component<
 
   constructor(props: IUIEngineProps) {
     super(props)
+
+    if (_.isString(props.id) && props.id) {
+      this.engineId = props.id
+    }
 
     if (!_.isNil(this.nodeController)) {
       const nodeController = this.nodeController
@@ -78,7 +82,7 @@ export class UIEngine extends React.Component<
       }
 
       if (_.isFunction(props.onEngineCreate)) {
-        props.onEngineCreate(nodeController)
+        props.onEngineCreate(this.engineId, this.nodeController)
       }
     } else {
       console.warn(`No available nodeController, this is required in ${this.engineId}!`)
