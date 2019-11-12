@@ -279,7 +279,7 @@
                               "deps": [
                                 {
                                   "selector": {
-                                    "datasource": "slb.virtual-server:ip-address"
+                                    "datasource.source": "slb.virtual-server:ip-address"
                                   },
                                   "state": {
                                     "visible": false
@@ -287,7 +287,7 @@
                                 },
                                 {
                                   "selector": {
-                                    "datasource": "slb.virtual-server:ip-address"
+                                    "datasource.source": "slb.virtual-server:ip-address"
                                   },
                                   "data": "",
                                   "dataCompareRule": "empty"
@@ -299,7 +299,7 @@
                               "deps": [
                                 {
                                   "selector": {
-                                    "datasource": "slb.virtual-server:ipv6-address"
+                                    "datasource.source": "slb.virtual-server:ipv6-address"
                                   },
                                   "state": {
                                     "visible": false
@@ -307,7 +307,7 @@
                                 },
                                 {
                                   "selector": {
-                                    "datasource": "slb.virtual-server:ipv6-address"
+                                    "datasource.source": "slb.virtual-server:ipv6-address"
                                   },
                                   "data": "",
                                   "dataCompareRule": "empty"
