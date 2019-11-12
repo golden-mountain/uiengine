@@ -132,22 +132,22 @@ export class UINode implements IUINode {
     }
 
     // initialize data node
-    let nodeSource: IDataSource = {
-      source: `$dummy.${this.id}`
-    }
+    const defaultSource = `$dummy.${this.id}`
+    let dataSource: IDataSource = { source: defaultSource }
     const { datasource } = this.schema
-    if (_.isObject(datasource)) {
+    if (_.isObject(datasource) && !_.isEmpty(datasource)) {
       const { source } = datasource
-      if (_.isString(source) && source) {
-        nodeSource = datasource
-      } else {
-        datasource.source = nodeSource.source
-        nodeSource = datasource
+      if (!_.isString(source) || _.isEmpty(source)) {
+        datasource.source = defaultSource
       }
+      dataSource = datasource
+    } else if (_.isString(datasource) && datasource) {
+      dataSource.source = datasource
+      this.schema.datasource = dataSource
     } else {
-      this.schema.datasource = nodeSource
+      this.schema.datasource = dataSource
     }
-    this.dataNode = new DataNode(nodeSource, this, this.request)
+    this.dataNode = new DataNode(dataSource, this, this.request)
 
     // initialize state node
     this.stateNode = new StateNode(this)
