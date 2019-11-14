@@ -28,8 +28,8 @@ export interface IRequestGetConfigOption {
 export interface IRequest {
   setConfig: (config: IRequestConfig, options?: IRequestSetConfigOption) => void
   getConfig: (options?: IRequestGetConfigOption) => IRequestConfig
-  get: (url: string, config?: IRequestConfig) => Promise<AxiosResponse<any>>
-  delete: (url: string, config?: IRequestConfig) => Promise<AxiosResponse<any>>
-  put: (url: string, data?: any, config?: IRequestConfig) => Promise<AxiosResponse<any>>
-  post: (url: string, data?: any, config?: IRequestConfig) => Promise<AxiosResponse<any>>
+  get: (url: string, config?: IRequestConfig, id?: string) => Promise<AxiosResponse<any>>
+  delete: (url: string, config?: IRequestConfig, id?: string) => Promise<AxiosResponse<any>>
+  put: (url: string, data?: any, config?: IRequestConfig, id?: string) => Promise<AxiosResponse<any>>
+  post: (url: string, data?: any, config?: IRequestConfig, id?: string) => Promise<AxiosResponse<any>>
 }

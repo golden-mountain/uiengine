@@ -82,9 +82,9 @@ class RequestDevelop extends AbstractRequest {
     let mockDataPath: string = url
     if (_.isString(pathPrefix) && pathPrefix) {
       if (_.startsWith(mockDataPath, '/')) {
-        mockDataPath = `${pathPrefix}${mockDataPath}`
+        mockDataPath = `${_.trimEnd(pathPrefix, '/')}${mockDataPath}`
       } else {
-        mockDataPath = `${pathPrefix}/${mockDataPath}`
+        mockDataPath = `${_.trimEnd(pathPrefix, '/')}/${mockDataPath}`
       }
     }
 
