@@ -190,7 +190,7 @@ export class DataEngine implements IDataEngine {
     } else {
       RP.dataSchema = this.mapper.getDataSchema(source, true)
       if (_.isNil(RP.dataSchema)) {
-        RP.loadedSchema = await this.loadSchema(source)
+        RP.loadedSchema = await this.loadSchema(source, { engineId: _.get(options, 'engineId') })
         if (_.isNil(RP.loadedSchema)) {
           this.errorInfo = {
             status: 1003,
@@ -342,7 +342,9 @@ export class DataEngine implements IDataEngine {
   }
 
   async loadData(source: IDataSource, options?: ILoadDataOption) {
-    const requestOption: ISendRequestOption = {}
+    const requestOption: ISendRequestOption = {
+      config: { prefixType: 'data' }
+    }
     if (_.isObject(options)) {
       const { engineId, loadID } = options
       if (_.isString(engineId) && engineId) {
@@ -361,7 +363,10 @@ export class DataEngine implements IDataEngine {
   }
 
   async updateData(source: IDataSource, data: any, options?: IOtherOperOption) {
-    const requestOption: ISendRequestOption = { data }
+    const requestOption: ISendRequestOption = {
+      data,
+      config: { prefixType: 'data' }
+    }
     if (_.isObject(options)) {
       const { engineId } = options
       if (_.isString(engineId) && engineId) {
@@ -377,7 +382,10 @@ export class DataEngine implements IDataEngine {
   }
 
   async replaceData(source: IDataSource, data: any, options?: IOtherOperOption) {
-    const requestOption: ISendRequestOption = { data }
+    const requestOption: ISendRequestOption = {
+      data,
+      config: { prefixType: 'data' }
+    }
     if (_.isObject(options)) {
       const { engineId } = options
       if (_.isString(engineId) && engineId) {
@@ -393,7 +401,9 @@ export class DataEngine implements IDataEngine {
   }
 
   async deleteData(source: IDataSource, options?: IOtherOperOption) {
-    const requestOption: ISendRequestOption = {}
+    const requestOption: ISendRequestOption = {
+      config: { prefixType: 'data' }
+    }
     if (_.isObject(options)) {
       const { engineId } = options
       if (_.isString(engineId) && engineId) {
