@@ -1,98 +1,208 @@
-import _ from "lodash";
+import _ from 'lodash'
+
+import { PluginManager } from './PluginManager'
+import { getDomainName } from './utils'
 
 import {
   IDataMapper,
+  IDataMap,
   IDataSchema,
-  IRequest,
+  IDataNodeSchema,
+  IDataSource,
   IErrorInfo,
   IPluginManager,
-  IDataSource
-} from "../../typings";
-import { PluginManager, Cache, parseCacheID, parseSchemaPath } from ".";
+  IRequest,
+} from '../../typings'
 
-export default class DataMapper implements IDataMapper {
-  static instance: IDataMapper;
+export class DataMapper implements IDataMapper {
+  private static instance: DataMapper
   static getInstance = () => {
-    if (!DataMapper.instance) {
-      DataMapper.instance = new DataMapper();
+    if (_.isNil(DataMapper.instance)) {
+      DataMapper.instance = new DataMapper()
     }
-    return DataMapper.instance as DataMapper;
-  };
+    return DataMapper.instance
+  }
 
-  request: IRequest = {} as IRequest;
-  errorInfo?: IErrorInfo;
-  source: IDataSource = { source: "", schema: "" };
-  rootSchema?: IDataSchema;
-  id: string
-  pluginManager: IPluginManager
-  cacheID: string = "";
+  // the plugin types which can be used in DataMapper
+  private static pluginTypes: string[] = [
+    'dataMapper.dataSchema.searchFromRoot'
+  ]
+  static setPluginTypes = (types: string[]) => {
+    if (_.isArray(types)) {
+      DataMapper.pluginTypes = types.map((type: string) => {
+        if (_.isString(type) && type) {
+          return type
+        } else {
+          return undefined
+        }
+      }).filter((type?: string) => {
+        return _.isString(type)
+      }) as string[]
+    }
+  }
 
-  constructor() {
-    this.id = _.uniqueId('DataMapper-')
-    this.pluginManager = PluginManager.getInstance()
+  readonly id: string = _.uniqueId('DataMapper-')
+  pluginManager: IPluginManager = PluginManager.getInstance()
+
+  dataMap: IDataMap = {
+    dataSchema: {}
+  }
+  errorInfo?: IErrorInfo
+
+  constructor(id?: string) {
+
+    if (_.isString(id) && id) {
+      this.id = id
+    }
+
     this.pluginManager.register(
-      this.id
+      this.id,
+      { categories: DataMapper.pluginTypes }
     )
   }
 
-  setRequest(request: IRequest) {
-    this.request = request;
-  }
-
-  getDataEntryPoint(method: string): string {
-    let schema: any = this.rootSchema;
-    const defaultEndPoint = _.get(schema, `endpoints.default.path`, "");
-    const withoutPath = _.get(schema, `endpoints.${method}`, defaultEndPoint);
-    const endpoint = _.get(schema, `endpoints.${method}.path`, withoutPath);
-    const dataURLPrefix = this.request.getConfig("dataPathPrefix");
-    return `${dataURLPrefix}${endpoint}`;
-  }
-
-  private getSchemaSource(source: IDataSource) {
-    let schemaSource = source.schema;
-    if (!schemaSource) schemaSource = source.source;
-    return schemaSource;
-  }
-
-  async getSchema(source: IDataSource) {
-    const schemaSource = this.getSchemaSource(source);
-    this.cacheID = parseCacheID(schemaSource);
-    let schema: any = Cache.getDataSchema(this.cacheID);
-    if (!schema) {
-      schema = await this.loadSchema(source);
+  private getSchemaDomain(dataSource: IDataSource|string) {
+    let lineage: string = ''
+    if (_.isObject(dataSource)) {
+      const { schema, source } = dataSource
+      if (_.isString(schema) && schema) {
+        lineage = schema
+      } else if (_.isString(source) && source) {
+        lineage = source
+      }
+    } else if (_.isString(dataSource)) {
+      lineage = dataSource
     }
-    this.rootSchema = schema;
-    return schema;
+
+    return getDomainName(lineage, false)
+  }
+  private getSchemaLineage(dataSource: IDataSource|string) {
+    let lineage: string = ''
+    if (_.isObject(dataSource)) {
+      const { schema, source } = dataSource
+      if (_.isString(schema) && schema) {
+        lineage = schema
+      } else if (_.isString(source) && source) {
+        lineage = source
+      }
+    } else if (_.isString(dataSource)) {
+      lineage = dataSource
+    }
+
+    lineage = lineage
+      .replace('#:', '.')
+      .replace(':#', '.')
+      .replace('#', '.')
+      .replace(':', '.')
+
+    return _.trim(lineage, '.')
   }
 
-  async loadSchema(source: IDataSource) {
-    let result: any = null;
-    this.source = source;
-    const schemaSource = this.getSchemaSource(source);
-    let path = parseSchemaPath(schemaSource);
-    this.cacheID = parseCacheID(schemaSource);
-    try {
-      let schema: any = Cache.getDataSchema(this.cacheID);
-      if (!schema) {
-        const dataSchemaPrefix = this.request.getConfig("dataSchemaPrefix");
-        if (!_.isEmpty(dataSchemaPrefix)) {
-          path = `${dataSchemaPrefix}${path}`;
+  setDataSchema(
+    source: IDataSource,
+    schema: IDataSchema | IDataNodeSchema,
+  ) {
+    const schemaLineage = this.getSchemaLineage(source)
+    if (_.isString(schemaLineage) && schemaLineage) {
+      this.dataMap.dataSchema[schemaLineage] = schema
+    } else {
+      console.warn(`Can't get valid schema lineage to store the data schema.`)
+    }
+  }
+
+  getDataSchema(
+    source: IDataSource,
+    fromRoot?: boolean,
+  ) {
+    const dataSchemaMap = this.dataMap.dataSchema
+
+    let schema
+    const schemaLineage = this.getSchemaLineage(source)
+    if (_.isString(schemaLineage) && schemaLineage) {
+      schema = dataSchemaMap[schemaLineage]
+    }
+
+    if (_.isNil(schema) && fromRoot === true) {
+      const domainLineage = this.getSchemaDomain(source)
+      if (_.isString(domainLineage) && domainLineage) {
+        const domainSchema = dataSchemaMap[domainLineage]
+
+        const { results } = this.pluginManager.syncExecutePlugins(
+          this.id,
+          'dataMapper.dataSchema.searchFromRoot',
+          { schema: domainSchema, lineage: schemaLineage }
+        )
+        if (_.isArray(results) && results.length) {
+          const lastResult = results[results.length - 1]
+          if (!_.isNil(lastResult.result)) {
+            schema = lastResult.result
+            dataSchemaMap[schemaLineage] = schema
+          }
         }
-        schema = await this.request.get(path);
-        schema = schema.data;
-        Cache.setDataSchema(this.cacheID, schema);
+      }
+    }
+
+    return schema
+  }
+
+  clearDataSchema(
+    source?: IDataSource,
+  ) {
+    if (_.isNil(source)) {
+      this.dataMap.dataSchema = {}
+    } else {
+      const dataSchemaMap = this.dataMap.dataSchema
+
+      const schemaLineage = this.getSchemaLineage(source)
+      delete dataSchemaMap[schemaLineage]
+    }
+
+  }
+
+  getEntryPoint(
+    source: IDataSource,
+    method?: string,
+  ) {
+    const dataSchemaMap = this.dataMap.dataSchema
+
+    let schema
+    const schemaLineage = this.getSchemaLineage(source)
+    if (_.isString(schemaLineage) && schemaLineage) {
+      schema = dataSchemaMap[schemaLineage]
+    }
+
+    let endPoint
+    if (_.isObject(schema) && _.has(schema, 'endpoints')) {
+      const { endpoints } = schema as IDataSchema
+
+      let defaultEndPoint: string | undefined
+      const defaultConfig = _.get(endpoints, ['default'])
+      if (_.isObject(defaultEndPoint)) {
+        const { path } = defaultEndPoint
+        if (_.isString(path) && path) {
+          defaultEndPoint = path
+        }
+      } else if (_.isString(defaultConfig) && defaultConfig) {
+        defaultEndPoint = defaultConfig
       }
 
-      this.rootSchema = schema;
-      result = schema;
-    } catch (e) {
-      // prevent load and load again
-      Cache.setDataSchema(this.cacheID, {});
-      this.errorInfo = {
-        code: e.message
-      };
-    }
+      let methodEndPoint: string | undefined
+      if (_.isString(method) && method) {
+        const methodConfig = _.get(endpoints, [method])
+        if (_.isObject(methodConfig)) {
+          const { path } = methodConfig
+          if (_.isString(path) && path) {
+            methodEndPoint = path
+          }
+        } else if (_.isString(methodConfig) && methodConfig) {
+          methodEndPoint = methodConfig
+        }
+      }
 
-    return result;
+      endPoint = methodEndPoint || defaultEndPoint
+    }
+    return endPoint
   }
 }
+
+export default DataMapper

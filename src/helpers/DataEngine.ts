@@ -1,195 +1,412 @@
-import _ from "lodash";
+import _ from 'lodash'
+
+import { Cache } from './Cache'
+import { DataMapper } from './DataMapper'
+import { PluginManager } from './PluginManager'
+import { Request } from './Request'
+import { getDomainName, getSchemaName } from './utils'
 
 import {
   IDataEngine,
+  IDataEngineConfig,
   IDataMapper,
+  IDataSchema,
   IDataSource,
+  IErrorInfo,
+  ILoadDataOption,
+  IOtherOperOption,
   IPluginManager,
   IPluginExecuteOption,
   IPluginResult,
   IRequest,
-  IRequestOptions
-} from "../../typings";
+  IRequestConfig,
+  ISendRequestOption,
+} from '../../typings'
 
-import { PluginManager, Cache, DataMapper, parseCacheID } from ".";
-
-export default class DataEngine implements IDataEngine {
-  static instance: DataEngine;
+export class DataEngine implements IDataEngine {
+  private static instance: DataEngine
   static getInstance = () => {
     if (_.isNil(DataEngine.instance)) {
-      DataEngine.instance = new DataEngine();
+      DataEngine.instance = new DataEngine()
     }
-    return DataEngine.instance;
-  };
-
-  id: string;
-  pluginManager: IPluginManager;
-  request: IRequest = {} as IRequest;
-  errorInfo?: any;
-  source?: IDataSource;
-  schemaPath?: string;
-  mapper: IDataMapper = {} as IDataMapper;
-  data?: any;
-  cacheID: string = "response";
-  requestOptions: IRequestOptions = {};
-
-  constructor() {
-    this.id = _.uniqueId("DataEngine");
-    this.pluginManager = PluginManager.getInstance();
-    this.pluginManager.register(this.id, {
-      categories: ["data.request.before", "data.request.after"]
-    });
+    return DataEngine.instance
   }
 
-  setRequest(request: IRequest) {
-    this.request = request;
-    this.mapper = DataMapper.getInstance();
-    this.mapper.setRequest(request);
+  private static pluginTypes: string[] = [
+    'data.request.before',
+    'data.request.after',
+  ]
+  static setPluginTypes = (types: string[]) => {
+    if (_.isArray(types)) {
+      DataEngine.pluginTypes = types.map((type: string) => {
+        if (_.isString(type) && type) {
+          return type
+        } else {
+          return undefined
+        }
+      }).filter((type?: string) => {
+        return _.isString(type)
+      }) as string[]
+    }
   }
 
-  async loadSchema(source: IDataSource) {
-    // this.schemaPath = parseSchemaPath(source)
-    return await this.mapper.loadSchema(source);
+  readonly id: string = _.uniqueId('DataEngine-')
+  mapper: IDataMapper = DataMapper.getInstance()
+  pluginManager: IPluginManager = PluginManager.getInstance()
+  request: IRequest = Request.getInstance()
+
+  errorInfo?: IErrorInfo
+
+  constructor(id?: string, config?: IDataEngineConfig) {
+
+    if (_.isString(id) && id) {
+      this.id = id
+    }
+
+    this.initializeConfig(config)
+
+    this.pluginManager.register(
+      this.id,
+      { categories: DataEngine.pluginTypes }
+    )
+  }
+
+  initializeConfig(config?: IDataEngineConfig) {
+    if (_.isObject(config)) {
+      const { mapper, pluginManager, request } = config
+      if (!_.isNil(mapper)) {
+        this.mapper = mapper
+      }
+      if (!_.isNil(pluginManager)) {
+        this.pluginManager = pluginManager
+        this.pluginManager.register(
+          this.id,
+          { categories: DataEngine.pluginTypes}
+        )
+      }
+      if (!_.isNil(request)) {
+        this.request = request
+      }
+    }
+  }
+
+  private getSchemaName(dataSource: IDataSource|string) {
+    let lineage: string = ''
+    if (_.isObject(dataSource)) {
+      const { schema, source } = dataSource
+      if (_.isString(schema) && schema) {
+        lineage = schema
+      } else if (_.isString(source) && source) {
+        lineage = source
+      }
+    } else if (_.isString(dataSource)) {
+      lineage = dataSource
+    }
+
+    return getSchemaName(lineage)
+  }
+  private getDomainSource(dataSource: IDataSource|string) {
+    let lineage: string = ''
+    if (_.isObject(dataSource)) {
+      const { schema, source } = dataSource
+      if (_.isString(schema) && schema) {
+        lineage = schema
+      } else if (_.isString(source) && source) {
+        lineage = source
+      }
+    } else if (_.isString(dataSource)) {
+      lineage = dataSource
+    }
+
+    return {
+      source: `${getDomainName(lineage, false)}:`,
+      schema: `${getDomainName(lineage, false)}:`,
+    } as IDataSource
+  }
+  async loadSchema(source: IDataSource, options?: IOtherOperOption) {
+    const schemaName = this.getSchemaName(source)
+    let currentEngine: string | undefined
+    if (_.isObject(options)) {
+      const { engineId } = options
+      if (_.isString(engineId) && engineId) {
+        currentEngine = engineId
+      }
+    }
+
+    let schema: IDataSchema | undefined
+    try {
+      const schemaCache: IDataSchema = Cache.getDataSchema(schemaName)
+      if (!_.isObject(schemaCache)) {
+        const { data } = await this.request.get(schemaName, { prefixType: 'dataSchema' }, currentEngine)
+        if (_.isObject(data)) {
+          schema = data as IDataSchema
+        }
+      }
+    } catch (e) {
+      this.errorInfo = {
+        status: 1008,
+        code: _.get(e, 'message', `Error happens when load schema ${schemaName}`)
+      }
+    }
+
+    const domainSource = this.getDomainSource(source)
+    if (_.isObject(schema)) {
+      Cache.setDataSchema(schemaName, schema)
+      this.mapper.setDataSchema(domainSource, _.cloneDeep(schema))
+    } else {
+      // prevent load too many times
+      Cache.setDataSchema(schemaName, {})
+      this.mapper.setDataSchema(domainSource, {} as IDataSchema)
+      this.mapper.setDataSchema(source, {} as any)
+    }
+
+    return schema
   }
 
   async sendRequest(
     source: IDataSource,
-    data?: any,
-    method: string = "get",
-    cache: boolean = false
+    method: string,
+    options?: ISendRequestOption,
   ) {
-    // clear initial data
-    this.data = {};
-    this.requestOptions.params = _.cloneDeep(data);
-    this.requestOptions.method = method;
-    this.errorInfo = null;
-    if (!this.request[method] || !_.isFunction(this.request[method])) {
+    this.errorInfo = undefined
+    // the running parameters
+    const RP: any = {}
+
+    RP.sendMethod = _.lowerCase(method)
+    if (!_.isFunction(this.request[RP.sendMethod])) {
       this.errorInfo = {
         status: 1001,
-        code: `Method ${method} did not defined on Request`
-      };
-      return false;
+        code: `Current DataEngine didn't support request method '${method}'.`
+      }
+      return null
     }
 
-    // schemaPath = parseSchemaPath(source)
-    let dataSource = source.source;
-    this.cacheID = parseCacheID(dataSource);
-    this.source = source;
-    if (source) {
-      const schema = await this.mapper.loadSchema(source);
-      if (schema === null) {
-        this.errorInfo = {
-          status: 2001,
-          code: `Schema for ${source.source} not found`
-        };
-        return false;
+    if (_.isNil(source) || !_.isObject(source)) {
+      this.errorInfo = {
+        status: 1002,
+        code: `Can't send the request without a valid data source.`
+      }
+      return null
+    } else {
+      RP.dataSchema = this.mapper.getDataSchema(source, true)
+      if (_.isNil(RP.dataSchema)) {
+        RP.loadedSchema = await this.loadSchema(source)
+        if (_.isNil(RP.loadedSchema)) {
+          this.errorInfo = {
+            status: 1003,
+            code: `Can't find data schema for ${source.source}`
+          }
+          return null
+        }
+        RP.dataSchema = this.mapper.getDataSchema(source, true)
+        if (_.isNil(RP.dataSchema)) {
+          this.errorInfo = {
+            status: 1003,
+            code: `Can't find data schema for ${source.source}`
+          }
+          return null
+        }
       }
 
-      this.requestOptions.endpoint = this.mapper.getDataEntryPoint(method);
-      if (!this.requestOptions.endpoint) {
+      RP.endpoint = this.mapper.getEntryPoint(source, RP.sendMethod)
+      if (!_.isString(RP.endpoint) || _.isEmpty(RP.endpoint)) {
         this.errorInfo = {
-          status: 1000,
-          code: "URL not match"
-        };
-        return false;
+          status: 1004,
+          code: `Can't find the endpoint of ${RP.sendMethod} in the schema of ${source.source}.`
+        }
+        return null
+      }
+
+      if (_.isObject(options)) {
+        const { data, config, cacheID, engineId } = options
+        if (!_.isNil(data)) {
+          RP.requestPayload = _.cloneDeep(data)
+        }
+        if (!_.isNil(config)) {
+          RP.requestConfig = config
+        }
+        if (_.isString(cacheID) && cacheID) {
+          RP.responseID = cacheID
+        }
+        if (_.isString(engineId) && engineId) {
+          RP.engineId = engineId
+        }
       }
 
       try {
-        let response: any;
+        if (_.isString(RP.responseID) && RP.responseID) {
+          // use the cache data as response
+          // Pay attention: the API of the source should always response the same data
+          RP.responseData = Cache.getData(
+            RP.responseID,
+            { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
+          )
+        }
 
-        // could stop the commit
-        const exeOption: IPluginExecuteOption = {
-          afterExecute: (plugin, param, result) => {
-            if (!result) {
-              return {
-                stop: true
-              };
-            }
-            return {};
-          }
-        };
-        const exeResult = await this.pluginManager.executePlugins(
+        // execute plugins to prepare for the request and return the status
+        // the results of these plugins decide whether should stop the send
+        const { results: beforeResults } = await this.pluginManager.executePlugins(
           this.id,
-          "data.request.before",
-          { dataEngine: DataEngine.instance },
-          exeOption
-        );
-        const couldCommit = exeResult.results.every((item: IPluginResult) => {
-          if (item.result === true) {
-            return true;
-          } else {
-            return false;
-          }
-        });
-
-        if (couldCommit === false) {
-          this.errorInfo = {
-            status: 1001,
-            code: "Plugins blocked the commit"
-          };
-          return false;
-        }
-
-        if (cache) {
-          response = Cache.getData(this.cacheID, this.requestOptions.endpoint);
-        }
-
-        // handle response
-        if (!response) {
-          response = await this.request[method](
-            this.requestOptions.endpoint,
-            this.requestOptions.params
-          );
-          if (response.data) {
-            if (cache) {
-              Cache.setData(
-                this.cacheID,
-                this.requestOptions.endpoint,
-                response.data
-              );
+          'data.request.before',
+          {
+            dataEngine: this,
+            request: this.request,
+            source,
+            method,
+            options,
+            RP,
+          },
+          {
+            afterExecute: (plugin, param, result) => {
+              if (!!result === false) { return { stop: true } }
+              return {}
             }
-            response = response.data;
+          },
+        )
+        const couldSend = beforeResults.every((resultItem: IPluginResult) => {
+          const allowSend = !!(resultItem.result)
+          if (allowSend === false) {
+            this.errorInfo = {
+              status: 1005,
+              code: `Plugin '${resultItem.name}' blocked the request.`
+            }
+          }
+          return allowSend
+        })
+        if (couldSend === false) {
+          return null
+        }
+
+        if (_.isNil(RP.responseData)) {
+          switch (RP.sendMethod) {
+            case 'get':
+              RP.response = await this.request.get(RP.endpoint, RP.requestConfig, RP.engineId)
+              break
+            case 'delete':
+              RP.response = await this.request.delete(RP.endpoint, RP.requestConfig, RP.engineId)
+              break
+            case 'post':
+              RP.response = await this.request.post(RP.endpoint, RP.requestPayload, RP.requestConfig, RP.engineId)
+              break
+            case 'put':
+              RP.response = await this.request.put(RP.endpoint, RP.requestPayload, RP.requestConfig, RP.engineId)
+              break
+            default:
+              this.errorInfo = {
+                status: 1006,
+                code: `Can't solve the parameters for request method ${RP.sendMethod}`
+              }
+              return
+          }
+          if (_.isObject(RP.response)) {
+            const { data } = RP.response
+            if (!_.isNil(data)) {
+              if (_.isString(RP.responseID) && RP.responseID) {
+                // cache the response data with the ID
+                // Pay attention: the API of the source should always response the same data
+                Cache.setData(
+                  RP.responseID,
+                  data,
+                  { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
+                )
+              }
+              RP.responseData = data
+            }
           }
         }
 
-        this.data = response;
+        // execute plugins to check the response or modify the result
+        await this.pluginManager.executePlugins(
+          this.id,
+          'data.request.after',
+          {
+            dataEngine: this,
+            request: this.request,
+            source,
+            method,
+            options,
+            RP,
+          }
+        )
+
       } catch (e) {
         this.errorInfo = {
-          code: e.message
-        };
+          status: 1007,
+          code: _.get(e, 'message', `Error happens when send request to ${RP.endpoint}`)
+        }
+        return null
       }
     }
 
-    // could modify the response
-    const afterResult = await this.pluginManager.executePlugins(
-      this.id,
-      "data.request.after",
-      { dataEngine: DataEngine.instance }
-    );
-    if (afterResult.status === "COMPLETED") {
-      afterResult.results.forEach(result => {
-        if (!_.isEmpty(result.result)) {
-          this.data = result.result;
-        }
-      });
+    return RP.responseData
+  }
+
+  async loadData(source: IDataSource, options?: ILoadDataOption) {
+    const requestOption: ISendRequestOption = {}
+    if (_.isObject(options)) {
+      const { engineId, loadID } = options
+      if (_.isString(engineId) && engineId) {
+        requestOption.engineId = engineId
+      }
+      if (_.isString(loadID) && loadID) {
+        requestOption.cacheID = loadID
+      }
     }
 
-    return this.data;
+    return await this.sendRequest(
+      source,
+      'get',
+      requestOption,
+    )
   }
 
-  async loadData(source: IDataSource, params?: any) {
-    return await this.sendRequest(source, params, "get", true);
+  async updateData(source: IDataSource, data: any, options?: IOtherOperOption) {
+    const requestOption: ISendRequestOption = { data }
+    if (_.isObject(options)) {
+      const { engineId } = options
+      if (_.isString(engineId) && engineId) {
+        requestOption.engineId = engineId
+      }
+    }
+
+    return await this.sendRequest(
+      source,
+      'post',
+      requestOption,
+    )
   }
 
-  async updateData(source: IDataSource, data?: any) {
-    return await this.sendRequest(source, data, "post");
+  async replaceData(source: IDataSource, data: any, options?: IOtherOperOption) {
+    const requestOption: ISendRequestOption = { data }
+    if (_.isObject(options)) {
+      const { engineId } = options
+      if (_.isString(engineId) && engineId) {
+        requestOption.engineId = engineId
+      }
+    }
+
+    return await this.sendRequest(
+      source,
+      'put',
+      requestOption,
+    )
   }
 
-  async replaceData(source: IDataSource, data?: any) {
-    return await this.sendRequest(source, data, "put");
-  }
+  async deleteData(source: IDataSource, options?: IOtherOperOption) {
+    const requestOption: ISendRequestOption = {}
+    if (_.isObject(options)) {
+      const { engineId } = options
+      if (_.isString(engineId) && engineId) {
+        requestOption.engineId = engineId
+      }
+    }
 
-  async deleteData(source: IDataSource, data?: any) {
-    return await this.sendRequest(source, data, "put");
+    return await this.sendRequest(
+      source,
+      'delete',
+      requestOption,
+    )
   }
 }
+
+export default DataEngine

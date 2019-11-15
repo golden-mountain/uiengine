@@ -1,48 +1,45 @@
-import { IRequest } from "../Request";
-import { IDataSource } from "../DataNode";
+import { IObject, IDataSchema } from '../Common'
+import { IDataSource } from '../DataNode'
+import { IRequest, IErrorInfo, IRequestConfig } from '../Request'
 
-export interface IResponse {}
-export interface IRequestOptions {
-  endpoint?: string;
-  params?: any;
-  method?: string;
+export interface IDataEngineConfig {
+  mapper: IDataMapper
+  pluginManager: IPluginManager
+  request: IRequest
 }
 
-export interface IDataMapper {
-  schema?: IDataSchema;
-  errorInfo?: any;
-  source?: IDataSource;
-  schema?: IDataSchema;
-  rootSchema?: IDataSchema;
-  cacheID: string;
+export interface ISendRequestOption {
+  data?: any
+  config?: IRequestConfig
+  cacheID?: string
+  engineId?: string
+  [otherKey: string]: any
+}
 
-  setRequest(request: IRequest);
-  loadSchema(source?: IDataSource);
-  getSchema(source: IDataSource);
-  getDataEntryPoint(method: string): string;
+export interface ILoadDataOption {
+  engineId?: string
+  loadID?: string
+}
+
+export interface IOtherOperOption {
+  engineId?: string
 }
 
 export interface IDataEngine {
-  errorInfo?: any;
-  source?: IDataSource;
-  mapper: IDataMapper;
-  request: IRequest;
-  data?: any;
-  pluginManager: IPluginManager;
-  cacheID: string;
-  requestOptions: IRequestOptions;
+  readonly id: string
+  mapper: IDataMapper
+  pluginManager: IPluginManager
+  request: IRequest
 
-  setRequest(req: IRequest);
-  sendRequest(
-    source: IDataSource,
-    data: any,
-    method: string = "post",
-    cache: boolean = false
-  );
-  loadSchema(source?: IDataSource);
-  loadData(source?: IDataSource, data?: any);
-  updateData(source?: IDataSource, data?: any);
-  replaceData(source?: IDataSource, data?: any);
-  deleteData(source?: IDataSource, data?: any);
-  // parseSchemaPath(source: string);
+  errorInfo?: IErrorInfo
+
+  initializeConfig: (config?: IDataEngineConfig) => void
+
+  loadSchema: (source: IDataSource, options?: IOtherOperOption) => Promise<IDataSchema|undefined>
+
+  sendRequest: (source: IDataSource, method: string, options?: ISendRequestOption) => Promise<any>
+  loadData: (source: IDataSource, options?: ILoadDataOption) => Promise<any>
+  updateData: (source: IDataSource, data: any, options?: IOtherOperOption) => Promise<any>
+  replaceData: (source: IDataSource, data: any, options?: IOtherOperOption) => Promise<any>
+  deleteData: (source: IDataSource, options?: IOtherOperOption) => Promise<any>
 }
