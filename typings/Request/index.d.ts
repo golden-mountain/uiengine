@@ -1,17 +1,20 @@
 import { AxiosRequestConfig, AxiosResponse } from 'axios'
 
+import { IObject } from '../Common'
+
 export interface IErrorInfo {
   status?: number
-  code?: any
+  code?: string
 }
 
 export interface IRequestConfig extends AxiosRequestConfig {
   devMode?: boolean
-  pathPrefix?: string
+  prefixType?: 'dataSchema' | 'data' | 'uiSchema'
   dataSchemaPrefix?: string
   mockDataPrefix?: string
-  layoutSchemaPrefix?: string
-  headers?: object
+  realDataPrefix?: string
+  uiSchemaPrefix?: string
+  headers?: IObject
 }
 
 export interface IRequestSetConfigOption {

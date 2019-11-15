@@ -1,4 +1,8 @@
-import axios, { AxiosInstance } from 'axios'
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+} from 'axios'
 import MockAdapter from 'axios-mock-adapter'
 import _ from 'lodash'
 
@@ -9,31 +13,14 @@ import {
   IRequestGetConfigOption,
 } from '../../typings'
 
-// Add a request interceptor
-// axios.interceptors.request.use(
-//   function(config) {
-//     // Do something before request is sent
-//     return config
-//   },
-//   function(error) {
-//     // Do something with request error
-//     return Promise.reject(error)
-//   }
-// )
-
-// // Add a response interceptor
-// axios.interceptors.response.use(
-//   function(response) {
-//     // Do something with response data
-//     return response
-//   },
-//   function(error) {
-//     // Do something with response error
-//     return Promise.reject(error)
-//   }
-// )
-
 axios.defaults.headers.common['Content-Type'] = 'application/json'
+
+type RequestInterceptor = (
+  value: AxiosRequestConfig,
+) => AxiosRequestConfig | Promise<AxiosRequestConfig>
+type ResponseInterceptor = (
+  value: AxiosResponse,
+) => AxiosResponse | Promise<AxiosResponse>
 
 class AbstractRequest {
   protected axios: AxiosInstance
@@ -56,6 +43,38 @@ class AbstractRequest {
   getDefaultConfig() {
     return _.cloneDeep(this.defaultConfig)
   }
+
+  injectInterceptor(
+    type: 'request' | 'response',
+    onFulfilled?: RequestInterceptor | ResponseInterceptor,
+    onRejected?: (error: any) => any,
+  ) {
+    if (type === 'request') {
+      return this.axios.interceptors.request.use(
+        onFulfilled as RequestInterceptor,
+        onRejected,
+      )
+    } else if (type === 'response') {
+      return this.axios.interceptors.response.use(
+        onFulfilled as ResponseInterceptor,
+        onRejected,
+      )
+    } else {
+      console.warn(`Invalid interceptor type '${type}'`)
+    }
+  }
+  ejectInterceptor(
+    type: string,
+    number: number,
+  ) {
+    if (type === 'request') {
+      this.axios.interceptors.request.eject(number)
+    } else if (type === 'response') {
+      this.axios.interceptors.response.eject(number)
+    } else {
+      console.warn(`Invalid interceptor type '${type}'`)
+    }
+  }
 }
 
 class RequestDevelop extends AbstractRequest {
@@ -67,28 +86,51 @@ class RequestDevelop extends AbstractRequest {
     this.mocker = new MockAdapter(this.axios)
   }
 
-  private getConfigInfo(config?: IRequestConfig, configKey?: string) {
-    const requestConfig = _.assign({}, this.defaultConfig, config)
-
-    if (_.isString(configKey) && configKey) {
-      return _.cloneDeep(requestConfig[configKey])
+  private addPrefix(url: string, prefix: string) {
+    if (_.startsWith(url, '/')) {
+      return `${_.trimEnd(prefix, '/')}${url}`
     } else {
-      return _.cloneDeep(requestConfig)
+      return `${_.trimEnd(prefix, '/')}/${url}`
     }
   }
-  private mockResponse(method: string, url: string, data?: any, config?: IRequestConfig) {
-    const pathPrefix: string = this.getConfigInfo(config, 'pathPrefix')
+  private customizePrefix(
+    method: string,
+    url: string,
+    data: any,
+    config: IRequestConfig,
+  ) {
+    const {
+      prefixType,
+      dataSchemaPrefix,
+      mockDataPrefix,
+      uiSchemaPrefix,
+    } = config
 
-    let mockDataPath: string = url
-    if (_.isString(pathPrefix) && pathPrefix) {
-      if (_.startsWith(mockDataPath, '/')) {
-        mockDataPath = `${_.trimEnd(pathPrefix, '/')}${mockDataPath}`
-      } else {
-        mockDataPath = `${_.trimEnd(pathPrefix, '/')}/${mockDataPath}`
-      }
+    let prefix: string = ''
+    switch (prefixType) {
+      case 'dataSchema':
+        if (_.isString(dataSchemaPrefix)) {
+          prefix = dataSchemaPrefix
+        }
+        return this.addPrefix(url, prefix)
+      case 'data':
+        if (_.isString(mockDataPrefix)) {
+          this.mockResponse(method, url, data, mockDataPrefix)
+        }
+        return url
+      case 'uiSchema':
+        if (_.isString(uiSchemaPrefix)) {
+          prefix = uiSchemaPrefix
+        }
+        return this.addPrefix(url, prefix)
+      default:
+        return url
     }
-
+  }
+  private mockResponse(method: string, url: string, data: any, prefix: string) {
+    const mockDataPath: string = this.addPrefix(url, prefix)
     const mockData = require(mockDataPath)
+
     const mockMatcher = this.mocker[`on${_.upperFirst(method)}`]
     if (_.isFunction(mockMatcher)) {
       const mockHandler = mockMatcher(url, data)
@@ -97,51 +139,97 @@ class RequestDevelop extends AbstractRequest {
       console.warn(`Can\'t mock the response for a ${_.upperCase(method)} request`)
     }
   }
+  private getRealConfig(config?: IRequestConfig) {
+    return _.assign({}, this.defaultConfig, config)
+  }
 
   get(url: string, config?: IRequestConfig) {
-    this.mockResponse('get', url, undefined, config)
-    const realConfig: IRequestConfig = this.getConfigInfo(config)
-    return this.axios.get(url, realConfig)
+    const realConfig: IRequestConfig = this.getRealConfig(config)
+    const realEndpoint: string = this.customizePrefix('get', url, undefined, realConfig)
+    return this.axios.get(realEndpoint, realConfig)
   }
 
   put(url: string, data?: any, config?: IRequestConfig) {
-    this.mockResponse('put', url, data, config)
-    const realConfig: IRequestConfig = this.getConfigInfo(config)
-    return this.axios.put(url, data, realConfig)
+    const realConfig: IRequestConfig = this.getRealConfig(config)
+    const realEndpoint: string = this.customizePrefix('put', url, data, realConfig)
+    return this.axios.put(realEndpoint, data, realConfig)
   }
 
   post(url: string, data?: any, config?: IRequestConfig) {
-    this.mockResponse('post', url, data, config)
-    const realConfig: IRequestConfig = this.getConfigInfo(config)
-    return this.axios.post(url, data, realConfig)
+    const realConfig: IRequestConfig = this.getRealConfig(config)
+    const realEndpoint: string = this.customizePrefix('post', url, data, realConfig)
+    return this.axios.post(realEndpoint, data, realConfig)
   }
 
   delete(url: string, config?: IRequestConfig) {
-    this.mockResponse('delete', url, undefined, config)
-    const realConfig: IRequestConfig = this.getConfigInfo(config)
-    return this.axios.delete(url, realConfig)
+    const realConfig: IRequestConfig = this.getRealConfig(config)
+    const realEndpoint: string = this.customizePrefix('delelte', url, undefined, realConfig)
+    return this.axios.delete(realEndpoint, realConfig)
   }
 }
 
 class RequestProduct extends AbstractRequest {
+  private addPrefix(url: string, prefix: string) {
+    if (_.startsWith(url, '/')) {
+      return `${_.trimEnd(prefix, '/')}${url}`
+    } else {
+      return `${_.trimEnd(prefix, '/')}/${url}`
+    }
+  }
+  private customizePrefix(url: string, config: IRequestConfig) {
+    const {
+      prefixType,
+      dataSchemaPrefix,
+      realDataPrefix,
+      uiSchemaPrefix,
+    } = config
+
+    let prefix: string = ''
+    switch (prefixType) {
+      case 'dataSchema':
+        if (_.isString(dataSchemaPrefix)) {
+          prefix = dataSchemaPrefix
+        }
+        return this.addPrefix(url, prefix)
+      case 'data':
+        if (_.isString(realDataPrefix)) {
+          prefix = realDataPrefix
+        }
+        return this.addPrefix(url, prefix)
+      case 'uiSchema':
+        if (_.isString(uiSchemaPrefix)) {
+          prefix = uiSchemaPrefix
+        }
+        return this.addPrefix(url, prefix)
+      default:
+        return url
+    }
+  }
+  private getRealConfig(config?: IRequestConfig) {
+    return _.assign({}, this.defaultConfig, config)
+  }
   get(url: string, config?: IRequestConfig) {
-    const realConfig: IRequestConfig = _.assign({}, this.defaultConfig, config)
-    return this.axios.get(url, realConfig)
+    const realConfig: IRequestConfig = this.getRealConfig(config)
+    const realEndpoint: string = this.customizePrefix(url, realConfig)
+    return this.axios.get(realEndpoint, realConfig)
   }
 
   put(url: string, data?: any, config?: IRequestConfig) {
-    const realConfig: IRequestConfig = _.assign({}, this.defaultConfig, config)
-    return this.axios.put(url, data, realConfig)
+    const realConfig: IRequestConfig = this.getRealConfig(config)
+    const realEndpoint: string = this.customizePrefix(url, realConfig)
+    return this.axios.put(realEndpoint, data, realConfig)
   }
 
   post(url: string, data?: any, config?: IRequestConfig) {
-    const realConfig: IRequestConfig = _.assign({}, this.defaultConfig, config)
-    return this.axios.post(url, data, realConfig)
+    const realConfig: IRequestConfig = this.getRealConfig(config)
+    const realEndpoint: string = this.customizePrefix(url, realConfig)
+    return this.axios.post(realEndpoint, data, realConfig)
   }
 
   delete(url: string, config?: IRequestConfig) {
-    const realConfig: IRequestConfig = _.assign({}, this.defaultConfig, config)
-    return this.axios.delete(url, realConfig)
+    const realConfig: IRequestConfig = this.getRealConfig(config)
+    const realEndpoint: string = this.customizePrefix(url, realConfig)
+    return this.axios.delete(realEndpoint, realConfig)
   }
 }
 
