@@ -103,6 +103,7 @@ class RequestDevelop extends AbstractRequest {
       prefixType,
       dataSchemaPrefix,
       mockDataPrefix,
+      realDataPrefix,
       uiSchemaPrefix,
     } = config
 
@@ -115,9 +116,17 @@ class RequestDevelop extends AbstractRequest {
         return this.addPrefix(url, prefix)
       case 'data':
         if (_.isString(mockDataPrefix)) {
-          this.mockResponse(method, url, data, mockDataPrefix)
+          const mockDataPath: string = this.addPrefix(url, mockDataPrefix)
+          const mockData: any = require(mockDataPath)
+          if (_.isObject(mockData) && _.has(mockData, [method])) {
+            this.mockResponse(method, url, data, mockData[method])
+            return url
+          }
         }
-        return url
+        if (_.isString(realDataPrefix)) {
+          prefix = realDataPrefix
+        }
+        return this.addPrefix(url, prefix)
       case 'uiSchema':
         if (_.isString(uiSchemaPrefix)) {
           prefix = uiSchemaPrefix
@@ -127,10 +136,11 @@ class RequestDevelop extends AbstractRequest {
         return url
     }
   }
-  private mockResponse(method: string, url: string, data: any, prefix: string) {
-    const mockDataPath: string = this.addPrefix(url, prefix)
-    const mockData = require(mockDataPath)
+  private getRealConfig(config?: IRequestConfig) {
+    return _.assign({}, this.defaultConfig, config)
+  }
 
+  mockResponse(method: string, url: string, data: any, mockData: any) {
     const mockMatcher = this.mocker[`on${_.upperFirst(method)}`]
     if (_.isFunction(mockMatcher)) {
       const mockHandler = mockMatcher(url, data)
@@ -138,9 +148,6 @@ class RequestDevelop extends AbstractRequest {
     } else {
       console.warn(`Can\'t mock the response for a ${_.upperCase(method)} request`)
     }
-  }
-  private getRealConfig(config?: IRequestConfig) {
-    return _.assign({}, this.defaultConfig, config)
   }
 
   get(url: string, config?: IRequestConfig) {
