@@ -341,25 +341,25 @@ export class UINode implements IUINode {
     return schema
   }
 
-  private async getRemoteSchema(url: string, config?: IRequestConfig) {
+  private async getRemoteSchema(schemaName: string) {
     let schema: IUISchema | undefined
     if (_.isString(this.layoutKey) && this.layoutKey) {
-      schema = Cache.getLayoutSchema(this.layoutKey, { cacheKey: url })
+      schema = Cache.getLayoutSchema(this.layoutKey, { cacheKey: schemaName })
     }
     if (_.isNil(schema)) {
       try {
-        const { data } = await this.request.get(url, config)
+        const { data } = await this.request.get(schemaName, { prefixType: 'uiSchema' }, this.engineId)
         if (_.isObject(data)) {
           schema = data
           if (_.isString(this.layoutKey) && this.layoutKey) {
-            Cache.setLayoutSchema(this.layoutKey, data, { cacheKey: url })
+            Cache.setLayoutSchema(this.layoutKey, data, { cacheKey: schemaName })
           }
         }
       } catch (e) {
         console.error(e)
         this.errorInfo = {
           status: 400,
-          code: `Error loading from ${url}`
+          code: `Error: failed to load layout schema ${schemaName}`
         }
       }
     }
@@ -369,7 +369,7 @@ export class UINode implements IUINode {
   async loadLayout(schema?: string | IUISchema) {
     let targetSchema: IUISchema | undefined
     if (_.isString(schema) && schema) {
-      targetSchema = await this.getRemoteSchema(schema, {})
+      targetSchema = await this.getRemoteSchema(schema)
     } else if (_.isObject(schema)) {
       targetSchema = schema
     } else {

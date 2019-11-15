@@ -12,7 +12,7 @@
         "path": "/virtual-server",
         "layouts": [
           {
-            "layout": "schema/ui/slb.virtual-server.json",
+            "layout": "slb.virtual-server.json",
             "workingMode": {
               "mode": "edit",
               "options": {
@@ -29,7 +29,7 @@
         "path": "/wizard",
         "layouts": [
           {
-            "layout": "schema/ui/wizard.json",
+            "layout": "wizard.json",
             "workingMode": {
               "mode": "edit",
               "options": {}
@@ -45,7 +45,7 @@
         "path": "/virtual-port",
         "layouts": [
           {
-            "layout": "schema/ui/slb.virtual-server.port.json",
+            "layout": "slb.virtual-server.port.json",
             "workingMode": {
               "mode": "edit",
               "options": {}

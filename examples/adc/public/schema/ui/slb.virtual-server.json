@@ -437,7 +437,7 @@
               "datasource": "slb.virtual-server:port-list",
               "props": {
                 "modal": {
-                  "layout": "schema/ui/slb.virtual-server.port.json",
+                  "layout": "slb.virtual-server.port.json",
                   "title": "Create Virtual Port",
                   "width": "80%",
                   "connect": {
