@@ -11,7 +11,7 @@ import {
   IDataSource,
   IErrorInfo,
   IStateNode,
-  IDataPoolHandle,
+  IDataPoolHandle
 } from "../../typings";
 import { DataEngine } from "../helpers";
 
@@ -76,11 +76,11 @@ export default class DataNode implements IDataNode {
     if (this.dataPool instanceof DataPool) {
       this.dataPool.set(this.source.source, value);
 
-      const stateNode: IStateNode = _.get(this, ['uiNode', 'stateNode'])
+      const stateNode: IStateNode = _.get(this, ["uiNode", "stateNode"]);
       if (!_.isNil(stateNode)) {
-        const poolState = stateNode.getStateFromDataPool()
+        const poolState = stateNode.getStateFromDataPool();
         if (_.isNil(poolState)) {
-          stateNode.setStateToDataPool()
+          stateNode.setStateToDataPool();
         }
       }
     }
@@ -94,16 +94,16 @@ export default class DataNode implements IDataNode {
 
   set errorInfo(error: IErrorInfo) {
     if (this.dataPool instanceof DataPool) {
-      this.dataPool.setInfo(
-        this.source.source,
-        { key: 'error', value: error || {} }
-      );
+      this.dataPool.setInfo(this.source.source, {
+        key: "error",
+        value: error || {}
+      });
     }
   }
 
   get errorInfo() {
     if (this.dataPool instanceof DataPool) {
-      return this.dataPool.getInfo(this.source.source, 'error');
+      return this.dataPool.getInfo(this.source.source, "error");
     }
     return {};
   }
@@ -158,49 +158,66 @@ export default class DataNode implements IDataNode {
         let formattedSource = formatSource(this.source.source);
         result = _.get(data, formattedSource);
         if (result !== undefined) {
-          this.data = result
+          this.data = result;
         }
       }
     }
 
-    const loadedData = this.data
+    const loadedData = this.data;
     if (_.isArray(loadedData)) {
       loadedData.forEach((item: any, index: number) => {
-        const downSource = this.source.source + `[${index}]`
-        if (this.dataPool.getInfo(downSource, 'status') === undefined) {
+        const downSource = this.source.source + `[${index}]`;
+        if (this.dataPool.getInfo(downSource, "status") === undefined) {
           if (mode === "new") {
-            this.dataPool.setInfo(downSource, { key: 'status', value: 'create' })
+            this.dataPool.setInfo(downSource, {
+              key: "status",
+              value: "create"
+            });
           } else {
-            this.dataPool.setInfo(downSource, { key: 'status', value: 'view' })
+            this.dataPool.setInfo(downSource, { key: "status", value: "view" });
           }
         }
-      })
+      });
     } else if (_.isObject(loadedData)) {
-      if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
+      if (this.dataPool.getInfo(this.source.source, "status") === undefined) {
         if (mode === "new") {
-          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create' })
+          this.dataPool.setInfo(this.source.source, {
+            key: "status",
+            value: "create"
+          });
         } else {
-          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'view' })
+          this.dataPool.setInfo(this.source.source, {
+            key: "status",
+            value: "view"
+          });
         }
       }
     } else {
       const setDataInfo = (infoKey: string, handle: IDataPoolHandle) => {
-        const parentHandle = handle.getParent()
+        const parentHandle = handle.getParent();
         if (!_.isNil(parentHandle)) {
-          if (parentHandle.getInfo('status') === undefined) {
+          if (parentHandle.getInfo("status") === undefined) {
             if (mode === "new") {
-              parentHandle.setInfo('status', 'create')
+              parentHandle.setInfo("status", "create");
             } else {
-              parentHandle.setInfo('status', 'view')
+              parentHandle.setInfo("status", "view");
             }
           }
         }
-      }
-      if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
+      };
+      if (this.dataPool.getInfo(this.source.source, "status") === undefined) {
         if (mode === "new") {
-          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create', setDataInfo })
+          this.dataPool.setInfo(this.source.source, {
+            key: "status",
+            value: "create",
+            setDataInfo
+          });
         } else {
-          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'view', setDataInfo })
+          this.dataPool.setInfo(this.source.source, {
+            key: "status",
+            value: "view",
+            setDataInfo
+          });
         }
       }
     }
@@ -223,19 +240,23 @@ export default class DataNode implements IDataNode {
   }
 
   async updateData(value: any) {
+    console.log(value, this.source.source);
     let noUpdateLayout = true;
     if (_.isArray(value) && this.uiNode.schema.$children) {
       noUpdateLayout = false;
     }
 
-    this.data = value
-    if (this.dataPool.getInfo(this.source.source, 'status') === 'view') {
-      this.dataPool.setInfo(this.source.source, { key: 'status', value: 'update' })
+    this.data = value;
+    if (this.dataPool.getInfo(this.source.source, "status") === "view") {
+      this.dataPool.setInfo(this.source.source, {
+        key: "status",
+        value: "update"
+      });
     }
-    if (this.source.source.includes(':')) {
-      let mainRoute = this.source.source.split(':')[0] + ':'
-      if (this.dataPool.getInfo(mainRoute, 'status') === 'view') {
-        this.dataPool.setInfo(mainRoute, { key: 'status', value: 'update' })
+    if (this.source.source.includes(":")) {
+      let mainRoute = this.source.source.split(":")[0] + ":";
+      if (this.dataPool.getInfo(mainRoute, "status") === "view") {
+        this.dataPool.setInfo(mainRoute, { key: "status", value: "update" });
       }
     }
 
@@ -264,7 +285,7 @@ export default class DataNode implements IDataNode {
 
     const status = _.get(this.errorInfo, "status", true);
     if (status) {
-      this.dataPool.clearInfo(this.source.source, 'error');
+      this.dataPool.clearInfo(this.source.source, "error");
     }
 
     await this.refreshLayout(noUpdateLayout);
@@ -276,9 +297,9 @@ export default class DataNode implements IDataNode {
     if (this.uiNode.schema.$children) {
       const currentValue = this.data || [];
 
-      let index = currentValue.length
+      let index = currentValue.length;
       if (insertHead) {
-        index = 0
+        index = 0;
         currentValue.unshift(value);
       } else {
         currentValue.push(value);
@@ -286,19 +307,22 @@ export default class DataNode implements IDataNode {
       status = await this.updateData(currentValue);
 
       if (index === currentValue.length - 1) {
-        let lineage = `${this.source.source}[${index}]`
-        this.dataPool.setInfo(lineage, { key: 'status', value: 'create' })
+        let lineage = `${this.source.source}[${index}]`;
+        this.dataPool.setInfo(lineage, { key: "status", value: "create" });
       } else if (index === 0) {
         for (let i = currentValue.length - 1; i > 0; i--) {
-          let oldLineage = `${this.source.source}[${i - 1}]`
-          const status = this.dataPool.getInfo(oldLineage, 'status')
+          let oldLineage = `${this.source.source}[${i - 1}]`;
+          const status = this.dataPool.getInfo(oldLineage, "status");
           if (status !== undefined) {
-            let newLineage = `${this.source.source}[${i}]`
-            this.dataPool.setInfo(newLineage, { key: 'status', value: status })
+            let newLineage = `${this.source.source}[${i}]`;
+            this.dataPool.setInfo(newLineage, { key: "status", value: status });
           }
         }
-        let insertLineage = `${this.source.source}[0]`
-        this.dataPool.setInfo(insertLineage, { key: 'status', value: 'create' })
+        let insertLineage = `${this.source.source}[0]`;
+        this.dataPool.setInfo(insertLineage, {
+          key: "status",
+          value: "create"
+        });
       }
     }
     return status;
@@ -337,15 +361,17 @@ export default class DataNode implements IDataNode {
             noUpdateLayout = false;
           }
 
-          let objLineage = `${this.source.source}[${path}]`
-          if (this.dataPool.getInfo(objLineage, 'status') !== 'delete') {
-            this.dataPool.setInfo(objLineage, { key: 'status', value: 'delete' })
+          let objLineage = `${this.source.source}[${path}]`;
+          if (this.dataPool.getInfo(objLineage, "status") !== "delete") {
+            this.dataPool.setInfo(objLineage, {
+              key: "status",
+              value: "delete"
+            });
           }
 
           // _.remove(data, (e: any, index: number) => {
           //   return _.isArray(path) ? path.indexOf(index) > -1 : index === path;
           // });
-
         } else {
           _.unset(data, path);
         }
@@ -356,7 +382,7 @@ export default class DataNode implements IDataNode {
       // not array, can't delete directly
       if (typeof this.data !== "object") {
         // this.dataPool.set(this.source.source, this.data);
-        this.dataPool.clearInfo(this.source.source, 'error');
+        this.dataPool.clearInfo(this.source.source, "error");
       }
       // update state without sending message
       await this.refreshLayout(noUpdateLayout);
