@@ -70,11 +70,9 @@ export class UINode implements IUINode {
       }
       if (!_.isNil(controller)) {
         this.controller = controller
-
       }
       if (!_.isNil(pluginManager)) {
         this.pluginManager = pluginManager
-
       }
       if (!_.isNil(request)) {
         this.request = request
@@ -147,10 +145,23 @@ export class UINode implements IUINode {
     } else {
       this.schema.datasource = dataSource
     }
-    this.dataNode = new DataNode(dataSource, this, this.request)
+    this.dataNode = new DataNode(this, dataSource, { request: this.request })
 
     // initialize state node
     this.stateNode = new StateNode(this)
+  }
+
+  async parseProps() {
+    // exec ui.parser plugin
+    try {
+      await this.pluginManager.executePlugins(
+        this.id,
+        'ui.parser',
+        {uiNode: this}
+      )
+    } catch (e) {
+      console.error(e)
+    }
   }
 
   private createChildNode(schema: IUISchema, parent?: IUINode) {
@@ -231,16 +242,7 @@ export class UINode implements IUINode {
     this.stateNode = new StateNode(this)
     await this.stateNode.renewStates()
 
-    // load ui.parser plugin
-    try {
-      await this.pluginManager.executePlugins(
-        this.id,
-        'ui.parser',
-        {uiNode: this}
-      )
-    } catch (e) {
-      console.error(e)
-    }
+    await this.parseProps()
 
     return currentSchema
   }

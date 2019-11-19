@@ -47,6 +47,8 @@ export interface IUINode {
   stateInfo: IStateInfo
   isLiveChildren: boolean
 
+  parseProps: () => Promise
+
   loadLayout: (schema?: string | IUISchema) => Promise<IUISchema>
   replaceLayout: (newSchema: string | IUISchema, route?: number[]) => Promise<IUISchema>
   refreshLayout: () => Promise<IUISchema>

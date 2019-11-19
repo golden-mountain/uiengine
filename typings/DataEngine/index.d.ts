@@ -1,5 +1,7 @@
 import { IObject, IDataSchema } from '../Common'
+import { IDataMapper } from '../DataMapper'
 import { IDataSource } from '../DataNode'
+import { IPluginManager } from '../PluginManager'
 import { IRequest, IErrorInfo, IRequestConfig } from '../Request'
 
 export interface IDataEngineConfig {
