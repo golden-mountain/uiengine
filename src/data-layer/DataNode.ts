@@ -89,7 +89,6 @@ export default class DataNode implements IDataNode {
         autoload: _.isBoolean(autoload) ? autoload : true,
       }
       if (defaultValue !== undefined) {
-        this.data = defaultValue
         initialSrc.defaultValue = _.cloneDeep(defaultValue)
       }
       if (_.isObject(loadOptions)) {
@@ -118,6 +117,10 @@ export default class DataNode implements IDataNode {
 
     this.uiNode = uiNode
     this.source = this.initialSource(source)
+
+    if (this.source.defaultValue !== undefined) {
+      this.data = this.source.defaultValue
+    }
 
     // set the helpers which the node depends on
     this.initialConfig(config)
