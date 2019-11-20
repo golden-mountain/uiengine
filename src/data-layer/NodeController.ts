@@ -430,16 +430,18 @@ export class NodeController implements INodeController {
     if (!_.isNil(renderer)) {
       renderer.visible = false
 
-      // set the last layout of active engine as current active layout
-      const activeEngine = this.getEngineId()
-      const loadedLayouts = this.engineMap[activeEngine]
-      const lastLayout = _.findLast(loadedLayouts, (layout: string) => {
-        return layout !== targetLayout
-      })
-      if (lastLayout === undefined) {
-        this.activeLayout = ''
-      } else {
-        this.activeLayout = lastLayout
+      if (targetLayout === this.activeLayout) {
+        // set the last layout of active engine as current active layout
+        const loadedLayouts = this.engineMap[this.activeEngine]
+        const lastLayout = _.findLast(loadedLayouts, (layout: string) => {
+          return layout !== targetLayout
+        })
+
+        if (lastLayout === undefined) {
+          this.activeLayout = ''
+        } else {
+          this.activeLayout = lastLayout
+        }
       }
 
       // clear data pool
@@ -460,7 +462,7 @@ export class NodeController implements INodeController {
         parentNode.sendMessage(true)
       } else {
         this.messager.sendMessage(
-          this.activeLayout,
+          renderer.engineId,
           { layoutMap: this.layoutMap }
         )
       }
