@@ -33,6 +33,7 @@ import {
 export default class DataNode implements IDataNode {
   private static pluginTypes: string[] = [
     'data.data.parser',
+    'data.data.picker',
     'data.schema.parser',
     'data.update.could',
     'data.delete.could',
@@ -181,8 +182,31 @@ export default class DataNode implements IDataNode {
       this.source,
       { engineId: this.uiNode.engineId, loadID: this.uiNode.layoutKey},
     )
-    const route = getAccessRoute(this.source.source)
-    const pickedData = _.get(wholeData, route)
+
+    // exec the plugins to pick the value from the loaded data
+    // if any plugin returns value that is not undefined, the return value will be return as the data of the node
+    let pickedData: any
+    const { results } = await this.pluginManager.executePlugins(
+      this.id,
+      'data.data.picker',
+      { data: wholeData, source: this.source }
+    )
+    if (_.isArray(results) && results.length) {
+      results.some((resultItem: IPluginResult) => {
+        const { result } = resultItem
+        if (result !== undefined) {
+          pickedData = result
+          return true
+        }
+        return false
+      })
+    }
+
+    if (_.isNil(pickedData)) {
+      const route = getAccessRoute(this.source.source)
+      pickedData = _.get(wholeData, route)
+    }
+
     if (pickedData !== undefined) {
       this.data = pickedData
     }

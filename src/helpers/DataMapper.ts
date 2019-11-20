@@ -165,20 +165,20 @@ export class DataMapper implements IDataMapper {
   ) {
     const dataSchemaMap = this.dataMap.dataSchema
 
-    let schema
-    const schemaLineage = this.getSchemaLineage(source)
-    if (_.isString(schemaLineage) && schemaLineage) {
-      schema = dataSchemaMap[schemaLineage]
+    let domainSchema
+    const schemaDomain = this.getSchemaDomain(source)
+    if (_.isString(schemaDomain) && schemaDomain) {
+      domainSchema = dataSchemaMap[schemaDomain]
     }
 
     let endPoint
-    if (_.isObject(schema) && _.has(schema, 'endpoints')) {
-      const { endpoints } = schema as IDataSchema
+    if (_.isObject(domainSchema) && _.has(domainSchema, 'endpoints')) {
+      const { endpoints } = domainSchema as IDataSchema
 
       let defaultEndPoint: string | undefined
       const defaultConfig = _.get(endpoints, ['default'])
-      if (_.isObject(defaultEndPoint)) {
-        const { path } = defaultEndPoint
+      if (_.isObject(defaultConfig)) {
+        const { path } = defaultConfig
         if (_.isString(path) && path) {
           defaultEndPoint = path
         }

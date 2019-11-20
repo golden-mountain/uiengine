@@ -140,7 +140,10 @@ export class DataEngine implements IDataEngine {
         const { data } = await this.request.get(schemaName, { prefixType: 'dataSchema' }, currentEngine)
         if (_.isObject(data)) {
           schema = data as IDataSchema
+          Cache.setDataSchema(schemaName, schema)
         }
+      } else {
+        schema = schemaCache
       }
     } catch (e) {
       this.errorInfo = {
@@ -151,7 +154,6 @@ export class DataEngine implements IDataEngine {
 
     const domainSource = this.getDomainSource(source)
     if (_.isObject(schema)) {
-      Cache.setDataSchema(schemaName, schema)
       this.mapper.setDataSchema(domainSource, _.cloneDeep(schema))
     } else {
       // prevent load too many times
