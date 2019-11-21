@@ -39,6 +39,9 @@ const DefaultMessager: React.FC<IErrorInfo> = (
 const DefaultUIEngineWrapper: React.FC<IUIEngineProps> = (
   props: IUIEngineProps
 ) => <>{props.children || null}</>
+const DefaultContainer: React.FC = (
+  props: any
+) => <>{props.children || null}</>
 
 export class UIEngine extends React.Component<
   IUIEngineProps,
@@ -164,6 +167,13 @@ export class UIEngine extends React.Component<
 
   componentWillUnmount() {
     if (!_.isNil(this.nodeController)) {
+      const loadedLayouts = this.nodeController.engineMap[this.engineId]
+      if (_.isArray(loadedLayouts) && loadedLayouts.length) {
+        loadedLayouts.forEach((layoutKey: string) => {
+          this.nodeController.removeLayout(layoutKey)
+        })
+      }
+
       const messager = this.nodeController.messager
       if (!_.isNil(messager)) {
         messager.removeStateFunc(this.engineId)
@@ -254,7 +264,7 @@ export function renderNodes(uiNodeRenderers: _.Dictionary<IUINodeRenderer>, rest
     if (!visible) return null
 
     // use the wrapper if provided
-    let Container: React.FC<any> = ({ children }: any) => children || null
+    let Container: React.FC<any> = DefaultContainer
     if (!_.isNil(container)) {
       Container = getComponent(container)
     }
