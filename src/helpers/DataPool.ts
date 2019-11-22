@@ -1,9 +1,6 @@
-import _ from 'lodash'
+import _ from "lodash";
 
-import {
-  getDomainName,
-  formatSource,
-} from './utils/data'
+import { getDomainName, formatSource } from "./utils/data";
 
 import {
   IDataPool,
@@ -14,54 +11,54 @@ import {
   IDataPoolInfoConfig,
   IDataPoolConnectObject,
   IDataPoolConnectOption,
-  IDataPoolHandle,
-} from '../../typings'
+  IDataPoolHandle
+} from "../../typings";
 
 interface IDataElement {
-  dataValue?: any
+  dataValue?: any;
   dataInfo?: {
-    status?: string
-    [otherInfo: string]: any
-  }
-  connect?: IDataConnection[]
-  parent?: IDataElement
-  children?: { [key: string]: IDataElement } | Array<IDataElement>
+    status?: string;
+    [otherInfo: string]: any;
+  };
+  connect?: IDataConnection[];
+  parent?: IDataElement;
+  children?: { [key: string]: IDataElement } | Array<IDataElement>;
 }
 interface IDataConnection {
-  object: IDataPoolConnectObject
-  options?: IDataPoolConnectOption
+  object: IDataPoolConnectObject;
+  options?: IDataPoolConnectOption;
 }
 
 export interface IDataPoolConfig {
-  domainAnalyzer?: (path: string) => string
-  routeAnalyzer?: (path: string) => string
+  domainAnalyzer?: (path: string) => string;
+  routeAnalyzer?: (path: string) => string;
 }
 
 export class DataPool implements IDataPool {
-  private static instance: DataPool
+  private static instance: DataPool;
   static getInstance = () => {
     if (!DataPool.instance) {
-      DataPool.instance = new DataPool
+      DataPool.instance = new DataPool();
     }
-    return DataPool.instance
-  }
+    return DataPool.instance;
+  };
 
   private pool: {
-    [domain: string]: IDataElement
-  }
-  private domainAnalyzer?: (path: string) => string
-  private routeAnalyzer?: (path: string) => string
+    [domain: string]: IDataElement;
+  };
+  private domainAnalyzer?: (path: string) => string;
+  private routeAnalyzer?: (path: string) => string;
 
   constructor(config?: IDataPoolConfig) {
-    this.pool = {}
+    this.pool = {};
 
     if (_.isObject(config) && !_.isEmpty(config)) {
-      const { domainAnalyzer, routeAnalyzer } = config
+      const { domainAnalyzer, routeAnalyzer } = config;
       if (_.isFunction(domainAnalyzer)) {
-        this.domainAnalyzer = domainAnalyzer
+        this.domainAnalyzer = domainAnalyzer;
       }
       if (_.isFunction(routeAnalyzer)) {
-        this.routeAnalyzer = routeAnalyzer
+        this.routeAnalyzer = routeAnalyzer;
       }
     }
   }
@@ -69,176 +66,176 @@ export class DataPool implements IDataPool {
   private routeExplorer(
     node: IDataElement,
     route: string,
-    options?: IDataPoolSetOption,
+    options?: IDataPoolSetOption
   ) {
-    let autoCreate: boolean = true
+    let autoCreate: boolean = true;
     if (_.isObject(options)) {
-      const { createPath } = options
+      const { createPath } = options;
       if (_.isBoolean(createPath)) {
-        autoCreate = createPath
+        autoCreate = createPath;
       }
     }
 
-    let currentNode: IDataElement | null = node
+    let currentNode: IDataElement | null = node;
     if (!_.isNil(node)) {
       if (_.isString(route)) {
         if (!_.isEmpty(route)) {
-          const accessList: Array<string|number> = []
-          const routeSlices = route.split('.')
+          const accessList: Array<string | number> = [];
+          const routeSlices = route.split(".");
           routeSlices.forEach((slice: string) => {
-            const accessArray = /\[\d*\]/g
-            const matchResult = slice.match(accessArray)
+            const accessArray = /\[\d*\]/g;
+            const matchResult = slice.match(accessArray);
             if (!_.isNil(matchResult)) {
-              let restStr = slice
+              let restStr = slice;
               matchResult.forEach((matchStr: string) => {
-                const startIndex = restStr.indexOf(matchStr)
-                const endIndex = startIndex + matchStr.length
+                const startIndex = restStr.indexOf(matchStr);
+                const endIndex = startIndex + matchStr.length;
 
-                accessList.push(restStr.slice(0, startIndex))
-                restStr = restStr.slice(endIndex)
+                accessList.push(restStr.slice(0, startIndex));
+                restStr = restStr.slice(endIndex);
 
-                const arrayIndex = /\[(\d*)\]/
-                const mResult = matchStr.match(arrayIndex)
+                const arrayIndex = /\[(\d*)\]/;
+                const mResult = matchStr.match(arrayIndex);
                 if (!_.isNil(mResult)) {
-                  const indexStr = mResult[1]
-                  const indexNum = Number(indexStr)
-                  accessList.push(indexNum)
+                  const indexStr = mResult[1];
+                  const indexNum = Number(indexStr);
+                  accessList.push(indexNum);
                 }
-              })
+              });
               if (restStr) {
-                accessList.push(restStr)
+                accessList.push(restStr);
               }
             } else {
-              accessList.push(slice)
+              accessList.push(slice);
             }
-          })
+          });
 
           accessList.forEach((item: string | number) => {
             if (currentNode === null) {
-              return
+              return;
             } else {
-              let children = currentNode.children
+              let children = currentNode.children;
               if (_.isNil(children)) {
                 if (autoCreate) {
                   if (_.isString(item)) {
-                    currentNode.children = {}
+                    currentNode.children = {};
                   } else if (_.isNumber(item)) {
-                    currentNode.children = []
+                    currentNode.children = [];
                   }
-                  children = currentNode.children
+                  children = currentNode.children;
                   // change leaf node(has value, no children) to branch node(no value, has children)
-                  delete currentNode.dataValue
+                  delete currentNode.dataValue;
                 } else {
-                  currentNode = null
-                  return
+                  currentNode = null;
+                  return;
                 }
               }
 
-              let childNode: IDataElement = _.get(children, item)
+              let childNode: IDataElement = _.get(children, item);
               if (_.isNil(childNode)) {
                 if (autoCreate && !_.isNil(children)) {
-                  children[item] = { parent: currentNode } as IDataElement
-                  childNode = children[item]
+                  children[item] = { parent: currentNode } as IDataElement;
+                  childNode = children[item];
                 } else {
-                  currentNode = null
-                  return
+                  currentNode = null;
+                  return;
                 }
               }
 
-              currentNode = childNode
+              currentNode = childNode;
             }
-          })
+          });
         }
       } else {
-        currentNode = null
+        currentNode = null;
       }
     } else {
-      currentNode = null
+      currentNode = null;
     }
 
-    return currentNode
+    return currentNode;
   }
   private createChildren(
     data: any,
     route: string,
     targetElement: IDataElement,
     prevChildren?: { [key: string]: IDataElement } | Array<IDataElement>,
-    options?: IDataPoolSetOption,
+    options?: IDataPoolSetOption
   ) {
     if (_.isObject(data)) {
       if (_.isArray(data)) {
-        let children: IDataElement[] = []
+        let children: IDataElement[] = [];
         data.forEach((item: any, index: number) => {
-          let prevItemNode: IDataElement | undefined
+          let prevItemNode: IDataElement | undefined;
           if (_.isArray(prevChildren)) {
-            prevItemNode = _.get(prevChildren, [index])
+            prevItemNode = _.get(prevChildren, [index]);
           }
 
-          const nextItemNode: IDataElement = { parent: targetElement }
+          const nextItemNode: IDataElement = { parent: targetElement };
           if (_.isObject(item)) {
             const itemChildren = this.createChildren(
               item,
               route + `[${index}]`,
               nextItemNode,
-              _.get(prevItemNode, 'children'),
-              options,
-            )
+              _.get(prevItemNode, "children"),
+              options
+            );
             if (_.isObject(itemChildren) || _.isArray(itemChildren)) {
-              nextItemNode.children = itemChildren
+              nextItemNode.children = itemChildren;
             } else {
-              nextItemNode.dataValue = undefined
+              nextItemNode.dataValue = undefined;
             }
           } else {
-            nextItemNode.dataValue = item
+            nextItemNode.dataValue = item;
           }
 
           this.solveDataInfo(
             route + `[${index}]`,
             nextItemNode,
             prevItemNode,
-            options,
-          )
+            options
+          );
 
-          children[index] = nextItemNode
-        })
-        return children
+          children[index] = nextItemNode;
+        });
+        return children;
       } else {
-        let children: { [key: string]: IDataElement } = {}
+        let children: { [key: string]: IDataElement } = {};
         Object.keys(data).forEach((key: string) => {
-          let prevKeyNode: IDataElement | undefined
+          let prevKeyNode: IDataElement | undefined;
           if (_.isObject(prevChildren) && !_.isArray(prevChildren)) {
-            prevKeyNode = _.get(prevChildren, [key])
+            prevKeyNode = _.get(prevChildren, [key]);
           }
 
-          const nextKeyNode: IDataElement = { parent: targetElement }
-          const value = data[key]
+          const nextKeyNode: IDataElement = { parent: targetElement };
+          const value = data[key];
           if (_.isObject(value)) {
             const keyChildren = this.createChildren(
               value,
               route + `.${key}`,
               nextKeyNode,
-              _.get(prevKeyNode, 'children'),
-              options,
-            )
+              _.get(prevKeyNode, "children"),
+              options
+            );
             if (_.isObject(keyChildren) || _.isArray(keyChildren)) {
-              nextKeyNode.children = keyChildren
+              nextKeyNode.children = keyChildren;
             } else {
-              nextKeyNode.dataValue = undefined
+              nextKeyNode.dataValue = undefined;
             }
           } else {
-            nextKeyNode.dataValue = value
+            nextKeyNode.dataValue = value;
           }
 
           this.solveDataInfo(
             route + `.${key}`,
             nextKeyNode,
             prevKeyNode,
-            options,
-          )
+            options
+          );
 
-          children[key] = nextKeyNode
-        })
-        return children
+          children[key] = nextKeyNode;
+        });
+        return children;
       }
     }
   }
@@ -246,466 +243,446 @@ export class DataPool implements IDataPool {
     route: string,
     targetElement: IDataElement,
     prevElement?: IDataElement,
-    options?: IDataPoolSetOption,
+    options?: IDataPoolSetOption
   ) {
-    let infoConfig: IDataPoolInfoConfig[] = []
+    let infoConfig: IDataPoolInfoConfig[] = [];
     if (_.isObject(options)) {
-      const { dataInfo } = options
+      const { dataInfo } = options;
       if (_.isArray(dataInfo)) {
-        infoConfig = dataInfo
+        infoConfig = dataInfo;
       } else if (_.isObject(dataInfo)) {
-        infoConfig.push(dataInfo)
+        infoConfig.push(dataInfo);
       }
     }
 
-    let dataInfo: { [infoKey: string]: any } = {}
+    let dataInfo: { [infoKey: string]: any } = {};
     if (!_.isNil(prevElement)) {
-      const prevDataInfo = _.get(prevElement, 'dataInfo')
+      const prevDataInfo = _.get(prevElement, "dataInfo");
       if (_.isObject(prevDataInfo) && !_.isEmpty(prevDataInfo)) {
-        dataInfo = prevDataInfo
+        dataInfo = prevDataInfo;
       }
     }
-    targetElement.dataInfo = dataInfo
+    targetElement.dataInfo = dataInfo;
 
     infoConfig.forEach((config: IDataPoolInfoConfig) => {
       if (_.isObject(config)) {
-        const { key, value, defaultValue, setDataInfo } = config
+        const { key, value, defaultValue, setDataInfo } = config;
 
         if (_.isString(key) && key) {
           if (value !== undefined) {
-            dataInfo[key] = value
-          } else if (defaultValue !== undefined && dataInfo[key] === undefined) {
-            dataInfo[key] = defaultValue
+            dataInfo[key] = value;
+          } else if (
+            defaultValue !== undefined &&
+            dataInfo[key] === undefined
+          ) {
+            dataInfo[key] = defaultValue;
           }
           if (_.isFunction(setDataInfo)) {
-            setDataInfo(key, new DataPoolHandle(route, targetElement))
+            setDataInfo(key, new DataPoolHandle(route, targetElement));
           }
         }
       }
-    })
+    });
 
     if (_.isEmpty(targetElement.dataInfo)) {
-      delete targetElement.dataInfo
+      delete targetElement.dataInfo;
     }
-
   }
   set(path: string, data: any, options?: IDataPoolSetOption) {
     if (_.isString(path) && path) {
       // get domain name
-      let domainName: string = ''
+      let domainName: string = "";
       if (_.isFunction(this.domainAnalyzer)) {
-        domainName = this.domainAnalyzer(path)
+        domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path)
+        domainName = getDomainName(path);
       }
       // get target route
-      let targetRoute: string = ''
+      let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
-        targetRoute = this.routeAnalyzer(path)
+        targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path)
+        targetRoute = formatSource(path);
       }
 
       // get domain root node
-      const domainRoot = _.get(this.pool, domainName, {} as IDataElement)
+      const domainRoot = _.get(this.pool, domainName, {} as IDataElement);
       // set the domain node if it doesn't exist
       if (!_.has(this.pool, domainName)) {
-        _.set(this.pool, domainName, domainRoot)
+        _.set(this.pool, domainName, domainRoot);
       }
 
       // get target node
-      const targetNode = this.routeExplorer(domainRoot, targetRoute, options)
+      const targetNode = this.routeExplorer(domainRoot, targetRoute, options);
       if (!_.isNil(targetNode)) {
-        let autoCreate: boolean = true
+        let autoCreate: boolean = true;
         if (_.isObject(options)) {
-          const { createChild } = options
+          const { createChild } = options;
           if (_.isBoolean(createChild)) {
-            autoCreate = createChild
+            autoCreate = createChild;
           }
         }
 
         // set data value
         if (autoCreate && _.isObject(data)) {
-          const prevChildren = targetNode.children
+          const prevChildren = targetNode.children;
           const nextChildren = this.createChildren(
             data,
             targetRoute,
             targetNode,
             prevChildren,
-            options,
-          )
+            options
+          );
           if (_.isObject(nextChildren) || _.isArray(nextChildren)) {
-            targetNode.children = nextChildren
+            targetNode.children = nextChildren;
             // change leaf node(has value, no children) to branch node(no value, has children)
-            delete targetNode.dataValue
+            delete targetNode.dataValue;
           } else {
-            return false
+            return false;
           }
         } else {
-          targetNode.dataValue = data
+          targetNode.dataValue = data;
           // change branch node(no value, has children) to leaf node(has value, no children)
-          delete targetNode.children
+          delete targetNode.children;
         }
 
         // set data info
-        this.solveDataInfo(
-          targetRoute,
-          targetNode,
-          targetNode,
-          options,
-        )
-
+        this.solveDataInfo(targetRoute, targetNode, targetNode, options);
       } else {
-        return false
+        return false;
       }
     } else {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
   setInfo(path: string, config: IDataPoolInfoConfig | IDataPoolInfoConfig[]) {
     if (_.isString(path) && path) {
       // get domain name
-      let domainName: string = ''
+      let domainName: string = "";
       if (_.isFunction(this.domainAnalyzer)) {
-        domainName = this.domainAnalyzer(path)
+        domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path)
+        domainName = getDomainName(path);
       }
       // get target route
-      let targetRoute: string = ''
+      let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
-        targetRoute = this.routeAnalyzer(path)
+        targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path)
+        targetRoute = formatSource(path);
       }
 
       // get domain root node
-      const domainRoot = _.get(this.pool, domainName)
+      const domainRoot = _.get(this.pool, domainName);
       // if can not find the target domain
       if (_.isNil(domainRoot)) {
-        return false
+        return false;
       }
 
       // get target node
-      const targetNode = this.routeExplorer(domainRoot, targetRoute, { createPath: false })
+      const targetNode = this.routeExplorer(domainRoot, targetRoute, {
+        createPath: false
+      });
       if (!_.isNil(targetNode)) {
         // set data info
-        this.solveDataInfo(
-          targetRoute,
-          targetNode,
-          targetNode,
-          { dataInfo: config },
-        )
-
+        this.solveDataInfo(targetRoute, targetNode, targetNode, {
+          dataInfo: config
+        });
       } else {
-        return false
+        return false;
       }
     } else {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
-  private getElementValue(
-    dataElement: IDataElement
-  ) {
-    if (_.has(dataElement, 'dataValue')) {
-      return dataElement.dataValue
-    } else if (_.has(dataElement, 'children')) {
-      let dataValue
-      const children = dataElement.children
+  private getElementValue(dataElement: IDataElement) {
+    if (_.has(dataElement, "dataValue")) {
+      return dataElement.dataValue;
+    } else if (_.has(dataElement, "children")) {
+      let dataValue;
+      const children = dataElement.children;
       if (_.isArray(children)) {
-        const arrValue: any[] = []
+        const arrValue: any[] = [];
         children.forEach((child: IDataElement, index: number) => {
-          arrValue[index] = this.getElementValue(child)
-        })
-        dataValue = arrValue
+          arrValue[index] = this.getElementValue(child);
+        });
+        dataValue = arrValue;
       } else if (_.isObject(children)) {
-        const objValue = {}
+        const objValue = {};
         Object.keys(children).forEach((key: string) => {
-          const child = children[key]
-          objValue[key] = this.getElementValue(child)
-        })
-        dataValue = objValue
+          const child = children[key];
+          objValue[key] = this.getElementValue(child);
+        });
+        dataValue = objValue;
       }
-      return dataValue
+      return dataValue;
     }
-    return undefined
+    return undefined;
   }
-  private getElementInfo(
-    dataElement: IDataElement,
-    infoKey: string,
-  ) {
-    if (_.has(dataElement, 'dataInfo')) {
-      let nodeInfo = {}
+  private getElementInfo(dataElement: IDataElement, infoKey: string) {
+    if (_.has(dataElement, "dataInfo")) {
+      let nodeInfo = {};
 
-      const dataInfo = dataElement.dataInfo
+      const dataInfo = dataElement.dataInfo;
       if (_.isObject(dataInfo) && !_.isEmpty(dataInfo)) {
-        nodeInfo = dataInfo
+        nodeInfo = dataInfo;
       }
 
-      return nodeInfo[infoKey]
+      return nodeInfo[infoKey];
     } else {
-      return undefined
+      return undefined;
     }
   }
   get(path?: string, options?: IDataPoolGetOption) {
     if (_.isString(path) && path) {
       // get domain name
-      let domainName: string = ''
+      let domainName: string = "";
       if (_.isFunction(this.domainAnalyzer)) {
-        domainName = this.domainAnalyzer(path)
+        domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path)
+        domainName = getDomainName(path);
       }
       // get target route
-      let targetRoute: string = ''
+      let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
-        targetRoute = this.routeAnalyzer(path)
+        targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path)
+        targetRoute = formatSource(path);
       }
 
       // get domain root node
-      const domainRoot = _.get(this.pool, domainName)
+      const domainRoot = _.get(this.pool, domainName);
       if (_.isNil(domainRoot)) {
-        return undefined
+        return undefined;
       }
 
       // get target node
-      const targetNode = this.routeExplorer(
-        domainRoot,
-        targetRoute,
-        { createPath: false },
-      )
+      const targetNode = this.routeExplorer(domainRoot, targetRoute, {
+        createPath: false
+      });
       if (!_.isNil(targetNode)) {
-        let contentType: string = 'data'
-        let wrapWithRoute: boolean = false
+        let contentType: string = "data";
+        let wrapWithRoute: boolean = false;
         if (_.isObject(options)) {
-          const { content, withPath } = options
+          const { content, withPath } = options;
           if (_.isString(content) && content) {
-            contentType = content
+            contentType = content;
           }
           if (_.isBoolean(withPath)) {
-            wrapWithRoute = withPath
+            wrapWithRoute = withPath;
           }
         }
 
-        if (contentType === 'data') {
-          let data =  this.getElementValue(targetNode)
+        if (contentType === "data") {
+          let data = this.getElementValue(targetNode);
           if (wrapWithRoute) {
-            data = _.set({}, targetRoute, data)
+            data = _.set({}, targetRoute, data);
           }
-          return data
+          return data;
         } else {
-          let info = this.getElementInfo(targetNode, contentType)
+          let info = this.getElementInfo(targetNode, contentType);
           if (wrapWithRoute) {
-            info = _.set({}, targetRoute, info)
+            info = _.set({}, targetRoute, info);
           }
-          return info
+          return info;
         }
       } else {
-        return undefined
+        return undefined;
       }
     } else {
-      const allDomains: { [domain: string]: any} = {}
+      const allDomains: { [domain: string]: any } = {};
       Object.keys(this.pool).forEach((domain: string) => {
-        const rootNode = this.pool[domain]
+        const rootNode = this.pool[domain];
 
-        let contentType: string = 'data'
+        let contentType: string = "data";
         if (_.isObject(options)) {
-          const { content } = options
+          const { content } = options;
           if (_.isString(content) && content) {
-            contentType = content
+            contentType = content;
           }
         }
 
-        if (contentType === 'data') {
-          allDomains[domain] = this.getElementValue(rootNode)
+        if (contentType === "data") {
+          allDomains[domain] = this.getElementValue(rootNode);
         } else {
-          allDomains[domain] = this.getElementInfo(rootNode, contentType)
+          allDomains[domain] = this.getElementInfo(rootNode, contentType);
         }
-      })
-      return allDomains
+      });
+      return allDomains;
     }
   }
   getInfo(path: string, key: string | string[]) {
     if (_.isString(path) && path) {
       // get domain name
-      let domainName: string = ''
+      let domainName: string = "";
       if (_.isFunction(this.domainAnalyzer)) {
-        domainName = this.domainAnalyzer(path)
+        domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path)
+        domainName = getDomainName(path);
       }
       // get target route
-      let targetRoute: string = ''
+      let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
-        targetRoute = this.routeAnalyzer(path)
+        targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path)
+        targetRoute = formatSource(path);
       }
 
       // get domain root node
-      const domainRoot = _.get(this.pool, domainName)
+      const domainRoot = _.get(this.pool, domainName);
       if (_.isNil(domainRoot)) {
-        return undefined
+        return undefined;
       }
 
       // get target node
-      const targetNode = this.routeExplorer(
-        domainRoot,
-        targetRoute,
-        { createPath: false },
-      )
+      const targetNode = this.routeExplorer(domainRoot, targetRoute, {
+        createPath: false
+      });
       if (!_.isNil(targetNode)) {
-        let targetInfo = {}
-        if (_.has(targetNode, 'dataInfo')) {
-          const { dataInfo } = targetNode
+        let targetInfo = {};
+        if (_.has(targetNode, "dataInfo")) {
+          const { dataInfo } = targetNode;
           if (_.isObject(dataInfo) && !_.isEmpty(dataInfo)) {
-            targetInfo = dataInfo
+            targetInfo = dataInfo;
           }
         }
 
         if (_.isArray(key)) {
-          const result = {}
+          const result = {};
           key.forEach((item: string) => {
             if (_.isString(item) && item) {
-              result[item] = targetInfo[item]
+              result[item] = targetInfo[item];
             }
-          })
-          return result
+          });
+          return result;
         } else if (_.isString(key) && key) {
-          return targetInfo[key]
+          return targetInfo[key];
         }
       } else {
-        return undefined
+        return undefined;
       }
     } else {
-      return undefined
+      return undefined;
     }
   }
 
   clear(path?: string, options?: IDataPoolClearOption) {
     if (_.isString(path) && path) {
       // get domain name
-      let domainName: string = ''
+      let domainName: string = "";
       if (_.isFunction(this.domainAnalyzer)) {
-        domainName = this.domainAnalyzer(path)
+        domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path)
+        domainName = getDomainName(path);
       }
       // get target route
-      let targetRoute: string = ''
+      let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
-        targetRoute = this.routeAnalyzer(path)
+        targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path)
+        targetRoute = formatSource(path);
       }
 
       // get domain root node
-      const domainRoot = _.get(this.pool, domainName)
+      const domainRoot = _.get(this.pool, domainName);
       if (_.isNil(domainRoot)) {
-        return
+        return;
       }
 
       if (_.isObject(options)) {
-        const { clearDomain } = options
+        const { clearDomain } = options;
         if (clearDomain === true) {
-          delete this.pool[domainName]
-          return
+          delete this.pool[domainName];
+          return;
         }
       }
 
       // get target node
-      const targetNode = this.routeExplorer(
-        domainRoot,
-        targetRoute,
-        { createPath: false },
-      )
+      const targetNode = this.routeExplorer(domainRoot, targetRoute, {
+        createPath: false
+      });
 
       if (domainRoot === targetNode) {
-        delete this.pool[domainName]
+        delete this.pool[domainName];
       } else if (!_.isNil(targetNode)) {
-        const { parent } = targetNode
+        const { parent } = targetNode;
         if (!_.isNil(parent)) {
-          const { children } = parent
+          const { children } = parent;
           if (_.isArray(children)) {
-            let deleteIndex: number = children.length
+            let deleteIndex: number = children.length;
             children.some((child: IDataElement, index: number) => {
               if (child === targetNode) {
-                deleteIndex = index
-                return true
+                deleteIndex = index;
+                return true;
               }
-            })
+            });
 
             if (deleteIndex < children.length) {
-              children.splice(deleteIndex, 1)
+              children.splice(deleteIndex, 1);
             }
           } else if (_.isObject(children)) {
-            let deleteKey: string = ''
+            let deleteKey: string = "";
             Object.keys(children).some((key: string) => {
               if (children[key] === targetNode) {
-                deleteKey = key
-                return true
+                deleteKey = key;
+                return true;
               }
-            })
+            });
 
             if (deleteKey) {
-              delete children[deleteKey]
+              delete children[deleteKey];
             }
           }
         }
       }
-
     } else if (_.isNil(path)) {
-      this.pool = {}
+      this.pool = {};
     }
   }
   clearInfo(path: string, key?: string | string[]) {
     if (_.isString(path) && path) {
       // get domain name
-      let domainName: string = ''
+      let domainName: string = "";
       if (_.isFunction(this.domainAnalyzer)) {
-        domainName = this.domainAnalyzer(path)
+        domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path)
+        domainName = getDomainName(path);
       }
       // get target route
-      let targetRoute: string = ''
+      let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
-        targetRoute = this.routeAnalyzer(path)
+        targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path)
+        targetRoute = formatSource(path);
       }
 
       // get domain root node
-      const domainRoot = _.get(this.pool, domainName)
+      const domainRoot = _.get(this.pool, domainName);
       if (_.isNil(domainRoot)) {
-        return
+        return;
       }
 
       // get target node
-      const targetNode = this.routeExplorer(
-        domainRoot,
-        targetRoute,
-        { createPath: false },
-      )
+      const targetNode = this.routeExplorer(domainRoot, targetRoute, {
+        createPath: false
+      });
 
       if (!_.isNil(targetNode)) {
-        const { dataInfo } = targetNode
+        const { dataInfo } = targetNode;
         if (_.isObject(dataInfo)) {
           if (_.isArray(key)) {
             key.forEach((infoKey: string) => {
               if (_.isString(infoKey) && infoKey) {
-                delete dataInfo[infoKey]
+                delete dataInfo[infoKey];
               }
-            })
+            });
           } else if (_.isString(key) && key) {
-            delete dataInfo[key]
+            delete dataInfo[key];
           } else if (key === undefined) {
-            delete targetNode.dataInfo
+            delete targetNode.dataInfo;
           }
         }
       }
@@ -714,304 +691,323 @@ export class DataPool implements IDataPool {
 
   private cloneElement(
     dataElement: IDataElement,
-    options?: IDataPoolTransferOption,
+    options?: IDataPoolTransferOption
   ) {
-    const clone: IDataElement = {}
+    const clone: IDataElement = {};
 
-    if (_.has(dataElement, 'dataValue')) {
-      const dataValue = dataElement.dataValue
+    if (_.has(dataElement, "dataValue")) {
+      const dataValue = dataElement.dataValue;
 
-      let shallowClone: boolean = false
-      let deepClone: boolean = false
+      let shallowClone: boolean = false;
+      let deepClone: boolean = false;
       if (_.isObject(options)) {
-        const { cloneConfig } = options
+        const { cloneConfig } = options;
         if (_.isObject(cloneConfig)) {
-          const { shallowCloneData, deepCloneData } = cloneConfig
+          const { shallowCloneData, deepCloneData } = cloneConfig;
           if (_.isBoolean(shallowCloneData)) {
-            shallowClone = shallowCloneData
+            shallowClone = shallowCloneData;
           }
           if (_.isBoolean(deepCloneData)) {
-            deepClone = deepCloneData
+            deepClone = deepCloneData;
           }
         }
       }
 
       if (shallowClone) {
-        clone.dataValue = _.clone(dataValue)
+        clone.dataValue = _.clone(dataValue);
       } else if (deepClone) {
-        clone.dataValue = _.cloneDeep(dataValue)
+        clone.dataValue = _.cloneDeep(dataValue);
       } else {
-        clone.dataValue = dataValue
+        clone.dataValue = dataValue;
       }
-    } else if (_.has(dataElement, 'children')) {
-      const children = dataElement.children
+    } else if (_.has(dataElement, "children")) {
+      const children = dataElement.children;
 
       if (_.isArray(children)) {
-        const cloneChildren: IDataElement[] = []
+        const cloneChildren: IDataElement[] = [];
         children.forEach((child: IDataElement, index: number) => {
-          cloneChildren[index] = this.cloneElement(child, options)
-        })
-        clone.children = cloneChildren
+          cloneChildren[index] = this.cloneElement(child, options);
+        });
+        clone.children = cloneChildren;
       } else if (_.isObject(children)) {
-        const cloneChildren: { [key: string]: IDataElement } = {}
+        const cloneChildren: { [key: string]: IDataElement } = {};
         Object.keys(children).forEach((key: string) => {
-          const child = children[key]
-          cloneChildren[key] = this.cloneElement(child, options)
-        })
-        clone.children = cloneChildren
+          const child = children[key];
+          cloneChildren[key] = this.cloneElement(child, options);
+        });
+        clone.children = cloneChildren;
       }
     }
 
-    if (_.has(dataElement, 'dataInfo')) {
-      const dataInfo = dataElement.dataInfo
+    if (_.has(dataElement, "dataInfo")) {
+      const dataInfo = dataElement.dataInfo;
 
-      let shallowClone: boolean = false
-      let deepClone: boolean = false
+      let shallowClone: boolean = false;
+      let deepClone: boolean = false;
       if (_.isObject(options)) {
-        const { cloneConfig } = options
+        const { cloneConfig } = options;
         if (_.isObject(cloneConfig)) {
-          const { shallowCloneInfo, deepCloneInfo } = cloneConfig
+          const { shallowCloneInfo, deepCloneInfo } = cloneConfig;
           if (_.isBoolean(shallowCloneInfo)) {
-            shallowClone = shallowCloneInfo
+            shallowClone = shallowCloneInfo;
           }
           if (_.isBoolean(deepCloneInfo)) {
-            deepClone = deepCloneInfo
+            deepClone = deepCloneInfo;
           }
         }
       }
 
       if (_.isObject(dataInfo)) {
-        const cloneInfo = {}
+        const cloneInfo = {};
 
         Object.keys(dataInfo).forEach((key: string) => {
           if (shallowClone) {
-            cloneInfo[key] = _.clone(dataInfo[key])
+            cloneInfo[key] = _.clone(dataInfo[key]);
           } else if (deepClone) {
-            cloneInfo[key] = _.cloneDeep(dataInfo[key])
+            cloneInfo[key] = _.cloneDeep(dataInfo[key]);
           } else {
-            cloneInfo[key] = dataInfo[key]
+            cloneInfo[key] = dataInfo[key];
           }
-        })
+        });
 
         if (!_.isEmpty(cloneInfo)) {
-          clone.dataInfo = cloneInfo
+          clone.dataInfo = cloneInfo;
         }
       }
     }
 
-    return clone
+    return clone;
   }
   private mergeExtraContent(
     srcElement: IDataElement,
     dstElement: IDataElement,
     mergeData: boolean,
-    mergeInfo: boolean,
+    mergeInfo: boolean
   ) {
     if (mergeData) {
       // merge extra data
-      if (_.has(dstElement, 'dataValue')) {
-        const srcDataValue = srcElement.dataValue
-        const dstDataValue = dstElement.dataValue
+      if (_.has(dstElement, "dataValue")) {
+        const srcDataValue = srcElement.dataValue;
+        const dstDataValue = dstElement.dataValue;
 
         if (_.isArray(srcDataValue) && _.isArray(dstDataValue)) {
           srcDataValue.forEach((item: any, index: number) => {
             if (dstDataValue[index] === undefined) {
-              dstDataValue[index] = item
+              dstDataValue[index] = item;
             }
-          })
+          });
         } else if (
-          !_.isArray(srcDataValue) && _.isObject(srcDataValue) &&
-          !_.isArray(dstDataValue) && _.isObject(dstDataValue)
+          !_.isArray(srcDataValue) &&
+          _.isObject(srcDataValue) &&
+          !_.isArray(dstDataValue) &&
+          _.isObject(dstDataValue)
         ) {
           Object.keys(srcDataValue).forEach((key: string) => {
             if (dstDataValue[key] === undefined) {
-              dstDataValue[key] = srcDataValue[key]
+              dstDataValue[key] = srcDataValue[key];
             }
-          })
+          });
         }
-      } else if (_.has(dstElement, 'children')) {
-        const srcChildren = srcElement.children
-        const dstChildren = dstElement.children
+      } else if (_.has(dstElement, "children")) {
+        const srcChildren = srcElement.children;
+        const dstChildren = dstElement.children;
 
         if (_.isArray(srcChildren) && _.isArray(dstChildren)) {
           srcChildren.forEach((srcChild: IDataElement, index: number) => {
             if (_.isNil(dstChildren[index])) {
-              dstChildren[index] = srcChild
-              srcChild.parent = dstElement
+              dstChildren[index] = srcChild;
+              srcChild.parent = dstElement;
             } else {
-              this.mergeExtraContent(srcChild, dstChildren[index], mergeData, mergeInfo)
+              this.mergeExtraContent(
+                srcChild,
+                dstChildren[index],
+                mergeData,
+                mergeInfo
+              );
             }
-          })
+          });
         } else if (
-          !_.isArray(srcChildren) && _.isObject(srcChildren) &&
-          !_.isArray(dstChildren) && _.isObject(dstChildren)
+          !_.isArray(srcChildren) &&
+          _.isObject(srcChildren) &&
+          !_.isArray(dstChildren) &&
+          _.isObject(dstChildren)
         ) {
           Object.keys(srcChildren).forEach((key: string) => {
             if (_.isNil(dstChildren[key])) {
-              dstChildren[key] = srcChildren[key]
-              srcChildren[key].parent = dstElement
+              dstChildren[key] = srcChildren[key];
+              srcChildren[key].parent = dstElement;
             } else {
-              this.mergeExtraContent(srcChildren[key], dstChildren[key], mergeData, mergeInfo)
+              this.mergeExtraContent(
+                srcChildren[key],
+                dstChildren[key],
+                mergeData,
+                mergeInfo
+              );
             }
-          })
+          });
         }
       }
     }
 
     if (mergeInfo) {
       // merge extra info
-      if (_.has(dstElement, 'dataInfo')) {
-        const srcDataInfo = srcElement.dataInfo
-        const dstDataInfo = dstElement.dataInfo
+      if (_.has(dstElement, "dataInfo")) {
+        const srcDataInfo = srcElement.dataInfo;
+        const dstDataInfo = dstElement.dataInfo;
 
         if (_.isObject(srcDataInfo) && _.isObject(dstDataInfo)) {
           Object.keys(srcDataInfo).forEach((infoKey: string) => {
             if (dstDataInfo[infoKey] === undefined) {
-              dstDataInfo[infoKey] = srcDataInfo[infoKey]
+              dstDataInfo[infoKey] = srcDataInfo[infoKey];
             }
-          })
+          });
         }
-
-      } else if (_.has(srcElement, 'dataInfo')) {
-        dstElement.dataInfo = srcElement.dataInfo
+      } else if (_.has(srcElement, "dataInfo")) {
+        dstElement.dataInfo = srcElement.dataInfo;
       }
     }
   }
   private transferElement(
     srcElement: IDataElement,
     dstElement: IDataElement,
-    options?: IDataPoolTransferOption,
+    options?: IDataPoolTransferOption
   ) {
     if (_.isObject(options)) {
-      const { clearSrc } = options
+      const { clearSrc } = options;
       if (!clearSrc) {
-        srcElement = this.cloneElement(srcElement, options)
+        srcElement = this.cloneElement(srcElement, options);
       }
     }
 
     // replace dst element with src element
     if (!_.isNil(dstElement.parent)) {
-      const parentElement = dstElement.parent
+      const parentElement = dstElement.parent;
       if (!_.isNil(parentElement.children)) {
-        const parentChildren = parentElement.children
+        const parentChildren = parentElement.children;
         if (_.isArray(parentChildren)) {
           parentChildren.some((child: IDataElement, index: number) => {
             if (child === dstElement) {
-              parentChildren[index] = srcElement
-              srcElement.parent = parentElement
-              return true
+              parentChildren[index] = srcElement;
+              srcElement.parent = parentElement;
+              return true;
             }
-            return false
-          })
+            return false;
+          });
         } else if (!_.isArray(parentChildren) && _.isObject(parentChildren)) {
           Object.keys(parentChildren).some((key: string) => {
-            const child = parentChildren[key]
+            const child = parentChildren[key];
             if (child === dstElement) {
-              parentChildren[key] = srcElement
-              srcElement.parent = parentElement
-              return true
+              parentChildren[key] = srcElement;
+              srcElement.parent = parentElement;
+              return true;
             }
-            return false
-          })
+            return false;
+          });
         }
       }
     } else {
       Object.keys(this.pool).some((domainName: string) => {
-        const rootElement = this.pool[domainName]
+        const rootElement = this.pool[domainName];
         if (rootElement === dstElement) {
-          this.pool[domainName] = srcElement
-          delete srcElement.parent
-          return true
+          this.pool[domainName] = srcElement;
+          delete srcElement.parent;
+          return true;
         }
-        return false
-      })
+        return false;
+      });
     }
 
-    let mergeDataValue: boolean = false
-    let mergeInfoValue: boolean = false
+    let mergeDataValue: boolean = false;
+    let mergeInfoValue: boolean = false;
     if (_.isObject(options)) {
-      const { mergeConfig } = options
+      const { mergeConfig } = options;
       if (_.isObject(mergeConfig)) {
-        const { mergeData, mergeInfo } = mergeConfig
+        const { mergeData, mergeInfo } = mergeConfig;
         if (_.isBoolean(mergeData)) {
-          mergeDataValue = mergeData
+          mergeDataValue = mergeData;
         }
         if (_.isBoolean(mergeInfo)) {
-          mergeInfoValue = mergeInfo
+          mergeInfoValue = mergeInfo;
         }
       }
     }
 
     // merge the extra content of dst element to src element
-    this.mergeExtraContent(dstElement, srcElement, mergeDataValue, mergeInfoValue)
-
+    this.mergeExtraContent(
+      dstElement,
+      srcElement,
+      mergeDataValue,
+      mergeInfoValue
+    );
   }
-  transfer(srcPath: string, dstPath: string, options?: IDataPoolTransferOption) {
+  transfer(
+    srcPath: string,
+    dstPath: string,
+    options?: IDataPoolTransferOption
+  ) {
     if (_.isString(srcPath) && srcPath) {
       // get src domain name
-      let srcDomainName: string = ''
+      let srcDomainName: string = "";
       if (_.isFunction(this.domainAnalyzer)) {
-        srcDomainName = this.domainAnalyzer(srcPath)
+        srcDomainName = this.domainAnalyzer(srcPath);
       } else {
-        srcDomainName = getDomainName(srcPath)
+        srcDomainName = getDomainName(srcPath);
       }
       // get src target route
-      let srcTargetRoute: string = ''
+      let srcTargetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
-        srcTargetRoute = this.routeAnalyzer(srcPath)
+        srcTargetRoute = this.routeAnalyzer(srcPath);
       } else {
-        srcTargetRoute = formatSource(srcPath)
+        srcTargetRoute = formatSource(srcPath);
       }
 
       // get src domain root node
-      const srcDomainRoot = _.get(this.pool, srcDomainName)
+      const srcDomainRoot = _.get(this.pool, srcDomainName);
       if (_.isNil(srcDomainRoot)) {
-        return false
+        return false;
       }
 
       // get src target node
-      const srcTargetNode = this.routeExplorer(
-        srcDomainRoot,
-        srcTargetRoute,
-        { createPath: false },
-      )
+      const srcTargetNode = this.routeExplorer(srcDomainRoot, srcTargetRoute, {
+        createPath: false
+      });
 
       if (!_.isNil(srcTargetNode)) {
         // get dst domain name
-        let dstDomainName: string = ''
+        let dstDomainName: string = "";
         if (_.isFunction(this.domainAnalyzer)) {
-          dstDomainName = this.domainAnalyzer(dstPath)
+          dstDomainName = this.domainAnalyzer(dstPath);
         } else {
-          dstDomainName = getDomainName(dstPath)
+          dstDomainName = getDomainName(dstPath);
         }
         // get dst target route
-        let dstTargetRoute: string = ''
+        let dstTargetRoute: string = "";
         if (_.isFunction(this.routeAnalyzer)) {
-          dstTargetRoute = this.routeAnalyzer(dstPath)
+          dstTargetRoute = this.routeAnalyzer(dstPath);
         } else {
-          dstTargetRoute = formatSource(dstPath)
+          dstTargetRoute = formatSource(dstPath);
         }
 
-        let autoClear: boolean = false
-        let autoCreate: boolean = false
+        let autoClear: boolean = false;
+        let autoCreate: boolean = false;
         if (_.isObject(options)) {
-          const { clearSrc, createDst } = options
+          const { clearSrc, createDst } = options;
           if (_.isBoolean(clearSrc)) {
-            autoClear = clearSrc
+            autoClear = clearSrc;
           }
           if (_.isBoolean(createDst)) {
-            autoCreate = createDst
+            autoCreate = createDst;
           }
         }
 
         // get dst domain root node
-        let dstDomainRoot = _.get(this.pool, dstDomainName)
+        let dstDomainRoot = _.get(this.pool, dstDomainName);
         if (_.isNil(dstDomainRoot)) {
           if (autoCreate) {
-            dstDomainRoot = {} as IDataElement
-            _.set(this.pool, dstDomainName, dstDomainRoot)
+            dstDomainRoot = {} as IDataElement;
+            _.set(this.pool, dstDomainName, dstDomainRoot);
           } else {
-            return false
+            return false;
           }
         }
 
@@ -1019,214 +1015,214 @@ export class DataPool implements IDataPool {
         const dstTargetNode = this.routeExplorer(
           dstDomainRoot,
           dstTargetRoute,
-          { createPath: autoCreate },
-        )
+          { createPath: autoCreate }
+        );
 
         if (!_.isNil(dstTargetNode)) {
           if (autoClear === true) {
-            this.clear(srcPath)
+            this.clear(srcPath);
           }
 
           // transfer content of src node to dst node
-          this.transferElement(srcTargetNode, dstTargetNode, options)
-
+          this.transferElement(srcTargetNode, dstTargetNode, options);
         } else {
-          return false
+          return false;
         }
       } else {
-        return false
+        return false;
       }
     } else {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   // undetermined functions
-  connnect(path: string, object: IDataPoolConnectObject, options?: IDataPoolConnectOption) {
-
-  }
-  disconnect(path: string, object: IDataPoolConnectObject) {
-
-  }
+  connnect(
+    path: string,
+    object: IDataPoolConnectObject,
+    options?: IDataPoolConnectOption
+  ) {}
+  disconnect(path: string, object: IDataPoolConnectObject) {}
 }
 
 export class DataPoolHandle implements IDataPoolHandle {
-  dataRoute: string | null
-  dataElement: IDataElement | null
+  dataRoute: string | null;
+  dataElement: IDataElement | null;
   constructor(targetRoute?: string, targetElement?: IDataElement) {
     if (_.isString(targetRoute) && targetRoute) {
-      this.dataRoute = targetRoute
+      this.dataRoute = targetRoute;
     } else {
-      this.dataRoute = null
+      this.dataRoute = null;
     }
 
     if (!_.isNil(targetElement)) {
-      this.dataElement = targetElement
+      this.dataElement = targetElement;
     } else {
-      this.dataElement = null
+      this.dataElement = null;
     }
   }
 
   getRoute() {
-    const route = this.dataRoute
+    const route = this.dataRoute;
     if (_.isString(route)) {
-      return route
+      return route;
     }
-    return undefined
+    return undefined;
   }
 
-  private getElementValue(
-    dataElement: IDataElement
-  ) {
-    if (_.has(dataElement, 'dataValue')) {
-      return dataElement.dataValue
-    } else if (_.has(dataElement, 'children')) {
-      let dataValue
-      const children = dataElement.children
+  private getElementValue(dataElement: IDataElement) {
+    if (_.has(dataElement, "dataValue")) {
+      return dataElement.dataValue;
+    } else if (_.has(dataElement, "children")) {
+      let dataValue;
+      const children = dataElement.children;
       if (_.isArray(children)) {
-        const arrValue: any[] = []
+        const arrValue: any[] = [];
         children.forEach((child: IDataElement, index: number) => {
-          arrValue[index] = this.getElementValue(child)
-        })
-        dataValue = arrValue
+          arrValue[index] = this.getElementValue(child);
+        });
+        dataValue = arrValue;
       } else if (_.isObject(children)) {
-        const objValue = {}
+        const objValue = {};
         Object.keys(children).forEach((key: string) => {
-          const child = children[key]
-          objValue[key] = this.getElementValue(child)
-        })
-        dataValue = objValue
+          const child = children[key];
+          objValue[key] = this.getElementValue(child);
+        });
+        dataValue = objValue;
       }
-      return dataValue
+      return dataValue;
     }
-    return undefined
+    return undefined;
   }
   getData() {
-    const element = this.dataElement
+    const element = this.dataElement;
     if (!_.isNil(element)) {
-      return this.getElementValue(element)
+      return this.getElementValue(element);
     }
-    return undefined
+    return undefined;
   }
 
   getInfo(infoKey?: string | string[]) {
-    const element = this.dataElement
+    const element = this.dataElement;
     if (!_.isNil(element)) {
-      const { dataInfo } = element
+      const { dataInfo } = element;
       if (_.isObject(dataInfo)) {
         if (_.isArray(infoKey)) {
-          const returnObj = {}
+          const returnObj = {};
           infoKey.forEach((key: string) => {
             if (_.isString(key) && key) {
-              returnObj[key] = dataInfo[key]
+              returnObj[key] = dataInfo[key];
             }
-          })
-          return returnObj
+          });
+          return returnObj;
         } else if (_.isString(infoKey) && infoKey) {
-          return dataInfo[infoKey]
+          return dataInfo[infoKey];
         } else if (infoKey === undefined) {
-          return { ...dataInfo }
+          return { ...dataInfo };
         }
       }
     }
-    return undefined
+    return undefined;
   }
   setInfo(infoKey: string, value: any) {
-    const element = this.dataElement
+    const element = this.dataElement;
     if (!_.isNil(element)) {
-      const { dataInfo } = element
+      const { dataInfo } = element;
       if (_.isObject(dataInfo)) {
-        _.set(dataInfo, [infoKey], value)
+        _.set(dataInfo, [infoKey], value);
       } else {
-        _.set(element, ['dataInfo'], { [infoKey]: value })
+        _.set(element, ["dataInfo"], { [infoKey]: value });
       }
     } else {
-      return false
+      return false;
     }
-    return true
+    return true;
   }
 
   private getParentRoute(route: string) {
     // analyze route
-    const accessQueue: Array<string|number> = []
-    route.split('.').forEach((slice: string) => {
-      const arrayAccess = /\[\d*\]/g
-      const matchResult = slice.match(arrayAccess)
+    const accessQueue: Array<string | number> = [];
+    route.split(".").forEach((slice: string) => {
+      const arrayAccess = /\[\d*\]/g;
+      const matchResult = slice.match(arrayAccess);
       if (!_.isNil(matchResult)) {
-        let restStr = slice
+        let restStr = slice;
         matchResult.forEach((matchStr: string) => {
-          const startIndex = restStr.indexOf(matchStr)
-          const endIndex = startIndex + matchStr.length
+          const startIndex = restStr.indexOf(matchStr);
+          const endIndex = startIndex + matchStr.length;
 
-          accessQueue.push(restStr.slice(0, startIndex))
-          restStr = restStr.slice(endIndex)
+          accessQueue.push(restStr.slice(0, startIndex));
+          restStr = restStr.slice(endIndex);
 
-          const arrayIndex = /\[(\d*)\]/
-          const mResult = matchStr.match(arrayIndex)
+          const arrayIndex = /\[(\d*)\]/;
+          const mResult = matchStr.match(arrayIndex);
           if (!_.isNil(mResult)) {
-            const indexStr = mResult[1]
-            const indexNum = Number(indexStr)
-            accessQueue.push(indexNum)
+            const indexStr = mResult[1];
+            const indexNum = Number(indexStr);
+            accessQueue.push(indexNum);
           }
-        })
+        });
         if (restStr) {
-          accessQueue.push(restStr)
+          accessQueue.push(restStr);
         }
       } else {
-        accessQueue.push(slice)
+        accessQueue.push(slice);
       }
-    })
+    });
 
     // remove the last access item
-    const lastItem = accessQueue.pop()
+    const lastItem = accessQueue.pop();
     if (_.isNumber(lastItem)) {
-      const lastAccessStr = `[${lastItem}]`
-      const lastAccessIndex = route.lastIndexOf(lastAccessStr)
-      return route.slice(0, lastAccessIndex)
+      const lastAccessStr = `[${lastItem}]`;
+      const lastAccessIndex = route.lastIndexOf(lastAccessStr);
+      return route.slice(0, lastAccessIndex);
     } else if (_.isString(lastItem)) {
-      const lastAccessIndex = route.lastIndexOf(lastItem)
-      return _.trim(route.slice(0, lastAccessIndex), '.')
+      const lastAccessIndex = route.lastIndexOf(lastItem);
+      return _.trim(route.slice(0, lastAccessIndex), ".");
     }
-    return route
+    return route;
   }
   getParent() {
-    const route = this.dataRoute
-    const element = this.dataElement
+    const route = this.dataRoute;
+    const element = this.dataElement;
     if (!_.isNil(element)) {
-      const { parent: parentElement } = element
+      const { parent: parentElement } = element;
       if (!_.isNil(parentElement)) {
-        let parentRoute
+        let parentRoute;
         if (_.isString(route)) {
-          parentRoute = this.getParentRoute(route)
+          parentRoute = this.getParentRoute(route);
         }
-        return new DataPoolHandle(parentRoute, parentElement)
+        return new DataPoolHandle(parentRoute, parentElement);
       }
     }
-    return null
+    return null;
   }
   getChildren() {
-    const route = this.dataRoute
-    const element = this.dataElement
+    const route = this.dataRoute;
+    const element = this.dataElement;
     if (!_.isNil(element)) {
-      const { children } = element
+      const { children } = element;
       if (_.isArray(children)) {
-        const childrenHandle: DataPoolHandle[] = []
+        const childrenHandle: DataPoolHandle[] = [];
         children.forEach((child: IDataElement, index: number) => {
-          childrenHandle[index] = new DataPoolHandle(route + `[${index}]`, child)
-        })
-        return childrenHandle
+          childrenHandle[index] = new DataPoolHandle(
+            route + `[${index}]`,
+            child
+          );
+        });
+        return childrenHandle;
       } else if (_.isObject(children)) {
-        const childrenHandle: { [key: string]: DataPoolHandle } = {}
+        const childrenHandle: { [key: string]: DataPoolHandle } = {};
         Object.keys(children).forEach((key: string) => {
-          const child = children[key]
-          childrenHandle[key] = new DataPoolHandle(route + `.${key}`, child)
-        })
-        return childrenHandle
+          const child = children[key];
+          childrenHandle[key] = new DataPoolHandle(route + `.${key}`, child);
+        });
+        return childrenHandle;
       }
     }
-    return null
+    return null;
   }
 }
 
-export default DataPool
+export default DataPool;
