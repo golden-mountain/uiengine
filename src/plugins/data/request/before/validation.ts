@@ -14,8 +14,8 @@ import {
  * @param dataEngine
  */
 const execution: IPluginExecution = async (param: IPluginParam) => {
-  const dataSource: IDataSource = _.get(param, 'dataSource')
-  // validation
+  const dataSource: IDataSource|string = _.get(param, 'source')
+
   let errors: any = []
   const validate = async (target: string) => {
     // validate all values
@@ -28,8 +28,10 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
     }
   }
 
-  if (!_.isNil(dataSource)) {
+  if (_.isObject(dataSource)) {
     await validate(dataSource.source)
+  } else if (_.isString(dataSource)) {
+    await validate(dataSource)
   }
 
   if (errors.length) {
@@ -48,15 +50,8 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
 
 export const validation: IPlugin = {
   name: 'validation',
-  categories: [
-    {
-      name: 'data.request.before',
-      adapter: {
-        dataSource: 'dataEngine.source',
-      }
-    }
-  ],
-  paramKeys: ['dataSource'],
+  categories: ['data.request.before'],
+  paramKeys: ['source'],
   execution,
   priority: 200,
 }

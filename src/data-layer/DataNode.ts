@@ -180,7 +180,11 @@ export default class DataNode implements IDataNode {
   private async loadAndPick() {
     const wholeData = await this.dataEngine.loadData(
       this.source,
-      { engineId: this.uiNode.engineId, loadID: this.uiNode.layoutKey},
+      {
+        engineId: this.uiNode.engineId,
+        layoutKey: this.uiNode.layoutKey,
+        loadID: this.uiNode.layoutKey
+      },
     )
 
     // exec the plugins to pick the value from the loaded data
@@ -475,14 +479,14 @@ export default class DataNode implements IDataNode {
   async updateRow(value: any, updateIndex?: number) {
 
   }
-  async deleteRow(index: number|number[]) {
+  async deleteRow(index: number|number[], logically?: boolean) {
     const data = this.data
 
     if (!_.isArray(data)) {
       // not array, can't delete directly
       this.errorInfo = {
         status: 1000,
-        code: 'Could not delete row data when it is not an array'
+        code: `Couldn't delete a row from DataNode ${this.id} whose data is not an array.`
       }
       return false
     }
@@ -516,18 +520,34 @@ export default class DataNode implements IDataNode {
     }
 
     const currentStatus = _.get(this.errorInfo, 'status', true)
-    if (status) {
-      if (_.isArray(index)) {
-        index.forEach((item: number) => {
-          const targetSource = `${this.source.source}[${item}]`
+    if (currentStatus) {
+      // delete the row(s) logically by setting its status to 'delete'
+      if (logically === true) {
+        if (_.isArray(index)) {
+          index.forEach((item: number) => {
+            const targetSource = `${this.source.source}[${item}]`
+            if (this.dataPool.getInfo(targetSource, 'status') !== 'delete') {
+              this.dataPool.setInfo(targetSource, { key: 'status', value: 'delete' })
+            }
+          })
+        } else if (_.isFinite(index)) {
+          const targetSource = `${this.source.source}[${index}]`
           if (this.dataPool.getInfo(targetSource, 'status') !== 'delete') {
             this.dataPool.setInfo(targetSource, { key: 'status', value: 'delete' })
           }
-        })
-      } else if (_.isFinite(index)) {
-        const targetSource = `${this.source.source}[${index}]`
-        if (this.dataPool.getInfo(targetSource, 'status') !== 'delete') {
-          this.dataPool.setInfo(targetSource, { key: 'status', value: 'delete' })
+        }
+      } else {
+        // delete the row(s) really
+        if (_.isArray(index)) {
+          index.filter((item: number) => {
+            return _.isFinite(item)
+          }).forEach((item: number) => {
+            const targetSource = `${this.source.source}[${item}]`
+            this.dataPool.clear(targetSource)
+          })
+        } else if (_.isFinite(index)) {
+          const targetSource = `${this.source.source}[${index}]`
+          this.dataPool.clear(targetSource)
         }
       }
 

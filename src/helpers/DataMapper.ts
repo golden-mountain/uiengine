@@ -99,7 +99,7 @@ export class DataMapper implements IDataMapper {
   }
 
   setDataSchema(
-    source: IDataSource,
+    source: IDataSource|string,
     schema: IDataSchema | IDataNodeSchema,
   ) {
     const schemaLineage = this.getSchemaLineage(source)
@@ -111,7 +111,7 @@ export class DataMapper implements IDataMapper {
   }
 
   getDataSchema(
-    source: IDataSource,
+    source: IDataSource|string,
     fromRoot?: boolean,
   ) {
     const dataSchemaMap = this.dataMap.dataSchema
@@ -146,7 +146,7 @@ export class DataMapper implements IDataMapper {
   }
 
   clearDataSchema(
-    source?: IDataSource,
+    source?: IDataSource|string,
   ) {
     if (_.isNil(source)) {
       this.dataMap.dataSchema = {}
@@ -160,7 +160,7 @@ export class DataMapper implements IDataMapper {
   }
 
   getEntryPoint(
-    source: IDataSource,
+    source: IDataSource|string,
     method?: string,
   ) {
     const dataSchemaMap = this.dataMap.dataSchema

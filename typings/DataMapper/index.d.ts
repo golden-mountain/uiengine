@@ -17,18 +17,18 @@ export interface IDataMapper {
   errorInfo?: IErrorInfo
 
   setDataSchema: (
-    source: IDataSource,
+    source: IDataSource|string,
     schema: IDataSchema | IDataNodeSchema,
   ) => void
   getDataSchema: (
-    source: IDataSource,
+    source: IDataSource|string,
     fromRoot?: boolean,
   ) => IDataSchema | IDataNodeSchema | undefined
   clearDataSchema: (
-    source?: IDataSource,
+    source?: IDataSource|string,
   ) => void
   getEntryPoint: (
-    source: IDataSource,
+    source: IDataSource|string,
     method?: string,
   ) => string | undefined
 }

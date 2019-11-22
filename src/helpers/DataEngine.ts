@@ -90,7 +90,7 @@ export class DataEngine implements IDataEngine {
     }
   }
 
-  private getSchemaName(dataSource: IDataSource|string) {
+  private getSchemaDomainName(dataSource: IDataSource|string) {
     let lineage: string = ''
     if (_.isObject(dataSource)) {
       const { schema, source } = dataSource
@@ -105,7 +105,7 @@ export class DataEngine implements IDataEngine {
 
     return getSchemaName(lineage)
   }
-  private getDomainSource(dataSource: IDataSource|string) {
+  private getSchemaDomainSource(dataSource: IDataSource|string) {
     let lineage: string = ''
     if (_.isObject(dataSource)) {
       const { schema, source } = dataSource
@@ -123,8 +123,8 @@ export class DataEngine implements IDataEngine {
       schema: `${getDomainName(lineage, false)}:`,
     } as IDataSource
   }
-  async loadSchema(source: IDataSource, options?: IOtherOperOption) {
-    const schemaName = this.getSchemaName(source)
+  async loadSchema(source: IDataSource|string, options?: IOtherOperOption) {
+    const schemaName = this.getSchemaDomainName(source)
     let currentEngine: string | undefined
     if (_.isObject(options)) {
       const { engineId } = options
@@ -152,7 +152,7 @@ export class DataEngine implements IDataEngine {
       }
     }
 
-    const domainSource = this.getDomainSource(source)
+    const domainSource = this.getSchemaDomainSource(source)
     if (_.isObject(schema)) {
       this.mapper.setDataSchema(domainSource, _.cloneDeep(schema))
     } else {
@@ -165,8 +165,37 @@ export class DataEngine implements IDataEngine {
     return schema
   }
 
+  private getSourceDomainName(dataSource: IDataSource|string) {
+    let sourceStr: string = ''
+    if (_.isObject(dataSource)) {
+      const { source } = dataSource
+      if (_.isString(source) && source) {
+        sourceStr = source
+      }
+    } else if (_.isString(dataSource)) {
+      sourceStr = dataSource
+    }
+
+    return getSchemaName(sourceStr)
+  }
+  private getSourceDomainSource(dataSource: IDataSource|string) {
+    let sourceStr: string = ''
+    if (_.isObject(dataSource)) {
+      const { source } = dataSource
+      if (_.isString(source) && source) {
+        sourceStr = source
+      }
+    } else if (_.isString(dataSource)) {
+      sourceStr = dataSource
+    }
+
+    return {
+      source: `${getDomainName(sourceStr, false)}:`,
+      schema: `${getDomainName(sourceStr, false)}:`,
+    } as IDataSource
+  }
   async sendRequest(
-    source: IDataSource,
+    source: IDataSource|string,
     method: string,
     options?: ISendRequestOption,
   ) {
@@ -183,44 +212,37 @@ export class DataEngine implements IDataEngine {
       return null
     }
 
-    if (_.isNil(source) || !_.isObject(source)) {
+    if (_.isNil(source) || _.isEmpty(source)) {
       this.errorInfo = {
         status: 1002,
         code: `Can't send the request without a valid data source.`
       }
       return null
     } else {
-      RP.dataSchema = this.mapper.getDataSchema(source, true)
-      if (_.isNil(RP.dataSchema)) {
-        RP.loadedSchema = await this.loadSchema(source, { engineId: _.get(options, 'engineId') })
-        if (_.isNil(RP.loadedSchema)) {
+      RP.domainSource = this.getSourceDomainSource(source)
+      RP.domainSchema = this.mapper.getDataSchema(RP.domainSource, true)
+      if (_.isNil(RP.domainSchema)) {
+        RP.domainSchema = await this.loadSchema(RP.domainSource, { engineId: _.get(options, 'engineId') })
+        if (_.isNil(RP.domainSchema)) {
           this.errorInfo = {
             status: 1003,
-            code: `Can't find data schema for ${source.source}`
-          }
-          return null
-        }
-        RP.dataSchema = this.mapper.getDataSchema(source, true)
-        if (_.isNil(RP.dataSchema)) {
-          this.errorInfo = {
-            status: 1003,
-            code: `Can't find data schema for ${source.source}`
+            code: `Can't find data schema for ${RP.domainSource.source}`
           }
           return null
         }
       }
 
-      RP.endpoint = this.mapper.getEntryPoint(source, RP.sendMethod)
+      RP.endpoint = this.mapper.getEntryPoint(RP.domainSource, RP.sendMethod)
       if (!_.isString(RP.endpoint) || _.isEmpty(RP.endpoint)) {
         this.errorInfo = {
           status: 1004,
-          code: `Can't find the endpoint of ${RP.sendMethod} in the schema of ${source.source}.`
+          code: `Can't find the endpoint of ${RP.sendMethod} in the schema of ${RP.domainSource.source}.`
         }
         return null
       }
 
       if (_.isObject(options)) {
-        const { data, config, cacheID, engineId } = options
+        const { data, config, cacheID, engineId, layoutKey } = options
         if (!_.isNil(data)) {
           RP.requestPayload = _.cloneDeep(data)
         }
@@ -233,18 +255,12 @@ export class DataEngine implements IDataEngine {
         if (_.isString(engineId) && engineId) {
           RP.engineId = engineId
         }
+        if (_.isString(layoutKey) && layoutKey) {
+          RP.layoutKey = layoutKey
+        }
       }
 
       try {
-        if (_.isString(RP.responseID) && RP.responseID) {
-          // use the cache data as response
-          // Pay attention: the API of the source should always response the same data
-          RP.responseData = Cache.getData(
-            RP.responseID,
-            { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
-          )
-        }
-
         // execute plugins to prepare for the request and return the status
         // the results of these plugins decide whether should stop the send
         const { results: beforeResults } = await this.pluginManager.executePlugins(
@@ -279,6 +295,15 @@ export class DataEngine implements IDataEngine {
           return null
         }
 
+        if (_.isString(RP.responseID) && RP.responseID) {
+          // use the cache data as response
+          // Pay attention: the API of the source should always response the same data
+          RP.responseData = Cache.getData(
+            RP.responseID,
+            { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
+          )
+        }
+
         if (_.isNil(RP.responseData)) {
           switch (RP.sendMethod) {
             case 'get':
@@ -308,7 +333,7 @@ export class DataEngine implements IDataEngine {
                 // Pay attention: the API of the source should always response the same data
                 Cache.setData(
                   RP.responseID,
-                  data,
+                  _.cloneDeep(data),
                   { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
                 )
               }
@@ -343,14 +368,17 @@ export class DataEngine implements IDataEngine {
     return RP.responseData
   }
 
-  async loadData(source: IDataSource, options?: ILoadDataOption) {
+  async loadData(source: IDataSource|string, options?: ILoadDataOption) {
     const requestOption: ISendRequestOption = {
       config: { prefixType: 'data' }
     }
     if (_.isObject(options)) {
-      const { engineId, loadID } = options
+      const { engineId, layoutKey, loadID } = options
       if (_.isString(engineId) && engineId) {
         requestOption.engineId = engineId
+      }
+      if (_.isString(layoutKey) && layoutKey) {
+        requestOption.layoutKey = layoutKey
       }
       if (_.isString(loadID) && loadID) {
         requestOption.cacheID = loadID
@@ -364,15 +392,18 @@ export class DataEngine implements IDataEngine {
     )
   }
 
-  async updateData(source: IDataSource, data: any, options?: IOtherOperOption) {
+  async updateData(source: IDataSource|string, data: any, options?: IOtherOperOption) {
     const requestOption: ISendRequestOption = {
       data,
       config: { prefixType: 'data' }
     }
     if (_.isObject(options)) {
-      const { engineId } = options
+      const { engineId, layoutKey } = options
       if (_.isString(engineId) && engineId) {
         requestOption.engineId = engineId
+      }
+      if (_.isString(layoutKey) && layoutKey) {
+        requestOption.layoutKey = layoutKey
       }
     }
 
@@ -383,15 +414,18 @@ export class DataEngine implements IDataEngine {
     )
   }
 
-  async replaceData(source: IDataSource, data: any, options?: IOtherOperOption) {
+  async replaceData(source: IDataSource|string, data: any, options?: IOtherOperOption) {
     const requestOption: ISendRequestOption = {
       data,
       config: { prefixType: 'data' }
     }
     if (_.isObject(options)) {
-      const { engineId } = options
+      const { engineId, layoutKey } = options
       if (_.isString(engineId) && engineId) {
         requestOption.engineId = engineId
+      }
+      if (_.isString(layoutKey) && layoutKey) {
+        requestOption.layoutKey = layoutKey
       }
     }
 
@@ -402,14 +436,17 @@ export class DataEngine implements IDataEngine {
     )
   }
 
-  async deleteData(source: IDataSource, options?: IOtherOperOption) {
+  async deleteData(source: IDataSource|string, options?: IOtherOperOption) {
     const requestOption: ISendRequestOption = {
       config: { prefixType: 'data' }
     }
     if (_.isObject(options)) {
-      const { engineId } = options
+      const { engineId, layoutKey } = options
       if (_.isString(engineId) && engineId) {
         requestOption.engineId = engineId
+      }
+      if (_.isString(layoutKey) && layoutKey) {
+        requestOption.layoutKey = layoutKey
       }
     }
 

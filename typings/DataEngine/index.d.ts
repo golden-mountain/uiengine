@@ -15,16 +15,19 @@ export interface ISendRequestOption {
   config?: IRequestConfig
   cacheID?: string
   engineId?: string
+  layoutKey?: string
   [otherKey: string]: any
 }
 
 export interface ILoadDataOption {
   engineId?: string
+  layoutKey?: string
   loadID?: string
 }
 
 export interface IOtherOperOption {
   engineId?: string
+  layoutKey?: string
 }
 
 export interface IDataEngine {
@@ -37,11 +40,11 @@ export interface IDataEngine {
 
   initializeConfig: (config?: IDataEngineConfig) => void
 
-  loadSchema: (source: IDataSource, options?: IOtherOperOption) => Promise<IDataSchema|undefined>
+  loadSchema: (source: IDataSource|string, options?: IOtherOperOption) => Promise<IDataSchema|undefined>
 
-  sendRequest: (source: IDataSource, method: string, options?: ISendRequestOption) => Promise<any>
-  loadData: (source: IDataSource, options?: ILoadDataOption) => Promise<any>
-  updateData: (source: IDataSource, data: any, options?: IOtherOperOption) => Promise<any>
-  replaceData: (source: IDataSource, data: any, options?: IOtherOperOption) => Promise<any>
-  deleteData: (source: IDataSource, options?: IOtherOperOption) => Promise<any>
+  sendRequest: (source: IDataSource|string, method: string, options?: ISendRequestOption) => Promise<any>
+  loadData: (source: IDataSource|string, options?: ILoadDataOption) => Promise<any>
+  updateData: (source: IDataSource|string, data: any, options?: IOtherOperOption) => Promise<any>
+  replaceData: (source: IDataSource|string, data: any, options?: IOtherOperOption) => Promise<any>
+  deleteData: (source: IDataSource|string, options?: IOtherOperOption) => Promise<any>
 }
