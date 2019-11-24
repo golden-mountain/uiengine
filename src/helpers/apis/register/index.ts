@@ -1,4 +1,9 @@
-export * from "./component";
-export * from "./config";
-export * from "./listener";
-export * from "./plugin";
+import component from "./component";
+import listener from "./listener";
+import plugin from "./plugin";
+
+export default {
+  component,
+  listener,
+  plugin
+};
