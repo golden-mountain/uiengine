@@ -1,24 +1,47 @@
-const listener: any = function(this: any, name: string, listener?: any) {
-  if (!listener) {
-    return this.get(name);
+import _ from "lodash";
+import { createInstanceProxy } from "../../engine";
+
+class ListenerProxy {
+  constructor(name: string, plugin?: any) {
+    if (!plugin) {
+      this.get(name);
+    } else {
+      this.set(name, plugin);
+    }
   }
-  return this.set(name, listener);
+
+  get(name: string) {
+    console.log("get a config");
+  }
+
+  set(configs: string | object, value: any) {
+    console.log("set config");
+  }
+}
+
+// callbacks
+const ListenerProxyGetCallback = function(target: any, key: string) {
+  if (!_.isEmpty(target[key])) {
+    return target[key];
+  }
+
+  return _.get(target.node, key);
 };
 
-listener.prototype.get = function(name: string) {
-  console.log("get a listener");
+const ListenerProxySetCallback = function(
+  target: any,
+  key: string,
+  value: any
+) {
+  return _.set(target.node, key, value);
 };
 
-listener.prototype.set = function(listeners: string | object, listener?: any) {
-  console.log("set an listener or a group of listeners");
-};
-
-listener.set = (listeners: string | object, listener?: any) => {
-  return new listener(listeners, listener);
-};
-
-listener.get = (name: string) => {
-  return new listener(name);
+const listener = function(this: any, path: string, configObject?: any) {
+  return createInstanceProxy(
+    new ListenerProxy(path, configObject),
+    ListenerProxyGetCallback,
+    ListenerProxySetCallback
+  );
 };
 
 export default listener;

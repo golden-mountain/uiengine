@@ -1,7 +1,31 @@
-export const request: any = function(path: string, configObject?: any) {
-  return request.get(name, configObject);
+import _ from "lodash";
+import { createInstanceProxy } from "../engine";
+
+class RequestProxy {
+  constructor(path: string, configObject?: any) {}
+
+  get(path: string, configObject?: any) {
+    console.log("get a request");
+  }
+}
+
+// callbacks
+const RequestProxyGetCallback = function(target: any, key: string) {
+  if (!_.isEmpty(target[key])) {
+    return target[key];
+  }
+
+  return _.get(target.node, key);
 };
 
-request.get = function(path: string, configObject?: any) {
-  console.log("get a request");
+const RequestProxySetCallback = function(target: any, key: string, value: any) {
+  return _.set(target.node, key, value);
+};
+
+export const request = function(this: any, path: string, configObject?: any) {
+  return createInstanceProxy(
+    new RequestProxy(path, configObject),
+    RequestProxyGetCallback,
+    RequestProxySetCallback
+  );
 };

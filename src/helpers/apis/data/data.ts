@@ -1,12 +1,13 @@
 import _ from "lodash";
 import { createInstanceProxy } from "../../engine";
 
-export const DataNodeProxy: any = function(this: any) {};
+class DataNodeProxy {
+  constructor() {}
 
-DataNodeProxy.prototype.select = (selector: object, layoutId?: string) => {
-  // const uiNodeProxy = new UINodeProxy()
-};
-
+  select(selector: object, layoutId?: string) {
+    // const uiNodeProxy = new UINodeProxy()
+  }
+}
 // callbacks
 const DataNodeProxyGetCallback = function(target: any, key: string) {
   if (!_.isEmpty(target[key])) {

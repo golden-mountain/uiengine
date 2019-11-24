@@ -1,31 +1,47 @@
-const component: any = function(
-  this: any,
-  name: string | object,
-  component?: any
-) {
-  if (!component) {
-    return this.get(name);
+import _ from "lodash";
+import { createInstanceProxy } from "../../engine";
+
+class ComponentProxy {
+  constructor(name: string, component?: any) {
+    if (!component) {
+      this.get(name);
+    } else {
+      this.set(name, component);
+    }
   }
-  return this.set(name, component);
+
+  get(name: string) {
+    console.log("get a config");
+  }
+
+  set(components: string | object, value: any) {
+    console.log("set config");
+  }
+}
+
+// callbacks
+const ComponentProxyGetCallback = function(target: any, key: string) {
+  if (!_.isEmpty(target[key])) {
+    return target[key];
+  }
+
+  return _.get(target.node, key);
 };
 
-component.prototype.get = function(name: string) {
-  console.log("get a component");
-};
-
-component.prototype.set = function(
-  components: string | object,
-  component?: any
+const ComponentProxySetCallback = function(
+  target: any,
+  key: string,
+  value: any
 ) {
-  console.log("set one or group components");
+  return _.set(target.node, key, value);
 };
 
-component.get = function(name: string) {
-  return new component(name);
-};
-
-component.set = function(coms: string | object, com?: any) {
-  return new component(coms, com);
+const component = function(this: any, path: string, configObject?: any) {
+  return createInstanceProxy(
+    new ComponentProxy(path, configObject),
+    ComponentProxyGetCallback,
+    ComponentProxySetCallback
+  );
 };
 
 export default component;

@@ -41,11 +41,8 @@ export function engine() {
 }
 
 // register apis
-engine.config = apis.config;
-engine.register = apis.register;
-engine.request = apis.request;
-engine.ui = apis.ui;
-engine.data = apis.data;
-engine.state = apis.state;
+_.forEach(apis as any, (name: string, api: any) => {
+  engine[name] = api;
+});
 
 export default engine;

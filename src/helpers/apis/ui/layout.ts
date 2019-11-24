@@ -1,35 +1,44 @@
 import { ILayoutSchema } from "../../../../typings";
+import _ from "lodash";
+import { createInstanceProxy } from "../../engine";
 
-export const layout: any = function(this: any, name: string) {
-  return this.get(name);
+class LayoutProxy {
+  constructor(name: string) {}
+
+  active(name?: string) {
+    console.log("get a config");
+  }
+
+  get(name?: string) {
+    console.log("get a config");
+  }
+
+  select(name?: string) {
+    return this.get(name);
+  }
+
+  replaceWith(layoutObject?: ILayoutSchema) {
+    // return this.get(name);
+  }
+}
+
+// callbacks
+const LayoutProxyGetCallback = function(target: any, key: string) {
+  if (!_.isEmpty(target[key])) {
+    return target[key];
+  }
+
+  return _.get(target.node, key);
 };
 
-layout.prototype.active = function(name?: string) {
-  return this.get(name);
+const LayoutProxySetCallback = function(target: any, key: string, value: any) {
+  return _.set(target.node, key, value);
 };
 
-layout.prototype.get = function(name?: string) {
-  console.log("get a layout");
+export const layout = function(this: any, name: string) {
+  return createInstanceProxy(
+    new LayoutProxy(name),
+    LayoutProxyGetCallback,
+    LayoutProxySetCallback
+  );
 };
-
-layout.select = function(name?: string) {
-  return this.get(name);
-};
-
-layout.replaceWith = function(layoutObject?: ILayoutSchema) {
-  // return this.get(name);
-};
-
-// static methods
-layout.active = (name?: string) => {
-  return new layout(name).active();
-};
-layout.get = (name?: string) => {
-  return new layout(name);
-};
-
-layout.select = (name?: string) => {
-  return new layout(name);
-};
-
-export default layout;

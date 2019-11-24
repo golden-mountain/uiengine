@@ -1,23 +1,43 @@
-const plugin: any = function(this: any, name: string, plugin?: any) {
-  if (!plugin) {
-    return this.get(name);
+import _ from "lodash";
+import { createInstanceProxy } from "../../engine";
+
+class PluginProxy {
+  constructor(name: string, plugin?: any) {
+    if (!plugin) {
+      this.get(name);
+    } else {
+      this.set(name, plugin);
+    }
   }
-  return this.set(name, plugin);
+
+  get(name: string) {
+    console.log("get a config");
+  }
+
+  set(configs: string | object, value: any) {
+    console.log("set config");
+  }
+}
+
+// callbacks
+const PluginProxyGetCallback = function(target: any, key: string) {
+  if (!_.isEmpty(target[key])) {
+    return target[key];
+  }
+
+  return _.get(target.node, key);
 };
 
-plugin.prototype.get = function(name?: string) {
-  console.log("get a plugin");
+const PluginProxySetCallback = function(target: any, key: string, value: any) {
+  return _.set(target.node, key, value);
 };
 
-plugin.prototype.set = function(plugins?: any, plugin?: any) {
-  console.log("set array of plugins or an plugin");
+const plugin = function(this: any, path: string, configObject?: any) {
+  return createInstanceProxy(
+    new PluginProxy(path, configObject),
+    PluginProxyGetCallback,
+    PluginProxySetCallback
+  );
 };
 
-plugin.set = (plugins: string | object, plugin?: any) => {
-  return new plugin(plugins, plugin);
-};
-
-plugin.get = (name: string) => {
-  return new plugin(name);
-};
 export default plugin;

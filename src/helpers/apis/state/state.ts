@@ -1,11 +1,13 @@
 import _ from "lodash";
 import { createInstanceProxy } from "../../engine";
 
-const StateNodeProxy: any = function(this: any) {};
+class StateNodeProxy {
+  constructor() {}
 
-StateNodeProxy.prototype.select = (selector: object, layoutId?: string) => {
-  // const uiNodeProxy = new UINodeProxy()
-};
+  select(selector: object, layoutId?: string) {
+    // const uiNodeProxy = new UINodeProxy()
+  }
+}
 
 // callbacks
 const StateNodeProxyGetCallback = function(target: any, key: string) {

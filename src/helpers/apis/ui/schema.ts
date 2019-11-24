@@ -1,9 +1,39 @@
-export const schema: any = function(this: any, name: string, value?: any) {
-  return this.get(name);
+import _ from "lodash";
+import { createInstanceProxy } from "../../engine";
+
+class SchemaProxy {
+  constructor(name: string, config?: any) {}
+
+  get(name: string) {
+    console.log("get a schema");
+  }
+
+  set(name: string | object, value?: any) {
+    console.log("set schema");
+  }
+
+  update(name: string | object, value?: any) {
+    console.log("set schema");
+  }
+}
+
+// callbacks
+const SchemaProxyGetCallback = function(target: any, key: string) {
+  if (!_.isEmpty(target[key])) {
+    return target[key];
+  }
+
+  return _.get(target.node, key);
 };
 
-schema.prototype.set = function(name: string, value: any) {};
-schema.prototype.get = function(name: String) {};
-schema.prototype.update = function(schemaobject: any) {};
+const SchemaProxySetCallback = function(target: any, key: string, value: any) {
+  return _.set(target.node, key, value);
+};
 
-export default schema;
+export const schema = function(this: any, path: string, configObject?: any) {
+  return createInstanceProxy(
+    new SchemaProxy(path, configObject),
+    SchemaProxyGetCallback,
+    SchemaProxySetCallback
+  );
+};
