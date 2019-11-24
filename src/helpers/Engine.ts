@@ -1,18 +1,51 @@
+import _ from "lodash";
 import * as apis from "./apis";
 
-class EngineApiFactory {
-  static classes = {};
-
-  static register(cls: any) {
-    Object.assign(EngineApiFactory.classes, cls);
+class EngineInstanceProxy {
+  private setCallback?: any;
+  private getCallback?: any;
+  constructor(setCallback?: any, getCallback?: any) {
+    // this.instance = instance;
+    this.setCallback = setCallback;
+    this.getCallback = getCallback;
   }
 
   get(target: any, key: string) {
-    //     console.log(`getting ${key}!`, key, value, receiver);
-    //     return Reflect.get(target, key, receiver);
-    console.log(key, EngineApiFactory.classes);
-    return EngineApiFactory.classes[key] || null;
+    if (_.isFunction(this.getCallback)) return this.getCallback(target, key);
+    return target[key] || null;
+  }
+
+  set(target: any, key: string, value: any): boolean {
+    if (_.isFunction(this.setCallback))
+      return this.setCallback(target, key, value);
+    try {
+      target[key] = value;
+      return true;
+    } catch (e) {
+      console.error(e.message);
+      return false;
+    }
   }
 }
-EngineApiFactory.register(apis);
-export default new Proxy({}, new EngineApiFactory());
+
+export function createInstanceProxy(
+  instance: any,
+  setCallback?: any,
+  getCallback?: any
+) {
+  return new Proxy(instance, new EngineInstanceProxy(setCallback, getCallback));
+}
+
+export function engine() {
+  console.log("UIengine Apis Version 0.1");
+}
+
+// register apis
+engine.config = apis.config;
+engine.register = apis.register;
+engine.request = apis.request;
+engine.ui = apis.ui;
+engine.data = apis.data;
+engine.state = apis.state;
+
+export default engine;
