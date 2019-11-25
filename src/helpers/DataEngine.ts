@@ -305,40 +305,65 @@ export class DataEngine implements IDataEngine {
         }
 
         if (_.isNil(RP.responseData)) {
-          switch (RP.sendMethod) {
-            case 'get':
-              RP.response = await this.request.get(RP.endpoint, RP.requestConfig, RP.engineId)
-              break
-            case 'delete':
-              RP.response = await this.request.delete(RP.endpoint, RP.requestConfig, RP.engineId)
-              break
-            case 'post':
-              RP.response = await this.request.post(RP.endpoint, RP.requestPayload, RP.requestConfig, RP.engineId)
-              break
-            case 'put':
-              RP.response = await this.request.put(RP.endpoint, RP.requestPayload, RP.requestConfig, RP.engineId)
-              break
-            default:
-              this.errorInfo = {
-                status: 1006,
-                code: `Can't solve the parameters for request method ${RP.sendMethod}`
-              }
-              return
-          }
-          if (_.isObject(RP.response)) {
-            const { data } = RP.response
-            if (!_.isNil(data)) {
-              if (_.isString(RP.responseID) && RP.responseID) {
-                // cache the response data with the ID
-                // Pay attention: the API of the source should always response the same data
-                Cache.setData(
-                  RP.responseID,
-                  _.cloneDeep(data),
-                  { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
-                )
-              }
-              RP.responseData = data
+          try {
+            switch (RP.sendMethod) {
+              case 'get':
+                RP.response = await this.request.get(RP.endpoint, RP.requestConfig, RP.engineId)
+                break
+              case 'delete':
+                RP.response = await this.request.delete(RP.endpoint, RP.requestConfig, RP.engineId)
+                break
+              case 'post':
+                RP.response = await this.request.post(RP.endpoint, RP.requestPayload, RP.requestConfig, RP.engineId)
+                break
+              case 'put':
+                RP.response = await this.request.put(RP.endpoint, RP.requestPayload, RP.requestConfig, RP.engineId)
+                break
+              default:
+                this.errorInfo = {
+                  status: 1006,
+                  code: `Can't solve the parameters for request method ${RP.sendMethod}`
+                }
+                return
             }
+            if (_.isObject(RP.response)) {
+              const { data } = RP.response
+              if (!_.isNil(data)) {
+                if (_.isString(RP.responseID) && RP.responseID) {
+                  // cache the response data with the ID
+                  // Pay attention: the API of the source should always response the same data
+                  Cache.setData(
+                    RP.responseID,
+                    _.cloneDeep(data),
+                    { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
+                  )
+                }
+                RP.responseData = data
+              } else {
+                if (_.isString(RP.responseID) && RP.responseID) {
+                  // cache the default data with the ID
+                  // avoid calling the same api too many times
+                  Cache.setData(
+                    RP.responseID,
+                    {},
+                    { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
+                  )
+                }
+                RP.responseData = {}
+              }
+            }
+          } catch (e) {
+            console.error(e)
+            if (_.isString(RP.responseID) && RP.responseID) {
+              // cache the default data with the ID
+              // avoid calling the same api too many times
+              Cache.setData(
+                RP.responseID,
+                {},
+                { cacheKey: `${RP.sendMethod}:${RP.endpoint}` },
+              )
+            }
+            RP.responseData = {}
           }
         }
 
