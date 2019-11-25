@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { createInstanceProxy } from "../../engine";
+import { createInstanceProxy } from "../../APIEngine";
 
 class ListenerProxy {
   constructor(name: string, plugin?: any) {

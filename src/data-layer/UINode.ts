@@ -272,7 +272,7 @@ export default class UINode implements IUINode {
 
   async genLiveLayout(schema: ILayoutSchema, data: any) {
     // replace $ to row number
-    const updatePropRow = (target: ILayoutSchema, index: string) => {
+    const updatePropRow = (target: ILayoutSchema, index: any) => {
       _.forIn(target, function(value: any, key: string) {
         if (typeof value === "object") {
           updatePropRow(value, index);
@@ -288,9 +288,9 @@ export default class UINode implements IUINode {
 
     const liveSchema = schema;
     let rowTemplate: any = liveSchema.$children;
-    if (rowTemplate && data) {
+    if (rowTemplate && _.isArray(data)) {
       cloneTemplateSchema(rowTemplate);
-      liveSchema.children = data.map((d: any, index: string) =>
+      liveSchema.children = data.map((d: any, index: number) =>
         rowTemplate.map((s: any) => {
           const newSchema = _.cloneDeep(s);
           if (newSchema.datasource) {

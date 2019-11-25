@@ -1,6 +1,6 @@
 import { ILayoutSchema } from "../../../../typings";
 import _ from "lodash";
-import { createInstanceProxy } from "../../engine";
+import { createInstanceProxy } from "../../APIEngine";
 
 class LayoutProxy {
   constructor(name: string) {}

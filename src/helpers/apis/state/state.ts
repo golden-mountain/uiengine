@@ -1,9 +1,8 @@
 import _ from "lodash";
-import { createInstanceProxy } from "../../engine";
+import { createInstanceProxy } from "../../APIEngine";
+import { IApiState } from "../../../../typings/apis";
 
 class StateNodeProxy {
-  constructor() {}
-
   select(selector: object, layoutId?: string) {
     // const uiNodeProxy = new UINodeProxy()
   }
@@ -25,10 +24,8 @@ const StateNodeProxySetCallback = function(
   return _.set(target.node, key, value);
 };
 
-export const state = function(this: any) {
-  return createInstanceProxy(
-    new StateNodeProxy(),
-    StateNodeProxyGetCallback,
-    StateNodeProxySetCallback
-  );
-};
+export const state: IApiState = createInstanceProxy<IApiState>(
+  new StateNodeProxy(),
+  StateNodeProxyGetCallback,
+  StateNodeProxySetCallback
+);

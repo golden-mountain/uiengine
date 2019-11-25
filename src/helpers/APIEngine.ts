@@ -1,5 +1,16 @@
 import _ from "lodash";
 import * as apis from "./apis";
+import {
+  IApiConfig,
+  IApiRequest,
+  IApiEngine,
+  IApiRegister,
+  IApiPlugin,
+  IApiUI,
+  IAPIUIConstructor,
+  IApiState,
+  IApiData
+} from "../../typings/apis";
 
 class EngineInstanceProxy {
   private setCallback?: any;
@@ -28,21 +39,31 @@ class EngineInstanceProxy {
   }
 }
 
-export function createInstanceProxy(
+export function createInstanceProxy<T>(
   instance: any,
   setCallback?: any,
   getCallback?: any
-) {
+): T {
   return new Proxy(instance, new EngineInstanceProxy(setCallback, getCallback));
 }
 
-export function engine() {
-  console.log("UIengine Apis Version 0.1");
+// register apis
+class APIEngine implements IApiEngine {
+  register: IApiRegister = apis.register;
+  config: IApiConfig = apis.config;
+  request: IApiRequest = apis.request;
+  plugin: IApiPlugin = apis.plugin;
+
+  ui: IApiUI = apis.ui as any;
+  data: IApiData = apis.data as any;
+  state: IApiState = apis.state as any;
+
+  constructor() {
+    // register apis
+    // _.forEach(apis as any, (name: string, api: any) => {
+    //   this[name] = api;
+    // });
+  }
 }
 
-// register apis
-_.forEach(apis as any, (name: string, api: any) => {
-  engine[name] = api;
-});
-
-export default engine;
+export default new APIEngine();

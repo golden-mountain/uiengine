@@ -1,9 +1,10 @@
 import _ from "lodash";
-import { createInstanceProxy } from "../../engine";
+import { createInstanceProxy } from "../../APIEngine";
 import { layout } from "./layout";
 import { schema } from "./schema";
 import { data } from "../data";
 import { state } from "../state";
+import { IApiUI } from "../../../../typings/apis";
 
 class UINodeProxy {
   private instance: any;
@@ -49,10 +50,16 @@ const UINodeProxySetCallback = function(target: any, key: string, value: any) {
   return _.set(target.node, key, value);
 };
 
-export const ui = function(this: any, selector: object, layoutId?: string) {
-  return createInstanceProxy(
+export const ui = function(selector: object, layoutId?: string) {
+  return createInstanceProxy<IApiUI>(
     new UINodeProxy(selector, layoutId),
     UINodeProxyGetCallback,
     UINodeProxySetCallback
   );
 };
+
+// access directly
+ui.schema = schema;
+ui.data = data;
+ui.state = state;
+ui.layout = layout;

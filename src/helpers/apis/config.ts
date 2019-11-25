@@ -1,7 +1,8 @@
 import _ from "lodash";
-import { createInstanceProxy } from "../engine";
+import { createInstanceProxy } from "../APIEngine";
+import { IApiConfig } from "../../../typings/apis/config";
 
-class ConfigProxy {
+class ConfigProxy implements IApiConfig {
   constructor(name: string, config: any) {}
 
   get(name: string) {

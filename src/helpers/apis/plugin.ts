@@ -1,8 +1,8 @@
 import _ from "lodash";
-import { createInstanceProxy } from "../engine";
+import { createInstanceProxy } from "../APIEngine";
 
 class PluginProxy {
-  constructor(name: string, config?: any) {}
+  constructor(name: string) {}
 
   info(name: string) {
     console.log("get a config");
@@ -26,9 +26,9 @@ const PluginProxySetCallback = function(target: any, key: string, value: any) {
   return _.set(target.node, key, value);
 };
 
-export const plugin = function(this: any, path: string, configObject?: any) {
+export const plugin = function(this: any, path: string) {
   return createInstanceProxy(
-    new PluginProxy(path, configObject),
+    new PluginProxy(path),
     PluginProxyGetCallback,
     PluginProxySetCallback
   );

@@ -16,4 +16,4 @@ export * from "./UIEngineRegister";
 export * from "./utils";
 
 // apis
-export { default as engine } from "./engine";
+export { default as engine } from "./APIEngine";

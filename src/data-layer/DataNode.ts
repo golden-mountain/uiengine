@@ -240,7 +240,6 @@ export default class DataNode implements IDataNode {
   }
 
   async updateData(value: any) {
-    console.log(value, this.source.source);
     let noUpdateLayout = true;
     if (_.isArray(value) && this.uiNode.schema.$children) {
       noUpdateLayout = false;
@@ -374,6 +373,8 @@ export default class DataNode implements IDataNode {
           // });
         } else {
           _.unset(data, path);
+          this.data = data;
+          noUpdateLayout = false;
         }
       } else {
         this.data = null;

@@ -1,12 +1,14 @@
 import _ from "lodash";
-import { createInstanceProxy } from "../../engine";
+import { UIEngineRegister } from "../../UIEngineRegister";
+import { createInstanceProxy } from "../../APIEngine";
+import { IPlugin, IPluginMap } from "../../../../typings";
 
 class PluginProxy {
-  constructor(name: string, plugin?: any) {
-    if (!plugin) {
-      this.get(name);
-    } else {
-      this.set(name, plugin);
+  constructor(plugins?: any) {
+    if (_.isArray(plugins)) {
+      this.set(name);
+    } else if (_.isString(plugins)) {
+      this.get(plugins);
     }
   }
 
@@ -14,8 +16,8 @@ class PluginProxy {
     console.log("get a config");
   }
 
-  set(configs: string | object, value: any) {
-    console.log("set config");
+  set(nameOrPlugins: IPlugin[] | IPluginMap, plugin?: IPlugin) {
+    UIEngineRegister.registerPlugins(nameOrPlugins);
   }
 }
 
@@ -32,9 +34,9 @@ const PluginProxySetCallback = function(target: any, key: string, value: any) {
   return _.set(target.node, key, value);
 };
 
-const plugin = function(this: any, path: string, configObject?: any) {
+const plugin = function(this: any, path: string) {
   return createInstanceProxy(
-    new PluginProxy(path, configObject),
+    new PluginProxy(path),
     PluginProxyGetCallback,
     PluginProxySetCallback
   );

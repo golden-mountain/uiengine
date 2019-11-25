@@ -1,5 +1,6 @@
 import _ from "lodash";
-import { createInstanceProxy } from "../../engine";
+import { createInstanceProxy } from "../../APIEngine";
+import { IApiData } from "../../../../typings/apis";
 
 class DataNodeProxy {
   constructor() {}
@@ -24,10 +25,8 @@ const DataNodeProxySetCallback = function(
   return _.set(target.node, key, value);
 };
 
-export const data = function(this: any) {
-  return createInstanceProxy(
-    new DataNodeProxy(),
-    DataNodeProxyGetCallback,
-    DataNodeProxySetCallback
-  );
-};
+export const data: IApiData = createInstanceProxy<IApiData>(
+  new DataNodeProxy(),
+  DataNodeProxyGetCallback,
+  DataNodeProxySetCallback
+);
