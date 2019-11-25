@@ -29,6 +29,18 @@ export interface IRequestGetConfigOption {
 }
 
 export interface IRequest {
+  injectInterceptor: (
+    type: 'request' | 'response',
+    onFulfilled?: RequestInterceptor | ResponseInterceptor,
+    onRejected?: (error: any) => any,
+    devMode?: boolean,
+  ) => number | undefined
+  ejectInterceptor: (
+    type: 'request' | 'response',
+    number: number,
+    devMode?: boolean,
+  ) => void
+
   setConfig: (config: IRequestConfig, options?: IRequestSetConfigOption) => void
   getConfig: (options?: IRequestGetConfigOption) => IRequestConfig
   get: (url: string, config?: IRequestConfig, id?: string) => Promise<AxiosResponse<any>>

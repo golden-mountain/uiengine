@@ -64,7 +64,7 @@ class AbstractRequest {
     }
   }
   ejectInterceptor(
-    type: string,
+    type: 'request' | 'response',
     number: number,
   ) {
     if (type === 'request') {
@@ -257,6 +257,45 @@ export class Request implements IRequest {
   productConfigs: {
     [id: string]: IRequestConfig
   } = {}
+
+  injectInterceptor(
+    type: 'request' | 'response',
+    onFulfilled?: RequestInterceptor | ResponseInterceptor,
+    onRejected?: (error: any) => any,
+    devMode?: boolean,
+  ) {
+    if (devMode === true) {
+      return this.requestDevelop.injectInterceptor(
+        type,
+        onFulfilled,
+        onRejected,
+      )
+    } else {
+      return this.requestProduct.injectInterceptor(
+        type,
+        onFulfilled,
+        onRejected,
+      )
+    }
+  }
+
+  ejectInterceptor(
+    type: 'request' | 'response',
+    number: number,
+    devMode?: boolean,
+  ) {
+    if (devMode === true) {
+      return this.requestDevelop.ejectInterceptor(
+        type,
+        number,
+      )
+    } else {
+      return this.requestProduct.ejectInterceptor(
+        type,
+        number,
+      )
+    }
+  }
 
   setConfig(config: IRequestConfig, options?: IRequestSetConfigOption) {
     const isDevConfig: boolean = _.get(config, 'devMode', false)
