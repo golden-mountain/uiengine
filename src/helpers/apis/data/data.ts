@@ -25,8 +25,10 @@ const DataNodeProxySetCallback = function(
   return _.set(target.node, key, value);
 };
 
-export const data: IApiData = createInstanceProxy<IApiData>(
-  new DataNodeProxy(),
-  DataNodeProxyGetCallback,
-  DataNodeProxySetCallback
-);
+export const data: IApiData = () => {
+  return createInstanceProxy(
+    new DataNodeProxy(),
+    DataNodeProxyGetCallback,
+    DataNodeProxySetCallback
+  );
+};

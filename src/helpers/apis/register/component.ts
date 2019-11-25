@@ -11,21 +11,21 @@ class ComponentProxy {
   }
 
   get(name: string) {
-    console.log("get a config");
+    console.log("get a copmonent");
   }
 
   set(components: string | object, value: any) {
-    console.log("set config");
+    console.log("set copmonent");
   }
 }
 
 // callbacks
 const ComponentProxyGetCallback = function(target: any, key: string) {
-  if (!_.isEmpty(target[key])) {
+  if (!_.isNil(target[key])) {
     return target[key];
   }
 
-  return _.get(target.node, key);
+  return target.get(key);
 };
 
 const ComponentProxySetCallback = function(
@@ -33,7 +33,7 @@ const ComponentProxySetCallback = function(
   key: string,
   value: any
 ) {
-  return _.set(target.node, key, value);
+  return target.set(key, value);
 };
 
 const component = function(this: any, path: string, configObject?: any) {

@@ -24,8 +24,10 @@ const StateNodeProxySetCallback = function(
   return _.set(target.node, key, value);
 };
 
-export const state: IApiState = createInstanceProxy<IApiState>(
-  new StateNodeProxy(),
-  StateNodeProxyGetCallback,
-  StateNodeProxySetCallback
-);
+export const state: IApiState = () => {
+  createInstanceProxy<IApiState>(
+    new StateNodeProxy(),
+    StateNodeProxyGetCallback,
+    StateNodeProxySetCallback
+  );
+};

@@ -7,7 +7,6 @@ import {
   IApiRegister,
   IApiPlugin,
   IApiUI,
-  IAPIUIConstructor,
   IApiState,
   IApiData
 } from "../../typings/apis";
@@ -15,14 +14,16 @@ import {
 class EngineInstanceProxy {
   private setCallback?: any;
   private getCallback?: any;
-  constructor(setCallback?: any, getCallback?: any) {
+  constructor(getCallback?: any, setCallback?: any) {
     // this.instance = instance;
     this.setCallback = setCallback;
     this.getCallback = getCallback;
   }
 
   get(target: any, key: string) {
-    if (_.isFunction(this.getCallback)) return this.getCallback(target, key);
+    if (_.isFunction(this.getCallback)) {
+      return this.getCallback(target, key);
+    }
     return target[key] || null;
   }
 
@@ -41,10 +42,10 @@ class EngineInstanceProxy {
 
 export function createInstanceProxy<T>(
   instance: any,
-  setCallback?: any,
-  getCallback?: any
+  getCallback?: any,
+  setCallback?: any
 ): T {
-  return new Proxy(instance, new EngineInstanceProxy(setCallback, getCallback));
+  return new Proxy(instance, new EngineInstanceProxy(getCallback, setCallback));
 }
 
 // register apis

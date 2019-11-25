@@ -17,14 +17,11 @@ class UINodeProxy {
   constructor(selector: object, layoutId?: string) {
     this.node = null;
     this.instance = null;
-    return this.select(selector, layoutId);
   }
 
   // selector could be an IUINodeProxyNode or SchemaSelector
   select(selector: object, layoutId?: string) {
     // fetch UINodeProxyNode
-    this.instance = new UINodeProxy(selector);
-    return this.instance;
   }
 
   delete() {}
@@ -39,7 +36,7 @@ class UINodeProxy {
 
 // callbacks
 const UINodeProxyGetCallback = function(target: any, key: string) {
-  if (!_.isEmpty(target[key])) {
+  if (!_.isNil(target[key])) {
     return target[key];
   }
 
@@ -50,12 +47,10 @@ const UINodeProxySetCallback = function(target: any, key: string, value: any) {
   return _.set(target.node, key, value);
 };
 
-export const ui = function(selector: object, layoutId?: string) {
-  return createInstanceProxy<IApiUI>(
-    new UINodeProxy(selector, layoutId),
-    UINodeProxyGetCallback,
-    UINodeProxySetCallback
-  );
+export const ui = <IApiUI>function(selector: any, layoutId?: string) {
+  return createInstanceProxy<
+    IApiUI
+  >(new UINodeProxy(selector, layoutId), UINodeProxyGetCallback, UINodeProxySetCallback);
 };
 
 // access directly

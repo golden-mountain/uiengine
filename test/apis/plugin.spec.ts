@@ -11,10 +11,11 @@ describe("Given an instance of Register's plugin apis library", () => {
     it("get:should same as json file state-test.json", () => {
       // register plugin
       engine.register.plugin.set(plugins);
-      // expect(engine.plugin()).to.deep.equal(plugins)
-      // get plugins registered, if empty params given, get all
-      // engine.register.plugin.get();
-      // engine.register.plugin.get('plugin-id');`
+      engine.register.plugin(plugins);
+      engine.register.plugin.get("xxxx");
+
+      // engine.ui({ name: "1234" });
+      // engine.ui.layout("1234");
     });
   });
 });
