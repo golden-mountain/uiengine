@@ -11,6 +11,7 @@ import {
 
 const listener: IListener = (directParam: IListenerParam) => {
   const uiNode: IUINode = _.get(directParam, 'uiNode')
+  const engineId: string = _.get(directParam, 'engineId')
   const layout: string = _.get(directParam, 'layout')
   const container: string = _.get(directParam, 'container')
 
@@ -19,11 +20,15 @@ const listener: IListener = (directParam: IListenerParam) => {
   }
 
   const nodeController = NodeController.getInstance()
-  return nodeController.workflow.activeLayout(
+  return nodeController.workflow.addLayout(
+    engineId,
     layout,
     {
-      container,
-      parentNode: uiNode
+      schema: layout,
+      loadOptions: {
+        container,
+        parentNode: uiNode
+      }
     }
   )
 }

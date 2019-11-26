@@ -77,7 +77,7 @@ export class NodeController implements INodeController {
 
   constructor() {
     if (!_.isNil(this.workflow)) {
-      this.workflow.setNodeController(this)
+      this.workflow.setController(this)
     }
 
     if (!_.isNil(this.pluginManager)) {

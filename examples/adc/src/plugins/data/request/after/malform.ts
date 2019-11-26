@@ -4,6 +4,7 @@ import { getDomainName } from 'uiengine'
 
 import {
   IDataEngine,
+  IDataSource,
   IPlugin,
   IPluginExecution,
   IPluginParam,
@@ -15,9 +16,11 @@ import {
  */
 const execution: IPluginExecution = (param: IPluginParam) => {
   const dataEngine: IDataEngine = _.get(param, 'dataEngine')
-  const data = dataEngine.data
-  if (dataEngine.source !== undefined) {
-    const sourceSegs = getDomainName(dataEngine.source, false).split('.')
+  const source: IDataSource = _.get(param, 'source')
+  const RP: any = _.get(param, 'RP')
+  const data = RP.responseData
+  if (source !== undefined) {
+    const sourceSegs = getDomainName(source.source, false).split('.')
     let result: any = {}
     let validSegs: any = []
     let validData: any = {}
@@ -38,7 +41,7 @@ const execution: IPluginExecution = (param: IPluginParam) => {
 export const malform: IPlugin = {
   name: 'malform',
   categories: ['data.request.after'],
-  paramKeys: ['dataEngine'],
+  paramKeys: ['dataEngine', 'source', 'RP'],
   execution,
   priority: 100,
 }

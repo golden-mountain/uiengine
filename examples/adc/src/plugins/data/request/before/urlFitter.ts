@@ -2,6 +2,7 @@ import _ from 'lodash'
 
 import {
   IDataEngine,
+  IDataSource,
   IPlugin,
   IPluginExecution,
   IPluginParam,
@@ -13,15 +14,19 @@ import {
  */
 const execution: IPluginExecution = (param: IPluginParam) => {
   const dataEngine: IDataEngine = _.get(param, 'dataEngine')
-  const { endpoint = '' } = dataEngine.requestOptions
-  dataEngine.requestOptions.endpoint = endpoint.replace(/\{(.*?)\}/, '')
+  const dataSource: IDataSource = _.get(param, 'source')
+  const RP: any = _.get(param, 'RP')
+
+  if (_.isString(RP.endpoint)) {
+    RP.endpoint = RP.endpoint.replace(/\{(.*?)\}/, '')
+  }
   return true
 }
 
 export const urlFitter: IPlugin = {
   name: 'urlFitter',
   categories: ['data.request.could'],
-  paramKeys: ['dataEngine'],
+  paramKeys: ['dataEngine', 'source', 'RP'],
   execution,
   priority: 100,
 }

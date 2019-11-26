@@ -166,48 +166,44 @@ export class EditableTable extends React.Component<any, any> {
     const {
       modal: { connect }
     } = this.props;
-    const workingMode = {
-      mode: "edit-pool",
+    const workingMode: IWorkingMode = {
+      mode: "edit",
       options: {
-        key,
-        source: connect
+        dataConnect: connect,
+        connectParam: {
+          index: key
+        },
       }
     };
     this.openModal(workingMode);
   };
 
   handleDelete = async (key: any) => {
-    await this.props.uinode.dataNode.deleteData(key);
+    await this.props.uinode.dataNode.deleteRow(key, true);
   };
 
   handleAdd = async () => {
-    this.props.uinode.dataNode.createRow();
+    this.props.uinode.dataNode.createRow({});
   };
 
   handleAdvanceAdd = async () => {
     const {
       modal: { connect }
     } = this.props;
-    const workingMode = {
+    const workingMode: IWorkingMode = {
       mode: "new",
       options: {
-        source: connect
+        dataConnect: connect,
       }
     };
     this.openModal(workingMode);
   };
 
   handleCancel = () => {
-    const nodeController = NodeController.getInstance();
     const {
-      modal: { layout, connect }
+      modal: { layout }
     } = this.props;
-
-    // if (_.has(connect, "source")) {
-    //   const dataPool = DataPool.getInstance();
-    //   dataPool.clear(_.get(connect, "source"));
-    // }
-    nodeController.hideUINode(layout, true);
+    this.context.controller.hideLayout(layout);
   };
 
   openModal = (workingMode?: IWorkingMode) => {
@@ -220,21 +216,25 @@ export class EditableTable extends React.Component<any, any> {
       const options = {
         ...modal,
         onClose: this.handleCancel,
-        // visible: true,
-        parentNode: this.props.uinode
+        parentNode: this.props.uinode,
       };
-      // const workflow = Workflow.getInstance();
-      this.context.controller.setWorkingMode(layout, workingMode);
-      this.context.controller.workflow.activeLayout(layout, options);
+
+      this.context.controller.workflow.addLayout(
+        'app',
+        layout,
+        {
+          schema: layout,
+          workingMode,
+          loadOptions: options,
+        }
+      );
     } else {
       console.error("popup layout not provided on schema");
     }
   };
 
   handleSave = (row: any) => {
-    const newData = this.props.uinode.dataNode.data;
-    const dataSource = { dataSource: newData };
-    this.setState(dataSource);
+    this.setState({ dataSource: this.props.uinode.dataNode.data });
   };
 
   render() {
@@ -250,6 +250,7 @@ export class EditableTable extends React.Component<any, any> {
     };
     // add the key for each dataSource
     if (_.isArray(dataSource) && dataSource.length) {
+      console.log(dataSource)
       dataSource.forEach((record: any, index: number) => {
         record.key = index;
         record.uinode = this.props.uinode.children[index];

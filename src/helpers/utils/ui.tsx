@@ -1,7 +1,14 @@
 import React from "react";
 import _ from "lodash";
+
 import { UIEngineRegister, Cache } from "../";
-import { IUINode, IUISchema, IPluginExecuteOption } from "../../../typings";
+import {
+  ICacheBlock,
+  ICachePiece,
+  IUINode,
+  IUISchema,
+  IPluginExecuteOption,
+} from "../../../typings";
 
 /**
  * From schema define, get registered components
@@ -53,18 +60,18 @@ export function getComponent(componentLine?: string) {
  * @param rootName the root name of the loaded schema nodes
  * @return UINodes has the props
  */
-export function searchNodes(prop: object, rootName: string = "") {
+export function searchNodes(prop: object, layoutKey?: string) {
   let nodes: Array<any> = [];
   // const rootName = parseRootName(layout);
 
   let allUINodes = {};
-  if (rootName) {
-    allUINodes = Cache.getUINode(rootName);
+  if (_.isString(layoutKey) && layoutKey) {
+    allUINodes = Cache.getLayoutNode(layoutKey, { allCacheKeys: true });
   } else {
     // if rootName not provided, merge all nodes, and search from
-    const nodes = Cache.getCache("uiNodes");
-    _.forIn(nodes, (node: any) => {
-      allUINodes = _.assign(allUINodes, node);
+    const nodeBlock: ICacheBlock = Cache.getLayoutNode();
+    _.forIn(nodeBlock, (node: ICachePiece, layoutKey: string) => {
+      allUINodes = _.assign(allUINodes, node.subPieces);
     });
   }
 
@@ -111,16 +118,18 @@ export function searchNodes(prop: object, rootName: string = "") {
  * @returns An array of UINodes which depend on target
  */
 export function searchDepsNodes(targetNode: IUINode) {
-  const rootName: string = targetNode.rootName;
+  const layoutKey = targetNode.layoutKey;
 
   const depNodes: IUINode[] = [];
   // to fix: rootName should not be empty
-  const allUINodes: { [key: string]: IUINode } = Cache.getUINode(rootName);
-  _.forIn(allUINodes, (node: IUINode, key: string) => {
-    if (isDependantNode(node, targetNode)) {
-      depNodes.push(node);
-    }
-  });
+  if (_.isString(layoutKey) && layoutKey) {
+    const allUINodes: { [nodeId: string]: IUINode } = Cache.getLayoutNode(layoutKey, { allCacheKeys: true });
+    _.forIn(allUINodes, (node: IUINode, key: string) => {
+      if (isDependantNode(node, targetNode)) {
+        depNodes.push(node);
+      }
+    });
+  }
   return depNodes;
 }
 
@@ -148,11 +157,15 @@ export function cloneTemplateSchema(schema: IUISchema) {
  * @returns true, if depend on the target
  */
 function isDependantNode(node: IUINode, targetNode: IUINode) {
-  const targetSchema: IUISchema = targetNode.getSchema();
+  if (node.id === 'UINode-94' && targetNode.id === 'UINode-58') {
+    console.log(node, targetNode)
+  }
+  const schema = node.getSchema();
+  const targetSchema = targetNode.getSchema();
 
   let isDepNode: boolean = false;
-  if (node.schema) {
-    const { state } = node.getSchema();
+  if (!_.isNil(targetSchema) && !_.isNil(schema)) {
+    const { state } = schema
     if (!_.isEmpty(state)) {
       _.forIn(state, (condition: any, stateName: string) => {
         if (matchOneSelector(condition, targetSchema)) {

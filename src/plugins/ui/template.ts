@@ -14,8 +14,7 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
   let result = {}
   if (tplSchemaPath) {
     const reqConfig = uiNode.request.getConfig()
-    let path = `${reqConfig.layoutSchemaPrefix}${tplSchemaPath}`
-    let response: any = await uiNode.request.get(path)
+    let response: any = await uiNode.request.get(tplSchemaPath, { prefixType: 'uiSchema' }, uiNode.engineId)
     if (response.data) {
       result = response.data
       // Cache.setLayoutSchema(rootName, result)

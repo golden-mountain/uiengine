@@ -445,7 +445,7 @@
                       "clearSource": true
                     },
                     "source": "slb.virtual-server.port:",
-                    "target": "slb.virtual-server:port-list[]"
+                    "target": "slb.virtual-server:port-list[{index}]"
                   },
                   "container": "antd:Drawer",
                   "placement": "right",

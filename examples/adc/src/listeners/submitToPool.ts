@@ -1,42 +1,55 @@
 import _ from 'lodash'
 
-import { NodeController } from 'uiengine'
+import {
+  NodeController,
+  UINode,
+  replaceParam,
+} from 'uiengine'
 
 import {
+  IConnectOptions,
   IListenerConfig,
   IListener,
   IListenerParam,
+  IObject,
   IUINode,
 } from 'uiengine/typings'
 
 const listener: IListener = async (directParam: IListenerParam) => {
   const uiNode: IUINode = _.get(directParam, 'uiNode')
 
-  const nodeCtroller = NodeController.getInstance()
-  const workflow = nodeCtroller.workflow
-  const workingMode = uiNode.workingMode
-  if (_.has(workingMode, 'options.source')) {
-    const connectOptions = _.get(workingMode, 'options.source')
-    const key = _.get(workingMode, 'options.key')
-    const mode = _.get(workingMode, 'mode')
-    const newConnectOptions = _.cloneDeep(connectOptions)
-    if (
-      mode === 'edit-pool' &&
-      key !== undefined &&
-      _.has(newConnectOptions, 'target')
-    ) {
-      newConnectOptions.target = newConnectOptions.target.replace(
-        /\[(\d*)\]$/,
-        `[${key}]`
-      )
-    }
-    const result = await workflow.submitToPool(newConnectOptions)
+  if (uiNode instanceof UINode) {
+    const controller = NodeController.getInstance()
+    const workflow = controller.workflow
+    const workingMode = controller.getWorkingMode(uiNode.layoutKey)
 
-    if (result) {
-      workflow.deactiveLayout()
-    } else {
-      // to write to a global notification
-      console.error('Data should not empty when submitting')
+    if (!_.isNil(workingMode)) {
+      const { options } = workingMode
+      if (_.isObject(options)) {
+        const { dataConnect, connectParam } = options
+
+        if (_.isObject(dataConnect)) {
+          let { source, target, ...rest } = dataConnect as IConnectOptions
+          if (_.isString(source) && source && _.isString(target) && target) {
+            if (_.isObject(connectParam)) {
+              source = replaceParam(source, connectParam)
+              target = replaceParam(target, connectParam)
+            }
+
+            const result = await workflow.submitToPool({
+              source,
+              target,
+              ...rest
+            })
+
+            if (!_.isNil(result)) {
+              workflow.hideLayout()
+            } else {
+              console.error('Data should not empty when submitting')
+            }
+          }
+        }
+      }
     }
   }
 }

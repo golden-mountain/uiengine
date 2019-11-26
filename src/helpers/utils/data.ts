@@ -96,6 +96,36 @@ export function getSchemaName(source: string) {
   return `${getDomainName(source, false)}.json`
 }
 
+/**
+ * replace the param in the string
+ * @param sourceStr the source string
+ * @param paramMap the paramters map
+ */
+export function replaceParam(
+  sourceStr: string,
+  paramMap: object,
+) {
+  const matchBlock = /\{[\w\-]*\}/g
+  const matchString = /\{(.*)\}/
+
+  let currentStr: string = sourceStr
+  const results = currentStr.match(matchBlock)
+  if (_.isArray(results) && results.length) {
+    results.forEach((item: string) => {
+      const result = item.match(matchString)
+      if (_.isArray(result) && _.isString(result[1]) && result[1]) {
+        const paramKey = result[1]
+        const paramValue = _.get(paramMap, [paramKey])
+        if (_.isString(paramValue) || _.isFinite(paramValue)) {
+          currentStr = currentStr.replace(`{${paramKey}}`, `${paramValue}`)
+        }
+      }
+    })
+  }
+
+  return currentStr
+}
+
 export async function submitToAPI(
   dataSources: Array<IDataSource>,
   method: string = 'post'
@@ -148,12 +178,8 @@ export async function validateAll(dataSources: Array<any>) {
             validateResults.push(result.result)
           }
         })
-        // await uiNode.updateLayout()
-        await uiNode.pluginManager.executePlugins(
-          uiNode.id,
-          'ui.parser',
-          { uiNode },
-        )
+        // await uiNode.refreshLayout()
+        await uiNode.parseProps()
         uiNode.sendMessage(true)
       }
     }
