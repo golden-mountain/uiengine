@@ -1,4 +1,4 @@
-import { ILayoutSchema } from "../../../../typings";
+import { IUISchema } from "../../../../typings";
 import _ from "lodash";
 import { createInstanceProxy } from "../../APIEngine";
 
@@ -17,7 +17,7 @@ class LayoutProxy {
     return this.get(name);
   }
 
-  replaceWith(layoutObject?: ILayoutSchema) {
+  replaceWith(layoutObject?: IUISchema) {
     // return this.get(name);
   }
 }
