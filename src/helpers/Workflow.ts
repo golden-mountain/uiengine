@@ -1,86 +1,128 @@
 import _ from "lodash";
+
+import { DataPool } from "./DataPool";
+import { PluginManager } from "./PluginManager";
+import { UINode, NodeController } from "../data-layer";
+import { searchNodes, submitToAPI } from "./utils"
+
 import {
-  IWorkflow,
-  IUINode,
-  INodeController,
-  ILoadOptions,
-  IDataSource,
-  INodeProps,
+  IAddLayoutConfig,
   IConnectOptions,
-  IPluginExecuteOption
+  IDataSource,
+  ILoadOptions,
+  INodeController,
+  INodeProps,
+  IPluginExecuteOption,
+  IPluginManager,
+  IWorkflow,
+  IWorkingMode,
+  IUINode,
 } from "../../typings";
 
-import { searchNodes, parseRootName, DataPool, submitToAPI } from "../helpers";
-import { UINode } from "../data-layer";
-import PluginManager from "./PluginManager";
-
-export default class Workflow implements IWorkflow {
-  static instance: IWorkflow;
+export class Workflow implements IWorkflow {
+  private static instance: Workflow;
   static getInstance = () => {
-    if (!Workflow.instance) {
+    if (_.isNil(Workflow.instance)) {
       Workflow.instance = new Workflow();
     }
-    return Workflow.instance as Workflow;
+    return Workflow.instance;
   };
 
-  id: string
-  pluginManager: PluginManager
-  nodeController: INodeController = {} as INodeController;
+  readonly id: string = _.uniqueId('Workflow-')
+  controller?: INodeController
+  pluginManager: IPluginManager = PluginManager.getInstance();
+
   activeNode?: IUINode;
 
   constructor() {
-    this.id = _.uniqueId('Workflow-')
-    this.pluginManager = PluginManager.getInstance()
     this.pluginManager.register(
       this.id,
-      {
-        categories: []
-      }
+      { categories: [] }
     )
   }
 
-  setNodeController(nodeController: INodeController) {
-    this.nodeController = nodeController;
+  setController(controller: INodeController) {
+    this.controller = controller
   }
 
-  activeLayout(layout: string, options?: ILoadOptions) {
-    let promise = this.nodeController.loadUINode(layout, "", options, false);
-
-    // send message
-    promise.then((uiNode: IUINode) => {
-      const parentNode = _.get(options, "parentNode");
-      if (parentNode) {
-        parentNode.sendMessage(true);
-      } else {
-        this.nodeController.messager.sendMessage(this.nodeController.engineId, {
-          nodes: this.nodeController.nodes
-        });
+  addLayout(
+    engineId: string,
+    layoutKey: string,
+    layoutConfig: IAddLayoutConfig,
+  ) {
+    if (_.isObject(layoutConfig) && !_.isNil(this.controller)) {
+      const { schema, workingMode, loadOptions } = layoutConfig
+      return this.controller.loadLayout(
+        engineId,
+        layoutKey,
+        schema,
+        workingMode,
+        loadOptions,
+        true,
+      ).then((rootNode) => {
+        if (!_.isNil(this.controller) &&
+          _.has(rootNode, ['layoutKey']) && rootNode.layoutKey
+        ) {
+          this.controller.activateLayout(rootNode.layoutKey)
+        }
+        return rootNode
+      })
+    } else {
+      return undefined
+    }
+  }
+  removeLayout(
+    layoutKey: string,
+    clearData?: boolean,
+  ) {
+    if (!_.isNil(this.controller)) {
+      return this.controller.removeLayout(layoutKey, clearData)
+    }
+    return false
+  }
+  locateLayout(layoutKey?: string) {
+    if (!_.isNil(this.controller)) {
+      let targetLayout = this.controller.activeLayout
+      if (_.isString(layoutKey) && layoutKey) {
+        targetLayout = layoutKey
       }
-      this.activeNode = uiNode;
-    });
 
-    return promise;
-  }
-
-  deactiveLayout() {
-    if (this.nodeController.activeLayout) {
-      this.nodeController.hideUINode(this.nodeController.activeLayout);
-      // active new nodes, now NodeController actived the new layout
-      if (this.nodeController.activeLayout) {
-        this.activeNode = this.nodeController.nodes[
-          this.nodeController.activeLayout
-        ];
+      const renderer = _.get(this.controller.layoutMap, [targetLayout])
+      if (_.isObject(renderer)) {
+        const { engineId } = renderer
+        return engineId
       }
     }
+  }
+  showLayout(layoutKey?: string) {
+    if (!_.isNil(this.controller)) {
+      let targetLayout = this.controller.activeLayout
+      if (_.isString(layoutKey) && layoutKey) {
+        targetLayout = layoutKey
+      }
+
+      return this.controller.activateLayout(targetLayout)
+    }
+    return false
+  }
+  hideLayout(layoutKey?: string) {
+    if (!_.isNil(this.controller)) {
+      let targetLayout = this.controller.activeLayout
+      if (_.isString(layoutKey) && layoutKey) {
+        targetLayout = layoutKey
+      }
+
+      return this.controller.hideLayout(targetLayout)
+    }
+    return false
   }
 
   private fetchNodes(nodes: Array<IUINode> | INodeProps) {
     let uiNodes: any;
     if (nodes instanceof UINode) {
       uiNodes = nodes;
-    } else {
-      const layoutName = parseRootName(this.nodeController.activeLayout);
-      uiNodes = searchNodes(nodes, layoutName);
+    } else if (!_.isNil(this.controller)) {
+      uiNodes = searchNodes(nodes, this.controller.activeLayout);
     }
     return uiNodes;
   }
@@ -113,8 +155,8 @@ export default class Workflow implements IWorkflow {
 
   async updateState(nodes: Array<IUINode> | INodeProps, state: any) {
     let uiNodes: any = nodes;
-    if (!_.isArray(nodes)) {
-      uiNodes = searchNodes(nodes, this.nodeController.activeLayout);
+    if (!_.isArray(nodes) && !_.isNil(this.controller)) {
+      uiNodes = searchNodes(nodes, this.controller.activeLayout);
     }
 
     // update state directly
@@ -127,8 +169,8 @@ export default class Workflow implements IWorkflow {
 
   async saveNodes(nodes: Array<IUINode> | INodeProps) {
     let uiNodes: any = nodes;
-    if (!_.isArray(nodes)) {
-      uiNodes = searchNodes(nodes, this.nodeController.activeLayout);
+    if (!_.isArray(nodes) && !_.isNil(this.controller)) {
+      uiNodes = searchNodes(nodes, this.controller.activeLayout);
     }
 
     let dataSources: Array<IDataSource> = [];
@@ -151,19 +193,21 @@ export default class Workflow implements IWorkflow {
         return {}
       }
     };
-    const exeResult = await this.nodeController.pluginManager.executePlugins(
-      this.nodeController.id,
-      "data.commit.workflow.could",
-      { nodeController: this.nodeController, sources },
-      exeConfig,
-    );
-    const couldCommit = exeResult.results.every((result) => {
-      return result.result
-    })
-    if (couldCommit === undefined || couldCommit === true) {
-      return await submitToAPI(sources);
-    } else {
-      return couldCommit;
+    if (!_.isNil(this.controller)) {
+      const exeResult = await this.controller.pluginManager.executePlugins(
+        this.controller.id,
+        "data.commit.workflow.could",
+        { nodeController: this.controller, sources },
+        exeConfig,
+      );
+      const couldCommit = exeResult.results.every((result) => {
+        return result.result
+      })
+      if (couldCommit === undefined || couldCommit === true) {
+        return await submitToAPI(sources);
+      } else {
+        return couldCommit;
+      }
     }
   }
 
@@ -177,39 +221,41 @@ export default class Workflow implements IWorkflow {
         return {}
       }
     };
-    const exeResult = await this.nodeController.pluginManager.executePlugins(
-      this.nodeController.id,
-      "data.commit.workflow.could",
-      { nodeController: this.nodeController,  sources: connectOptions },
-      exeConfig,
-    );
-    const couldCommit = exeResult.results.every((result) => {
-      return result.result
-    })
-    if (couldCommit === undefined || couldCommit === true) {
-      const dataPool = DataPool.getInstance();
-      const { source, target, options } = connectOptions;
-      let clearSrc = _.get(options, "clearSource");
-      const result = dataPool.transfer(source, target, { clearSrc });
-      dataPool.clear(source, { clearDomain: true })
-      // refresh target ui node
+    if (!_.isNil(this.controller)) {
+      const exeResult = await this.controller.pluginManager.executePlugins(
+        this.controller.id,
+        "data.commit.workflow.could",
+        { nodeController: this.controller,  sources: connectOptions },
+        exeConfig,
+      );
+      const couldCommit = exeResult.results.every((result) => {
+        return result.result
+      })
+      if (couldCommit === undefined || couldCommit === true) {
+        const dataPool = DataPool.getInstance();
+        const { source, target, options } = connectOptions;
+        let clearSrc = _.get(options, "clearSource");
+        const result = dataPool.transfer(source, target, { clearSrc });
+        dataPool.clear(source, { clearDomain: true })
+        // refresh target ui node
 
-      let selector = connectOptions.targetSelector;
-      if (!selector) {
-        selector = {
-          datasource: target.replace(/\[\d*\]$/, "")
-        };
-      }
+        let selector = connectOptions.targetSelector;
+        if (!selector) {
+          selector = {
+            datasource: target.replace(/\[\d*\]$/, "")
+          };
+        }
 
-      const selectedNodes = searchNodes(selector, refreshLayout);
-      for (let index in selectedNodes) {
-        const node = selectedNodes[index];
-        // send message
-        await node.updateLayout();
+        const selectedNodes = searchNodes(selector, refreshLayout);
+        for (let index in selectedNodes) {
+          const node = selectedNodes[index];
+          // send message
+          await node.refreshLayout();
+        }
+        return result;
+      } else {
+        return couldCommit;
       }
-      return result;
-    } else {
-      return couldCommit;
     }
   }
 
@@ -228,7 +274,7 @@ export default class Workflow implements IWorkflow {
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message
-      await node.updateLayout();
+      await node.refreshLayout();
     }
   }
 
@@ -244,7 +290,9 @@ export default class Workflow implements IWorkflow {
     for (let index in selectedNodes) {
       const node = selectedNodes[index];
       // send message
-      await node.updateLayout();
+      await node.refreshLayout();
     }
   }
 }
+
+export default Workflow

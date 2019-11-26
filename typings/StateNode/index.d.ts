@@ -1,4 +1,6 @@
-import { IUINode } from "../UINode";
+import { IPluginManager } from '../PluginManager'
+import { IErrorInfo } from '../Request'
+import { IUINode } from '../UINode'
 
 export interface IState {
   [stateKey: string]: any
@@ -7,20 +9,24 @@ export interface IState {
 export type StatePluginFunc = (
   this: IStateNode,
   stateNode: IStateNode
-) => IState;
+) => IState
 
 export interface IStateNode {
-  id: string
-  pluginManager: IPluginManager;
-  errorInfo: IErrorInfo;
-  state: IState;
-  uiNode: IUINode;
-  getUINode(): IUINode;
-  getState(key?: string): IState;
-  renewStates();
-  setState(key: string | IState, value?: any);
-  setStateToDataPool();
-  getStateFromDataPool();
-  updateState(state: IState);
-  getPluginManager(): IPluginManager;
+  readonly id: string
+  pluginManager: IPluginManager
+
+  uiNode: IUINode
+
+  state: IState
+  errorInfo: IErrorInfo
+
+  setState: (state: string | IState, value?: any) => IState
+  getState: (key?: string) => IState | any
+  renewStates: () => Promise<IState>
+
+  useState: (state: IState) => Promise<IStateNode>
+
+  setStateToDataPool: () => void
+  getStateFromDataPool: () => void
+  syncStateWithDataPool: () => void
 }

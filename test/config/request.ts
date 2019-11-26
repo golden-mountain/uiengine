@@ -1,10 +1,8 @@
-const reqConfig = {
-  pathPrefix: "../../test",
+export const defaultRequestConfig = {
   devMode: true,
-  dataSchemaPrefix: "data/schema/",
-  // mockDataPrefix: "data/",
-  dataPathPrefix: "data/",
-  layoutSchemaPrefix: "layouts/"
-};
+  dataSchemaPrefix: 'data/schema/',
+  mockDataPrefix: 'data/',
+  uiSchemaPrefix: 'layouts/'
+}
 
-export default reqConfig;
+export default defaultRequestConfig

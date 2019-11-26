@@ -36,7 +36,7 @@ export class A10Modal extends React.Component<any, any> {
     }
 
     // console.log(e);
-    await this.props.uinode.updateLayout();
+    await this.props.uinode.refreshLayout();
     this.setState({ visible: false });
   };
 

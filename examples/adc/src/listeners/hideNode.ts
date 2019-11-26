@@ -12,7 +12,7 @@ import {
 const listener: IListener = (directParam: IListenerParam) => {
   const uiNode: IUINode = _.get(directParam, 'uiNode')
   const nodeController = NodeController.getInstance()
-  nodeController.workflow.deactiveLayout()
+  nodeController.workflow.hideLayout()
 }
 
 export const hideNode: IListenerConfig = {

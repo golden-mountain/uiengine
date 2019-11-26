@@ -11,7 +11,9 @@ import {
   IComponentWrapperProps
 } from "../../typings";
 
-const DefaultWrapper: React.FC = (props: any) => <>{props.children || null}</>;
+const DefaultWrapper: React.FC = function(props: any) {
+  return <>{props.children || null}</>
+}
 
 export class ComponentWrapper extends React.Component<
   IComponentWrapper,
@@ -65,7 +67,11 @@ export class ComponentWrapper extends React.Component<
       const componentLine = _.get(uiNode.schema, "component");
       let WrappedComponent;
 
-      WrappedComponent = getComponent(componentLine);
+      if (_.isString(componentLine)) {
+        WrappedComponent = getComponent(componentLine);
+      } else {
+        WrappedComponent = componentLine
+      }
       if (componentLine && !WrappedComponent) {
         console.warn(
           `Component ${componentLine} has no correspond Component registered`
@@ -73,7 +79,7 @@ export class ComponentWrapper extends React.Component<
       }
 
       // map children as components
-      let childrenObjects = uiNode.children.map((child: any, key: any) => {
+      let childrenObjects = (uiNode.children || []).map((child: any, key: any) => {
         const props = { config, ...rest, uiNode: child, key: child.id || key };
         return <ComponentWrapper {...props} />;
       });
@@ -123,7 +129,7 @@ export class ComponentWrapper extends React.Component<
               ) : (
                 <WrappedComponent {...props} />
               )}
-              {renderNodes(uiNode.nodes)}
+              {renderNodes(uiNode.layoutMap)}
             </HOCWrapper>
           );
         } catch (e) {

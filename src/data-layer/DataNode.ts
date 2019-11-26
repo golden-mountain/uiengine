@@ -1,164 +1,322 @@
-import _ from "lodash";
-import { PluginManager, DataPool, formatSource } from "../";
+import _ from 'lodash'
+
+import { DataEngine } from '../helpers/DataEngine'
+import { DataPool } from '../helpers/DataPool'
+import { PluginManager} from '../helpers/PluginManager'
+import { Request } from '../helpers/Request'
+import { getAccessRoute } from '../helpers/utils'
+
 import {
-  IDataNode,
-  IRequest,
-  IPluginManager,
-  IUINode,
-  IPluginExecuteOption,
   IDataEngine,
+  IDataNode,
+  IDataNodeConfig,
+  IDataGetOption,
+  IDataLoadOption,
+  IDataUpdateOption,
+  IDataDeleteOption,
   IDataPool,
+  IDataPoolHandle,
+  IDataSchema,
+  IDataNodeSchema,
   IDataSource,
   IErrorInfo,
+  IRequest,
+  IPluginManager,
+  IPluginExecuteOption,
+  IPluginResult,
   IStateNode,
-  IDataPoolHandle
-} from "../../typings";
-import { DataEngine } from "../helpers";
+  IUINode,
+  IWorkingMode,
+  IOperationMode,
+} from '../../typings'
 
 export default class DataNode implements IDataNode {
-  id: string;
-  pluginManager: IPluginManager;
-  private request: IRequest = {} as IRequest;
-  dataEngine: IDataEngine;
-  uiNode: IUINode;
-  source: IDataSource;
-  schema?: any;
-  rootSchema?: any;
-  dataPool: IDataPool;
-
-  constructor(
-    source: IDataSource | string,
-    uiNode: IUINode,
-    request?: IRequest
-  ) {
-    this.id = _.uniqueId("DataNode-");
-    this.pluginManager = PluginManager.getInstance();
-    this.pluginManager.register(this.id, {
-      categories: [
-        "data.data.parser",
-        "data.schema.parser",
-        "data.update.could",
-        "data.delete.could"
-      ]
-    });
-
-    // get instance of data pool
-    this.dataPool = DataPool.getInstance();
-
-    this.uiNode = uiNode;
-    this.source = this.setDataSource(source);
-
-    // initial data engine
-    if (request) {
-      this.request = request;
+  private static pluginTypes: string[] = [
+    'data.data.parser',
+    'data.data.picker',
+    'data.schema.parser',
+    'data.update.could',
+    'data.delete.could',
+  ]
+  static setPluginTypes = (types: string[]) => {
+    if (_.isArray(types)) {
+      DataNode.pluginTypes = types.map((type: string) => {
+        if (_.isString(type) && type) {
+          return type
+        } else {
+          return undefined
+        }
+      }).filter((type?: string) => {
+        return _.isString(type)
+      }) as string[]
     }
-
-    // get id
-    this.dataEngine = DataEngine.getInstance();
-    this.dataEngine.setRequest(this.request);
   }
 
-  private async refreshLayout(noUpdateLayout: boolean) {
-    // update state without sending message
-    if (noUpdateLayout) {
-      await this.uiNode.pluginManager.executePlugins(
-        this.uiNode.id,
-        "ui.parser",
-        { uiNode: this.uiNode }
-      );
-      await this.uiNode.stateNode.renewStates();
-    } else {
-      await this.uiNode.updateLayout();
+  readonly id: string = _.uniqueId('DataNode-')
+  dataEngine: IDataEngine = DataEngine.getInstance()
+  dataPool: IDataPool = DataPool.getInstance()
+  pluginManager: IPluginManager = PluginManager.getInstance()
+  request: IRequest = Request.getInstance()
+
+  uiNode: IUINode
+  source: IDataSource
+
+  schema?: IDataSchema | IDataNodeSchema
+  rootSchema?: IDataSchema
+
+  private initialConfig(config?: IDataNodeConfig) {
+    if (_.isObject(config)) {
+      const { dataEngine, dataPool, pluginManager, request } = config
+      if (!_.isNil(dataEngine)) {
+        this.dataEngine = dataEngine
+      }
+      if (!_.isNil(dataPool)) {
+        this.dataPool = dataPool
+      }
+      if (!_.isNil(pluginManager)) {
+        this.pluginManager = pluginManager
+      }
+      if (!_.isNil(request)) {
+        this.request = request
+      }
     }
+  }
+  private initialSource(dataSrc: string|IDataSource) {
+    if (_.isObject(dataSrc)) {
+      const { source, schema, autoload, defaultValue, loadOptions } = dataSrc
+      const initialSrc: IDataSource = {
+        source,
+        schema: _.isString(schema) && schema ? schema : source,
+        autoload: _.isBoolean(autoload) ? autoload : true,
+      }
+      if (defaultValue !== undefined) {
+        initialSrc.defaultValue = _.cloneDeep(defaultValue)
+      }
+      if (_.isObject(loadOptions)) {
+        initialSrc.loadOptions = _.cloneDeep(loadOptions)
+      }
+      return initialSrc
+    } else if (_.isString(dataSrc)) {
+      return {
+        source: dataSrc,
+        schema: dataSrc,
+        autoload: true,
+      }
+    }
+
+    return {
+      source: `$dummy.${this.id}`,
+      schema: `$dummy.${this.id}`,
+      autoload: true,
+    }
+  }
+  constructor(uiNode: IUINode, source: string|IDataSource, config?: IDataNodeConfig) {
+    const id = _.get(config, 'id')
+    if (_.isString(id) && id) {
+      this.id = id
+    }
+
+    this.uiNode = uiNode
+    this.source = this.initialSource(source)
+
+    if (this.source.defaultValue !== undefined) {
+      this.data = this.source.defaultValue
+    }
+
+    // set the helpers which the node depends on
+    this.initialConfig(config)
+
+    // register the plugin types supported
+    this.pluginManager.register(
+      this.id,
+      { categories: DataNode.pluginTypes }
+    )
   }
 
   set data(value: any) {
     if (this.dataPool instanceof DataPool) {
-      this.dataPool.set(this.source.source, value);
-
-      const stateNode: IStateNode = _.get(this, ["uiNode", "stateNode"]);
-      if (!_.isNil(stateNode)) {
-        const poolState = stateNode.getStateFromDataPool();
-        if (_.isNil(poolState)) {
-          stateNode.setStateToDataPool();
-        }
-      }
+      this.dataPool.set(this.source.source, value)
+    } else {
+      console.warn(`Can't set data of '${this.source.source}' to the unknown data pool:`, this.dataPool)
     }
   }
 
   get data() {
     if (this.dataPool instanceof DataPool) {
-      return this.dataPool.get(this.source.source);
+      return this.dataPool.get(this.source.source)
+    } else {
+      console.warn(`Can't get data of '${this.source.source}' from the unknown data pool:`, this.dataPool)
+      return undefined
     }
   }
 
   set errorInfo(error: IErrorInfo) {
     if (this.dataPool instanceof DataPool) {
-      this.dataPool.setInfo(this.source.source, {
-        key: "error",
-        value: error || {}
-      });
+      this.dataPool.setInfo(
+        this.source.source,
+        { key: 'error', value: error || {} }
+      )
+    } else {
+      console.warn(`Can't set error info of '${this.source.source}' to the unknown data pool:`, this.dataPool)
     }
   }
 
   get errorInfo() {
     if (this.dataPool instanceof DataPool) {
-      return this.dataPool.getInfo(this.source.source, "error");
-    }
-    return {};
-  }
-
-  setDataSource(source: IDataSource | string) {
-    if (_.isObject(source)) {
-      this.source = source;
-      if (source.schema === undefined) this.source.schema = source.source;
-      if (source.autoload === undefined) this.source.autoload = true;
-      if (source.defaultValue !== undefined) this.data = source.defaultValue;
+      return this.dataPool.getInfo(this.source.source, 'error')
     } else {
-      // give default data
-      this.source = {
-        source: source,
-        schema: source,
-        autoload: true
-      };
+      console.warn(`Can't get error info of '${this.source.source}' from the unknown data pool:`, this.dataPool)
+      return {}
     }
-    return this.source;
-  }
-
-  getData(path?: string) {
-    return path ? _.get(this.data, path, this.data) : this.data;
   }
 
   getSchema(path?: string) {
-    if (path) {
-      return _.get(this.schema, path);
+    if (_.isString(path) && path) {
+      return _.cloneDeep(_.get(this.schema, path))
     }
-    return this.schema;
+    return _.cloneDeep(this.schema)
   }
 
-  async loadData(source?: IDataSource | string) {
-    if (source) {
-      this.setDataSource(source);
+  private async loadAndPick() {
+    const wholeData = await this.dataEngine.loadData(
+      this.source,
+      {
+        engineId: this.uiNode.engineId,
+        layoutKey: this.uiNode.layoutKey,
+        loadID: this.uiNode.layoutKey
+      },
+    )
+
+    // exec the plugins to pick the value from the loaded data
+    // if any plugin returns value that is not undefined, the return value will be return as the data of the node
+    let pickedData: any
+    const { results } = await this.pluginManager.executePlugins(
+      this.id,
+      'data.data.picker',
+      { data: wholeData, source: this.source }
+    )
+    if (_.isArray(results) && results.length) {
+      results.some((resultItem: IPluginResult) => {
+        const { result } = resultItem
+        if (result !== undefined) {
+          pickedData = result
+          return true
+        }
+        return false
+      })
     }
 
-    const exeResult = await this.pluginManager.executePlugins(
-      this.id,
-      "data.data.parser",
-      { dataNode: this }
-    );
-    let result = exeResult.results[0].result;
+    if (_.isNil(pickedData)) {
+      const route = getAccessRoute(this.source.source)
+      pickedData = _.get(wholeData, route)
+    }
 
-    const mode = _.get(this.uiNode.workingMode, "mode");
-    if (result === undefined) {
-      if (mode === "new" || !this.source.autoload) {
-        await this.dataEngine.loadSchema(this.source);
-        result = null;
+    if (pickedData !== undefined) {
+      this.data = pickedData
+    }
+  }
+  private async refreshUI(holdLayout: boolean) {
+    const uiNode = this.uiNode
+
+    if (!_.isNil(uiNode)) {
+      if (holdLayout) {
+        // update props of uiNode
+        await uiNode.parseProps()
+
+        const stateNode = uiNode.stateNode
+        if (!_.isNil(stateNode)) {
+          // update state of stateNode
+          await stateNode.renewStates()
+        } else {
+          console.warn(`No associated StateNode with ${this.id}`)
+        }
       } else {
-        let data = await this.dataEngine.loadData(this.source);
-        let formattedSource = formatSource(this.source.source);
-        result = _.get(data, formattedSource);
+        await uiNode.refreshLayout()
+      }
+    } else {
+      console.warn(`No associated UINode with ${this.id}`)
+    }
+
+    // sync state to data pool
+    const stateNode: IStateNode = _.get(this.uiNode, ['stateNode'])
+    if (!_.isNil(stateNode)) {
+      stateNode.syncStateWithDataPool()
+    }
+
+  }
+
+  getData(options?: IDataGetOption) {
+    if (_.isObject(options)) {
+      const { path } = options
+      if (_.isString(path) && path) {
+        return _.get(this.data, path)
+      }
+    }
+    return this.data
+  }
+  async loadData(source?: string|IDataSource, options?: IDataLoadOption) {
+    if (!_.isNil(source)) {
+      this.source= this.initialSource(source)
+    }
+
+    // get the working mode of the layout
+    let workingMode: IWorkingMode = { mode: 'new' }
+    const controller = _.get(this.uiNode, ['controller'])
+    if (!_.isNil(controller)) {
+      const wMode = controller.getWorkingMode(this.uiNode.layoutKey)
+      if (!_.isNil(wMode)) {
+        workingMode = wMode
+      }
+    }
+
+    // exec the plugins to parse the data of the node
+    // if any plugin returns value that is not undefined, the return value will be loaded as the data of the node
+    let parsedResult: any
+    const { results } = await this.pluginManager.executePlugins(
+      this.id,
+      'data.data.parser',
+      { dataNode: this, workingMode }
+    )
+    if (_.isArray(results) && results.length) {
+      results.some((resultItem: IPluginResult) => {
+        const { result } = resultItem
         if (result !== undefined) {
-          this.data = result;
+          parsedResult = result
+          return true
+        }
+        return false
+      })
+    }
+
+    let loadMode: string = _.get(workingMode, 'mode')
+    if (parsedResult !== undefined) {
+      this.data = parsedResult
+    } else {
+      if (!this.source.autoload || loadMode === 'new') {
+        // do not need to load data
+      } else if (loadMode === 'edit' || loadMode === 'view') {
+        await this.loadAndPick()
+      } else if (loadMode === 'customize') {
+        const { operationModes } = workingMode
+        if (_.isArray(operationModes)) {
+          for (let i = 0; i < operationModes.length; i++) {
+            const { source, mode } = operationModes[i]
+            if (_.startsWith(this.source.source, source)) {
+              loadMode = mode
+              if (mode !== 'create') {
+                await this.loadAndPick()
+              }
+              break
+            }
+          }
+        } else if (_.isObject(operationModes)) {
+          const { source, mode } = operationModes
+          if (_.startsWith(this.source.source, source)) {
+            loadMode = mode
+            if (mode !== 'create') {
+              await this.loadAndPick()
+            }
+          }
         }
       }
     }
@@ -166,25 +324,19 @@ export default class DataNode implements IDataNode {
     const loadedData = this.data;
     if (_.isArray(loadedData)) {
       loadedData.forEach((item: any, index: number) => {
-        const downSource = this.source.source + `[${index}]`;
-        if (this.dataPool.getInfo(downSource, "status") === undefined) {
-          if (mode === "new") {
-            this.dataPool.setInfo(downSource, {
-              key: "status",
-              value: "create"
-            });
+        const downSource = this.source.source + `[${index}]`
+        if (this.dataPool.getInfo(downSource, 'status') === undefined) {
+          if (loadMode === 'new' || loadMode === 'customize' || loadMode === 'create') {
+            this.dataPool.setInfo(downSource, { key: 'status', value: 'create' })
           } else {
             this.dataPool.setInfo(downSource, { key: "status", value: "view" });
           }
         }
       });
     } else if (_.isObject(loadedData)) {
-      if (this.dataPool.getInfo(this.source.source, "status") === undefined) {
-        if (mode === "new") {
-          this.dataPool.setInfo(this.source.source, {
-            key: "status",
-            value: "create"
-          });
+      if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
+        if (loadMode === 'new' || loadMode === 'customize' || loadMode === 'create') {
+          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create' })
         } else {
           this.dataPool.setInfo(this.source.source, {
             key: "status",
@@ -196,22 +348,18 @@ export default class DataNode implements IDataNode {
       const setDataInfo = (infoKey: string, handle: IDataPoolHandle) => {
         const parentHandle = handle.getParent();
         if (!_.isNil(parentHandle)) {
-          if (parentHandle.getInfo("status") === undefined) {
-            if (mode === "new") {
-              parentHandle.setInfo("status", "create");
+          if (parentHandle.getInfo('status') === undefined) {
+            if (loadMode === 'new' || loadMode === 'customize' || loadMode === 'create') {
+              parentHandle.setInfo('status', 'create')
             } else {
               parentHandle.setInfo("status", "view");
             }
           }
         }
-      };
-      if (this.dataPool.getInfo(this.source.source, "status") === undefined) {
-        if (mode === "new") {
-          this.dataPool.setInfo(this.source.source, {
-            key: "status",
-            value: "create",
-            setDataInfo
-          });
+      }
+      if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
+        if (loadMode === 'new' || loadMode === 'customize' || loadMode === 'create') {
+          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create', setDataInfo })
         } else {
           this.dataPool.setInfo(this.source.source, {
             key: "status",
@@ -222,172 +370,200 @@ export default class DataNode implements IDataNode {
       }
     }
 
-    // assign root schema if not $dummy data
-    this.rootSchema = await this.dataEngine.mapper.getSchema(this.source);
-    // load this node schema
-    const schemaResult = await this.pluginManager.executePlugins(
-      this.id,
-      "data.schema.parser",
-      { dataNode: this }
-    );
-    if (schemaResult) {
-      let schema = schemaResult.results[schemaResult.results.length - 1].result;
-      if (schema) {
-        this.schema = schema;
-      }
+    // load the dataSchema of the root
+    this.rootSchema = await this.dataEngine.loadSchema(
+      this.source,
+      { engineId: this.uiNode.engineId },
+    )
+    // assign schema from the root
+    this.schema = await this.dataEngine.mapper.getDataSchema(
+      this.source,
+      true,
+    )
+
+    // sync state to data pool
+    const stateNode: IStateNode = _.get(this.uiNode, ['stateNode'])
+    if (!_.isNil(stateNode)) {
+      stateNode.syncStateWithDataPool()
     }
-    return result;
+
+    return loadedData
   }
+  async updateData(value: any, options?: IDataUpdateOption) {
+    // set the value
+    this.data = value
 
-  async updateData(value: any) {
-    let noUpdateLayout = true;
-    if (_.isArray(value) && this.uiNode.schema.$children) {
-      noUpdateLayout = false;
+    // update the status
+    if (this.dataPool.getInfo(this.source.source, 'status') === 'view') {
+      this.dataPool.setInfo(this.source.source, { key: 'status', value: 'update' })
     }
-
-    this.data = value;
-    if (this.dataPool.getInfo(this.source.source, "status") === "view") {
-      this.dataPool.setInfo(this.source.source, {
-        key: "status",
-        value: "update"
-      });
-    }
-    if (this.source.source.includes(":")) {
-      let mainRoute = this.source.source.split(":")[0] + ":";
-      if (this.dataPool.getInfo(mainRoute, "status") === "view") {
-        this.dataPool.setInfo(mainRoute, { key: "status", value: "update" });
+    if (this.source.source.includes(':')) {
+      const domain = this.source.source.split(':')[0] + ':'
+      if (this.dataPool.getInfo(domain, 'status') === 'view') {
+        this.dataPool.setInfo(domain, { key: 'status', value: 'update' })
       }
     }
 
-    // check data from update plugins
-    const exeConfig: IPluginExecuteOption = {
-      afterExecute: (plugin, param, result) => {
-        if (!_.get(result, "status")) {
-          return { stop: true };
-        }
-        return {};
-      }
-    };
-    const exeResult = await this.pluginManager.executePlugins(
+    // exec plugins to check the new value
+    // each plugin can return an error info
+    const { results } = await this.pluginManager.executePlugins(
       this.id,
-      "data.update.could",
+      'data.update.could',
       { dataNode: this },
-      exeConfig
-    );
-    if (exeResult) {
-      exeResult.results.forEach(result => {
-        if (!_.get(result.result, "status")) {
-          this.errorInfo = result.result;
+      {
+        afterExecute: (plugin, param, result) => {
+          if (!_.get(result, 'status')) {
+            return { stop: true }
+          }
+          return {}
         }
-      });
+      }
+    )
+    if (_.isArray(results)) {
+      let hasError: boolean = false
+      results.forEach((resultItem: IPluginResult) => {
+        const { result } = resultItem
+        if (!_.get(result, 'status')) {
+          hasError = true
+          this.errorInfo = result
+        }
+      })
+      if (hasError === false) {
+        delete this.errorInfo
+      }
     }
 
-    const status = _.get(this.errorInfo, "status", true);
+    const status = _.get(this.errorInfo, 'status', true)
     if (status) {
-      this.dataPool.clearInfo(this.source.source, "error");
+      this.dataPool.clearInfo(this.source.source, 'error')
     }
 
-    await this.refreshLayout(noUpdateLayout);
-    return status;
+    let holdLayout: boolean = true
+    if (_.isArray(value) && _.get(this.uiNode, ['schema', '$children']) !== undefined) {
+      holdLayout = false
+    }
+    await this.refreshUI(holdLayout)
+
+    return status
+  }
+  async deleteData(options?: IDataDeleteOption) {
   }
 
-  async createRow(value: any = {}, insertHead?: boolean) {
-    let status: any = false;
-    if (this.uiNode.schema.$children) {
-      const currentValue = this.data || [];
+  getRow(index: number) {
 
-      let index = currentValue.length;
-      if (insertHead) {
-        index = 0;
-        currentValue.unshift(value);
+  }
+  async createRow(value: any, insertIndex?: number) {
+    let status: any = false
+    const liveChildren = _.get(this.uiNode, ['schema', '$children'])
+    if (liveChildren !== undefined) {
+      const currentValue = _.isArray(this.data) ? this.data : []
+
+      if (!_.isNil(insertIndex) && _.isFinite(insertIndex)) {
+        currentValue.splice(insertIndex, 0, value)
       } else {
-        currentValue.push(value);
+        currentValue.push(value)
       }
-      status = await this.updateData(currentValue);
+      status = await this.updateData(currentValue)
 
-      if (index === currentValue.length - 1) {
-        let lineage = `${this.source.source}[${index}]`;
-        this.dataPool.setInfo(lineage, { key: "status", value: "create" });
-      } else if (index === 0) {
-        for (let i = currentValue.length - 1; i > 0; i--) {
-          let oldLineage = `${this.source.source}[${i - 1}]`;
-          const status = this.dataPool.getInfo(oldLineage, "status");
+      if (!_.isNil(insertIndex) && _.isFinite(insertIndex)) {
+        for (let i = currentValue.length - 1; i >= insertIndex; i--) {
+          let oldSource = `${this.source.source}[${i - 1}]`
+          const status = this.dataPool.getInfo(oldSource, 'status')
           if (status !== undefined) {
-            let newLineage = `${this.source.source}[${i}]`;
-            this.dataPool.setInfo(newLineage, { key: "status", value: status });
+            let newSource = `${this.source.source}[${i}]`
+            this.dataPool.setInfo(newSource, { key: 'status', value: status })
           }
         }
-        let insertLineage = `${this.source.source}[0]`;
-        this.dataPool.setInfo(insertLineage, {
-          key: "status",
-          value: "create"
-        });
+        let targetSource = `${this.source.source}[${insertIndex}]`
+        this.dataPool.setInfo(targetSource, { key: 'status', value: 'create' })
+      } else {
+        let targetSource = `${this.source.source}[${currentValue.length - 1}]`
+        this.dataPool.setInfo(targetSource, { key: 'status', value: 'create' })
       }
     }
-    return status;
+    return status
   }
+  async updateRow(value: any, updateIndex?: number) {
 
-  async deleteData(path?: any) {
-    const exeConfig: IPluginExecuteOption = {
-      afterExecute: (plugin, param, result) => {
-        if (!_.get(result, "status")) {
-          return { stop: true };
-        }
-        return {};
+  }
+  async deleteRow(index: number|number[], logically?: boolean) {
+    const data = this.data
+
+    if (!_.isArray(data)) {
+      // not array, can't delete directly
+      this.errorInfo = {
+        status: 1000,
+        code: `Couldn't delete a row from DataNode ${this.id} whose data is not an array.`
       }
-    };
-    const exeResult = await this.pluginManager.executePlugins(
-      this.id,
-      "data.delete.could",
-      { dataNode: this },
-      exeConfig
-    );
-    if (exeResult) {
-      exeResult.results.forEach(result => {
-        if (!_.get(result.result, "status")) {
-          this.errorInfo = result.result;
-        }
-      });
+      return false
     }
-    let noUpdateLayout = true;
 
-    const status = _.get(this.errorInfo, "status", true);
-    let data = this.data;
-    if (status) {
-      if (path !== undefined) {
-        if ((_.isArray(path) || _.isNumber(path)) && _.isArray(this.data)) {
-          if (this.uiNode.schema.$children) {
-            noUpdateLayout = false;
+    // exec plugins to check whether could delete
+    const { results } = await this.pluginManager.executePlugins(
+      this.id,
+      'data.delete.could',
+      { dataNode: this },
+      {
+        afterExecute: (plugin, param, result) => {
+          if (!_.get(result, 'status')) {
+            return { stop: true }
           }
+          return {}
+        }
+      }
+    )
+    if (_.isArray(results)) {
+      let hasError: boolean = false
+      results.forEach((resultItem: IPluginResult) => {
+        const { result } = resultItem
+        if (!_.get(result, 'status')) {
+          hasError = true
+          this.errorInfo = result
+        }
+      })
+      if (hasError === false) {
+        delete this.errorInfo
+      }
+    }
 
-          let objLineage = `${this.source.source}[${path}]`;
-          if (this.dataPool.getInfo(objLineage, "status") !== "delete") {
-            this.dataPool.setInfo(objLineage, {
-              key: "status",
-              value: "delete"
-            });
+    const currentStatus = _.get(this.errorInfo, 'status', true)
+    if (currentStatus) {
+      // delete the row(s) logically by setting its status to 'delete'
+      if (logically === true) {
+        if (_.isArray(index)) {
+          index.forEach((item: number) => {
+            const targetSource = `${this.source.source}[${item}]`
+            if (this.dataPool.getInfo(targetSource, 'status') !== 'delete') {
+              this.dataPool.setInfo(targetSource, { key: 'status', value: 'delete' })
+            }
+          })
+        } else if (_.isFinite(index)) {
+          const targetSource = `${this.source.source}[${index}]`
+          if (this.dataPool.getInfo(targetSource, 'status') !== 'delete') {
+            this.dataPool.setInfo(targetSource, { key: 'status', value: 'delete' })
           }
-
-          // _.remove(data, (e: any, index: number) => {
-          //   return _.isArray(path) ? path.indexOf(index) > -1 : index === path;
-          // });
-        } else {
-          _.unset(data, path);
-          this.data = data;
-          noUpdateLayout = false;
         }
       } else {
-        this.data = null;
+        // delete the row(s) really
+        if (_.isArray(index)) {
+          index.filter((item: number) => {
+            return _.isFinite(item)
+          }).forEach((item: number) => {
+            const targetSource = `${this.source.source}[${item}]`
+            this.dataPool.clear(targetSource)
+          })
+        } else if (_.isFinite(index)) {
+          const targetSource = `${this.source.source}[${index}]`
+          this.dataPool.clear(targetSource)
+        }
       }
 
-      // not array, can't delete directly
-      if (typeof this.data !== "object") {
-        // this.dataPool.set(this.source.source, this.data);
-        this.dataPool.clearInfo(this.source.source, "error");
+      let holdLayout: boolean = true
+      if (_.isArray(this.data) && _.get(this.uiNode, ['schema', '$children']) !== undefined) {
+        holdLayout = false
       }
-      // update state without sending message
-      await this.refreshLayout(noUpdateLayout);
+      await this.refreshUI(holdLayout)
     }
-    return status;
+    return status
   }
 }

@@ -25,8 +25,7 @@ const execution: IPluginExecution = (param: IPluginParam) => {
   })
 
   // parse data schema deps
-  result = result.pop()
-  dataNode.schema = result
+  dataNode.schema = result.pop()
   return result
 }
 

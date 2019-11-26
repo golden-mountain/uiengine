@@ -179,7 +179,7 @@ export function stateDepsResolver(
   stateName: string,
   defaultState?: boolean
 ): boolean {
-  const uiNode = stateNode.getUINode();
+  const uiNode = stateNode.uiNode;
   const schema = uiNode.getSchema();
   const stateDepConfig = _.get(schema, `state.${stateName}`);
 
@@ -219,7 +219,7 @@ function resolveDependance(
       });
     }
   } else if (_.isObject(selector) && !_.isEmpty(selector)) {
-    const depUINodes = searchNodes(selector, uiNode.rootName);
+    const depUINodes = searchNodes(selector, uiNode.layoutKey);
 
     if (_.isArray(depUINodes) && depUINodes.length > 0) {
       return depUINodes.every((targetUINode: any) => {

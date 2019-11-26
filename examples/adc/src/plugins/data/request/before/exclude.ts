@@ -1,14 +1,16 @@
 import _ from 'lodash'
 
-import { NodeController, formatSource } from 'uiengine'
+import { NodeController, getAccessRoute } from 'uiengine'
 
 import {
   IDataEngine,
+  IDataSource,
   IPlugin,
   IPluginExecution,
   IPluginExecuteOption,
   IUINode,
   IPluginParam,
+  IDataSchema,
 } from 'uiengine/typings'
 
 type MatchFunction = (uiNode: IUINode) => boolean
@@ -55,10 +57,10 @@ const doExclusion = (data: any, uiNode: IUINode) => {
   const { visible } = stateNode.state
   const {
     'cm-meta': { 'm-exclusion': exclusion }
-  } = schema
+  } = schema as IDataSchema
 
   const dataSource: string = source.source
-  const dataPath = formatSource(dataSource)
+  const dataPath = getAccessRoute(dataSource)
   const dataValue = _.get(data, dataPath)
   if (dataValue && visible) {
     const prefix = dataSource.split(':')[0]
@@ -75,26 +77,27 @@ const doExclusion = (data: any, uiNode: IUINode) => {
  */
 const execution: IPluginExecution = (param: IPluginParam) => {
   const dataEngine: IDataEngine = _.get(param, 'dataEngine')
-  const { params } = dataEngine.requestOptions
-  const dataSource = dataEngine.source
+  const dataSource: IDataSource = _.get(param, 'source')
+  const RP: any = _.get(param, 'RP')
+
   if (!dataSource || !dataSource.source) {
     return true
   }
   const nodeController = NodeController.getInstance()
-  const layout = `schema/ui/${dataSource.source.slice(0, -1)}.json`
-  const rootNode = _.get(nodeController.nodes[layout], 'uiNode')
+  const layout = `${dataSource.source.slice(0, -1)}.json`
+  const rootNode = _.get(nodeController.layoutMap[layout], 'uiNode')
   if (!rootNode) {
     return true
   }
 
-  deepSearch(rootNode, hasExclusion, doExclusion.bind(null, params))
+  deepSearch(rootNode, hasExclusion, doExclusion.bind(null, RP.requestPayload))
   return true
 }
 
 export const exclude: IPlugin = {
   name: 'exclude',
   categories: ['data.request.before'],
-  paramKeys: ['dataEngine'],
+  paramKeys: ['dataEngine', 'source', 'RP'],
   execution,
   priority: 100,
 }

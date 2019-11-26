@@ -1,6 +1,9 @@
 import _ from "lodash";
 
-import { getDomainName, formatSource } from "./utils/data";
+import {
+  getDomainName,
+  getAccessRoute,
+} from './utils/data'
 
 import {
   IDataPool,
@@ -295,14 +298,14 @@ export class DataPool implements IDataPool {
       if (_.isFunction(this.domainAnalyzer)) {
         domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path);
+        domainName = getDomainName(path, true)
       }
       // get target route
       let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
         targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path);
+        targetRoute = getAccessRoute(path)
       }
 
       // get domain root node
@@ -363,14 +366,14 @@ export class DataPool implements IDataPool {
       if (_.isFunction(this.domainAnalyzer)) {
         domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path);
+        domainName = getDomainName(path, true)
       }
       // get target route
       let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
         targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path);
+        targetRoute = getAccessRoute(path)
       }
 
       // get domain root node
@@ -443,14 +446,14 @@ export class DataPool implements IDataPool {
       if (_.isFunction(this.domainAnalyzer)) {
         domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path);
+        domainName = getDomainName(path, true)
       }
       // get target route
       let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
         targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path);
+        targetRoute = getAccessRoute(path)
       }
 
       // get domain root node
@@ -521,14 +524,14 @@ export class DataPool implements IDataPool {
       if (_.isFunction(this.domainAnalyzer)) {
         domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path);
+        domainName = getDomainName(path, true)
       }
       // get target route
       let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
         targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path);
+        targetRoute = getAccessRoute(path)
       }
 
       // get domain root node
@@ -576,14 +579,14 @@ export class DataPool implements IDataPool {
       if (_.isFunction(this.domainAnalyzer)) {
         domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path);
+        domainName = getDomainName(path, true)
       }
       // get target route
       let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
         targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path);
+        targetRoute = getAccessRoute(path)
       }
 
       // get domain root node
@@ -649,14 +652,14 @@ export class DataPool implements IDataPool {
       if (_.isFunction(this.domainAnalyzer)) {
         domainName = this.domainAnalyzer(path);
       } else {
-        domainName = getDomainName(path);
+        domainName = getDomainName(path, true)
       }
       // get target route
       let targetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
         targetRoute = this.routeAnalyzer(path);
       } else {
-        targetRoute = formatSource(path);
+        targetRoute = getAccessRoute(path)
       }
 
       // get domain root node
@@ -951,14 +954,14 @@ export class DataPool implements IDataPool {
       if (_.isFunction(this.domainAnalyzer)) {
         srcDomainName = this.domainAnalyzer(srcPath);
       } else {
-        srcDomainName = getDomainName(srcPath);
+        srcDomainName = getDomainName(srcPath, true)
       }
       // get src target route
       let srcTargetRoute: string = "";
       if (_.isFunction(this.routeAnalyzer)) {
         srcTargetRoute = this.routeAnalyzer(srcPath);
       } else {
-        srcTargetRoute = formatSource(srcPath);
+        srcTargetRoute = getAccessRoute(srcPath)
       }
 
       // get src domain root node
@@ -978,14 +981,14 @@ export class DataPool implements IDataPool {
         if (_.isFunction(this.domainAnalyzer)) {
           dstDomainName = this.domainAnalyzer(dstPath);
         } else {
-          dstDomainName = getDomainName(dstPath);
+          dstDomainName = getDomainName(dstPath, true)
         }
         // get dst target route
         let dstTargetRoute: string = "";
         if (_.isFunction(this.routeAnalyzer)) {
           dstTargetRoute = this.routeAnalyzer(dstPath);
         } else {
-          dstTargetRoute = formatSource(dstPath);
+          dstTargetRoute = getAccessRoute(dstPath)
         }
 
         let autoClear: boolean = false;

@@ -1,14 +1,15 @@
-const reqConfig = {
+export const defaultRequestConfig = {
   // axios config
-  baseURL: "http://localhost:3000/",
+  baseURL: 'http://localhost:3000/',
   timeout: 1000,
 
-  // customize config
+  // customized config
   devMode: false,
-  dataSchemaPrefix: "schema/data/",
-  dataPathPrefix: "",
-  layoutSchemaPrefix: "schema/ui/",
-  headers: {}
-};
+  dataSchemaPrefix: 'schema/data/',
+  mockDataPrefix: '',
+  realDataPrefix: '',
+  uiSchemaPrefix: 'schema/ui/',
+  headers: {},
+}
 
-export default reqConfig;
+export default defaultRequestConfig
