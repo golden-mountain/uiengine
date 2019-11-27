@@ -1,6 +1,7 @@
 import _ from 'lodash'
 
 import { NodeController } from '../../../../data-layer'
+import { replaceParam } from '../../../../helpers/utils'
 
 import {
   IDataSource,
@@ -55,26 +56,7 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
           }
         }
 
-        let url: string = endpoint
-        const matchBraces = /\{[\w\-]*\}/g
-        const matchParam = /\{(.*)\}/
-        const results = url.match(matchBraces)
-        if (_.isArray(results)) {
-          results.forEach((item: string) => {
-            const result = item.match(matchParam)
-            if (_.isArray(result) && _.isString(result[1])) {
-              const paramKey = result[1]
-              let paramStr = param[paramKey]
-              if (!paramStr) {
-                paramStr = param[paramKey]
-              }
-              if (_.isString(paramStr) || _.isFinite(paramStr)) {
-                url = url.replace(`{${paramKey}}`, `${paramStr}`)
-              }
-            }
-          })
-        }
-
+        const url = replaceParam(endpoint, param)
         if (url !== endpoint) {
           _.set(RP, 'endpoint', url)
         }

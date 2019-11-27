@@ -1,15 +1,19 @@
+import { IUIEngineConfig } from "../UIEngine";
 import { IUINode, IStateInfo } from "../UINode";
 
-export interface IComponentWrapper {
+export interface IComponentWrapperProps {
   uiNode: IUINode;
+  config?: IUIEngineConfig;
   key?: string;
   [anyKey: string]: any;
 }
 
-export interface IComponentWrapperProps {
-  uinode: IUINode;
-  key?: string;
+// used cross modules
+export interface IComponentWrapperState extends IStateInfo {
 }
 
-// used cross modules
-export interface IComponentState extends IStateInfo {}
+export interface IWrappedComponentProps {
+  uinode: IUINode;
+  key?: string;
+  [anyKey: string]: any;
+}

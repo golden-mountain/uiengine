@@ -7,9 +7,10 @@ export interface IObject {
 
 // UI schema
 export interface IUISchema {
-  component?: string | JSX.Element
+  component?: string | React.ElementType
   datasource?: IDataSource
   props?: IObject
+  inheritProps?: boolean | string[]
   state?: {
     [stateName: string]: IDependanceTree | IDependanceNode
   }
