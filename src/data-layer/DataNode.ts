@@ -221,7 +221,7 @@ export default class DataNode implements IDataNode {
     if (!_.isNil(uiNode)) {
       if (holdLayout) {
         // update props of uiNode
-        await uiNode.parseProps()
+        await uiNode.parse()
 
         const stateNode = uiNode.stateNode
         if (!_.isNil(stateNode)) {

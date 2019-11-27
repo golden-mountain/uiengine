@@ -72,6 +72,8 @@ export class ComponentWrapper extends React.Component<
         WrappedComponent = getComponent(componentLine);
       } else if (!_.isNil(componentLine)) {
         WrappedComponent = componentLine
+      } else {
+        WrappedComponent = DefaultWrapper
       }
       if (componentLine && !WrappedComponent) {
         console.warn(

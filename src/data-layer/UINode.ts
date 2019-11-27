@@ -12,7 +12,7 @@ import {
   Request,
 } from '../helpers'
 import {
-  cloneTemplateSchema,
+  cloneTemplateSchema, replaceParam,
 } from '../helpers/utils'
 
 import {
@@ -120,6 +120,7 @@ export class UINode implements IUINode {
       {
         categories: [
           'ui.parser',
+          'ui.parser.before',
         ]
       }
     )
@@ -151,7 +152,28 @@ export class UINode implements IUINode {
     this.stateNode = new StateNode(this)
   }
 
-  async parseProps() {
+  async parseBefore(schema: IUISchema) {
+    // exec ui.parser.before plugin
+    try {
+      const { results } = await this.pluginManager.executePlugins(
+        this.id,
+        'ui.parser.before',
+        {uiNode: this, schema}
+      )
+      if (_.isArray(results)) {
+        results.forEach((resultItem) => {
+          const { result } = resultItem
+          if (_.isObject(results)) {
+            _.assign(schema, result)
+          }
+        })
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    return schema
+  }
+  async parse() {
     // exec ui.parser plugin
     try {
       await this.pluginManager.executePlugins(
@@ -187,8 +209,9 @@ export class UINode implements IUINode {
    * @returns the final UI schema
    */
   private async analyzeSchema(schema: IUISchema) {
-    let currentSchema: IUISchema = schema
+    schema = await this.parseBefore(schema)
 
+    let currentSchema: IUISchema = schema
     // use dataNode to load the dataSource
     if (_.isObject(currentSchema.datasource)) {
       const { source } = currentSchema.datasource
@@ -242,68 +265,141 @@ export class UINode implements IUINode {
     this.stateNode = new StateNode(this)
     await this.stateNode.renewStates()
 
-    await this.parseProps()
+    await this.parse()
 
     return currentSchema
   }
 
-  private searchAndReplace(
-    srcString: string,
+  private replaceLiveToken(
+    source: string,
     token: string,
-    replacer: string,
-    exceptions?: string[],
+    replace: string,
+    except?: Array<string|RegExp>,
+    depth?: number,
   ) {
-    const matcher = RegExp(`${token}[^${token}]*`, 'g')
-    const results = srcString.match(matcher)
-    if (!_.isNil(results)) {
+    // format the token to create the RegExp
+    const formatToken = token
+      .split('')
+      .map((char: string) => {
+        if ('{}[]()^$*\\'.includes(char)) {
+          return '\\' + char
+        }
+        return char
+      })
+      .join('')
+    // match the token and the following chars before the next token
+    const tokenMatcher = RegExp(`${formatToken}[^${formatToken}]*`, 'g')
+
+    const matchArray = source.match(tokenMatcher)
+    if (!_.isNil(matchArray)) {
       const slices: string[] = []
-      let restString = srcString
-      results.forEach((result: string) => {
-        if (_.isArray(exceptions) && exceptions.length) {
-          const except = exceptions.some((value: string) => {
-            if (result.startsWith(value) && value.startsWith(token)) {
+
+      let restString = source
+      matchArray.forEach((matchString: string, index: number) => {
+        // the depth of the replacement
+        if (_.isNumber(depth) && index + 1 > depth) {
+          return
+        }
+        // the exception of the replacement
+        if (_.isArray(except) && except.length) {
+          const isExcepted = except.some((value: string|RegExp) => {
+            if (_.isString(value) && matchString.startsWith(value)) {
+              return true
+            } else if (_.isRegExp(value) && value.test(matchString)) {
               return true
             }
             return false
           })
-          if (except) {
+          if (isExcepted) {
             return
           }
         }
 
-        const matchLength = result.length
-        const startIndex = restString.indexOf(result)
+        const matchLength = matchString.length
+        const startIndex = restString.indexOf(matchString)
         const endIndex = startIndex + matchLength
 
         slices.push(restString.slice(0, startIndex))
-        slices.push(replacer)
+        slices.push(replace)
         slices.push(restString.slice(startIndex + token.length, endIndex))
         restString = restString.slice(endIndex)
       })
+
       slices.push(restString)
       return slices.join('')
     }
-    return srcString
+    return source
   }
-  private replaceLiveToken(
+  private searchAndReplace(
     target: any,
     token: string,
-    replacer: string,
-    exceptions?: string[],
+    replace: string,
+    except?: Array<string|RegExp>,
+    depth?: number,
   ) {
-    if (_.isString(target) && target.indexOf(token) > -1) {
-      return this.searchAndReplace(target, token, replacer, exceptions)
+    if (_.isString(target)) {
+      return this.replaceLiveToken(target, token, replace, except, depth)
     } else if (_.isObject(target)) {
       _.forIn(target, (value: any, key: string) => {
         if (_.isObject(value)) {
-          this.replaceLiveToken(value, token, replacer, exceptions)
-        } else if (_.isString(value) && value.indexOf(token) > -1) {
-          const newValue = this.searchAndReplace(value, token, replacer, exceptions)
+          const newValue = this.searchAndReplace(value, token, replace, except, depth)
+          _.set(target, [key], newValue)
+        } else if (_.isString(value)) {
+          const newValue = this.replaceLiveToken(value, token, replace, except, depth)
           _.set(target, [key], newValue)
         }
       })
     }
     return target
+  }
+  private replaceChildToken(
+    schema: IUISchema,
+    index: number,
+  ) {
+    const { $children, children } = schema
+    if (!_.isNil($children)) {
+      if (_.isArray($children)) {
+        $children.forEach(($child: IUISchema) => {
+          $child.datasource = this.searchAndReplace(
+            $child.datasource,
+            '$',
+            `${index}`,
+            ['$dummy'],
+            1,
+          )
+        })
+      } else if (_.isObject($children)) {
+        $children.datasource = this.searchAndReplace(
+          $children.datasource,
+          '$',
+          `${index}`,
+          ['$dummy'],
+          1,
+        )
+      }
+    } else if (_.isArray(children) && children.length) {
+      children.forEach((child: IUISchema|IUISchema[]) => {
+        if (_.isArray(child)) {
+          child.forEach((item: IUISchema) => {
+            item.datasource = this.searchAndReplace(
+              item.datasource,
+              '$',
+              `${index}`,
+              ['$dummy'],
+              1,
+            )
+          })
+        } else {
+          child.datasource = this.searchAndReplace(
+            child.datasource,
+            '$',
+            `${index}`,
+            ['$dummy'],
+            1,
+          )
+        }
+      })
+    }
   }
   private analyzeLiveSchema(schema: IUISchema) {
     const data = this.dataNode.data
@@ -312,11 +408,18 @@ export class UINode implements IUINode {
       schema.children = data.map((value: any, index: number) => {
         if (_.isArray($children)) {
           cloneTemplateSchema($children)
-          return $children.map((item: IUISchema) => {
-            const cloneSchema = _.cloneDeep(item)
+          return $children.map(($child: IUISchema) => {
+            const cloneSchema = _.cloneDeep($child)
             if (_.isObject(cloneSchema.datasource)) {
-              this.replaceLiveToken(cloneSchema.datasource, '\\\$', `${index}`, ['$dummy'])
+              cloneSchema.datasource = this.searchAndReplace(
+                cloneSchema.datasource,
+                '$',
+                `${index}`,
+                ['$dummy'],
+                1,
+              )
             }
+            this.replaceChildToken(cloneSchema, index)
             cloneSchema._index = index
             return cloneSchema
           })
@@ -324,8 +427,15 @@ export class UINode implements IUINode {
           cloneTemplateSchema($children)
           const cloneSchema = _.cloneDeep($children)
           if (_.isObject(cloneSchema.datasource)) {
-            this.replaceLiveToken(cloneSchema.datasource, '\\\$', `${index}`, ['$dummy'])
+            cloneSchema.datasource = this.searchAndReplace(
+              cloneSchema.datasource,
+              '$',
+              `${index}`,
+              ['$dummy'],
+              1,
+            )
           }
+          this.replaceChildToken(cloneSchema, index)
           cloneSchema._index = index
           return cloneSchema
         } else {

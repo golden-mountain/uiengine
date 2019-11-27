@@ -179,7 +179,7 @@ export async function validateAll(dataSources: Array<any>) {
           }
         })
         // await uiNode.refreshLayout()
-        await uiNode.parseProps()
+        await uiNode.parse()
         uiNode.sendMessage(true)
       }
     }
