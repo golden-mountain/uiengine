@@ -44,17 +44,17 @@ const execution: IPluginExecution = (param: IPluginParam) => {
 
           if (!_.isNil(dataPool)) {
             dataPool.transfer(target, source, { createDst: true })
+            return dataNode.data
           }
         }
       }
     }
-    return dataNode.data
   }
   return
 }
 
-export const loadDataPoolData: IPlugin = {
-  name: 'loadDataPoolData',
+export const connectData: IPlugin = {
+  name: 'connectData',
   categories: ['data.data.parser'],
   paramKeys: ['dataNode', 'workingMode'],
   execution,
