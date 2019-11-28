@@ -40,6 +40,7 @@ export interface IEventConfig {
   target?: string | IEventTargetConfig
   listener: string | IEventListenerConfig | Array<string|IEventListenerConfig>
   resultSolver?: IEventResultSolver
+  simpleMode?: boolean
 }
 
 export interface IEventDebugConfig {
@@ -184,8 +185,8 @@ export interface IListenerManager {
   unloadListeners: (name?: string) => boolean
   getListenerConfig: (name: string) => IListenerMap | IListenerConfig | null
 
-  getStaticEventProps: (events: IEventConfig | IEventConfig[]) => IEventProps
-  getDynamicEventListener: (event: IEventConfig) => IEventListener
+  getStaticEventProps: (events: IEventConfig | IEventConfig[], simpleMode?: boolean) => IEventProps
+  getDynamicEventListener: (event: IEventConfig, simpleMode?: boolean) => IEventListener
 
   resetHistory: (capacity?: number) => void
   setHistoryCapacity: (capacity: number) => boolean

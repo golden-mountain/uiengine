@@ -486,34 +486,31 @@ export class ListenerManager implements TYPES.IListenerManager {
     }
 
     const props: TYPES.IEventProps = {}
-    if (simple === true) {
-      eventArray.forEach((config: TYPES.IEventConfig) => {
-        const { eventName } = config
+    eventArray.forEach((config: TYPES.IEventConfig) => {
+      if (_.isObject(config)) {
+        const {
+          eventName,
+          receiveParams,
+          defaultParams,
+          debugList,
+          target,
+          resultSolver,
+          simpleMode,
+        } = config
 
-        if (_.isString(eventName) && eventName.length > 0) {
-          const listenerQueue = this.prepareListenerQueue(config)
-          props[eventName] = (...args: any[]) => {
-            listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-              const { listener } = listenerConfig
-              if (_.isFunction(listener)) {
-                listener(...args)
-              }
-            })
+        if (simple === true || simpleMode === true) {
+          if (_.isString(eventName) && eventName.length > 0) {
+            const listenerQueue = this.prepareListenerQueue(config)
+            props[eventName] = (...args: any[]) => {
+              listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
+                const { listener } = listenerConfig
+                if (_.isFunction(listener)) {
+                  listener(...args)
+                }
+              })
+            }
           }
-        }
-      })
-    } else {
-      eventArray.forEach((config: TYPES.IEventConfig) => {
-        if (_.isObject(config)) {
-          const {
-            eventName,
-            receiveParams,
-            defaultParams,
-            debugList,
-            target,
-            resultSolver,
-          } = config
-
+        } else {
           if (_.isString(eventName) && eventName.length > 0) {
 
             // In case that the event config changes or load new listeners
@@ -616,8 +613,8 @@ export class ListenerManager implements TYPES.IListenerManager {
             }
           }
         }
-      })
-    }
+      }
+    })
 
     return props
   }
@@ -634,12 +631,13 @@ export class ListenerManager implements TYPES.IListenerManager {
           debugList,
           target,
           resultSolver,
+          simpleMode,
         } = event
 
         // get listener queue
         const listenerQueue = this.prepareListenerQueue(event)
 
-        if (simple === true) {
+        if (simple === true || simpleMode === true) {
           listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
             const { listener } = listenerConfig
             if (_.isFunction(listener)) {
