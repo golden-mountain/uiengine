@@ -500,15 +500,26 @@ export class ListenerManager implements TYPES.IListenerManager {
 
         if (simple === true || simpleMode === true) {
           if (_.isString(eventName) && eventName.length > 0) {
+
+            // In case that the event config changes or load new listeners
+            // save listener config
             const listenerQueue = this.prepareListenerQueue(config)
+            // save param config
+            const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : defaultParams
+
             props[eventName] = (...args: any[]) => {
               listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
                 const { listener } = listenerConfig
                 if (_.isFunction(listener)) {
-                  listener(...args)
+                  if (defaultConfig === undefined) {
+                    listener(...args)
+                  } else {
+                    listener(...args, defaultConfig)
+                  }
                 }
               })
             }
+
           }
         } else {
           if (_.isString(eventName) && eventName.length > 0) {
@@ -641,7 +652,11 @@ export class ListenerManager implements TYPES.IListenerManager {
           listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
             const { listener } = listenerConfig
             if (_.isFunction(listener)) {
-              listener(...args)
+              if (defaultParams === undefined) {
+                listener(...args)
+              } else {
+                listener(...args, defaultParams)
+              }
             }
           })
         } else {
