@@ -118,18 +118,17 @@ export class UIEngine extends React.Component<
     }
   }
 
-  shouldComponentUpdate(nextProps: IUIEngineProps, nextState: IUIEngineStates) {
-    const { layouts: nextLayouts } = nextProps
+  componentDidUpdate(prevProps: IUIEngineProps) {
+    const { layouts: prevLayouts } = prevProps
     const { layouts } = this.props
     const { loading } = this.state
-    if (!_.isEqual(nextLayouts, layouts)) {
+    if (!_.isEqual(prevLayouts, layouts)) {
       if (loading === true) {
         this.updateTime = new Date().getTime()
       } else {
         this.refresh()
       }
     }
-    return true
   }
 
   loadLayouts() {
