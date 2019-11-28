@@ -92,6 +92,28 @@ export class UIEngine extends React.Component<
   }
 
   componentDidMount() {
+    this.loadLayouts()
+  }
+
+  componentWillUnmount() {
+    this.unloadLayouts()
+
+    if (!_.isNil(this.nodeController)) {
+      const messager = this.nodeController.messager
+      if (!_.isNil(messager)) {
+        messager.removeStateFunc(this.engineId)
+      }
+    }
+  }
+
+  componentDidUpdate(prevProps: IUIEngineProps, prevState: IUIEngineStates) {
+    if (!_.isEqual(prevProps.layouts, this.props.layouts)) {
+      this.unloadLayouts()
+      this.loadLayouts()
+    }
+  }
+
+  loadLayouts() {
     if (!_.isNil(this.nodeController)) {
       const nodeController = this.nodeController
       if (!_.isNil(nodeController.messager)) {
@@ -164,18 +186,13 @@ export class UIEngine extends React.Component<
     }
   }
 
-  componentWillUnmount() {
+  unloadLayouts() {
     if (!_.isNil(this.nodeController)) {
       const loadedLayouts = this.nodeController.engineMap[this.engineId]
       if (_.isArray(loadedLayouts) && loadedLayouts.length) {
         loadedLayouts.forEach((layoutKey: string) => {
           this.nodeController.removeLayout(layoutKey)
         })
-      }
-
-      const messager = this.nodeController.messager
-      if (!_.isNil(messager)) {
-        messager.removeStateFunc(this.engineId)
       }
     }
   }
