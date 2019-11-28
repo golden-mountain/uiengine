@@ -498,7 +498,7 @@ export class ListenerManager implements TYPES.IListenerManager {
           simpleMode,
         } = config
 
-        if (simple === true || simpleMode === true) {
+        if (simple === true || simpleMode === true || _.isEqual(simpleMode, 'true')) {
           if (_.isString(eventName) && eventName.length > 0) {
 
             // In case that the event config changes or load new listeners
@@ -648,7 +648,7 @@ export class ListenerManager implements TYPES.IListenerManager {
         // get listener queue
         const listenerQueue = this.prepareListenerQueue(event)
 
-        if (simple === true || simpleMode === true) {
+        if (simple === true || simpleMode === true || _.isEqual(simpleMode, 'true')) {
           listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
             const { listener } = listenerConfig
             if (_.isFunction(listener)) {
