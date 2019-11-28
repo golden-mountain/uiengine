@@ -34,7 +34,6 @@ export default class DataNode implements IDataNode {
   private static pluginTypes: string[] = [
     'data.data.parser',
     'data.data.picker',
-    'data.schema.parser',
     'data.update.could',
     'data.delete.could',
   ]
@@ -259,6 +258,17 @@ export default class DataNode implements IDataNode {
       this.source= this.initialSource(source)
     }
 
+    // load the dataSchema of the root
+    this.rootSchema = await this.dataEngine.loadSchema(
+      this.source,
+      { engineId: this.uiNode.engineId },
+    )
+    // assign schema from the root
+    this.schema = await this.dataEngine.mapper.getDataSchema(
+      this.source,
+      true,
+    )
+
     // get the working mode of the layout
     let workingMode: IWorkingMode = { mode: 'new' }
     const controller = _.get(this.uiNode, ['controller'])
@@ -369,17 +379,6 @@ export default class DataNode implements IDataNode {
         }
       }
     }
-
-    // load the dataSchema of the root
-    this.rootSchema = await this.dataEngine.loadSchema(
-      this.source,
-      { engineId: this.uiNode.engineId },
-    )
-    // assign schema from the root
-    this.schema = await this.dataEngine.mapper.getDataSchema(
-      this.source,
-      true,
-    )
 
     // sync state to data pool
     const stateNode: IStateNode = _.get(this.uiNode, ['stateNode'])

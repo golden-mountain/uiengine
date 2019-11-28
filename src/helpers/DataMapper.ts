@@ -25,7 +25,7 @@ export class DataMapper implements IDataMapper {
 
   // the plugin types which can be used in DataMapper
   private static pluginTypes: string[] = [
-    'dataMapper.dataSchema.searchFromRoot'
+    'data.schema.parser'
   ]
   static setPluginTypes = (types: string[]) => {
     if (_.isArray(types)) {
@@ -116,7 +116,7 @@ export class DataMapper implements IDataMapper {
   ) {
     const dataSchemaMap = this.dataMap.dataSchema
 
-    let schema
+    let schema: any
     const schemaLineage = this.getSchemaLineage(source)
     if (_.isString(schemaLineage) && schemaLineage) {
       schema = dataSchemaMap[schemaLineage]
@@ -129,13 +129,21 @@ export class DataMapper implements IDataMapper {
 
         const { results } = this.pluginManager.syncExecutePlugins(
           this.id,
-          'dataMapper.dataSchema.searchFromRoot',
-          { schema: domainSchema, lineage: schemaLineage }
+          'data.schema.parser',
+          { domainSchema, lineage: schemaLineage }
         )
         if (_.isArray(results) && results.length) {
-          const lastResult = results[results.length - 1]
-          if (!_.isNil(lastResult.result)) {
-            schema = lastResult.result
+          results.forEach((resultItem) => {
+            const { result } = resultItem
+            if (_.isObject(result) && !_.isEmpty(result)) {
+              if (_.isNil(schema)) {
+                schema = _.assign({}, _.cloneDeep(result))
+              } else if (_.isObject(schema)) {
+                schema = _.assign(schema, _.cloneDeep(result))
+              }
+            }
+          })
+          if (!_.isNil(schema)) {
             dataSchemaMap[schemaLineage] = schema
           }
         }

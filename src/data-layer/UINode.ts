@@ -367,6 +367,7 @@ export class UINode implements IUINode {
             ['$dummy'],
             1,
           )
+          this.replaceChildToken($child, index)
         })
       } else if (_.isObject($children)) {
         $children.datasource = this.searchAndReplace(
@@ -376,6 +377,7 @@ export class UINode implements IUINode {
           ['$dummy'],
           1,
         )
+        this.replaceChildToken($children, index)
       }
     } else if (_.isArray(children) && children.length) {
       children.forEach((child: IUISchema|IUISchema[]) => {
@@ -388,6 +390,7 @@ export class UINode implements IUINode {
               ['$dummy'],
               1,
             )
+            this.replaceChildToken(item, index)
           })
         } else {
           child.datasource = this.searchAndReplace(
@@ -397,6 +400,7 @@ export class UINode implements IUINode {
             ['$dummy'],
             1,
           )
+          this.replaceChildToken(child, index)
         }
       })
     }

@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 import {
-  IDataNode,
+  IDataSchema,
   IPlugin,
   IPluginExecution,
   IPluginParam,
@@ -14,26 +14,20 @@ import {
  * @param dataNode
  */
 const execution: IPluginExecution = (param: IPluginParam) => {
-  const dataNode: IDataNode = _.get(param, 'dataNode')
-  if (_.isNil(dataNode)) {
-    return ''
+  const domainSchema: IDataSchema = _.get(param, 'domainSchema')
+  const lineage: string = _.get(param, 'lineage')
+
+  if (_.isObject(domainSchema) && _.isString(lineage)) {
+    return _.get(domainSchema, `definition.${lineage}`)
   }
-  const rootSchema = dataNode.rootSchema
-  let schemaPath = dataNode.source.schema || dataNode.source.source
-  if (schemaPath) {
-    let name = schemaPath.replace(':', '.')
-    const regex = /\[\d+\]/
-    name = name.replace(regex, '')
-    return _.get(rootSchema, `definition.${name}`)
-  } else {
-    return ''
-  }
+
+  return undefined
 }
 
 export const schemaParser: IPlugin = {
-  name: 'parse-schema',
+  name: 'schema-parser',
   categories: ['data.schema.parser'],
-  paramKeys: ['dataNode'],
+  paramKeys: ['domainSchema', 'lineage'],
   execution,
   priority: 0,
 }
