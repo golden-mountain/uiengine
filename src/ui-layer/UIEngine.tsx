@@ -61,7 +61,9 @@ export class UIEngine extends React.Component<
     activeNodeID: '',
     error: {},
     time: 0,
+    loading: false,
   }
+  updateTime?: number
 
   constructor(props: IUIEngineProps) {
     super(props)
@@ -92,6 +94,16 @@ export class UIEngine extends React.Component<
   }
 
   componentDidMount() {
+    if (!_.isNil(this.nodeController)) {
+      const messager = this.nodeController.messager
+      if (!_.isNil(messager)) {
+        messager.setStateFunc(
+          this.engineId,
+          setComponentState.bind(this)
+        )
+      }
+    }
+
     this.loadLayouts()
   }
 
@@ -106,22 +118,23 @@ export class UIEngine extends React.Component<
     }
   }
 
-  componentDidUpdate(prevProps: IUIEngineProps, prevState: IUIEngineStates) {
-    if (!_.isEqual(prevProps.layouts, this.props.layouts)) {
-      this.unloadLayouts()
-      this.loadLayouts()
+  shouldComponentUpdate(nextProps: IUIEngineProps, nextState: IUIEngineStates) {
+    const { layouts: nextLayouts } = nextProps
+    const { layouts } = this.props
+    const { loading } = this.state
+    if (!_.isEqual(nextLayouts, layouts)) {
+      if (loading === true) {
+        this.updateTime = new Date().getTime()
+      } else {
+        this.refresh()
+      }
     }
+    return true
   }
 
   loadLayouts() {
     if (!_.isNil(this.nodeController)) {
       const nodeController = this.nodeController
-      if (!_.isNil(nodeController.messager)) {
-        nodeController.messager.setStateFunc(
-          this.engineId,
-          setComponentState.bind(this)
-        )
-      }
 
       const { layouts, loadOptions = {} } = this.props
       const promises: Promise<IUINode>[] = []
@@ -166,6 +179,11 @@ export class UIEngine extends React.Component<
         })
       }
       if (promises.length) {
+        // there are new layouts loading and set update time
+        this.setState({ loading: true })
+        const currentTime = new Date().getTime()
+        this.updateTime = currentTime
+
         Promise.all(promises).then((rootNodes: IUINode[]) => {
           nodeController.activateEngine(
             this.engineId,
@@ -179,6 +197,11 @@ export class UIEngine extends React.Component<
               autoRefresh: false,
             }
           )
+
+          this.setState({ loading: false })
+          if (this.updateTime !== currentTime) {
+            this.refresh()
+          }
         })
       } else {
         nodeController.activateEngine(this.engineId)
@@ -195,6 +218,11 @@ export class UIEngine extends React.Component<
         })
       }
     }
+  }
+
+  refresh() {
+    this.unloadLayouts()
+    this.loadLayouts()
   }
 
   render() {
