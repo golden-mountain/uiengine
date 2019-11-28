@@ -109,13 +109,14 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
 
   const manager = ListenerManager.getInstance()
   let eventFuncs = manager.getStaticEventProps(eventConfigs.map((config: IEventConfig) => {
-    const { eventName, receiveParams, defaultParams, target, listener } = config
+    const { eventName, receiveParams, defaultParams, target, listener, ...rest } = config
     return {
       eventName: _.isString(eventName) ? eventName : 'unknownEvent',
       receiveParams: _.isArray(receiveParams) ? receiveParams : [],
       defaultParams: { ...(_.isObject(defaultParams) ? defaultParams : {}), uiNode },
       target: _.isString(target) ? target : uiNode.id,
       listener: _.isString(listener) ? listener : 'unknownListener',
+      ...rest
     }
   }))
   if (!_.isEmpty(eventFuncs)) {
