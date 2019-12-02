@@ -53,7 +53,7 @@ export class UINode implements IUINode {
     this.loadLayout(newSchema)
   }
   get schema() {
-    return _.cloneDeep(this.uiSchema)
+    return this.uiSchema
   }
   private loadQueue: number = 0
   private loadProcess: Promise<IUISchema|undefined> | undefined
@@ -500,7 +500,7 @@ export class UINode implements IUINode {
 
   async loadLayout(schema?: string | IUISchema) {
     // cache the schema which will be loaded, if not provide, use the current loaded schema as default
-    const schemaCache = _.isNil(schema) ? this.schema : _.cloneDeep(schema)
+    const schemaCache = _.isNil(schema) ? this.schema : schema
 
     // add to load queue
     this.loadQueue++
@@ -587,7 +587,7 @@ export class UINode implements IUINode {
           // cache the node instance in its layout
           Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
         }
-        this.uiSchema = _.cloneDeep(loadResult)
+        this.uiSchema = loadResult
       }
 
       this.loadQueue--
@@ -663,7 +663,7 @@ export class UINode implements IUINode {
           // cache the node instance in its layout
           Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
         }
-        this.uiSchema = _.cloneDeep(loadResult)
+        this.uiSchema = loadResult
       }
 
       this.loadQueue--
