@@ -383,11 +383,25 @@ export class UINode implements IUINode {
             ['$dummy'],
             1,
           )
+          $child.state = this.searchAndReplace(
+            $child.state,
+            '$',
+            `${index}`,
+            ['$dummy'],
+            1,
+          )
           this.replaceChildToken($child, index)
         })
       } else if (_.isObject($children)) {
         $children.datasource = this.searchAndReplace(
           $children.datasource,
+          '$',
+          `${index}`,
+          ['$dummy'],
+          1,
+        )
+        $children.state = this.searchAndReplace(
+          $children.state,
           '$',
           `${index}`,
           ['$dummy'],
@@ -406,11 +420,25 @@ export class UINode implements IUINode {
               ['$dummy'],
               1,
             )
+            item.state = this.searchAndReplace(
+              item.state,
+              '$',
+              `${index}`,
+              ['$dummy'],
+              1,
+            )
             this.replaceChildToken(item, index)
           })
         } else {
           child.datasource = this.searchAndReplace(
             child.datasource,
+            '$',
+            `${index}`,
+            ['$dummy'],
+            1,
+          )
+          child.state = this.searchAndReplace(
+            child.state,
             '$',
             `${index}`,
             ['$dummy'],
@@ -438,6 +466,13 @@ export class UINode implements IUINode {
                 ['$dummy'],
                 1,
               )
+              cloneSchema.state = this.searchAndReplace(
+                cloneSchema.state,
+                '$',
+                `${index}`,
+                ['$dummy'],
+                1,
+              )
             }
             this.replaceChildToken(cloneSchema, index)
             cloneSchema._index = index
@@ -449,6 +484,13 @@ export class UINode implements IUINode {
           if (_.isObject(cloneSchema.datasource)) {
             cloneSchema.datasource = this.searchAndReplace(
               cloneSchema.datasource,
+              '$',
+              `${index}`,
+              ['$dummy'],
+              1,
+            )
+            cloneSchema.state = this.searchAndReplace(
+              cloneSchema.state,
               '$',
               `${index}`,
               ['$dummy'],
