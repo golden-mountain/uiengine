@@ -30,7 +30,6 @@ import {
   IWorkflow,
   IWorkingMode,
 } from '../../typings'
-import { render } from 'enzyme'
 
 export class NodeController implements INodeController {
   private static instance: NodeController
@@ -126,12 +125,18 @@ export class NodeController implements INodeController {
       if (_.isString(layoutKey) && layoutKey) {
         nextActiveLayout = layoutKey
       } else if (_.isFunction(layoutKey)) {
-        nextActiveLayout = layoutKey(this.engineMap[nextActiveEngine])
+        const nextOne = layoutKey(this.engineMap[nextActiveEngine])
+        if (_.isString(nextOne) && nextOne) {
+          nextActiveLayout = nextOne
+        }
       }
       if (_.isBoolean(autoRefresh)) {
         needRefresh = autoRefresh
       } else if (_.isFunction(autoRefresh)) {
-        needRefresh = autoRefresh(nextActiveLayout, prevActiveLayout)
+        const needDo = autoRefresh(nextActiveLayout, prevActiveLayout)
+        if (_.isBoolean(needDo)) {
+          needRefresh = needDo
+        }
       }
       if (_.isFunction(onLayoutRefresh)) {
         onRefresh = onLayoutRefresh
@@ -191,7 +196,10 @@ export class NodeController implements INodeController {
     if (_.isString(layoutKey) && layoutKey) {
       nextActiveLayout = layoutKey
     } else if (_.isFunction(layoutKey)) {
-      nextActiveLayout = layoutKey(this.engineMap[prevActiveEngine])
+      const nextOne = layoutKey(this.engineMap[prevActiveEngine])
+      if (_.isString(nextOne) && nextOne) {
+        nextActiveLayout = nextOne
+      }
     }
 
     if (_.isString(nextActiveLayout) && nextActiveLayout) {
@@ -233,7 +241,10 @@ export class NodeController implements INodeController {
             if (_.isBoolean(autoRefresh)) {
               needRefresh = autoRefresh
             } else if (_.isFunction(autoRefresh)) {
-              needRefresh = autoRefresh(nextActiveLayout, prevActiveLayout)
+              const needDo = autoRefresh(nextActiveLayout, prevActiveLayout)
+              if (_.isBoolean(needRefresh)) {
+                needRefresh = needDo
+              }
             }
             if (_.isFunction(onLayoutRefresh)) {
               onRefresh = onLayoutRefresh
@@ -434,7 +445,7 @@ export class NodeController implements INodeController {
         // set the last layout of active engine as current active layout
         const loadedLayouts = this.engineMap[this.activeEngine]
         const lastLayout = _.findLast(loadedLayouts, (layout: string) => {
-          return layout !== targetLayout
+          return layout !== targetLayout && _.get(this.layoutMap[layout], 'visible', false)
         })
 
         if (lastLayout === undefined) {
@@ -483,33 +494,55 @@ export class NodeController implements INodeController {
     clearData?: boolean,
   ) {
     const targetLayout = this.getLayoutKey(layoutKey)
-    delete this.layoutMap[targetLayout]
+    const renderer = this.layoutMap[targetLayout]
 
-    _.forIn(this.engineMap, (layouts: string[], engineId: string) => {
-      _.remove(layouts, (layout: string) => {
-        return layout === targetLayout
-      })
-    })
+    if (!_.isNil(renderer)) {
+      delete this.layoutMap[targetLayout]
 
-    if (targetLayout === this.activeLayout) {
-      // activate the last layout of active engine
-      const activeEngine = this.getEngineId()
-      const loadedLayouts = this.engineMap[activeEngine]
-      const lastLayout = _.findLast(loadedLayouts, (layout: string) => {
-        return layout !== targetLayout
+      _.forIn(this.engineMap, (layouts: string[], engineId: string) => {
+        _.remove(layouts, (layout: string) => {
+          return layout === targetLayout
+        })
       })
-      if (lastLayout === undefined) {
-        this.activeLayout = ''
-      } else {
-        this.activeLayout = lastLayout
+
+      if (targetLayout === this.activeLayout) {
+        // activate the last layout of active engine
+        const loadedLayouts = this.engineMap[this.activeEngine]
+        const lastLayout = _.findLast(loadedLayouts, (layout: string) => {
+          return layout !== targetLayout && _.get(this.layoutMap[layout], 'visible', false)
+        })
+        if (lastLayout === undefined) {
+          this.activeLayout = ''
+        } else {
+          this.activeLayout = lastLayout
+        }
       }
-    }
 
-    // send message
-    this.messager.sendMessage(
-      this.activeEngine,
-      { layoutMap: this.layoutMap }
-    )
+      // clear data pool
+      if (clearData === true) {
+        const { uiNode } = renderer
+        const data = _.get(uiNode, ['dataNode', 'data'])
+        const datasource = _.get(uiNode.getSchema(), 'datasource')
+        if (!_.isNil(data) && !_.isNil(datasource)) {
+          const { source } = datasource
+          const dataPool = DataPool.getInstance()
+          dataPool.clear(source)
+        }
+      }
+
+      const parentNode = _.get(renderer, ['options', 'parentNode'])
+      if (!_.isNil(parentNode)) {
+        // must force update, since the data adjugement on uiNode side not precised
+        parentNode.sendMessage(true)
+      } else {
+        this.messager.sendMessage(
+          renderer.engineId,
+          { layoutMap: this.layoutMap }
+        )
+      }
+    } else {
+      return false
+    }
     return true
   }
 
@@ -525,14 +558,12 @@ export class NodeController implements INodeController {
     const targetLayout = this.getLayoutKey(layoutKey)
 
     let targetEngine: string = ''
-    _.forIn(this.engineMap, (layouts: string[], engineId: string) => {
-      if (layouts.includes(targetLayout)) {
-        targetEngine = engineId
-        return false
-      }
-    })
+    const renderer = this.layoutMap[targetLayout]
+    if (!_.isNil(renderer)) {
+      targetEngine = renderer.engineId
+    }
 
-    if (!_.isEmpty(targetEngine)) {
+    if (!_.isEmpty(targetLayout) && !_.isEmpty(targetEngine)) {
       const loadedLayouts = this.engineMap[targetEngine]
 
       _.remove(loadedLayouts, (layout: string) => {
@@ -628,6 +659,9 @@ export class NodeController implements INodeController {
           _.forEach(nodes, (node: IUINode) => {
             node.messager.sendMessage(node.id, info)
           })
+        } else {
+          const rootNode = renderer.uiNode
+          rootNode.messager.sendMessage(rootNode.id, info)
         }
       }
     })

@@ -505,17 +505,13 @@ export class ListenerManager implements TYPES.IListenerManager {
             // save listener config
             const listenerQueue = this.prepareListenerQueue(config)
             // save param config
-            const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : defaultParams
+            const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : {}
 
             props[eventName] = (...args: any[]) => {
               listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
                 const { listener } = listenerConfig
                 if (_.isFunction(listener)) {
-                  if (defaultConfig === undefined) {
-                    listener(...args)
-                  } else {
-                    listener(...args, defaultConfig)
-                  }
+                  listener(...args, defaultConfig)
                 }
               })
             }
@@ -578,13 +574,20 @@ export class ListenerManager implements TYPES.IListenerManager {
 
               if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
                 listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-                  const record = this.callEventListener(
-                    listenerConfig,
-                    receivedParam,
-                    eventRecord,
-                  )
-                  if (!_.isNil(record)) {
-                    eventRecord.records.push(record)
+                  const { simpleMode: listenerMode, listener } = listenerConfig
+                  if (listenerMode === true || _.isEqual(listenerMode, 'true')) {
+                    if (_.isFunction(listener)) {
+                      listener(...args, defaultConfig)
+                    }
+                  } else {
+                    const record = this.callEventListener(
+                      listenerConfig,
+                      receivedParam,
+                      eventRecord,
+                    )
+                    if (!_.isNil(record)) {
+                      eventRecord.records.push(record)
+                    }
                   }
                 })
               }
@@ -652,11 +655,7 @@ export class ListenerManager implements TYPES.IListenerManager {
           listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
             const { listener } = listenerConfig
             if (_.isFunction(listener)) {
-              if (defaultParams === undefined) {
-                listener(...args)
-              } else {
-                listener(...args, defaultParams)
-              }
+              listener(...args, defaultParams)
             }
           })
         } else {
@@ -706,13 +705,20 @@ export class ListenerManager implements TYPES.IListenerManager {
 
           if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
             listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-              const record = this.callEventListener(
-                listenerConfig,
-                receivedParam,
-                eventRecord,
-              )
-              if (!_.isNil(record)) {
-                eventRecord.records.push(record)
+              const { simpleMode: listenerMode, listener } = listenerConfig
+              if (listenerMode === true || _.isEqual(listenerMode, 'true')) {
+                if (_.isFunction(listener)) {
+                  listener(...args, defaultParams)
+                }
+              } else {
+                const record = this.callEventListener(
+                  listenerConfig,
+                  receivedParam,
+                  eventRecord,
+                )
+                if (!_.isNil(record)) {
+                  eventRecord.records.push(record)
+                }
               }
             })
           }

@@ -24,9 +24,9 @@ export interface IUINodeConfig {
 }
 
 export interface IUINode {
-  id: string
-  engineId?: string
-  layoutKey?: string
+  readonly id: string
+  readonly engineId?: string
+  readonly layoutKey?: string
 
   dataNode: IDataNode
   stateNode: IStateNode
@@ -47,7 +47,6 @@ export interface IUINode {
   stateInfo: IStateInfo
   isLiveChildren: boolean
 
-  parseBefore: (schema: IUISchema) => Promise<IUISchema>
   parse: () => Promise
 
   loadLayout: (schema?: string | IUISchema) => Promise<IUISchema>

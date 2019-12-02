@@ -35,8 +35,8 @@ import {
 
 export class UINode implements IUINode {
   readonly id: string
-  engineId?: string
-  layoutKey?: string
+  readonly engineId?: string
+  readonly layoutKey?: string
 
   dataNode: IDataNode
   stateNode: IStateNode
@@ -48,7 +48,16 @@ export class UINode implements IUINode {
   parent?: IUINode
   children?: IUINode[]
 
-  schema: IUISchema = {}
+  private uiSchema: IUISchema = {}
+  set schema(newSchema: IUISchema) {
+    this.loadLayout(newSchema)
+  }
+  get schema() {
+    return _.cloneDeep(this.uiSchema)
+  }
+  private loadQueue: number = 0
+  private loadProcess: Promise<IUISchema|undefined> | undefined
+
   props: IObject = {}
   layoutMap: {
     [layoutKey: string]: IUINodeRenderer
@@ -89,23 +98,6 @@ export class UINode implements IUINode {
     // initialize the node ID, the ID can't be changed after the construction
     this.id = _.uniqueId(`UINode-`)
 
-    // set the helpers which the node depends on
-    this.initialConfig(config)
-
-    // set UI schema
-    if (_.isObject(schema)) {
-      this.schema = schema
-
-      const { _id } = schema
-      if (_.isString(_id) && _id) {
-        this.id = _id
-      } else {
-        schema._id = this.id
-      }
-    } else {
-      this.schema._id = this.id
-    }
-
     // set the UIEngine and layout which this node belongs to
     if (_.isString(engineId) && engineId) {
       this.engineId = engineId
@@ -113,6 +105,24 @@ export class UINode implements IUINode {
     if (_.isString(layoutKey) && layoutKey) {
       this.layoutKey = layoutKey
     }
+
+    // prepare the uiSchema that will be loaded later
+    let uiSchema = this.uiSchema
+    // assign id by schema or set _id to schema
+    if (_.isObject(schema)) {
+      const { _id } = schema
+      if (_.isString(_id) && _id) {
+        this.id = _id
+      } else {
+        schema._id = this.id
+      }
+      uiSchema = schema
+    } else {
+      uiSchema._id = this.id
+    }
+
+    // set the helpers which the node depends on
+    this.initialConfig(config)
 
     // register the plugin types supported
     this.pluginManager.register(
@@ -130,29 +140,36 @@ export class UINode implements IUINode {
       this.parent = parent
     }
 
-    // initialize data node
-    const defaultSource = `$dummy.${this.id}`
-    let dataSource: IDataSource = { source: defaultSource }
-    const { datasource } = this.schema
-    if (_.isObject(datasource) && !_.isEmpty(datasource)) {
-      const { source } = datasource
-      if (!_.isString(source) || _.isEmpty(source)) {
-        datasource.source = defaultSource
-      }
-      dataSource = datasource
-    } else if (_.isString(datasource) && datasource) {
-      dataSource.source = datasource
-      this.schema.datasource = dataSource
-    } else {
-      this.schema.datasource = dataSource
+    // prepare dataSource for data node
+    const dataSource: IDataSource = {
+      source: `$dummy.${this.id}`,
     }
+    const { datasource: srcConfig } = uiSchema
+    if (_.isObject(srcConfig) && !_.isEmpty(srcConfig)) {
+      const { source } = srcConfig
+      if (!_.isString(source) || _.isEmpty(source)) {
+        srcConfig.source = dataSource.source
+      }
+      _.assign(dataSource, srcConfig)
+    } else if (_.isString(srcConfig) && srcConfig) {
+      dataSource.source = srcConfig
+      uiSchema.datasource = _.cloneDeep(dataSource)
+    } else {
+      uiSchema.datasource = _.cloneDeep(dataSource)
+    }
+
+    // initialize data node
     this.dataNode = new DataNode(this, dataSource, { request: this.request })
 
     // initialize state node
     this.stateNode = new StateNode(this)
+
+    // load the uiSchema
+    // Attention: only when the uiSchema is loaded, will it be set to the uiNode
+    this.uiSchema = uiSchema
   }
 
-  async parseBefore(schema: IUISchema) {
+  private async parseBefore(schema: IUISchema) {
     // exec ui.parser.before plugin
     try {
       const { results } = await this.pluginManager.executePlugins(
@@ -259,7 +276,6 @@ export class UINode implements IUINode {
       }
       this.children = childNodes
     }
-    this.schema = currentSchema
 
     // reload State
     this.stateNode = new StateNode(this)
@@ -479,41 +495,191 @@ export class UINode implements IUINode {
         }
       }
     }
-    return schema
+    return _.cloneDeep(schema)
   }
 
   async loadLayout(schema?: string | IUISchema) {
-    let targetSchema: IUISchema | undefined
-    if (_.isString(schema) && schema) {
-      targetSchema = await this.getRemoteSchema(schema)
-    } else if (_.isObject(schema)) {
-      targetSchema = schema
-    } else {
-      targetSchema = this.schema
-    }
+    // cache the schema which will be loaded, if not provide, use the current loaded schema as default
+    const schemaCache = _.isNil(schema) ? this.schema : _.cloneDeep(schema)
 
-    if (_.isObject(targetSchema)) {
-      const finalSchema = await this.analyzeSchema(targetSchema)
+    // add to load queue
+    this.loadQueue++
 
-      if (_.isString(this.layoutKey) && this.layoutKey) {
-        // cache the node instance in its layout
-        Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
+    if (_.isNil(this.loadProcess)) {
+      this.loadProcess = new Promise((resolve, reject) => {
+        if (_.isString(schemaCache) && schemaCache) {
+
+          this.getRemoteSchema(schemaCache)
+            .then((remoteSchema: IUISchema | undefined) => {
+              if (_.isObject(remoteSchema)) {
+                this.analyzeSchema(remoteSchema)
+                  .then((finalSchema: IUISchema) => {
+                    resolve(finalSchema)
+                  })
+                  .catch(() => {
+                    // error during the analyzation
+                    console.warn(`Error occurs when analyze schema for ${
+                      this.id
+                    }${
+                      this.layoutKey ? ` in ${this.layoutKey}` : ''
+                    }${
+                      this.engineId ? ` of ${this.engineId}` : ''
+                    }`)
+                    resolve(undefined)
+                  })
+              } else {
+                console.warn(`Can't get remote schema ${schemaCache} for ${
+                  this.id
+                }${
+                  this.layoutKey ? ` in ${this.layoutKey}` : ''
+                }${
+                  this.engineId ? ` of ${this.engineId}` : ''
+                }`)
+                resolve(undefined)
+              }
+            })
+            .catch(() => {
+              // error during the request
+              console.warn(`Error occurs when request remote schema for ${
+                this.id
+              }${
+                this.layoutKey ? ` in ${this.layoutKey}` : ''
+              }${
+                this.engineId ? ` of ${this.engineId}` : ''
+              }`)
+              resolve(undefined)
+            })
+
+        } else if (_.isObject(schemaCache)) {
+
+          this.analyzeSchema(schemaCache)
+            .then((finalSchema: IUISchema) => {
+              resolve(finalSchema)
+            })
+            .catch(() => {
+              // error during the analyzation
+              console.warn(`Error occurs when analyze schema for ${
+                this.id
+              }${
+                this.layoutKey ? ` in ${this.layoutKey}` : ''
+              }${
+                this.engineId ? ` of ${this.engineId}` : ''
+              }`)
+              resolve(undefined)
+            })
+
+        } else {
+          // invalid schema param
+          console.warn(`Can't load layout by invalid schema to ${
+            this.id
+          }${
+            this.layoutKey ? ` in ${this.layoutKey}` : ''
+          }${
+            this.engineId ? ` of ${this.engineId}` : ''
+          }`)
+          resolve(undefined)
+        }
+      })
+
+      const loadResult = await this.loadProcess
+      if (!_.isNil(loadResult)) {
+        if (_.isString(this.layoutKey) && this.layoutKey) {
+          // cache the node instance in its layout
+          Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
+        }
+        this.uiSchema = _.cloneDeep(loadResult)
       }
 
-      this.schema = finalSchema
-      return finalSchema
+      this.loadQueue--
+      if (this.loadQueue === 0) {
+        delete this.loadProcess
+      }
+
+      return loadResult || this.schema
     } else {
-      console.warn(`Can't load target layout to ${
-        this.id
-      }${
-        this.layoutKey ? ` in ${this.layoutKey}` : ''
-      }${
-        this.engineId ? ` of ${this.engineId}` : ''
-      }`)
-      return this.schema
+      this.loadProcess = this.loadProcess.then(() => {
+        // prepare the schema
+        if (_.isString(schemaCache) && schemaCache) {
+          return this.getRemoteSchema(schemaCache)
+            .then((schema) => {
+              if (_.isNil(schema)) {
+                console.warn(`Can't get remote schema ${schemaCache} for ${
+                  this.id
+                }${
+                  this.layoutKey ? ` in ${this.layoutKey}` : ''
+                }${
+                  this.engineId ? ` of ${this.engineId}` : ''
+                }`)
+              }
+              return schema
+            }, () => {
+              // error during the request
+              console.warn(`Error occurs when request remote schema for ${
+                this.id
+              }${
+                this.layoutKey ? ` in ${this.layoutKey}` : ''
+              }${
+                this.engineId ? ` of ${this.engineId}` : ''
+              }`)
+              return undefined
+            })
+        } else if (_.isObject(schemaCache)) {
+          return schemaCache
+        } else {
+          console.warn(`Can't load layout by invalid schema to ${
+            this.id
+          }${
+            this.layoutKey ? ` in ${this.layoutKey}` : ''
+          }${
+            this.engineId ? ` of ${this.engineId}` : ''
+          }`)
+          return undefined
+        }
+      }).then((schema: IUISchema | undefined) => {
+        // analyze the schema
+        if (_.isObject(schema)) {
+          return this.analyzeSchema(schema)
+            .then((finalSchema) => {
+              return finalSchema
+            }, () => {
+              // error during the analyzation
+              console.warn(`Error occurs when analyze schema for ${
+                this.id
+              }${
+                this.layoutKey ? ` in ${this.layoutKey}` : ''
+              }${
+                this.engineId ? ` of ${this.engineId}` : ''
+              }`)
+              return undefined
+            })
+        } else {
+          return undefined
+        }
+      })
+
+      const loadResult = await this.loadProcess
+      if (!_.isNil(loadResult)) {
+        if (_.isString(this.layoutKey) && this.layoutKey) {
+          // cache the node instance in its layout
+          Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
+        }
+        this.uiSchema = _.cloneDeep(loadResult)
+      }
+
+      this.loadQueue--
+      if (this.loadQueue === 0) {
+        delete this.loadProcess
+      }
+
+      return loadResult || this.schema
     }
   }
 
+  /**
+   * replace the layout of the node or its children
+   * @param newSchema
+   * @param route
+   */
   async replaceLayout(
     newSchema: string | IUISchema,
     route?: number[],
@@ -530,21 +696,47 @@ export class UINode implements IUINode {
     }
   }
 
+  /**
+   * refresh the layout of the node. When the node is still loading, the refresh won't work
+   */
   async refreshLayout() {
-    return await this.analyzeSchema(this.schema)
+    if (this.loadQueue === 0) {
+      return await this.loadLayout()
+    }
+    return {}
   }
 
+  private clearSchema() {
+    this.uiSchema = {}
+  }
+  private clearChildren() {
+    const children = this.children
+    if (_.isArray(children) && children.length) {
+      children.forEach((child: IUINode) => {
+        child.clearLayout()
+      })
+    }
+    delete this.children
+  }
+  private clearErrorInfo() {
+    this.errorInfo = {}
+  }
   clearLayout() {
     if (_.isString(this.layoutKey) && this.layoutKey) {
       Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
     }
     // this is not the rootNode of the layout
-    this.schema = {}
-    this.children = []
-    this.errorInfo = {}
+    this.clearErrorInfo()
+    this.clearChildren()
+    this.clearSchema()
     return this
   }
 
+  /**
+   * get the schema of the UINode, or the schema from one of its children
+   * @param route
+   * @returns the uiSchema copy
+   */
   getSchema(route?: number[]) {
     if (_.isArray(route) && route.length) {
       const path = route.map((value: number) => {

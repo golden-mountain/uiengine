@@ -203,6 +203,7 @@ export class UIEngine extends React.Component<
           }
         })
       } else {
+        nodeController.engineMap[this.engineId] = []
         nodeController.activateEngine(this.engineId)
       }
     }

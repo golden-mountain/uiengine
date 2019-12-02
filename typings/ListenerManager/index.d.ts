@@ -6,6 +6,7 @@ export interface IListenerConfig {
   debugList?: Array<string|IListenerDebugConfig>
   listener: IListener
   weight?: number
+  simpleMode?: boolean
   [anyKey: string]: any
 }
 
@@ -41,6 +42,7 @@ export interface IEventConfig {
   listener: string | IEventListenerConfig | Array<string|IEventListenerConfig>
   resultSolver?: IEventResultSolver
   simpleMode?: boolean
+  [anyKey: string]: any
 }
 
 export interface IEventDebugConfig {

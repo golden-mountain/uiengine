@@ -817,17 +817,17 @@ async function submitTarget(
     try {
       // send request
       if (submitMethod === 'post') {
-        const result = await engine.request.post(url, payload)
+        const result = await engine.request.post(url, payload, { prefixType: 'data' })
         if (_.has(result, 'data')) {
           targetRecord.response = _.get(result, 'data')
         }
       } else if (submitMethod === 'put') {
-        const result = await engine.request.put(url, payload)
+        const result = await engine.request.put(url, payload, { prefixType: 'data' })
         if (_.has(result, 'data')) {
           targetRecord.response = _.get(result, 'data')
         }
       } else if (submitMethod === 'delete') {
-        const result = await engine.request.delete(url)
+        const result = await engine.request.delete(url, { prefixType: 'data' })
         if (_.has(result, 'data')) {
           targetRecord.response = _.get(result, 'data')
         }
@@ -1022,17 +1022,17 @@ async function submitTarget(
       try {
         // send request
         if (submitMethod === 'post') {
-          const result = await engine.request.post(url, payload)
+          const result = await engine.request.post(url, payload, { prefixType: 'data' })
           if (_.has(result, 'data')) {
             _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
           }
         } else if (submitMethod === 'put') {
-          const result = await engine.request.put(url, payload)
+          const result = await engine.request.put(url, payload, { prefixType: 'data' })
           if (_.has(result, 'data')) {
             _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
           }
         } else if (submitMethod === 'delete') {
-          const result = await engine.request.delete(url)
+          const result = await engine.request.delete(url, { prefixType: 'data' })
           if (_.has(result, 'data')) {
             _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
           }
