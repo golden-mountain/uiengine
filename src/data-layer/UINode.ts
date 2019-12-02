@@ -512,6 +512,7 @@ export class UINode implements IUINode {
           this.getRemoteSchema(schemaCache)
             .then((remoteSchema: IUISchema | undefined) => {
               if (_.isObject(remoteSchema)) {
+                this.uiSchema = remoteSchema
                 this.analyzeSchema(remoteSchema)
                   .then((finalSchema: IUISchema) => {
                     resolve(finalSchema)
@@ -552,6 +553,7 @@ export class UINode implements IUINode {
 
         } else if (_.isObject(schemaCache)) {
 
+          this.uiSchema = schemaCache
           this.analyzeSchema(schemaCache)
             .then((finalSchema: IUISchema) => {
               resolve(finalSchema)
@@ -638,6 +640,7 @@ export class UINode implements IUINode {
       }).then((schema: IUISchema | undefined) => {
         // analyze the schema
         if (_.isObject(schema)) {
+          this.uiSchema = schema
           return this.analyzeSchema(schema)
             .then((finalSchema) => {
               return finalSchema
