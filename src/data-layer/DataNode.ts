@@ -149,7 +149,7 @@ export default class DataNode implements IDataNode {
     }
   }
 
-  set errorInfo(error: IErrorInfo) {
+  set errorInfo(error: IErrorInfo|undefined) {
     if (this.dataPool instanceof DataPool) {
       this.dataPool.setInfo(
         this.source.source,
@@ -428,7 +428,7 @@ export default class DataNode implements IDataNode {
         }
       })
       if (hasError === false) {
-        delete this.errorInfo
+        this.errorInfo = undefined
       }
     }
 
