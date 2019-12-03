@@ -12,10 +12,10 @@ import {
 
 /**
  * parse the endpoint by working mode
- * @param
+ * @directParam
  */
-const execution: IPluginExecution = async (param: IPluginParam) => {
-  const RP: any = _.get(param, 'RP')
+const execution: IPluginExecution = async (directParam: IPluginParam) => {
+  const RP: any = _.get(directParam, 'RP')
 
   if (_.isObject(RP)) {
     const { layoutKey, domainSource, endpoint } = RP as any
@@ -27,11 +27,15 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
       if (_.isObject(wMode)) {
         const { operationModes, options } = wMode
 
-        let param = {}
+        let urlParamMap = {}
+        let queryParamMap = {}
         if (_.isObject(options)) {
-          const { urlParam } = options
+          const { urlParam, queryParam } = options
           if (_.isObject(urlParam)) {
-            _.assign(param, urlParam)
+            _.assign(urlParamMap, urlParam)
+          }
+          if (_.isObject(queryParam)) {
+            _.assign(queryParamMap, queryParam)
           }
         }
         if (_.isArray(operationModes)) {
@@ -39,9 +43,12 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
             if (_.isObject(config)) {
               const { source, options: subOptions } = config
               if (source === domainSource.source && _.isObject(subOptions)) {
-                const { urlParam } = subOptions
+                const { urlParam, queryParam } = subOptions
                 if (_.isObject(urlParam)) {
-                  _.assign(param, urlParam)
+                  _.assign(urlParamMap, urlParam)
+                }
+                if (_.isObject(queryParam)) {
+                  _.assign(queryParamMap, queryParam)
                 }
               }
             }
@@ -49,22 +56,26 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
         } else if (_.isObject(operationModes)) {
           const { source, options: subOptions } = operationModes
           if (source === domainSource.source && _.isObject(subOptions)) {
-            const { urlParam } = subOptions
+            const { urlParam, queryParam } = subOptions
             if (_.isObject(urlParam)) {
-              _.assign(param, urlParam)
+              _.assign(urlParamMap, urlParam)
+            }
+            if (_.isObject(queryParam)) {
+              _.assign(queryParamMap, queryParam)
             }
           }
         }
 
-        const url = replaceParam(endpoint, param)
+        const url = replaceParam(endpoint, urlParamMap)
         if (url !== endpoint) {
           _.set(RP, 'endpoint', url)
+        }
+        if (!_.isEmpty(queryParamMap)) {
+          _.set(RP, ['requestConfig', 'params'], queryParamMap)
         }
       }
     }
   }
-
-
 
   return true
 }

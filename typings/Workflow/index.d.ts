@@ -20,8 +20,9 @@ export interface IWorkingMode {
   mode: 'new' | 'edit' | 'view' | 'customize'
   operationModes?: IOperationMode | IOperationMode[]
   options?: {
-    urlParam?: IObject
     envParam?: IObject
+    queryParam?: IObject
+    urlParam?: IObject
     submitMethod?: string
     [otherKey: string]: any
   }
@@ -35,8 +36,9 @@ export interface IOperationMode {
   mode: 'create' | 'delete' | 'update' | 'view'
   source: string
   options?: {
-    urlParam?: IObject
     envParam?: IObject
+    queryParam?: IObject
+    urlParam?: IObject
     submitMethod?: string
     [otherKey: string]: any
   }
