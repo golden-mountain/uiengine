@@ -1,2 +1,2 @@
-export * from "./submit";
 export * from "./validation";
+export * from "./parseEndpoint";

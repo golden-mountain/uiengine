@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import _ from "lodash";
 import { BrowserRouter } from "react-router-dom";
 import { PageHeader, Button, Menu } from "antd";
@@ -9,12 +9,14 @@ import * as plugins from "./plugins";
 import * as listeners from "./listeners";
 import { requestConfig, widgetConfig } from "./config";
 import {
+  Request,
   UIEngineRegister,
   UIEngine,
   submitToAPI,
   NodeController
 } from "uiengine";
 import "./App.css";
+import { useMemo } from "react";
 
 UIEngineRegister.registerComponents(components);
 UIEngineRegister.registerPlugins(plugins);
@@ -22,8 +24,31 @@ UIEngineRegister.registerListeners(listeners);
 
 const App: React.FC = () => {
   const [current, setCurrent] = useState();
+  useEffect(
+    () => {
+      const controller = NodeController.getInstance()
+      const num = controller.request.injectInterceptor('request', (config: any) => {
+        const token = window.sessionStorage.getItem('token')
+        if (token) {
+          if (config.headers) {
+            config.headers['Authorization'] = `A10 ${token}`
+          } else {
+            config.headers = { Authorization: `A10 ${token}` }
+          }
+        }
+        return config
+      })
 
-  let loginLayout = "schema/ui/login.json";
+      return () => {
+        if (num) {
+          controller.request.ejectInterceptor('request', num)
+        }
+      }
+    },
+    []
+  )
+
+  let loginLayout = "login.json";
 
   const handleClick = (e: any) => {
     setCurrent(e.key);
@@ -39,7 +64,14 @@ const App: React.FC = () => {
       onOk: handleOK,
       onCancel: handleCancel
     };
-    nodeController.workflow.activeLayout(loginLayout, loadOptions);
+    nodeController.workflow.addLayout(
+      'app',
+      loginLayout,
+      {
+        schema: loginLayout,
+        loadOptions,
+      }
+    );
   };
 
   const headers: any = requestConfig.headers;
@@ -47,46 +79,28 @@ const App: React.FC = () => {
     // const uiNode = controller.getUINode(loginLayout);
     const result = submitToAPI([{ source: "credentials" }]);
     result.then((res: any) => {
-      const token = _.get(res[0], "credentials.authresponse.signature");
+      const token = _.get(res[0], "authresponse.signature");
 
       if (token) {
         sessionStorage.setItem("token", token);
-        headers["Authorization"] = `A10 ${token}`;
       }
 
       console.log(sessionStorage.getItem("token"), " token fetched");
       const nodeController = NodeController.getInstance();
-      nodeController.hideUINode(loginLayout);
+      nodeController.hideLayout(loginLayout);
     });
   };
 
   const handleCancel = () => {
     const nodeController = NodeController.getInstance();
-    nodeController.hideUINode(loginLayout);
+    nodeController.hideLayout(loginLayout);
   };
 
   const token = sessionStorage.getItem("token");
   if (token) {
     headers["Authorization"] = `A10 ${token}`;
   }
-  const schema = "schema/ui/app.json";
-  // const schema = {
-  //   component: "antd:Layout",
-  //   children: [
-  //     {
-  //       component: "antd:Layout.Content",
-  //       children: [
-  //         {
-  //           component: "antd:Col",
-  //           _id: "node-63",
-  //           datasource: "$dummy.node-63"
-  //         }
-  //       ],
-  //       _id: "node-62",
-  //       datasource: "$dummy.node-113"
-  //     }
-  //   ]
-  // };
+  const schema = "app.json";
   return (
     <BrowserRouter>
       <PageHeader
@@ -112,7 +126,12 @@ const App: React.FC = () => {
         </Menu.Item>
       </Menu>
 
-      <UIEngine layouts={[schema]} config={{ requestConfig, widgetConfig }} />
+      <UIEngine
+        id={'app'}
+        layouts={[schema]}
+        // layouts={[]}
+        config={{ requestConfig, widgetConfig }}
+      />
     </BrowserRouter>
   );
 };

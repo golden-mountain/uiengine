@@ -712,7 +712,7 @@ async function submitTarget(
       }
     }
     const controller = NodeController.getInstance()
-    const layoutName = `schema/ui/${_.trim(
+    const layoutName = `${_.trim(
       schemaStr.replace(':', '.'),
       '.'
     )}.json`
@@ -726,10 +726,10 @@ async function submitTarget(
     // replace the url param
     const status = dataPool.getInfo(sourceStr, 'status') || 'create'
     const engine = DataEngine.getInstance()
-    const schema = await engine.mapper.getSchema({
-      source: sourceStr,
-      schema: schemaStr
-    })
+    const schema = await engine.mapper.getDataSchema(
+      { source: sourceStr, schema: schemaStr },
+      true,
+    )
     let url: string = ''
     if (_.isObject(schema)) {
       const { endpoints } = schema as any
@@ -817,17 +817,17 @@ async function submitTarget(
     try {
       // send request
       if (submitMethod === 'post') {
-        const result = await engine.request.post(url, payload)
+        const result = await engine.request.post(url, payload, { prefixType: 'data' })
         if (_.has(result, 'data')) {
           targetRecord.response = _.get(result, 'data')
         }
       } else if (submitMethod === 'put') {
-        const result = await engine.request.put(url, payload)
+        const result = await engine.request.put(url, payload, { prefixType: 'data' })
         if (_.has(result, 'data')) {
           targetRecord.response = _.get(result, 'data')
         }
       } else if (submitMethod === 'delete') {
-        const result = await engine.request.delete(url)
+        const result = await engine.request.delete(url, { prefixType: 'data' })
         if (_.has(result, 'data')) {
           targetRecord.response = _.get(result, 'data')
         }
@@ -916,7 +916,7 @@ async function submitTarget(
         }
       }
       const controller = NodeController.getInstance()
-      const layoutName = `schema/ui/${_.trim(
+      const layoutName = `${_.trim(
         schemaStr.replace(':', '.'),
         '.'
       )}.json`
@@ -931,10 +931,10 @@ async function submitTarget(
       let status =
         dataPool.getInfo(sourceStr + `[${index}]`, 'status') || 'create'
       const engine = DataEngine.getInstance()
-      const schema = await engine.mapper.getSchema({
-        source: sourceStr,
-        schema: schemaStr
-      })
+      const schema = await engine.mapper.getDataSchema(
+        { source: sourceStr, schema: schemaStr },
+        true,
+      )
       let url: string = ''
       if (_.isObject(schema)) {
         const { endpoints } = schema as any
@@ -1022,17 +1022,17 @@ async function submitTarget(
       try {
         // send request
         if (submitMethod === 'post') {
-          const result = await engine.request.post(url, payload)
+          const result = await engine.request.post(url, payload, { prefixType: 'data' })
           if (_.has(result, 'data')) {
             _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
           }
         } else if (submitMethod === 'put') {
-          const result = await engine.request.put(url, payload)
+          const result = await engine.request.put(url, payload, { prefixType: 'data' })
           if (_.has(result, 'data')) {
             _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
           }
         } else if (submitMethod === 'delete') {
-          const result = await engine.request.delete(url)
+          const result = await engine.request.delete(url, { prefixType: 'data' })
           if (_.has(result, 'data')) {
             _.set(targetRecord, `response.${index}`, _.get(result, 'data'))
           }

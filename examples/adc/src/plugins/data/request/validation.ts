@@ -4,6 +4,7 @@ import { validateAll } from 'uiengine'
 
 import {
   IDataEngine,
+  IDataSource,
   IPlugin,
   IPluginExecution,
   IPluginParam,
@@ -15,6 +16,9 @@ import {
  */
 const execution: IPluginExecution = async (param: IPluginParam) => {
   const dataEngine: IDataEngine = _.get(param, 'dataEngine')
+  const dataSource: IDataSource = _.get(param, 'source')
+  const RP: any = _.get(param, 'RP')
+
   // validation
   let errors: any = []
   const validate = async (target: string) => {
@@ -28,8 +32,8 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
     }
   }
 
-  if (dataEngine.source !== undefined) {
-    await validate(dataEngine.source.source)
+  if (dataSource !== undefined) {
+    await validate(dataSource.source)
   }
 
   if (errors.length) {
@@ -44,7 +48,7 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
 export const validation: IPlugin = {
   name: 'validation',
   categories: ['data.request.could'],
-  paramKeys: ['dataEngine'],
+  paramKeys: ['dataEngine', 'source', 'RP'],
   execution,
   weight: 100,
 }

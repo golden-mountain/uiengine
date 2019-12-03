@@ -4,26 +4,29 @@ import _ from "lodash";
 import { PluginManager, getComponent, setComponentState, Cache } from "..";
 import { renderNodes } from ".";
 import {
-  IComponentWrapper,
-  IComponentState,
+  IComponentWrapperProps,
+  IComponentWrapperState,
+  IWrappedComponentProps,
   IPluginManager,
   IPluginExecuteOption,
-  IComponentWrapperProps
+  IUINode,
 } from "../../typings";
 
-const DefaultWrapper: React.FC = (props: any) => <>{props.children || null}</>;
+const DefaultWrapper: React.FC = function(props: any) {
+  return <>{props.children || null}</>
+}
 
 export class ComponentWrapper extends React.Component<
-  IComponentWrapper,
-  IComponentState
+  IComponentWrapperProps,
+  IComponentWrapperState
 > {
   id: string;
   pluginManager: IPluginManager;
 
-  constructor(props: IComponentWrapper) {
+  constructor(props: IComponentWrapperProps) {
     super(props);
     const { uiNode } = props;
-    const initialState: IComponentState = {
+    const initialState: IComponentWrapperState = {
       state: uiNode.stateNode.state,
       data: uiNode.dataNode.data
     };
@@ -53,19 +56,25 @@ export class ComponentWrapper extends React.Component<
 
   render() {
     const { uiNode, config, ...rest } = this.props;
+
     if (
       !_.get(this.state, "state.visible", true) &&
       !_.get(config, "ideMode", false)
     ) {
       return null;
     }
-    // console.log(_.keys(uiNode.nodes), "will render on component side");
-    if (uiNode.schema) {
-      // render logic
-      const componentLine = _.get(uiNode.schema, "component");
-      let WrappedComponent;
 
-      WrappedComponent = getComponent(componentLine);
+    if (uiNode.schema) {
+      let WrappedComponent: React.ElementType | undefined;
+
+      const componentLine = _.get(uiNode.schema, "component");
+      if (_.isString(componentLine)) {
+        WrappedComponent = getComponent(componentLine);
+      } else if (!_.isNil(componentLine)) {
+        WrappedComponent = componentLine
+      } else {
+        WrappedComponent = DefaultWrapper
+      }
       if (componentLine && !WrappedComponent) {
         console.warn(
           `Component ${componentLine} has no correspond Component registered`
@@ -73,16 +82,38 @@ export class ComponentWrapper extends React.Component<
       }
 
       // map children as components
-      let childrenObjects = uiNode.children.map((child: any, key: any) => {
-        const props = { config, ...rest, uiNode: child, key: child.id || key };
-        return <ComponentWrapper {...props} />;
+      let childrenObjects = (uiNode.children || []).map((child: IUINode, index: number) => {
+        const childProps = {
+          uiNode: child,
+          config,
+          key: child.id || `${index}`,
+        };
+        if (_.isObject(child.schema)) {
+          const { inheritProps } = child.schema
+          if (_.isNil(inheritProps)) {
+            _.assign(childProps, rest)
+          } else if (_.isBoolean(inheritProps)) {
+            if (inheritProps) {
+              _.assign(childProps, rest)
+            }
+          } else if (_.isArray(inheritProps)) {
+            const inherited = {}
+            inheritProps.forEach((propKey: string) => {
+              if (_.isString(propKey) && propKey) {
+                inherited[propKey] = rest[propKey]
+              }
+            })
+            _.assign(childProps, inherited)
+          }
+        }
+        return <ComponentWrapper {...childProps} />;
       });
 
       if (WrappedComponent) {
         try {
           // TO FIX, when add and delete row, the state did not update in time using setState on messager
           // console.log(uiNode.id, this.state, "<<<<<<<< rendering");
-          let props: IComponentWrapperProps = {
+          let props: IWrappedComponentProps = {
             ...rest,
             ...uiNode.props,
             key: `key-of-child-${uiNode.id}`,
@@ -123,7 +154,7 @@ export class ComponentWrapper extends React.Component<
               ) : (
                 <WrappedComponent {...props} />
               )}
-              {renderNodes(uiNode.nodes)}
+              {renderNodes(uiNode.layoutMap)}
             </HOCWrapper>
           );
         } catch (e) {

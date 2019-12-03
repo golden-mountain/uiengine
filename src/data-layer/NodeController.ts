@@ -1,248 +1,672 @@
-import _ from "lodash";
+import _ from 'lodash'
 
+import { UINode } from '../data-layer'
 import {
-  IUINode,
-  IMessager,
-  INodeController,
-  INodeProps,
-  ILayoutSchema,
-  IRequestConfig,
-  IErrorInfo,
-  IWorkflow,
-  IUINodeRenderer,
-  IRequest,
-  ILoadOptions,
-  IPluginManager,
-  IWorkingMode
-} from "../../typings";
-import { UINode } from "../data-layer";
-import {
+  DataPool,
   Messager,
+  PluginManager,
   Request,
   Workflow,
-  PluginManager,
-  DataPool
-} from "../helpers";
-import { searchNodes } from "../helpers";
+} from '../helpers'
+import {
+  searchNodes,
+} from '../helpers/utils'
 
-export default class NodeController implements INodeController {
-  static instance: INodeController;
+import {
+  IErrorInfo,
+  ILoadOptions,
+  IRequest,
+  IRequestConfig,
+  IMessager,
+  INodeController,
+  IActivateEngineOption,
+  IActivateLayoutOption,
+  INodeProps,
+  IObject,
+  IPluginManager,
+  IUINode,
+  IUINodeRenderer,
+  IUISchema,
+  IWorkflow,
+  IWorkingMode,
+} from '../../typings'
+
+export class NodeController implements INodeController {
+  private static instance: NodeController
   static getInstance = () => {
-    if (!NodeController.instance) {
-      NodeController.instance = new NodeController();
+    if (_.isNil(NodeController.instance)) {
+      NodeController.instance = new NodeController()
     }
-    return NodeController.instance as NodeController;
-  };
-  id: string
-  pluginManager: IPluginManager
-  // layout path
-  errorInfo: IErrorInfo = {};
-  // layouts: object = {};
-  nodes: {
-    [name: string]: IUINodeRenderer;
-  } = {};
-  messager: IMessager = Messager.getInstance();
-  requestConfig: IRequestConfig = {};
-  activeLayout: string = "";
-  layouts: Array<string> = [];
-  workflow: IWorkflow;
-  engineId: string = _.uniqueId("engine-");
-  request: IRequest = Request.getInstance();
+    return NodeController.instance
+  }
+
+  // the plugin types which can be used in NodeController
+  private static pluginTypes: string[] = [
+    'data.commit.workflow.could',
+  ]
+  static setPluginTypes = (types: string[]) => {
+    if (_.isArray(types)) {
+      NodeController.pluginTypes = types.map((type: string) => {
+        if (_.isString(type) && type) {
+          return type
+        } else {
+          return undefined
+        }
+      }).filter((type?: string) => {
+        return _.isString(type)
+      }) as string[]
+    }
+  }
+
+  id: string = _.uniqueId('NodeController-')
+  messager: IMessager = Messager.getInstance()
+  pluginManager: IPluginManager = PluginManager.getInstance()
+  request: IRequest = Request.getInstance()
+  workflow: IWorkflow = Workflow.getInstance()
+
+  activeEngine: string = ''
+  activeLayout: string = ''
+  errorInfo: IErrorInfo = {}
+  engineMap: {
+    [engineId: string]: string[]
+  } = {}
+  layoutMap: {
+    [layoutKey: string]: IUINodeRenderer
+  } = {}
 
   constructor() {
-    this.workflow = Workflow.getInstance();
-    this.workflow.setNodeController(this);
+    if (!_.isNil(this.workflow)) {
+      this.workflow.setController(this)
+    }
 
-    this.id = _.uniqueId('NodeController-')
-    this.pluginManager = PluginManager.getInstance()
-    this.pluginManager.register(
-      this.id,
-      {
-        categories: ['data.commit.workflow.could'],
-      }
-    )
+    if (!_.isNil(this.pluginManager)) {
+      this.pluginManager.register(
+        this.id,
+        { categories: NodeController.pluginTypes },
+      )
+    }
   }
 
-  activeEngine(engineId: string) {
-    this.engineId = engineId;
+  private getEngineId(engineId?: string) {
+    let targetEngine: string = this.activeEngine
+    if (_.isString(engineId) && engineId) {
+      targetEngine = engineId
+    }
+    return targetEngine
   }
-
-  setRequestConfig(requestConfig: IRequestConfig) {
-    this.requestConfig = requestConfig;
-    this.request.setConfig(this.requestConfig);
+  private getLayoutKey(layoutKey?: string) {
+    let targetLayout: string = this.activeLayout
+    if (_.isString(layoutKey) && layoutKey) {
+      targetLayout = layoutKey
+    }
+    return targetLayout
   }
 
   /**
-   * Load a layout from remote or local
-   * @param layout ILayoutSchema|string path of layout or loaded layout
+   * activate the target UIEngine and its layout(if provided)
+   * @param engineId the target UIEngine. If not provided, use current active UIEngine as default
+   * @param options the options of the activation
+   * @returns true when activated the UIEngine, false when not
    */
-  async loadUINode(
-    layout: ILayoutSchema | string,
-    id?: string,
-    options?: ILoadOptions,
-    updateNodes: boolean = true
+  activateEngine(engineId?: string, options?: IActivateEngineOption) {
+    const prevActiveEngine = this.activeEngine
+    const prevActiveLayout = this.activeLayout
+
+    let nextActiveEngine: string = prevActiveEngine
+    let nextActiveLayout: string = ''
+    let needRefresh: boolean = false
+    let onRefresh: (rootNode: IUINode) => void = _.noop
+
+    if (_.isString(engineId) && engineId) {
+      nextActiveEngine = engineId
+    }
+    if (_.isObject(options)) {
+      const { layoutKey, autoRefresh, onLayoutRefresh } = options
+      if (_.isString(layoutKey) && layoutKey) {
+        nextActiveLayout = layoutKey
+      } else if (_.isFunction(layoutKey)) {
+        const nextOne = layoutKey(this.engineMap[nextActiveEngine])
+        if (_.isString(nextOne) && nextOne) {
+          nextActiveLayout = nextOne
+        }
+      }
+      if (_.isBoolean(autoRefresh)) {
+        needRefresh = autoRefresh
+      } else if (_.isFunction(autoRefresh)) {
+        const needDo = autoRefresh(nextActiveLayout, prevActiveLayout)
+        if (_.isBoolean(needDo)) {
+          needRefresh = needDo
+        }
+      }
+      if (_.isFunction(onLayoutRefresh)) {
+        onRefresh = onLayoutRefresh
+      }
+    }
+
+    const loadedLayouts = this.engineMap[nextActiveEngine]
+    if (_.isNil(loadedLayouts)) {
+      // the target UIEngine hasn't loaded
+      console.warn(`The UIEngine '${nextActiveEngine}' hasn't loaded, so can't activate yet.`)
+      return false
+    } else {
+      // activate UIEngine
+      this.activeEngine = nextActiveEngine
+
+      if (_.isString(nextActiveLayout) && nextActiveLayout) {
+        const hasLoaded = loadedLayouts.some((layout: string) => {
+          return layout === nextActiveLayout
+        })
+        const renderer = this.layoutMap[nextActiveLayout]
+        if (hasLoaded && !_.isNil(renderer)) {
+          // activate layout
+          this.activeLayout = nextActiveLayout
+          renderer.visible = true
+          // refresh the layout
+          if (needRefresh) {
+            this.loadLayout(this.activeEngine, this.activeLayout)
+              .then(onRefresh)
+          }
+        } else {
+          // the selected layout hasn't loaded
+          console.warn(`The layout '${nextActiveLayout}' hasn't loaded in '${nextActiveEngine}', so can't activate.`)
+          this.activeLayout = ''
+        }
+      } else {
+        this.activeLayout = ''
+      }
+    }
+    return true
+  }
+
+  /**
+   * activate the target layout and its UIEngine
+   * @param layoutKey the key of the target layout, or a callback
+   * which receives the layouts of active engine to decide the target
+   * @param options the options of the activation
+   * @returns true when activated the layout, false when not
+   */
+  activateLayout(
+    layoutKey?: string | ((layoutsInActiveEngine?: string[]) => string),
+    options?: IActivateLayoutOption,
   ) {
-    // get a unique id
-    let rootName = "default";
-    if (id) {
-      rootName = id;
-    } else {
-      if (_.isObject(layout)) {
-        rootName = _.get(layout, "id", "default");
+    const prevActiveEngine = this.activeEngine
+    const prevActiveLayout = this.activeLayout
+
+    let nextActiveLayout: string = ''
+    if (_.isString(layoutKey) && layoutKey) {
+      nextActiveLayout = layoutKey
+    } else if (_.isFunction(layoutKey)) {
+      const nextOne = layoutKey(this.engineMap[prevActiveEngine])
+      if (_.isString(nextOne) && nextOne) {
+        nextActiveLayout = nextOne
+      }
+    }
+
+    if (_.isString(nextActiveLayout) && nextActiveLayout) {
+      const renderer = this.layoutMap[nextActiveLayout]
+      if (_.isNil(renderer)) {
+        // the selected layout hasn't loaded
+        console.warn(`The layout '${nextActiveLayout}' hasn't loaded, so can't activate.`)
+        return false
       } else {
-        rootName = layout;
-      }
-    }
+        const nextActiveEngine = renderer.engineId
+        if (
+          _.isString(nextActiveEngine) &&
+          !_.isNil(this.engineMap[nextActiveEngine])
+        ) {
+          if (_.isObject(options)) {
+            const { beforeEngineExchange, beforeLayoutExchange } = options
+            if (_.isFunction(beforeEngineExchange)) {
+              const shouldExchange = beforeEngineExchange(nextActiveEngine, prevActiveEngine)
+              if (shouldExchange === false) {
+                return false
+              }
+            }
+            if (_.isFunction(beforeLayoutExchange)) {
+              const shouldExchange = beforeLayoutExchange(nextActiveLayout, prevActiveLayout)
+              if (shouldExchange === false) {
+                return false
+              }
+            }
+          }
 
-    // use cached nodes
-    let uiNode: IUINode = _.get(this.nodes[rootName], "uiNode");
+          this.activeEngine = nextActiveEngine
+          this.activeLayout = nextActiveLayout
+          renderer.visible = true
 
-    const workingMode = this.getWorkingMode(rootName);
-    if (!uiNode) {
-      // default we load all default plugins
-      uiNode = new UINode({}, this.request, rootName);
-      try {
-        await uiNode.loadLayout(layout, workingMode);
-      } catch (e) {
-        console.error(e.message);
+          let needRefresh: boolean = false
+          let onRefresh: ((rootNode: IUINode) => void) = _.noop
+          if (_.isObject(options)) {
+            const { autoRefresh, onLayoutRefresh } = options
+            if (_.isBoolean(autoRefresh)) {
+              needRefresh = autoRefresh
+            } else if (_.isFunction(autoRefresh)) {
+              const needDo = autoRefresh(nextActiveLayout, prevActiveLayout)
+              if (_.isBoolean(needRefresh)) {
+                needRefresh = needDo
+              }
+            }
+            if (_.isFunction(onLayoutRefresh)) {
+              onRefresh = onLayoutRefresh
+            }
+          }
+          // refresh the layout
+          if (needRefresh) {
+            this.loadLayout(this.activeEngine, this.activeLayout)
+              .then(onRefresh)
+          }
+
+        } else {
+          console.warn('No valid engine that the layout belongs to, so can not activate.')
+          return false
+        }
       }
     } else {
-      await uiNode.updateLayout(workingMode);
+      console.warn('No valid layout to activate.')
+      return false
     }
+    return true
+  }
 
-    const rendererOptions = _.merge(this.nodes[rootName], {
-      uiNode,
-      visible: true,
-      options,
-      engineId: this.engineId
-    });
-    this.nodes[rootName] = rendererOptions;
+  /**
+   * set the config to Request
+   * @param requestConfig the config object
+   * @param id the id of the config, if not provide, the config is global
+   */
+  setRequestConfig(requestConfig: IRequestConfig, id?: string) {
+    if (_.isString(id) && id) {
+      this.request.setConfig(requestConfig, { id })
+    } else {
+      this.request.setConfig(requestConfig)
+    }
+  }
 
-    // add layout stack
-    this.pushLayout(rootName);
-    this.activeLayout = rootName;
+  /**
+   * get the config from Request
+   * @param id the id of the config, if not provide or not find, get the global config
+   * @param devMode if true, get the config for develop, if false, get the one for product
+   */
+  getRequestConfig(id?: string, devMode?: boolean) {
+    if (_.isString(id) && id) {
+      return this.request.getConfig({ id, devMode })
+    } else {
+      return this.request.getConfig({ devMode })
+    }
+  }
 
-    // update parent node
-    const parentNode = _.get(options, "parentNode");
-    if (parentNode) {
-      const nodesOfParentNode = _.get(parentNode.nodes, `${rootName}.uiNode`);
-      if (nodesOfParentNode !== uiNode) {
-        parentNode.nodes[rootName] = rendererOptions;
+  /**
+   * set the working mode of the layout
+   * @param workingMode the config object
+   * @param layoutKey the layout of this config, if not provide, set it to current active layout
+   */
+  setWorkingMode(workingMode: IWorkingMode, layoutKey?: string) {
+    const targetLayout = this.getLayoutKey(layoutKey)
+
+    if (_.isString(targetLayout) && targetLayout) {
+      if (_.isNil(this.layoutMap[targetLayout])) {
+        console.warn(`The layout '${targetLayout}' hasn't loaded yet, so can't set its working mode`)
+        return false
       }
-    }
 
-    // send message
-    if (updateNodes) {
-      if (parentNode) {
-        parentNode.sendMessage(true);
+      if (!_.isEmpty(workingMode)) {
+        _.set(this.layoutMap[targetLayout], 'workingMode', workingMode)
       } else {
-        this.messager.sendMessage(this.engineId, {
-          nodes: this.nodes
-        });
+        return false
+      }
+    } else {
+      return false
+    }
+    return true
+  }
+
+  /**
+   * get the working mode of the layout
+   * @param layoutKey the layout key, if not provide, get working mode of current active layout
+   */
+  getWorkingMode(layoutKey?: string) {
+    const targetLayout = this.getLayoutKey(layoutKey)
+
+    return _.get(this.layoutMap[targetLayout], 'workingMode')
+  }
+
+  /**
+   * load target layout for the engine
+   * @param engineId the id of the UIEngine which target layout is loaded
+   * @param layoutKey the unique key of target layout
+   * @param schema the schema path or schema object of the loaded layout
+   * @param options load options
+   * @param autoRefresh if true, refresh the parent node which the layout is loaded in, or refresh the UIEngine when parent doesn't exist
+   */
+  async loadLayout(
+    engineId: string | undefined,
+    layoutKey: string | undefined,
+    schema?: string | IUISchema,
+    workingMode?: IWorkingMode,
+    options?: ILoadOptions,
+    autoRefresh?: boolean,
+  ) {
+    const targetEngine = this.getEngineId(engineId)
+    const targetLayout = this.getLayoutKey(layoutKey)
+
+    if (_.isNil(this.engineMap[targetEngine])) {
+      this.engineMap[targetEngine] = []
+    }
+    const loadedLayouts = this.engineMap[targetEngine]
+    if (!loadedLayouts.includes(targetLayout)) {
+      loadedLayouts.push(targetLayout)
+    }
+
+    if (_.isNil(this.layoutMap[targetLayout])) {
+      this.layoutMap[targetLayout] = {
+        engineId: targetEngine,
+        layoutKey: targetLayout,
+        uiNode: new UINode(
+          {},
+          targetEngine,
+          targetLayout,
+          undefined,
+          { request: this.request }
+        ),
+        options: {},
+        workingMode: { mode: 'new' },
       }
     }
-    return uiNode;
-  }
-
-  deleteUINode(layout: string): boolean {
-    _.unset(this.nodes, layout);
-
-    // send message to caller
-    this.messager.sendMessage(this.engineId, this.nodes);
-    _.remove(this.layouts, (l: string) => {
-      return l === layout;
-    });
-
-    // activelayout
-    this.activeLayout = _.last(this.layouts) || "";
-    return true;
-  }
-
-  hideUINode(layout: string, clearSource: boolean = false) {
-    const renderer = this.nodes[layout];
-    if (renderer) {
-      renderer.visible = false;
+    const targetRenderer = this.layoutMap[targetLayout]
+    if (_.isObject(workingMode) && !_.isEmpty(workingMode)) {
+      targetRenderer.workingMode = workingMode
+    }
+    if (_.isObject(options) && !_.isEmpty(options)) {
+      targetRenderer.options = options
     }
 
-    // set active layout as last node
-    const index = _.findLastIndex(this.layouts, function(o) {
-      return o !== layout;
-    });
-    if (index > -1) {
-      this.activeLayout = this.layouts[index];
+    const rootNode = targetRenderer.uiNode
+    try {
+      await rootNode.loadLayout(schema)
+      targetRenderer.visible = true
+
+      // update parent node
+      const parentNode = _.get(options, 'parentNode')
+      if (!_.isNil(parentNode)) {
+        const nodeInParent = _.get(parentNode.layoutMap, [targetLayout, 'uiNode'])
+        if (nodeInParent !== rootNode) {
+          parentNode.layoutMap[targetLayout] = targetRenderer
+        }
+      }
+
+      // send message
+      if (autoRefresh === true) {
+        if (!_.isNil(parentNode)) {
+          parentNode.sendMessage(true)
+        } else {
+          this.messager.sendMessage(targetEngine, { layoutMap: this.layoutMap })
+        }
+      }
+    } catch (e) {
+      console.error(e)
+    }
+
+    return rootNode
+  }
+
+  /**
+   * get the renderer or rootNode of the layout
+   * @param layoutKey the key of target layout
+   * @param uiNodeOnly if true, return the root uiNode only, else, return the renderer
+   * @returns the renderer or root uiNode of the target layout
+   */
+  getLayout(
+    layoutKey?: string,
+    uiNodeOnly?: boolean,
+  ) {
+    const targetLayout = this.getLayoutKey(layoutKey)
+
+    const renderer = _.get(this.layoutMap, [targetLayout])
+    if (_.isObject(renderer) && uiNodeOnly === true) {
+      return renderer.uiNode
+    }
+    return renderer
+  }
+
+  /**
+   * hide the layout
+   * @param layoutKey
+   * @param clearData
+   */
+  hideLayout(
+    layoutKey?: string,
+    clearData?: boolean,
+  ) {
+    const targetLayout = this.getLayoutKey(layoutKey)
+    const renderer = this.layoutMap[targetLayout]
+    if (!_.isNil(renderer)) {
+      renderer.visible = false
+
+      if (targetLayout === this.activeLayout) {
+        // set the last layout of active engine as current active layout
+        const loadedLayouts = this.engineMap[this.activeEngine]
+        const lastLayout = _.findLast(loadedLayouts, (layout: string) => {
+          return layout !== targetLayout && _.get(this.layoutMap[layout], 'visible', false)
+        })
+
+        if (lastLayout === undefined) {
+          this.activeLayout = ''
+        } else {
+          this.activeLayout = lastLayout
+        }
+      }
+
+      // clear data pool
+      if (clearData === true) {
+        const { uiNode } = renderer
+        const data = _.get(uiNode, ['dataNode', 'data'])
+        const datasource = _.get(uiNode.getSchema(), 'datasource')
+        if (!_.isNil(data) && !_.isNil(datasource)) {
+          const { source } = datasource
+          const dataPool = DataPool.getInstance()
+          dataPool.clear(source)
+        }
+      }
+
+      const parentNode = _.get(renderer, ['options', 'parentNode'])
+      if (!_.isNil(parentNode)) {
+        // must force update , since the data adjugement on uinode side not precised
+        parentNode.sendMessage(true)
+      } else {
+        this.messager.sendMessage(
+          renderer.engineId,
+          { layoutMap: this.layoutMap }
+        )
+      }
+
     } else {
-      this.activeLayout = "";
+      return false
     }
+    return true
+  }
 
-    // clear data pool
-    const workingMode = this.getWorkingMode(layout);
-    if (clearSource && _.has(workingMode, "options.source.source")) {
-      const dataPool = DataPool.getInstance();
-      const source = _.get(workingMode, "options.source.source");
-      if (source) dataPool.clear(source);
-    }
+  /**
+   * remove the layout
+   * @param layoutKey
+   * @param clearData
+   */
+  removeLayout(
+    layoutKey?: string,
+    clearData?: boolean,
+  ) {
+    const targetLayout = this.getLayoutKey(layoutKey)
+    const renderer = this.layoutMap[targetLayout]
 
-    const parentNode = _.get(renderer, "options.parentNode");
-    if (parentNode) {
-      // must force update , since the data adjugement on uinode side not precised
-      parentNode.sendMessage(true);
+    if (!_.isNil(renderer)) {
+      delete this.layoutMap[targetLayout]
+
+      _.forIn(this.engineMap, (layouts: string[], engineId: string) => {
+        _.remove(layouts, (layout: string) => {
+          return layout === targetLayout
+        })
+      })
+
+      if (targetLayout === this.activeLayout) {
+        // activate the last layout of active engine
+        const loadedLayouts = this.engineMap[this.activeEngine]
+        const lastLayout = _.findLast(loadedLayouts, (layout: string) => {
+          return layout !== targetLayout && _.get(this.layoutMap[layout], 'visible', false)
+        })
+        if (lastLayout === undefined) {
+          this.activeLayout = ''
+        } else {
+          this.activeLayout = lastLayout
+        }
+      }
+
+      // clear data pool
+      if (clearData === true) {
+        const { uiNode } = renderer
+        const data = _.get(uiNode, ['dataNode', 'data'])
+        const datasource = _.get(uiNode.getSchema(), 'datasource')
+        if (!_.isNil(data) && !_.isNil(datasource)) {
+          const { source } = datasource
+          const dataPool = DataPool.getInstance()
+          dataPool.clear(source)
+        }
+      }
+
+      const parentNode = _.get(renderer, ['options', 'parentNode'])
+      if (!_.isNil(parentNode)) {
+        // must force update, since the data adjugement on uiNode side not precised
+        parentNode.sendMessage(true)
+      } else {
+        this.messager.sendMessage(
+          renderer.engineId,
+          { layoutMap: this.layoutMap }
+        )
+      }
     } else {
-      this.messager.sendMessage(this.engineId, {
-        nodes: this.nodes
-      });
+      return false
     }
+    return true
   }
 
-  getUINode(layout: string, uiNodeOnly: boolean = false) {
-    const uiNode = _.get(this.nodes, layout);
-    if (uiNodeOnly) {
-      return uiNode.uiNode;
-    }
-    return uiNode;
-  }
+  /**
+   * change the order of the layout
+   * @param layoutKey
+   * @param newIndex
+   */
+  placeLayout(
+    layoutKey?: string,
+    newIndex?: number,
+  ) {
+    const targetLayout = this.getLayoutKey(layoutKey)
 
-  castMessage(nodeSelector: INodeProps, data: any, ids?: [string]) {
-    let nodes: any = this.nodes;
-    if (ids) {
-      nodes = _.pick(this.nodes, ids);
-    }
-    _.forIn(nodes, (uiNode: IUINodeRenderer) => {
-      let searchedNodes = searchNodes(nodeSelector, uiNode.uiNode.rootName);
-      _.forEach(searchedNodes, (s: IUINode) => {
-        s.messager.sendMessage(s.id, data);
-      });
-    });
-  }
-
-  sendMessage(info: any, force: boolean = false) {
-    const state = {
-      ...info,
-      time: force ? new Date().getTime() : 0
-    };
-
-    this.messager.sendMessage(this.engineId, state);
-  }
-
-  pushLayout(layout: string) {
-    _.remove(this.layouts, (l: string) => {
-      return l === layout;
-    });
-
-    this.layouts.push(layout);
-  }
-
-  setWorkingMode(layout: string, workingMode: IWorkingMode) {
-    if (_.isEmpty(this.nodes[layout])) {
-      this.nodes[layout] = {} as IUINodeRenderer;
+    let targetEngine: string = ''
+    const renderer = this.layoutMap[targetLayout]
+    if (!_.isNil(renderer)) {
+      targetEngine = renderer.engineId
     }
 
-    if (workingMode) {
-      _.set(this.nodes[layout], "workingMode", workingMode);
+    if (!_.isEmpty(targetLayout) && !_.isEmpty(targetEngine)) {
+      const loadedLayouts = this.engineMap[targetEngine]
+
+      _.remove(loadedLayouts, (layout: string) => {
+        return layout === targetLayout
+      })
+      if (!_.isNil(newIndex) && _.isFinite(newIndex)) {
+        loadedLayouts.splice(newIndex, 0, targetLayout)
+      } else {
+        loadedLayouts.push(targetLayout)
+      }
+    } else {
+      return false
     }
+    return true
   }
 
-  getWorkingMode(layout?: string) {
-    if (!layout) layout = this.activeLayout;
-    return _.get(this.nodes[layout], "workingMode");
+  /**
+   * send message to engines for info update
+   * @param engines
+   * @param info
+   * @param forceRefresh
+   * @param forAll
+   */
+  sendMessageToUIEngine(
+    engines: string | string[] | undefined,
+    info: IObject,
+    forceRefresh?: boolean,
+    forAll?: boolean,
+  ) {
+    const targetList: string[] = []
+    if (forAll === true) {
+      _.forIn(this.engineMap, (l, engineId: string) => {
+        targetList.push(engineId)
+      })
+    } else if (_.isString(engines) && engines) {
+      targetList.push(engines)
+    } else if (_.isArray(engines)) {
+      engines.forEach((item: string) => {
+        if (_.isString(item) && item) {
+          targetList.push(item)
+        }
+      })
+    } else if (_.isNil(engines) && this.activeEngine) {
+      targetList.push(this.activeEngine)
+    }
+
+    targetList.forEach((engineId: string) => {
+      const state = {
+        ...info,
+        time: forceRefresh ? new Date().getTime() : 0,
+      }
+
+      this.messager.sendMessage(engineId, state)
+    })
+    return true
+  }
+
+  /**
+   * cast message to layouts for info update
+   * @param layouts
+   * @param info
+   * @param nodeSelector
+   * @param forAll
+   */
+  castMessageToLayoutNode(
+    layouts: string | string[] | undefined,
+    info: IObject,
+    selector?: INodeProps,
+    forAll?: boolean,
+  ) {
+    const targetList: string[] = []
+    if (forAll === true) {
+      _.forIn(this.layoutMap, (r, layoutKey: string) => {
+        targetList.push(layoutKey)
+      })
+    } else if (_.isString(layouts) && layouts) {
+      targetList.push(layouts)
+    } else if (_.isArray(layouts)) {
+      layouts.forEach((item: string) => {
+        if (_.isString(item) && item) {
+          targetList.push(item)
+        }
+      })
+    } else if (_.isNil(layouts) && this.activeLayout) {
+      targetList.push(this.activeLayout)
+    }
+
+    targetList.forEach((layoutKey: string) => {
+      const renderer = this.layoutMap[layoutKey]
+      if (!_.isNil(renderer)) {
+        if (!_.isNil(selector)) {
+          const nodes = searchNodes(selector, layoutKey)
+          _.forEach(nodes, (node: IUINode) => {
+            node.messager.sendMessage(node.id, info)
+          })
+        } else {
+          const rootNode = renderer.uiNode
+          rootNode.messager.sendMessage(rootNode.id, info)
+        }
+      }
+    })
+    return true
   }
 }
+
+export default NodeController

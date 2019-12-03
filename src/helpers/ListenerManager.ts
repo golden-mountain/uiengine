@@ -475,7 +475,8 @@ export class ListenerManager implements TYPES.IListenerManager {
     }
   }
   getStaticEventProps(
-    events: TYPES.IEventConfig | TYPES.IEventConfig[]
+    events: TYPES.IEventConfig | TYPES.IEventConfig[],
+    simple?: boolean,
   ) {
     let eventArray: TYPES.IEventConfig[] = []
     if (_.isArray(events)) {
@@ -494,106 +495,135 @@ export class ListenerManager implements TYPES.IListenerManager {
           debugList,
           target,
           resultSolver,
+          simpleMode,
         } = config
 
-        if (_.isString(eventName) && eventName.length > 0) {
+        if (simple === true || simpleMode === true || _.isEqual(simpleMode, 'true')) {
+          if (_.isString(eventName) && eventName.length > 0) {
 
-          // In case that the event config changes or load new listeners
-          // save listener config
-          const listenerQueue = this.prepareListenerQueue(config)
-          // save param config
-          const receiveConfig = _.isArray(receiveParams) ? [...receiveParams] : []
-          const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : {}
-          // save target config
-          const targetConfig = {
-            name: _.isString(target) ? target : _.get(target, 'name'),
-            reference: _.get(target, 'reference'),
-          }
-          // save debug config
-          const debugConfig = _.cloneDeep(debugList)
+            // In case that the event config changes or load new listeners
+            // save listener config
+            const listenerQueue = this.prepareListenerQueue(config)
+            // save param config
+            const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : {}
 
-          props[eventName] = (...args: any[]) => {
-            // copy the received param
-            const receivedParam = defaultConfig
-            receiveConfig.forEach((paramKey: string, index: number) => {
-              if (_.isString(paramKey) && paramKey) {
-                if (!_.isUndefined(args[index])) {
-                  receivedParam[paramKey] = args[index]
-                }
-              }
-            })
-
-            // create event record
-            const eventRecord: TYPES.IEventRecord = {
-              eventName: eventName,
-              queue: listenerQueue.map((item) => item.name),
-              records: [],
-            }
-
-            if (_.isFinite(this.history.lastStartNumber)) {
-              eventRecord.startNumber = ++(this.history.lastStartNumber)
-            }
-
-            if (_.isString(targetConfig.name) && targetConfig.name) {
-              if (_.isNil(targetConfig.reference)) {
-                eventRecord.target = targetConfig.name
-              } else {
-                eventRecord.target = targetConfig as TYPES.IEventTargetConfig
-              }
-            } else if (!_.isNil(targetConfig.reference)) {
-              eventRecord.target = {
-                reference: targetConfig.reference,
-              } as TYPES.IEventTargetConfig
-            }
-
-            if (_.isArray(debugConfig) && debugConfig.length > 0) {
-              eventRecord.originInfo = this.generateDebugInfo(receivedParam, debugConfig)
-            }
-
-            if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
+            props[eventName] = (...args: any[]) => {
               listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-                const record = this.callEventListener(
-                  listenerConfig,
-                  receivedParam,
-                  eventRecord,
-                )
-                if (!_.isNil(record)) {
-                  eventRecord.records.push(record)
+                const { listener } = listenerConfig
+                if (_.isFunction(listener)) {
+                  listener(...args, defaultConfig)
                 }
               })
             }
 
-            if (_.isArray(debugConfig) && debugConfig.length > 0) {
-              eventRecord.finialInfo = this.generateDebugInfo(receivedParam, debugConfig)
+          }
+        } else {
+          if (_.isString(eventName) && eventName.length > 0) {
+
+            // In case that the event config changes or load new listeners
+            // save listener config
+            const listenerQueue = this.prepareListenerQueue(config)
+            // save param config
+            const receiveConfig = _.isArray(receiveParams) ? [...receiveParams] : []
+            const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : {}
+            // save target config
+            const targetConfig = {
+              name: _.isString(target) ? target : _.get(target, 'name'),
+              reference: _.get(target, 'reference'),
             }
+            // save debug config
+            const debugConfig = _.cloneDeep(debugList)
 
-            this.storeHistoryRecord(eventRecord)
-
-            const eventResult: TYPES.IEventResult = {
-              eventName: eventRecord.eventName,
-              queue: _.cloneDeep(eventRecord.queue),
-              results: eventRecord.records.map((record: TYPES.IListenerRecord) => {
-                const resultObj: TYPES.IListenerResult = {
-                  listenerName: record.listenerName,
-                  result: record.result,
+            props[eventName] = (...args: any[]) => {
+              // copy the received param
+              const receivedParam = defaultConfig
+              receiveConfig.forEach((paramKey: string, index: number) => {
+                if (_.isString(paramKey) && paramKey) {
+                  if (!_.isUndefined(args[index])) {
+                    receivedParam[paramKey] = args[index]
+                  }
                 }
-                if (record.result instanceof Promise) {
-                  resultObj.result = record.result.then((returnData: any) => {
-                    resultObj.result = returnData
-                    return returnData
-                  })
-                }
-                return resultObj
               })
-            }
-            if (!_.isNil(eventRecord.target)) {
-              eventResult.target = eventRecord.target
-            }
 
-            if (_.isFunction(resultSolver)) {
-              return resultSolver(eventResult)
-            } else {
-              return eventResult
+              // create event record
+              const eventRecord: TYPES.IEventRecord = {
+                eventName: eventName,
+                queue: listenerQueue.map((item) => item.name),
+                records: [],
+              }
+
+              if (_.isFinite(this.history.lastStartNumber)) {
+                eventRecord.startNumber = ++(this.history.lastStartNumber)
+              }
+
+              if (_.isString(targetConfig.name) && targetConfig.name) {
+                if (_.isNil(targetConfig.reference)) {
+                  eventRecord.target = targetConfig.name
+                } else {
+                  eventRecord.target = targetConfig as TYPES.IEventTargetConfig
+                }
+              } else if (!_.isNil(targetConfig.reference)) {
+                eventRecord.target = {
+                  reference: targetConfig.reference,
+                } as TYPES.IEventTargetConfig
+              }
+
+              if (_.isArray(debugConfig) && debugConfig.length > 0) {
+                eventRecord.originInfo = this.generateDebugInfo(receivedParam, debugConfig)
+              }
+
+              if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
+                listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
+                  const { simpleMode: listenerMode, listener } = listenerConfig
+                  if (listenerMode === true || _.isEqual(listenerMode, 'true')) {
+                    if (_.isFunction(listener)) {
+                      listener(...args, defaultConfig)
+                    }
+                  } else {
+                    const record = this.callEventListener(
+                      listenerConfig,
+                      receivedParam,
+                      eventRecord,
+                    )
+                    if (!_.isNil(record)) {
+                      eventRecord.records.push(record)
+                    }
+                  }
+                })
+              }
+
+              if (_.isArray(debugConfig) && debugConfig.length > 0) {
+                eventRecord.finialInfo = this.generateDebugInfo(receivedParam, debugConfig)
+              }
+
+              this.storeHistoryRecord(eventRecord)
+
+              const eventResult: TYPES.IEventResult = {
+                eventName: eventRecord.eventName,
+                queue: _.cloneDeep(eventRecord.queue),
+                results: eventRecord.records.map((record: TYPES.IListenerRecord) => {
+                  const resultObj: TYPES.IListenerResult = {
+                    listenerName: record.listenerName,
+                    result: record.result,
+                  }
+                  if (record.result instanceof Promise) {
+                    resultObj.result = record.result.then((returnData: any) => {
+                      resultObj.result = returnData
+                      return returnData
+                    })
+                  }
+                  return resultObj
+                })
+              }
+              if (!_.isNil(eventRecord.target)) {
+                eventResult.target = eventRecord.target
+              }
+
+              if (_.isFunction(resultSolver)) {
+                return resultSolver(eventResult)
+              } else {
+                return eventResult
+              }
             }
           }
         }
@@ -603,7 +633,8 @@ export class ListenerManager implements TYPES.IListenerManager {
     return props
   }
   getDynamicEventListener(
-    event: TYPES.IEventConfig
+    event: TYPES.IEventConfig,
+    simple?: boolean,
   ) {
     return (...args: any[]) => {
       if (_.isObject(event)) {
@@ -614,99 +645,116 @@ export class ListenerManager implements TYPES.IListenerManager {
           debugList,
           target,
           resultSolver,
+          simpleMode,
         } = event
 
         // get listener queue
         const listenerQueue = this.prepareListenerQueue(event)
 
-        // copy the received param
-        const receivedParam = _.isObject(defaultParams) ? {...defaultParams} : {}
-        if (_.isArray(receiveParams) && receiveParams.length > 0) {
-          receiveParams.forEach((paramKey: string, index: number) => {
-            if (_.isString(paramKey) && paramKey) {
-              if (!_.isUndefined(args[index])) {
-                receivedParam[paramKey] = args[index]
+        if (simple === true || simpleMode === true || _.isEqual(simpleMode, 'true')) {
+          listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
+            const { listener } = listenerConfig
+            if (_.isFunction(listener)) {
+              listener(...args, defaultParams)
+            }
+          })
+        } else {
+          // copy the received param
+          const receivedParam = _.isObject(defaultParams) ? {...defaultParams} : {}
+          if (_.isArray(receiveParams) && receiveParams.length > 0) {
+            receiveParams.forEach((paramKey: string, index: number) => {
+              if (_.isString(paramKey) && paramKey) {
+                if (!_.isUndefined(args[index])) {
+                  receivedParam[paramKey] = args[index]
+                }
+              }
+            })
+          }
+
+          // create event record
+          const eventRecord: TYPES.IEventRecord = {
+            eventName,
+            queue: listenerQueue.map((item) => item.name),
+            records: [],
+          }
+
+          if (_.isFinite(this.history.lastStartNumber)) {
+            eventRecord.startNumber = ++(this.history.lastStartNumber)
+          }
+
+          if (!_.isNil(target)) {
+            if (_.isString(target) && target) {
+              eventRecord.target = target
+            } else if (_.isObject(target)) {
+              const targetCache: any = {}
+              if (_.isString(target.name) && target.name) {
+                targetCache.name = target.name
+              }
+              if (!_.isNil(target.reference)) {
+                targetCache.reference = target.reference
+              }
+              if (!_.isEmpty(targetCache)) {
+                eventRecord.target = targetCache
               }
             }
-          })
-        }
-
-        // create event record
-        const eventRecord: TYPES.IEventRecord = {
-          eventName,
-          queue: listenerQueue.map((item) => item.name),
-          records: [],
-        }
-
-        if (_.isFinite(this.history.lastStartNumber)) {
-          eventRecord.startNumber = ++(this.history.lastStartNumber)
-        }
-
-        if (!_.isNil(target)) {
-          if (_.isString(target) && target) {
-            eventRecord.target = target
-          } else if (_.isObject(target)) {
-            const targetCache: any = {}
-            if (_.isString(target.name) && target.name) {
-              targetCache.name = target.name
-            }
-            if (!_.isNil(target.reference)) {
-              targetCache.reference = target.reference
-            }
-            if (!_.isEmpty(targetCache)) {
-              eventRecord.target = targetCache
-            }
           }
-        }
 
-        if (_.isArray(debugList) && debugList.length > 0) {
-          eventRecord.originInfo = this.generateDebugInfo(receivedParam, debugList)
-        }
+          if (_.isArray(debugList) && debugList.length > 0) {
+            eventRecord.originInfo = this.generateDebugInfo(receivedParam, debugList)
+          }
 
-        if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
-          listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-            const record = this.callEventListener(
-              listenerConfig,
-              receivedParam,
-              eventRecord,
-            )
-            if (!_.isNil(record)) {
-              eventRecord.records.push(record)
-            }
-          })
-        }
+          if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
+            listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
+              const { simpleMode: listenerMode, listener } = listenerConfig
+              if (listenerMode === true || _.isEqual(listenerMode, 'true')) {
+                if (_.isFunction(listener)) {
+                  listener(...args, defaultParams)
+                }
+              } else {
+                const record = this.callEventListener(
+                  listenerConfig,
+                  receivedParam,
+                  eventRecord,
+                )
+                if (!_.isNil(record)) {
+                  eventRecord.records.push(record)
+                }
+              }
+            })
+          }
 
-        if (_.isArray(debugList) && debugList.length > 0) {
-          eventRecord.finialInfo = this.generateDebugInfo(receivedParam, debugList)
-        }
+          if (_.isArray(debugList) && debugList.length > 0) {
+            eventRecord.finialInfo = this.generateDebugInfo(receivedParam, debugList)
+          }
 
-        this.storeHistoryRecord(eventRecord)
+          this.storeHistoryRecord(eventRecord)
 
-        const eventResult: TYPES.IEventResult = {
-          eventName: eventRecord.eventName,
-          queue: _.cloneDeep(eventRecord.queue),
-          results: eventRecord.records.map((record: TYPES.IListenerRecord) => {
-            const resultObj: TYPES.IListenerResult = {
-              listenerName: record.listenerName,
-              result: record.result,
-            }
-            if (record.result instanceof Promise) {
-              resultObj.result = record.result.then((returnData: any) => {
-                resultObj.result = returnData
-                return returnData
-              })
-            }
-            return resultObj
-          })
-        }
-        if (!_.isNil(eventRecord.target)) {
-          eventResult.target = eventRecord.target
-        }
+          const eventResult: TYPES.IEventResult = {
+            eventName: eventRecord.eventName,
+            queue: _.cloneDeep(eventRecord.queue),
+            results: eventRecord.records.map((record: TYPES.IListenerRecord) => {
+              const resultObj: TYPES.IListenerResult = {
+                listenerName: record.listenerName,
+                result: record.result,
+              }
+              if (record.result instanceof Promise) {
+                resultObj.result = record.result.then((returnData: any) => {
+                  resultObj.result = returnData
+                  return returnData
+                })
+              }
+              return resultObj
+            })
+          }
+          if (!_.isNil(eventRecord.target)) {
+            eventResult.target = eventRecord.target
+          }
 
-        if (_.isFunction(resultSolver)) {
-          return resultSolver(eventResult)
-        } else {
-          return eventResult
+          if (_.isFunction(resultSolver)) {
+            return resultSolver(eventResult)
+          } else {
+            return eventResult
+          }
         }
       }
     }

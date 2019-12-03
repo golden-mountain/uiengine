@@ -279,7 +279,7 @@
                               "deps": [
                                 {
                                   "selector": {
-                                    "datasource": "slb.virtual-server:ip-address"
+                                    "datasource.source": "slb.virtual-server:ip-address"
                                   },
                                   "state": {
                                     "visible": false
@@ -287,7 +287,7 @@
                                 },
                                 {
                                   "selector": {
-                                    "datasource": "slb.virtual-server:ip-address"
+                                    "datasource.source": "slb.virtual-server:ip-address"
                                   },
                                   "data": "",
                                   "dataCompareRule": "empty"
@@ -299,7 +299,7 @@
                               "deps": [
                                 {
                                   "selector": {
-                                    "datasource": "slb.virtual-server:ipv6-address"
+                                    "datasource.source": "slb.virtual-server:ipv6-address"
                                   },
                                   "state": {
                                     "visible": false
@@ -307,7 +307,7 @@
                                 },
                                 {
                                   "selector": {
-                                    "datasource": "slb.virtual-server:ipv6-address"
+                                    "datasource.source": "slb.virtual-server:ipv6-address"
                                   },
                                   "data": "",
                                   "dataCompareRule": "empty"
@@ -437,7 +437,7 @@
               "datasource": "slb.virtual-server:port-list",
               "props": {
                 "modal": {
-                  "layout": "schema/ui/slb.virtual-server.port.json",
+                  "layout": "slb.virtual-server.port.json",
                   "title": "Create Virtual Port",
                   "width": "80%",
                   "connect": {
@@ -445,7 +445,7 @@
                       "clearSource": true
                     },
                     "source": "slb.virtual-server.port:",
-                    "target": "slb.virtual-server:port-list[]"
+                    "target": "slb.virtual-server:port-list[{index}]"
                   },
                   "container": "antd:Drawer",
                   "placement": "right",

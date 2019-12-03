@@ -18,10 +18,13 @@ import {
  * convert 'a.b.c:#d' to 'a.b.c'
  * convert '#a.b.c:d' to ''
  * if prefix is provided, add it before the string, convert to prefix.xxx.xxx
- * @param source
- * @param prefix
+ * @param source the source string
+ * @param prefix add prefix string
  */
-export function formatSource(source: string, prefix?: string) {
+export function getAccessRoute(
+  source: string,
+  prefix?: string,
+) {
   let srcString: string = source
   // replace the ':'
   srcString = srcString.replace(':', '.')
@@ -49,35 +52,29 @@ export function formatSource(source: string, prefix?: string) {
  * convert 'a.b.c#:d' to 'a.b.c'/'a_b_c'
  * convert 'a.b.c:#d' to 'a.b.c'/'a_b_c'
  * convert '#a.b.c:d' to 'a.b.c'/'a_b_c'
- * @param id a.b.c:d
+ * @param source the source string
+ * @param snakeCase use snake case
  */
 export function getDomainName(
-  source: IDataSource | string,
-  snakeCase: boolean = true
+  source: string,
+  snakeCase?: boolean,
 ) {
-  let srcString = source
-  // if it's an IDataSource instance, eg:
-  // {source: 'slb.virtual-server:template-policy', autoload: true}
-  if (_.isObject(srcString)) {
-    srcString = _.get(srcString, 'source', '')
-  }
-
-  if (_.isString(srcString) && srcString) {
+  if (_.isString(source) && source) {
     // replace the '#'
-    srcString = srcString.replace('#', '.')
-    if (srcString.includes(':')) {
+    source = source.replace('#', '.')
+    if (source.includes(':')) {
       // splice the string by ':'
-      srcString = srcString.split(':')[0]
+      source = source.split(':')[0]
       // remove the '.' at both ends
-      srcString = _.trim(srcString, '.')
+      source = _.trim(source, '.')
     } else {
       // splice the string by '.'
-      srcString = srcString.split('.')[0]
+      source = source.split('.')[0]
     }
     if (snakeCase) {
-      return _.snakeCase(srcString)
+      return _.snakeCase(source)
     } else {
-      return srcString
+      return source
     }
   } else {
     return '$dummy'
@@ -85,36 +82,48 @@ export function getDomainName(
 }
 
 /**
- * convert source to a.b.c.
- * @param source
+ * get the schema name which accords to the domain from the string, eg:
+ * convert 'a.b.c.d' to 'a.json'
+ * convert 'a.b.c:d' to 'a.b.c.json'
+ * convert 'a.b.c:' to 'a.b.c.json'
+ * convert 'a.b#c:d' to 'a.b.c.json'
+ * convert 'a.b.c#:d' to 'a.b.c.json'
+ * convert 'a.b.c:#d' to 'a.b.c.json'
+ * convert '#a.b.c:d' to 'a.b.c.json'
+ * @param source the source string
  */
-export function parseSchemaPath(source: string) {
-  let schemaPath = getDomainName(source, false)
-  return `${schemaPath}.json`
+export function getSchemaName(source: string) {
+  return `${getDomainName(source, false)}.json`
 }
 
 /**
- * Convert source to a_b_c
- *
- * @param source
- * @param parsePath
+ * replace the param in the string
+ * @param sourceStr the source string
+ * @param paramMap the paramters map
  */
-export function parseCacheID(source: string, parsePath: boolean = true) {
-  let path = source
-  if (parsePath) {
-    path = parseSchemaPath(source)
+export function replaceParam(
+  sourceStr: string,
+  paramMap: object,
+) {
+  const matchBlock = /\{[\w\-]*\}/g
+  const matchString = /\{(.*)\}/
+
+  let currentStr: string = sourceStr
+  const results = currentStr.match(matchBlock)
+  if (_.isArray(results) && results.length) {
+    results.forEach((item: string) => {
+      const result = item.match(matchString)
+      if (_.isArray(result) && _.isString(result[1]) && result[1]) {
+        const paramKey = result[1]
+        const paramValue = _.get(paramMap, [paramKey])
+        if (_.isString(paramValue) || _.isFinite(paramValue)) {
+          currentStr = currentStr.replace(`{${paramKey}}`, `${paramValue}`)
+        }
+      }
+    })
   }
-  return _.snakeCase(path)
-}
 
-/**
- * export to a_b_c
- *
- * @param root like a-b-c.json
- */
-export function parseRootName(root: string) {
-  root = root.replace('.json', '')
-  return _.snakeCase(root)
+  return currentStr
 }
 
 export async function submitToAPI(
@@ -128,7 +137,7 @@ export async function submitToAPI(
   for (let index in dataSources) {
     const source = dataSources[index]
     result = _.merge(result, dataPool.get(source.source, { withPath: true }))
-    result = await dataEngine.sendRequest(source, result, method, false)
+    result = await dataEngine.sendRequest(source, method, { data: result, cacheID: 'test' })
     if (result !== false) responses.push(result)
   }
 
@@ -169,12 +178,8 @@ export async function validateAll(dataSources: Array<any>) {
             validateResults.push(result.result)
           }
         })
-        // await uiNode.updateLayout()
-        await uiNode.pluginManager.executePlugins(
-          uiNode.id,
-          'ui.parser',
-          { uiNode },
-        )
+        // await uiNode.refreshLayout()
+        await uiNode.parse()
         uiNode.sendMessage(true)
       }
     }

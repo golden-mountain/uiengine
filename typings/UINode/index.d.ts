@@ -1,58 +1,61 @@
-import { IRequest } from "../Request";
-import { IMessager } from "../Messager";
-import { IDataNode } from "../DataNode";
-import { IState, IStateNode } from "../StateNode";
+import { IObject,IUISchema } from '../Common'
+import { IDataNode } from '../DataNode'
+import { IMessager } from '../Messager'
+import { INodeController, IUINodeRenderer } from '../NodeController'
+import { IPluginManager } from '../PluginManager'
+import { IRequest, IRequestConfig } from '../Request'
+import { IState, IStateNode } from '../StateNode'
 
-export interface INodeProps {}
-
-export interface IStateInfo {
-  data: any;
-  state: IState;
-  [name: string]: any;
+export interface INodeProps {
+  [anyKey: string]: any
 }
 
-export interface ILayoutSchema {
-  component?: string;
-  children?: Array<ILayoutSchema>;
-  _children?: Array<ILayoutSchema>;
-  name?: string;
-  props?: object;
-  [key: string]: any;
+export interface IStateInfo {
+  data: any
+  state: IState
+  [name: string]: any
+}
+
+export interface IUINodeConfig {
+  messager?: IMessager
+  controller?: INodeController
+  pluginManager?: IPluginManager
+  request?: IRequest
 }
 
 export interface IUINode {
-  id: string
+  readonly id: string
+  readonly engineId?: string
+  readonly layoutKey?: string
+
   dataNode: IDataNode
   stateNode: IStateNode
-  request: IRequest
   messager: IMessager
+  controller: INodeController
   pluginManager: IPluginManager
+  request: IRequest
 
   parent?: IUINode
-  children: Array<IUINode>
+  children?: IUINode[]
 
-  schema: ILayoutSchema
-  rootName: string
+  schema: IUISchema
+  props: IObject
+  layoutMap: {
+    [layoutKey: string]: IUINodeRenderer
+  }
   errorInfo: IErrorInfo
+  stateInfo: IStateInfo
   isLiveChildren: boolean
 
-  props: object
-  stateInfo: IStateInfo
-  workingMode?: IWorkingMode
-  nodes: {
-    [name: string]: IUINodeRenderer
-  } = {}
+  parse: () => Promise
 
-  loadLayout(schema?: ILayoutSchema | string, workingMode?: IWorkingMode);
-  loadRemoteLayout(url: stringremoteURL): Promise<AxiosPromise>;
-  // loadData(source: IDataSource, workingMode?: IWorkingMode);
-  getSchema(path?: string): ILayoutSchema;
-  replaceLayout(newSchema: ILayoutSchema | string, workingMode?: IWorkingMode);
-  updateLayout(workingMode?: IWorkingMode);
-  genLiveLayout(schema: ILayoutSchema, data: any);
-  clearLayout();
-  getChildren(route?: Array<Number>);
-  getNode(path?: string);
-  // updateState();
-  sendMessage(force: boolean = false)
+  loadLayout: (schema?: string | IUISchema) => Promise<IUISchema>
+  replaceLayout: (newSchema: string | IUISchema, route?: number[]) => Promise<IUISchema>
+  refreshLayout: () => Promise<IUISchema>
+  clearLayout: () => IUINode
+
+  getSchema: (route?: number[]) => IUISchema | undefined
+  getParent: (toTop?: boolean) => IUINode | undefined
+  getChildren: (route?: number[]) => IUINode | IUINode[] | undefined
+  sendMessage: (forceRefresh?: boolean) => void
 }

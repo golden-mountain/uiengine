@@ -1,325 +1,837 @@
-import _ from "lodash";
-import { AxiosPromise } from "axios";
+import _ from 'lodash'
 
 import {
-  Request,
   DataNode,
-  Cache,
   StateNode,
-  PluginManager,
+  NodeController,
+} from '../data-layer'
+import {
+  Cache,
   Messager,
-  parseRootName,
-  cloneTemplateSchema
-} from "../index";
+  PluginManager,
+  Request,
+} from '../helpers'
+import {
+  cloneTemplateSchema, replaceParam,
+} from '../helpers/utils'
 
 import {
-  IUINode,
   IDataNode,
-  IStateNode,
+  IDataSource,
   IErrorInfo,
-  ILayoutSchema,
   IMessager,
+  INodeController,
+  IObject,
   IPluginManager,
   IRequest,
+  IRequestConfig,
   IStateInfo,
+  IStateNode,
+  IUINode,
+  IUINodeConfig,
   IUINodeRenderer,
-  IWorkingMode
-} from "../../typings";
+  IUISchema,
+} from '../../typings'
 
-export default class UINode implements IUINode {
-  readonly id: string;
-  dataNode: IDataNode;
-  stateNode: IStateNode = new StateNode(this);
-  pluginManager: IPluginManager;
-  request: IRequest = Request.getInstance();
-  children: Array<UINode> = [];
-  errorInfo: IErrorInfo = {};
-  schema: ILayoutSchema = {};
-  rootName: string = "";
-  isLiveChildren: boolean = false;
-  messager: IMessager;
-  props: object = {};
-  parent?: IUINode;
+export class UINode implements IUINode {
+  readonly id: string
+  readonly engineId?: string
+  readonly layoutKey?: string
+
+  dataNode: IDataNode
+  stateNode: IStateNode
+  messager: IMessager = Messager.getInstance()
+  controller: INodeController = NodeController.getInstance()
+  pluginManager: IPluginManager = PluginManager.getInstance()
+  request: IRequest = Request.getInstance()
+
+  parent?: IUINode
+  children?: IUINode[]
+
+  private uiSchema: IUISchema = {}
+  set schema(newSchema: IUISchema) {
+    this.loadLayout(newSchema)
+  }
+  get schema() {
+    return this.uiSchema
+  }
+  private loadQueue: number = 0
+  private loadProcess: Promise<IUISchema|undefined> | undefined
+
+  props: IObject = {}
+  layoutMap: {
+    [layoutKey: string]: IUINodeRenderer
+  } = {}
+
+  errorInfo: IErrorInfo = {}
   stateInfo: IStateInfo = {
     data: null,
     state: {},
     time: 0
-  };
-  workingMode?: IWorkingMode;
-  nodes: {
-    [name: string]: IUINodeRenderer;
-  } = {};
-
-  constructor(
-    schema: ILayoutSchema,
-    request?: IRequest,
-    root: string = "",
-    parent?: IUINode
-  ) {
-    if (request) {
-      this.request = request;
-    }
-    this.schema = schema;
-
-    // cache root object if given root name
-    if (root) {
-      this.rootName = root;
-    }
-
-    // initial id, the id can't change
-    if (!this.schema._id) {
-      this.schema._id = _.uniqueId(`UINode-`);
-    }
-
-    this.id = this.schema._id;
-    this.pluginManager = PluginManager.getInstance();
-    this.pluginManager.register(this.id, {
-      categories: ["ui.parser.before", "ui.parser", "ui.parser.event"]
-    });
-
-    // new messager
-    this.messager = Messager.getInstance();
-
-    // assign parent
-    this.parent = parent;
-
-    // data node initial
-    const emptyDataNodeName = `$dummy.${this.id}`;
-    if (!schema.datasource) schema.datasource = emptyDataNodeName;
-    this.dataNode = new DataNode(schema.datasource, this, this.request);
   }
+  isLiveChildren: boolean = false
 
-  private setRootName(root: string) {
-    this.rootName = parseRootName(root);
-  }
-
-  async loadLayout(
-    schema?: ILayoutSchema | string,
-    workingMode?: IWorkingMode
-  ) {
-    // load remote node
-    let returnSchema: any = schema;
-    if (!returnSchema) returnSchema = this.schema;
-    if (typeof schema === "string" && schema) {
-      returnSchema = await this.loadRemoteLayout(schema);
-      this.setRootName(schema);
-    }
-
-    // assign the schema to this and it's children
-    if (returnSchema) {
-      await this.assignSchema(returnSchema, workingMode);
-    }
-
-    // cache this node
-    Cache.setUINode(this.rootName, this);
-    return returnSchema;
-  }
-
-  getSchema(path?: string): ILayoutSchema {
-    // if (_.isEmpty(this.schema)) {
-    //   console.warn('did you execute loadLayout before using getSchema method?')
-    // }
-    if (path) {
-      return _.get(this.schema, path);
-    }
-    return this.schema;
-  }
-
-  async loadRemoteLayout(url: string): Promise<AxiosPromise> {
-    this.setRootName(url);
-    let result: any = Cache.getLayoutSchema(this.rootName);
-    if (!result) {
-      try {
-        let response: any = await this.request.get(url);
-        if (response.data) {
-          result = response.data;
-          Cache.setLayoutSchema(this.rootName, result);
-        }
-      } catch (e) {
-        this.errorInfo = {
-          status: 400,
-          code: `Error loading from ${url}`
-        };
+  private initialConfig(config?: IUINodeConfig) {
+    if (_.isObject(config)) {
+      const { messager, controller, pluginManager, request } = config
+      if (!_.isNil(messager)) {
+        this.messager = messager
+      }
+      if (!_.isNil(controller)) {
+        this.controller = controller
+      }
+      if (!_.isNil(pluginManager)) {
+        this.pluginManager = pluginManager
+      }
+      if (!_.isNil(request)) {
+        this.request = request
       }
     }
-    return result;
+  }
+  constructor(
+    schema: IUISchema,
+    engineId?: string,
+    layoutKey?: string,
+    parent?: IUINode,
+    config?: IUINodeConfig,
+  ) {
+    // initialize the node ID, the ID can't be changed after the construction
+    this.id = _.uniqueId(`UINode-`)
+
+    // set the UIEngine and layout which this node belongs to
+    if (_.isString(engineId) && engineId) {
+      this.engineId = engineId
+    }
+    if (_.isString(layoutKey) && layoutKey) {
+      this.layoutKey = layoutKey
+    }
+
+    // prepare the uiSchema that will be loaded later
+    let uiSchema = this.uiSchema
+    // assign id by schema or set _id to schema
+    if (_.isObject(schema)) {
+      const { _id } = schema
+      if (_.isString(_id) && _id) {
+        this.id = _id
+      } else {
+        schema._id = this.id
+      }
+      uiSchema = schema
+    } else {
+      uiSchema._id = this.id
+    }
+
+    // set the helpers which the node depends on
+    this.initialConfig(config)
+
+    // register the plugin types supported
+    this.pluginManager.register(
+      this.id,
+      {
+        categories: [
+          'ui.parser',
+          'ui.parser.before',
+        ]
+      }
+    )
+
+    // assign parent node
+    if (_.isObject(parent)) {
+      this.parent = parent
+    }
+
+    // prepare dataSource for data node
+    const dataSource: IDataSource = {
+      source: `$dummy.${this.id}`,
+    }
+    const { datasource: srcConfig } = uiSchema
+    if (_.isObject(srcConfig) && !_.isEmpty(srcConfig)) {
+      const { source } = srcConfig
+      if (!_.isString(source) || _.isEmpty(source)) {
+        srcConfig.source = dataSource.source
+      }
+      _.assign(dataSource, srcConfig)
+    } else if (_.isString(srcConfig) && srcConfig) {
+      dataSource.source = srcConfig
+      uiSchema.datasource = _.cloneDeep(dataSource)
+    } else {
+      uiSchema.datasource = _.cloneDeep(dataSource)
+    }
+
+    // initialize data node
+    this.dataNode = new DataNode(this, dataSource, { request: this.request })
+
+    // initialize state node
+    this.stateNode = new StateNode(this)
+
+    // load the uiSchema
+    // Attention: only when the uiSchema is loaded, will it be set to the uiNode
+    this.uiSchema = uiSchema
   }
 
+  private async parseBefore(schema: IUISchema) {
+    // exec ui.parser.before plugin
+    try {
+      const { results } = await this.pluginManager.executePlugins(
+        this.id,
+        'ui.parser.before',
+        {uiNode: this, schema}
+      )
+      if (_.isArray(results)) {
+        results.forEach((resultItem) => {
+          const { result } = resultItem
+          if (_.isObject(results)) {
+            _.assign(schema, result)
+          }
+        })
+      }
+    } catch (e) {
+      console.error(e)
+    }
+    return schema
+  }
+  async parse() {
+    // exec ui.parser plugin
+    try {
+      await this.pluginManager.executePlugins(
+        this.id,
+        'ui.parser',
+        {uiNode: this}
+      )
+    } catch (e) {
+      console.error(e)
+    }
+  }
+
+  private createChildNode(schema: IUISchema, parent?: IUINode) {
+    return new UINode(
+      schema,
+      this.engineId,
+      this.layoutKey,
+      parent !== undefined ? parent : this,
+      {
+        messager: this.messager,
+        controller: this.controller,
+        pluginManager: this.pluginManager,
+        request: this.request,
+      },
+    )
+  }
   /**
+   * analyze the UI schema to generate the UI construct - UINode tree
    * TO DO: need to enhance:
    * 1. if only state change, on layout gen
    * 2. if data change, if the changed data has an item different than origin one, should renew the one, if delete one, should also remove the one
-   * @param schema
-   * @param reloadData
+   * @param schema the source UI schema
+   * @returns the final UI schema
    */
-  private async assignSchema(
-    schema: ILayoutSchema,
-    workingMode?: IWorkingMode
-  ) {
-    // assign workingMode
-    if (workingMode) this.workingMode = workingMode;
+  private async analyzeSchema(schema: IUISchema) {
+    schema = await this.parseBefore(schema)
 
-    let liveSchema = schema;
-    // load ui.parser.before plugin
-    try {
-      const results = await this.pluginManager.executePlugins(
-        this.id,
-        "ui.parser.before",
-        {
-          uiNode: this,
-          schema
-        }
-      );
-      if (!_.isEmpty(results)) {
-        const finalResult: any = results.results.pop();
-        liveSchema = finalResult.result;
+    let currentSchema: IUISchema = schema
+    // use dataNode to load the dataSource
+    if (_.isObject(currentSchema.datasource)) {
+      const { source } = currentSchema.datasource
+      if (source.startsWith('$dummy.')) {
+        // dummy node needn't load data
+      } else {
+        await this.dataNode.loadData(currentSchema.datasource)
       }
-    } catch (e) {
-      console.log(e.message);
     }
 
-    if (liveSchema["datasource"]) {
-      await this.dataNode.loadData(liveSchema["datasource"]);
+    if (!_.isNil(currentSchema.$children)) {
+      currentSchema = this.analyzeLiveSchema(currentSchema)
     }
 
-    if (liveSchema["$children"] && this.dataNode) {
-      const data = this.dataNode.data;
-      liveSchema = await this.genLiveLayout(liveSchema, data);
-    }
+    const { children } = currentSchema
+    if (_.isArray(children)) {
+      const childNodes: UINode[] = []
+      for (let child of children) {
+        let node: UINode | undefined
+        if (_.isArray(child)) {
+          node = this.createChildNode({}, this)
+          for (let element of child) {
+            // the upper 'node' is a dummy node which is just used to store these subnodes, so their real parent is still this
+            const subnode = this.createChildNode(element, this)
+            await subnode.loadLayout(element)
 
-    if (liveSchema.children) {
-      const children: any = [];
-      for (let index in liveSchema.children) {
-        let node: any;
-        let s: any = liveSchema.children[index];
-        if (_.isArray(s)) {
-          node = new UINode({}, this.request, this.rootName, this);
-          for (let i in s) {
-            const subnode = new UINode(s[i], this.request, this.rootName, this);
-            await subnode.loadLayout(s[i], this.workingMode);
-            node.children.push(subnode);
+            if (!_.isNil(node)) {
+              if (_.isNil(node.children)) {
+                node.children = []
+              }
+              if (_.isArray(node.children)) {
+                node.children.push(subnode)
+              }
+            }
           }
-        } else {
-          node = new UINode(s, this.request, this.rootName, this);
-          await node.loadLayout(s, this.workingMode);
+        } else if (_.isObject(child)) {
+          node = this.createChildNode(child, this)
+          if (!_.isNil(node)) {
+            await node.loadLayout(child)
+          }
         }
-        children.push(node);
+        if (!_.isNil(node)) {
+          childNodes.push(node)
+        }
       }
-      this.children = children;
+      this.children = childNodes
     }
 
-    this.schema = liveSchema;
-    // load State
-    this.stateNode = new StateNode(this);
-    await this.stateNode.renewStates();
+    // reload State
+    this.stateNode = new StateNode(this)
+    await this.stateNode.renewStates()
 
-    // load ui.parser plugin
-    try {
-      await this.pluginManager.executePlugins(this.id, "ui.parser", {
-        uiNode: this
-      });
-    } catch (e) {
-      console.log(e.message);
-    }
+    await this.parse()
 
-    // state info default
-    return this;
+    return currentSchema
   }
 
-  async replaceLayout(
-    newSchema: ILayoutSchema | string,
-    workingMode?: IWorkingMode
+  private replaceLiveToken(
+    source: string,
+    token: string,
+    replace: string,
+    except?: Array<string|RegExp>,
+    depth?: number,
   ) {
-    const schemaReplaced = await this.loadLayout(newSchema, workingMode);
-    return schemaReplaced;
-  }
-
-  async updateLayout(workingMode?: IWorkingMode) {
-    const newSchema = await this.assignSchema(this.schema, workingMode);
-    return newSchema;
-  }
-
-  clearLayout() {
-    Cache.clearUINodes(this.rootName);
-    this.schema = {};
-    this.errorInfo = {};
-    this.children = [];
-    return this;
-  }
-
-  getNode(path?: string) {
-    if (path) {
-      return _.get(this, path);
-    }
-    return this;
-  }
-
-  getChildren(route?: Array<Number>) {
-    // if (_.isEmpty(this.children)) {
-    //   console.warn(
-    //     'did you execute loadLayout before using getChildren method?'
-    //   )
-    // }
-    if (route) {
-      const path = route.map((v: Number) => {
-        return `children[${v}]`;
-      });
-      return _.get(this, path.join("."));
-    } else {
-      return this.children;
-    }
-  }
-
-  async genLiveLayout(schema: ILayoutSchema, data: any) {
-    // replace $ to row number
-    const updatePropRow = (target: ILayoutSchema, index: string) => {
-      _.forIn(target, function(value: any, key: string) {
-        if (typeof value === "object") {
-          updatePropRow(value, index);
-        } else if (
-          _.isString(value) &&
-          value.indexOf("$dummy") === -1 &&
-          value.indexOf("$") > -1
-        ) {
-          _.set(target, key, value.replace("$", index));
+    // format the token to create the RegExp
+    const formatToken = token
+      .split('')
+      .map((char: string) => {
+        if ('{}[]()^$*\\'.includes(char)) {
+          return '\\' + char
         }
-      });
-    };
+        return char
+      })
+      .join('')
+    // match the token and the following chars before the next token
+    const tokenMatcher = RegExp(`${formatToken}[^${formatToken}]*`, 'g')
 
-    const liveSchema = schema;
-    let rowTemplate: any = liveSchema.$children;
-    if (rowTemplate && data) {
-      cloneTemplateSchema(rowTemplate);
-      liveSchema.children = data.map((d: any, index: string) =>
-        rowTemplate.map((s: any) => {
-          const newSchema = _.cloneDeep(s);
-          if (newSchema.datasource) {
-            updatePropRow(newSchema, index);
-            newSchema._index = index; // row id
+    const matchArray = source.match(tokenMatcher)
+    if (!_.isNil(matchArray)) {
+      const slices: string[] = []
+
+      let restString = source
+      matchArray.forEach((matchString: string, index: number) => {
+        // the depth of the replacement
+        if (_.isNumber(depth) && index + 1 > depth) {
+          return
+        }
+        // the exception of the replacement
+        if (_.isArray(except) && except.length) {
+          const isExcepted = except.some((value: string|RegExp) => {
+            if (_.isString(value) && matchString.startsWith(value)) {
+              return true
+            } else if (_.isRegExp(value) && value.test(matchString)) {
+              return true
+            }
+            return false
+          })
+          if (isExcepted) {
+            return
           }
-          return newSchema;
+        }
+
+        const matchLength = matchString.length
+        const startIndex = restString.indexOf(matchString)
+        const endIndex = startIndex + matchLength
+
+        slices.push(restString.slice(0, startIndex))
+        slices.push(replace)
+        slices.push(restString.slice(startIndex + token.length, endIndex))
+        restString = restString.slice(endIndex)
+      })
+
+      slices.push(restString)
+      return slices.join('')
+    }
+    return source
+  }
+  private searchAndReplace(
+    target: any,
+    token: string,
+    replace: string,
+    except?: Array<string|RegExp>,
+    depth?: number,
+  ) {
+    if (_.isString(target)) {
+      return this.replaceLiveToken(target, token, replace, except, depth)
+    } else if (_.isObject(target)) {
+      _.forIn(target, (value: any, key: string) => {
+        if (_.isObject(value)) {
+          const newValue = this.searchAndReplace(value, token, replace, except, depth)
+          _.set(target, [key], newValue)
+        } else if (_.isString(value)) {
+          const newValue = this.replaceLiveToken(value, token, replace, except, depth)
+          _.set(target, [key], newValue)
+        }
+      })
+    }
+    return target
+  }
+  private replaceChildToken(
+    schema: IUISchema,
+    index: number,
+  ) {
+    const { $children, children } = schema
+    if (!_.isNil($children)) {
+      if (_.isArray($children)) {
+        $children.forEach(($child: IUISchema) => {
+          $child.datasource = this.searchAndReplace(
+            $child.datasource,
+            '$',
+            `${index}`,
+            ['$dummy'],
+            1,
+          )
+          $child.state = this.searchAndReplace(
+            $child.state,
+            '$',
+            `${index}`,
+            ['$dummy'],
+            1,
+          )
+          this.replaceChildToken($child, index)
         })
-      );
+      } else if (_.isObject($children)) {
+        $children.datasource = this.searchAndReplace(
+          $children.datasource,
+          '$',
+          `${index}`,
+          ['$dummy'],
+          1,
+        )
+        $children.state = this.searchAndReplace(
+          $children.state,
+          '$',
+          `${index}`,
+          ['$dummy'],
+          1,
+        )
+        this.replaceChildToken($children, index)
+      }
+    } else if (_.isArray(children) && children.length) {
+      children.forEach((child: IUISchema|IUISchema[]) => {
+        if (_.isArray(child)) {
+          child.forEach((item: IUISchema) => {
+            item.datasource = this.searchAndReplace(
+              item.datasource,
+              '$',
+              `${index}`,
+              ['$dummy'],
+              1,
+            )
+            item.state = this.searchAndReplace(
+              item.state,
+              '$',
+              `${index}`,
+              ['$dummy'],
+              1,
+            )
+            this.replaceChildToken(item, index)
+          })
+        } else {
+          child.datasource = this.searchAndReplace(
+            child.datasource,
+            '$',
+            `${index}`,
+            ['$dummy'],
+            1,
+          )
+          child.state = this.searchAndReplace(
+            child.state,
+            '$',
+            `${index}`,
+            ['$dummy'],
+            1,
+          )
+          this.replaceChildToken(child, index)
+        }
+      })
+    }
+  }
+  private analyzeLiveSchema(schema: IUISchema) {
+    const data = this.dataNode.data
+    if (_.isArray(data)) {
+      const { $children } = schema
+      schema.children = data.map((value: any, index: number) => {
+        if (_.isArray($children)) {
+          cloneTemplateSchema($children)
+          return $children.map(($child: IUISchema) => {
+            const cloneSchema = _.cloneDeep($child)
+            if (_.isObject(cloneSchema.datasource)) {
+              cloneSchema.datasource = this.searchAndReplace(
+                cloneSchema.datasource,
+                '$',
+                `${index}`,
+                ['$dummy'],
+                1,
+              )
+              cloneSchema.state = this.searchAndReplace(
+                cloneSchema.state,
+                '$',
+                `${index}`,
+                ['$dummy'],
+                1,
+              )
+            }
+            this.replaceChildToken(cloneSchema, index)
+            cloneSchema._index = index
+            return cloneSchema
+          })
+        } else if (_.isObject($children)) {
+          cloneTemplateSchema($children)
+          const cloneSchema = _.cloneDeep($children)
+          if (_.isObject(cloneSchema.datasource)) {
+            cloneSchema.datasource = this.searchAndReplace(
+              cloneSchema.datasource,
+              '$',
+              `${index}`,
+              ['$dummy'],
+              1,
+            )
+            cloneSchema.state = this.searchAndReplace(
+              cloneSchema.state,
+              '$',
+              `${index}`,
+              ['$dummy'],
+              1,
+            )
+          }
+          this.replaceChildToken(cloneSchema, index)
+          cloneSchema._index = index
+          return cloneSchema
+        } else {
+          return undefined
+        }
+      }).filter((item) => {
+        // remove the undefined
+        return item !== undefined
+      }) as Array<IUISchema|IUISchema[]>
+    } else {
+      schema.children = []
     }
 
-    // add a new children
-    this.isLiveChildren = true;
-    return liveSchema;
+    this.isLiveChildren = true
+    return schema
   }
 
-  sendMessage(force: boolean = false) {
-    const newState = {
-      nodes: this.nodes,
+  private async getRemoteSchema(schemaName: string) {
+    let schema: IUISchema | undefined
+    if (_.isString(this.layoutKey) && this.layoutKey) {
+      schema = Cache.getLayoutSchema(this.layoutKey, { cacheKey: schemaName })
+    }
+    if (_.isNil(schema)) {
+      try {
+        const { data } = await this.request.get(schemaName, { prefixType: 'uiSchema' }, this.engineId)
+        if (_.isObject(data)) {
+          schema = data
+          if (_.isString(this.layoutKey) && this.layoutKey) {
+            Cache.setLayoutSchema(this.layoutKey, data, { cacheKey: schemaName })
+          }
+        }
+      } catch (e) {
+        console.error(e)
+        this.errorInfo = {
+          status: 400,
+          code: `Error: failed to load layout schema ${schemaName}`
+        }
+      }
+    }
+    return _.cloneDeep(schema)
+  }
+
+  async loadLayout(schema?: string | IUISchema) {
+    // cache the schema which will be loaded, if not provide, use the current loaded schema as default
+    const schemaCache = _.isNil(schema) ? this.schema : schema
+
+    // add to load queue
+    this.loadQueue++
+
+    if (_.isNil(this.loadProcess)) {
+      this.loadProcess = new Promise((resolve, reject) => {
+        if (_.isString(schemaCache) && schemaCache) {
+
+          this.getRemoteSchema(schemaCache)
+            .then((remoteSchema: IUISchema | undefined) => {
+              if (_.isObject(remoteSchema)) {
+                this.uiSchema = remoteSchema
+                this.analyzeSchema(remoteSchema)
+                  .then((finalSchema: IUISchema) => {
+                    resolve(finalSchema)
+                  })
+                  .catch(() => {
+                    // error during the analyzation
+                    console.warn(`Error occurs when analyze schema for ${
+                      this.id
+                    }${
+                      this.layoutKey ? ` in ${this.layoutKey}` : ''
+                    }${
+                      this.engineId ? ` of ${this.engineId}` : ''
+                    }`)
+                    resolve(undefined)
+                  })
+              } else {
+                console.warn(`Can't get remote schema ${schemaCache} for ${
+                  this.id
+                }${
+                  this.layoutKey ? ` in ${this.layoutKey}` : ''
+                }${
+                  this.engineId ? ` of ${this.engineId}` : ''
+                }`)
+                resolve(undefined)
+              }
+            })
+            .catch(() => {
+              // error during the request
+              console.warn(`Error occurs when request remote schema for ${
+                this.id
+              }${
+                this.layoutKey ? ` in ${this.layoutKey}` : ''
+              }${
+                this.engineId ? ` of ${this.engineId}` : ''
+              }`)
+              resolve(undefined)
+            })
+
+        } else if (_.isObject(schemaCache)) {
+
+          this.uiSchema = schemaCache
+          this.analyzeSchema(schemaCache)
+            .then((finalSchema: IUISchema) => {
+              resolve(finalSchema)
+            })
+            .catch(() => {
+              // error during the analyzation
+              console.warn(`Error occurs when analyze schema for ${
+                this.id
+              }${
+                this.layoutKey ? ` in ${this.layoutKey}` : ''
+              }${
+                this.engineId ? ` of ${this.engineId}` : ''
+              }`)
+              resolve(undefined)
+            })
+
+        } else {
+          // invalid schema param
+          console.warn(`Can't load layout by invalid schema to ${
+            this.id
+          }${
+            this.layoutKey ? ` in ${this.layoutKey}` : ''
+          }${
+            this.engineId ? ` of ${this.engineId}` : ''
+          }`)
+          resolve(undefined)
+        }
+      })
+
+      const loadResult = await this.loadProcess
+      if (!_.isNil(loadResult)) {
+        if (_.isString(this.layoutKey) && this.layoutKey) {
+          // cache the node instance in its layout
+          Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
+        }
+        this.uiSchema = loadResult
+      }
+
+      this.loadQueue--
+      if (this.loadQueue === 0) {
+        delete this.loadProcess
+      }
+
+      return loadResult || this.schema
+    } else {
+      this.loadProcess = this.loadProcess.then(() => {
+        // prepare the schema
+        if (_.isString(schemaCache) && schemaCache) {
+          return this.getRemoteSchema(schemaCache)
+            .then((schema) => {
+              if (_.isNil(schema)) {
+                console.warn(`Can't get remote schema ${schemaCache} for ${
+                  this.id
+                }${
+                  this.layoutKey ? ` in ${this.layoutKey}` : ''
+                }${
+                  this.engineId ? ` of ${this.engineId}` : ''
+                }`)
+              }
+              return schema
+            }, () => {
+              // error during the request
+              console.warn(`Error occurs when request remote schema for ${
+                this.id
+              }${
+                this.layoutKey ? ` in ${this.layoutKey}` : ''
+              }${
+                this.engineId ? ` of ${this.engineId}` : ''
+              }`)
+              return undefined
+            })
+        } else if (_.isObject(schemaCache)) {
+          return schemaCache
+        } else {
+          console.warn(`Can't load layout by invalid schema to ${
+            this.id
+          }${
+            this.layoutKey ? ` in ${this.layoutKey}` : ''
+          }${
+            this.engineId ? ` of ${this.engineId}` : ''
+          }`)
+          return undefined
+        }
+      }).then((schema: IUISchema | undefined) => {
+        // analyze the schema
+        if (_.isObject(schema)) {
+          this.uiSchema = schema
+          return this.analyzeSchema(schema)
+            .then((finalSchema) => {
+              return finalSchema
+            }, () => {
+              // error during the analyzation
+              console.warn(`Error occurs when analyze schema for ${
+                this.id
+              }${
+                this.layoutKey ? ` in ${this.layoutKey}` : ''
+              }${
+                this.engineId ? ` of ${this.engineId}` : ''
+              }`)
+              return undefined
+            })
+        } else {
+          return undefined
+        }
+      })
+
+      const loadResult = await this.loadProcess
+      if (!_.isNil(loadResult)) {
+        if (_.isString(this.layoutKey) && this.layoutKey) {
+          // cache the node instance in its layout
+          Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
+        }
+        this.uiSchema = loadResult
+      }
+
+      this.loadQueue--
+      if (this.loadQueue === 0) {
+        delete this.loadProcess
+      }
+
+      return loadResult || this.schema
+    }
+  }
+
+  /**
+   * replace the layout of the node or its children
+   * @param newSchema
+   * @param route
+   */
+  async replaceLayout(
+    newSchema: string | IUISchema,
+    route?: number[],
+  ) {
+    if (_.isArray(route) && route.length) {
+      const child = this.getChildren(route)
+      if (!_.isArray(child) && _.isObject(child)) {
+        return await child.loadLayout(newSchema)
+      } else {
+        return {}
+      }
+    } else {
+      return await this.loadLayout(newSchema)
+    }
+  }
+
+  /**
+   * refresh the layout of the node. When the node is still loading, the refresh won't work
+   */
+  async refreshLayout() {
+    if (this.loadQueue === 0) {
+      return await this.loadLayout()
+    }
+    return {}
+  }
+
+  private clearSchema() {
+    this.uiSchema = {}
+  }
+  private clearChildren() {
+    const children = this.children
+    if (_.isArray(children) && children.length) {
+      children.forEach((child: IUINode) => {
+        child.clearLayout()
+      })
+    }
+    delete this.children
+  }
+  private clearErrorInfo() {
+    this.errorInfo = {}
+  }
+  clearLayout() {
+    if (_.isString(this.layoutKey) && this.layoutKey) {
+      Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
+    }
+    // this is not the rootNode of the layout
+    this.clearErrorInfo()
+    this.clearChildren()
+    this.clearSchema()
+    return this
+  }
+
+  /**
+   * get the schema of the UINode, or the schema from one of its children
+   * @param route
+   * @returns the uiSchema copy
+   */
+  getSchema(route?: number[]) {
+    if (_.isArray(route) && route.length) {
+      const path = route.map((value: number) => {
+        return `children[${value}]`
+      })
+      return _.get(this.schema, path.join('.'))
+    }
+
+    return this.schema
+  }
+
+  getParent(toTop?: boolean) {
+    if (toTop === true) {
+      let topNode = this.parent
+      while (true) {
+        if (!_.isNil(topNode) && !_.isNil(topNode.parent)) {
+          topNode = topNode.parent
+        } else {
+          break
+        }
+      }
+      return topNode
+    }
+
+    return this.parent
+  }
+
+  getChildren(route?: number[]) {
+    if (_.isArray(route) && route.length) {
+      const path = route.map((value: number) => {
+        return `children[${value}]`
+      })
+      return _.get(this, path.join('.')) as IUINode | undefined
+    } else {
+      return this.children
+    }
+  }
+
+  sendMessage(forceRefresh?: boolean) {
+    const currentState = {
       data: _.cloneDeep(this.dataNode.data),
       state: _.cloneDeep(this.stateNode.state),
-      time: force ? new Date().getTime() : 0
-    };
-    // if (!_.isEmpty(newState.nodes)) {
-    //   console.log(_.cloneDeep(newState), 'at send message on UINode')
-    // }
-    if (!_.isEqual(newState, this.stateInfo)) {
-      this.stateInfo = newState;
-      this.messager.sendMessage(this.id, this.stateInfo);
+      time: forceRefresh ? new Date().getTime() : 0,
+      layoutMap: this.layoutMap,
+    }
+    if (!_.isEqual(currentState, this.stateInfo)) {
+      this.stateInfo = currentState
+      this.messager.sendMessage(this.id, this.stateInfo)
     }
   }
 }
+
+export default UINode
