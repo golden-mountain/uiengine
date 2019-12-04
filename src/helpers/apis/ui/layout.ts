@@ -1,44 +1,26 @@
-import { IUISchema } from "../../../../typings";
-import _ from "lodash";
-import { createInstanceProxy } from "../../APIEngine";
+import _ from 'lodash'
+import { NodeController, UINode } from '../../../../src/data-layer'
+import { IActivateLayoutOption, IObject, IUISchema } from '../../../../typings'
+import { any } from 'prop-types'
 
-class LayoutProxy {
-  constructor(name: string) {}
-
-  active(name?: string) {
-    console.log("get a config");
-  }
-
-  get(name?: string) {
-    console.log("get a config");
-  }
-
-  select(name?: string) {
-    return this.get(name);
-  }
-
-  replaceWith(layoutObject?: IUISchema) {
-    // return this.get(name);
-  }
+const layout: IObject = {
+  active: any,
+  replaceWith: any
+  // select: any
+}
+// layout.select = (layout_id?: string) => {
+//   return layout.active(layout_id)
+// }
+layout.active = (
+  layoutKey?: string | ((layoutsInActiveEngine?: string[]) => string),
+  options?: IActivateLayoutOption
+) => {
+  return NodeController.getInstance().activateLayout(layoutKey, options)
+}
+layout.replaceWith = (newSchema: string | IUISchema, route?: number[]) => {
+  const schema: IUISchema = {}
+  const uiNode = new UINode(schema)
+  return uiNode.replaceLayout(newSchema, route)
 }
 
-// callbacks
-const LayoutProxyGetCallback = function(target: any, key: string) {
-  if (!_.isEmpty(target[key])) {
-    return target[key];
-  }
-
-  return _.get(target.node, key);
-};
-
-const LayoutProxySetCallback = function(target: any, key: string, value: any) {
-  return _.set(target.node, key, value);
-};
-
-export const layout = function(this: any, name: string) {
-  return createInstanceProxy(
-    new LayoutProxy(name),
-    LayoutProxyGetCallback,
-    LayoutProxySetCallback
-  );
-};
+export default layout
