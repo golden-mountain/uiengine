@@ -7,6 +7,7 @@ export interface ILoadOptions {
   container?: string
   parentNode?: IUINode // parent ui node, default render in UIEngine
   props?: IObject
+  [otherKey: string]: any
 }
 
 // using working mode to decide in the layout:
