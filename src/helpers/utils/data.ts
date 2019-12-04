@@ -142,6 +142,8 @@ export function replaceParam(
         const paramValue = _.get(paramMap, [paramKey])
         if (_.isString(paramValue) || _.isFinite(paramValue)) {
           currentStr = currentStr.replace(`{${paramKey}}`, `${paramValue}`)
+        } else {
+          currentStr = currentStr.replace(`{${paramKey}}`, '')
         }
       }
     })
