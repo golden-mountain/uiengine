@@ -32,6 +32,7 @@ export interface IDataGetOption {
   path?: string
 }
 export interface IDataLoadOption {
+  loadID?: string | number
 }
 export interface IDataUpdateOption {
 }

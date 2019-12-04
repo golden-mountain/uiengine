@@ -176,13 +176,14 @@ export default class DataNode implements IDataNode {
     return _.cloneDeep(this.schema)
   }
 
-  private async loadAndPick() {
+  private async loadAndPick(options?: IDataLoadOption) {
+    const loadID = _.get(options, 'loadID')
     const wholeData = await this.dataEngine.loadData(
       this.source,
       {
         engineId: this.uiNode.engineId,
         layoutKey: this.uiNode.layoutKey,
-        loadID: this.uiNode.layoutKey
+        loadID: !_.isNil(loadID) ? `${this.uiNode.layoutKey}-${loadID}` : this.uiNode.layoutKey
       },
     )
 
@@ -305,7 +306,7 @@ export default class DataNode implements IDataNode {
       if (!this.source.autoload || loadMode === 'new') {
         // do not need to load data
       } else if (loadMode === 'edit' || loadMode === 'view') {
-        await this.loadAndPick()
+        await this.loadAndPick(options)
       } else if (loadMode === 'customize') {
         const { operationModes } = workingMode
         if (_.isArray(operationModes)) {
@@ -314,7 +315,7 @@ export default class DataNode implements IDataNode {
             if (_.startsWith(this.source.source, source)) {
               loadMode = mode
               if (mode !== 'create') {
-                await this.loadAndPick()
+                await this.loadAndPick(options)
               }
               break
             }
@@ -324,7 +325,7 @@ export default class DataNode implements IDataNode {
           if (_.startsWith(this.source.source, source)) {
             loadMode = mode
             if (mode !== 'create') {
-              await this.loadAndPick()
+              await this.loadAndPick(options)
             }
           }
         }

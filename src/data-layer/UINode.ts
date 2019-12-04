@@ -225,7 +225,7 @@ export class UINode implements IUINode {
    * @param schema the source UI schema
    * @returns the final UI schema
    */
-  private async analyzeSchema(schema: IUISchema) {
+  private async analyzeSchema(schema: IUISchema, loadID?: string | number) {
     schema = await this.parseBefore(schema)
 
     let currentSchema: IUISchema = schema
@@ -235,7 +235,7 @@ export class UINode implements IUINode {
       if (source.startsWith('$dummy.')) {
         // dummy node needn't load data
       } else {
-        await this.dataNode.loadData(currentSchema.datasource)
+        await this.dataNode.loadData(currentSchema.datasource, { loadID })
       }
     }
 
@@ -253,7 +253,7 @@ export class UINode implements IUINode {
           for (let element of child) {
             // the upper 'node' is a dummy node which is just used to store these subnodes, so their real parent is still this
             const subnode = this.createChildNode(element, this)
-            await subnode.loadLayout(element)
+            await subnode.loadLayout(element, loadID)
 
             if (!_.isNil(node)) {
               if (_.isNil(node.children)) {
@@ -267,7 +267,7 @@ export class UINode implements IUINode {
         } else if (_.isObject(child)) {
           node = this.createChildNode(child, this)
           if (!_.isNil(node)) {
-            await node.loadLayout(child)
+            await node.loadLayout(child, loadID)
           }
         }
         if (!_.isNil(node)) {
@@ -540,7 +540,7 @@ export class UINode implements IUINode {
     return _.cloneDeep(schema)
   }
 
-  async loadLayout(schema?: string | IUISchema) {
+  async loadLayout(schema?: string | IUISchema, loadID?: string | number) {
     // cache the schema which will be loaded, if not provide, use the current loaded schema as default
     const schemaCache = _.isNil(schema) ? this.schema : schema
 
@@ -555,7 +555,7 @@ export class UINode implements IUINode {
             .then((remoteSchema: IUISchema | undefined) => {
               if (_.isObject(remoteSchema)) {
                 this.uiSchema = remoteSchema
-                this.analyzeSchema(remoteSchema)
+                this.analyzeSchema(remoteSchema, loadID)
                   .then((finalSchema: IUISchema) => {
                     resolve(finalSchema)
                   })
@@ -596,7 +596,7 @@ export class UINode implements IUINode {
         } else if (_.isObject(schemaCache)) {
 
           this.uiSchema = schemaCache
-          this.analyzeSchema(schemaCache)
+          this.analyzeSchema(schemaCache, loadID)
             .then((finalSchema: IUISchema) => {
               resolve(finalSchema)
             })
@@ -683,7 +683,7 @@ export class UINode implements IUINode {
         // analyze the schema
         if (_.isObject(schema)) {
           this.uiSchema = schema
-          return this.analyzeSchema(schema)
+          return this.analyzeSchema(schema, loadID)
             .then((finalSchema) => {
               return finalSchema
             }, () => {
@@ -728,25 +728,26 @@ export class UINode implements IUINode {
   async replaceLayout(
     newSchema: string | IUISchema,
     route?: number[],
+    replaceID?: string | number,
   ) {
     if (_.isArray(route) && route.length) {
       const child = this.getChildren(route)
       if (!_.isArray(child) && _.isObject(child)) {
-        return await child.loadLayout(newSchema)
+        return await child.loadLayout(newSchema, replaceID)
       } else {
         return {}
       }
     } else {
-      return await this.loadLayout(newSchema)
+      return await this.loadLayout(newSchema, replaceID)
     }
   }
 
   /**
    * refresh the layout of the node. When the node is still loading, the refresh won't work
    */
-  async refreshLayout() {
+  async refreshLayout(refreshID?: string | number) {
     if (this.loadQueue === 0) {
-      return await this.loadLayout()
+      return await this.loadLayout(undefined, refreshID)
     }
     return {}
   }

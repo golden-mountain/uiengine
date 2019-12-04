@@ -49,9 +49,9 @@ export interface IUINode {
 
   parse: () => Promise
 
-  loadLayout: (schema?: string | IUISchema) => Promise<IUISchema>
-  replaceLayout: (newSchema: string | IUISchema, route?: number[]) => Promise<IUISchema>
-  refreshLayout: () => Promise<IUISchema>
+  loadLayout: (schema?: string | IUISchema, loadID?: string | number) => Promise<IUISchema>
+  replaceLayout: (newSchema: string | IUISchema, route?: number[], replaceID?: string | number) => Promise<IUISchema>
+  refreshLayout: (refreshID?: string | number) => Promise<IUISchema>
   clearLayout: () => IUINode
 
   getSchema: (route?: number[]) => IUISchema | undefined

@@ -9,14 +9,20 @@ import {
 } from '../../../typings'
 
 /**
- * get the access route from the string, eg:
- * convert 'a.b.c.d' to 'a.b.c.d'
- * convert 'a.b.c:d' to 'a.b.c.d'
- * convert 'a.b.c:' to 'a.b.c'
- * convert 'a.b#c:d' to 'a.b'
- * convert 'a.b.c#:d' to 'a.b.c'
- * convert 'a.b.c:#d' to 'a.b.c'
- * convert '#a.b.c:d' to ''
+ * Get the access route from the string,
+ * '^' means the start, '#' means the end, '.' and ':' are separators. Eg:
+ * convert 'a.b.c.d' to 'a.b.c.d',
+ * convert 'a.b.c:d' to 'a.b.c.d',
+ * convert 'a.b.c:' to 'a.b.c',
+ * convert '^a.b.c:d#' to 'a.b.c.d',
+ * convert 'a.b^c:d' to 'c.d',
+ * convert 'a.b.c^:d' to 'd',
+ * convert 'a.b.c:^d' to 'd',
+ * convert 'a.b.c:d^' to '',
+ * convert 'a.b#c:d' to 'a.b',
+ * convert 'a.b.c#:d' to 'a.b.c',
+ * convert 'a.b.c:#d' to 'a.b.c',
+ * convert '#a.b.c:d' to '',
  * if prefix is provided, add it before the string, convert to prefix.xxx.xxx
  * @param source the source string
  * @param prefix add prefix string
@@ -27,9 +33,14 @@ export function getAccessRoute(
 ) {
   let srcString: string = source
   // replace the ':'
-  srcString = srcString.replace(':', '.')
+  srcString = srcString.replace(/\:/g, '.')
+  // splice the string by '^'
+  const slices = srcString.split('^')
+  srcString = slices.length > 1 ? slices.slice(1).join('.') : srcString
   // splice the string by '#'
   srcString = srcString.split('#')[0]
+  // replace multiple separators
+  srcString = srcString.replace(/\.{2,}/g, '.')
   // remove the '.' at both ends
   srcString = _.trim(srcString, '.')
 
@@ -44,14 +55,20 @@ export function getAccessRoute(
 }
 
 /**
- * get the domain name from the string, eg:
- * convert 'a.b.c.d' to 'a'
- * convert 'a.b.c:d' to 'a.b.c'/'a_b_c'
- * convert 'a.b.c:' to 'a.b.c'/'a_b_c'
- * convert 'a.b#c:d' to 'a.b.c'/'a_b_c'
- * convert 'a.b.c#:d' to 'a.b.c'/'a_b_c'
- * convert 'a.b.c:#d' to 'a.b.c'/'a_b_c'
- * convert '#a.b.c:d' to 'a.b.c'/'a_b_c'
+ * Get the domain name from the string,
+ * starts from the first character, ':' means the end, '.', '^' and '#' are separators. Eg:
+ * convert 'a.b.c.d' to 'a'(not found ':', use the first '.'),
+ * convert 'a.b.c:d' to 'a.b.c'/'a_b_c',
+ * convert 'a.b.c:' to 'a.b.c'/'a_b_c',
+ * convert '^a.b.c:d#' to 'a.b.c'/'a_b_c',
+ * convert 'a.b^c:d' to 'a.b.c'/'a_b_c',
+ * convert 'a.b.c^:d' to 'a.b.c'/'a_b_c',
+ * convert 'a.b.c:^d' to 'a.b.c'/'a_b_c',
+ * convert 'a.b.c:d^' to 'a.b.c'/'a_b_c',
+ * convert 'a.b#c:d' to 'a.b.c'/'a_b_c',
+ * convert 'a.b.c#:d' to 'a.b.c'/'a_b_c',
+ * convert 'a.b.c:#d' to 'a.b.c'/'a_b_c',
+ * convert '#a.b.c:d' to 'a.b.c'/'a_b_c',
  * @param source the source string
  * @param snakeCase use snake case
  */
@@ -60,14 +77,21 @@ export function getDomainName(
   snakeCase?: boolean,
 ) {
   if (_.isString(source) && source) {
-    // replace the '#'
-    source = source.replace('#', '.')
+    // replace the '^' and '#'
+    source = source.replace(/\^/g, '.')
+    source = source.replace(/\#/g, '.')
     if (source.includes(':')) {
       // splice the string by ':'
       source = source.split(':')[0]
+      // replace multiple separators
+      source = source.replace(/\.{2,}/g, '.')
       // remove the '.' at both ends
       source = _.trim(source, '.')
     } else {
+      // replace multiple separators
+      source = source.replace(/\.{2,}/g, '.')
+      // remove the '.' at both ends
+      source = _.trim(source, '.')
       // splice the string by '.'
       source = source.split('.')[0]
     }

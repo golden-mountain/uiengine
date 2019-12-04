@@ -381,7 +381,8 @@ export class NodeController implements INodeController {
 
     const rootNode = targetRenderer.uiNode
     try {
-      await rootNode.loadLayout(schema)
+      const loadTime = new Date().getTime()
+      await rootNode.loadLayout(schema, loadTime)
       targetRenderer.visible = true
 
       // update parent node
