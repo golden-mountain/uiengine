@@ -13,9 +13,6 @@ export function setComponentState(this: any, state: any) {
 
 /**
  * compare the actual value with the expected value
- * @param actual
- * @param expected
- * @param rule
  * is
  * not
  * above
@@ -30,6 +27,9 @@ export function setComponentState(this: any, state: any) {
  * notEmpty
  * or
  * regexp
+ * @param actual
+ * @param expected
+ * @param rule
  */
 const compareRules = {
   is: (actual: any, expected: any) => {
@@ -122,6 +122,14 @@ const compareRules = {
     return regexp.test(actual);
   }
 };
+/**
+ * these rules specify their own expected value by default, so needn't provide
+ */
+const rulesWithExpect = [
+  'empty',
+  'notEmpty',
+]
+
 function compare(actual: any, expected: any, rule: string = "is") {
   const compareLogic = compareRules[rule];
   if (_.isFunction(compareLogic)) {
@@ -226,7 +234,10 @@ function resolveDependance(
         let dataMatched = true;
         if (data !== undefined) {
           dataMatched = dataCompare(targetUINode, data, dataCompareRule);
+        } else if (rulesWithExpect.includes(dataCompareRule)) {
+          dataMatched = dataCompare(targetUINode, data, dataCompareRule);
         }
+
         let stateMatched = true;
         if (_.isObject(state)) {
           stateMatched = stateCompare(
