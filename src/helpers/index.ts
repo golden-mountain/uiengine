@@ -3,6 +3,7 @@ export { default as Cache } from "./Cache";
 export { default as DataEngine } from "./DataEngine";
 export { default as DataMapper } from "./DataMapper";
 export { default as DataPool } from "./DataPool";
+export { default as Feedback } from "./Feedback";
 export { default as ListenerManager } from "./ListenerManager";
 export { default as Messager } from "./Messager";
 export { default as PluginManager } from "./PluginManager";

@@ -1,6 +1,8 @@
 import _ from 'lodash'
 
-import { DataPool, DataEngine, searchNodes } from '..'
+import { DataPool } from '../DataPool'
+import { DataEngine } from '../DataEngine'
+import { searchNodes } from './ui'
 
 import {
   IDataSource,
@@ -128,6 +130,7 @@ export function getSchemaName(source: string) {
 export function replaceParam(
   sourceStr: string,
   paramMap: object,
+  defaultString: string = '',
 ) {
   const matchBlock = /\{[\w\-]*\}/g
   const matchString = /\{(.*)\}/
@@ -142,8 +145,8 @@ export function replaceParam(
         const paramValue = _.get(paramMap, [paramKey])
         if (_.isString(paramValue) || _.isFinite(paramValue)) {
           currentStr = currentStr.replace(`{${paramKey}}`, `${paramValue}`)
-        } else {
-          currentStr = currentStr.replace(`{${paramKey}}`, '')
+        } else if (_.isString(defaultString)) {
+          currentStr = currentStr.replace(`{${paramKey}}`, defaultString)
         }
       }
     })

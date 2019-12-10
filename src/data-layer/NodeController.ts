@@ -1,16 +1,12 @@
 import _ from 'lodash'
 
-import { UINode } from '../data-layer'
-import {
-  DataPool,
-  Messager,
-  PluginManager,
-  Request,
-  Workflow,
-} from '../helpers'
-import {
-  searchNodes,
-} from '../helpers/utils'
+import { UINode } from './UINode'
+import { DataPool } from '../helpers/DataPool'
+import { Messager } from '../helpers/Messager'
+import { PluginManager } from '../helpers/PluginManager'
+import { Request } from '../helpers/Request'
+import { Workflow } from '../helpers/Workflow'
+import { searchNodes } from '../helpers/utils/ui'
 
 import {
   IErrorInfo,

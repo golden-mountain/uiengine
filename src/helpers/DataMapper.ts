@@ -1,7 +1,7 @@
 import _ from 'lodash'
 
 import { PluginManager } from './PluginManager'
-import { getDomainName } from './utils'
+import { getDomainName } from './utils/data'
 
 import {
   IDataMapper,
