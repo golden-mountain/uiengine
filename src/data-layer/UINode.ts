@@ -32,6 +32,7 @@ import {
   IUINodeRenderer,
   IUISchema,
 } from '../../typings'
+import { on } from 'cluster'
 
 export class UINode implements IUINode {
   readonly id: string
@@ -56,7 +57,7 @@ export class UINode implements IUINode {
     return this.uiSchema
   }
   private loadQueue: number = 0
-  private loadProcess: Promise<IUISchema|undefined> | undefined
+  private loadProcess: Promise<IUISchema | undefined> | undefined
 
   props: IObject = {}
   layoutMap: {
@@ -175,7 +176,7 @@ export class UINode implements IUINode {
       const { results } = await this.pluginManager.executePlugins(
         this.id,
         'ui.parser.before',
-        {uiNode: this, schema}
+        { uiNode: this, schema }
       )
       if (_.isArray(results)) {
         results.forEach((resultItem) => {
@@ -196,7 +197,7 @@ export class UINode implements IUINode {
       await this.pluginManager.executePlugins(
         this.id,
         'ui.parser',
-        {uiNode: this}
+        { uiNode: this }
       )
     } catch (e) {
       console.error(e)
@@ -290,7 +291,7 @@ export class UINode implements IUINode {
     source: string,
     token: string,
     replace: string,
-    except?: Array<string|RegExp>,
+    except?: Array<string | RegExp>,
     depth?: number,
   ) {
     // format the token to create the RegExp
@@ -318,7 +319,7 @@ export class UINode implements IUINode {
         }
         // the exception of the replacement
         if (_.isArray(except) && except.length) {
-          const isExcepted = except.some((value: string|RegExp) => {
+          const isExcepted = except.some((value: string | RegExp) => {
             if (_.isString(value) && matchString.startsWith(value)) {
               return true
             } else if (_.isRegExp(value) && value.test(matchString)) {
@@ -350,7 +351,7 @@ export class UINode implements IUINode {
     target: any,
     token: string,
     replace: string,
-    except?: Array<string|RegExp>,
+    except?: Array<string | RegExp>,
     depth?: number,
   ) {
     if (_.isString(target)) {
@@ -410,7 +411,7 @@ export class UINode implements IUINode {
         this.replaceChildToken($children, index)
       }
     } else if (_.isArray(children) && children.length) {
-      children.forEach((child: IUISchema|IUISchema[]) => {
+      children.forEach((child: IUISchema | IUISchema[]) => {
         if (_.isArray(child)) {
           child.forEach((item: IUISchema) => {
             item.datasource = this.searchAndReplace(
@@ -506,7 +507,7 @@ export class UINode implements IUINode {
       }).filter((item) => {
         // remove the undefined
         return item !== undefined
-      }) as Array<IUISchema|IUISchema[]>
+      }) as Array<IUISchema | IUISchema[]>
     } else {
       schema.children = []
     }
@@ -563,21 +564,21 @@ export class UINode implements IUINode {
                     // error during the analyzation
                     console.warn(`Error occurs when analyze schema for ${
                       this.id
-                    }${
+                      }${
                       this.layoutKey ? ` in ${this.layoutKey}` : ''
-                    }${
+                      }${
                       this.engineId ? ` of ${this.engineId}` : ''
-                    }`)
+                      }`)
                     resolve(undefined)
                   })
               } else {
                 console.warn(`Can't get remote schema ${schemaCache} for ${
                   this.id
-                }${
+                  }${
                   this.layoutKey ? ` in ${this.layoutKey}` : ''
-                }${
+                  }${
                   this.engineId ? ` of ${this.engineId}` : ''
-                }`)
+                  }`)
                 resolve(undefined)
               }
             })
@@ -585,11 +586,11 @@ export class UINode implements IUINode {
               // error during the request
               console.warn(`Error occurs when request remote schema for ${
                 this.id
-              }${
+                }${
                 this.layoutKey ? ` in ${this.layoutKey}` : ''
-              }${
+                }${
                 this.engineId ? ` of ${this.engineId}` : ''
-              }`)
+                }`)
               resolve(undefined)
             })
 
@@ -604,11 +605,11 @@ export class UINode implements IUINode {
               // error during the analyzation
               console.warn(`Error occurs when analyze schema for ${
                 this.id
-              }${
+                }${
                 this.layoutKey ? ` in ${this.layoutKey}` : ''
-              }${
+                }${
                 this.engineId ? ` of ${this.engineId}` : ''
-              }`)
+                }`)
               resolve(undefined)
             })
 
@@ -616,11 +617,11 @@ export class UINode implements IUINode {
           // invalid schema param
           console.warn(`Can't load layout by invalid schema to ${
             this.id
-          }${
+            }${
             this.layoutKey ? ` in ${this.layoutKey}` : ''
-          }${
+            }${
             this.engineId ? ` of ${this.engineId}` : ''
-          }`)
+            }`)
           resolve(undefined)
         }
       })
@@ -649,22 +650,22 @@ export class UINode implements IUINode {
               if (_.isNil(schema)) {
                 console.warn(`Can't get remote schema ${schemaCache} for ${
                   this.id
-                }${
+                  }${
                   this.layoutKey ? ` in ${this.layoutKey}` : ''
-                }${
+                  }${
                   this.engineId ? ` of ${this.engineId}` : ''
-                }`)
+                  }`)
               }
               return schema
             }, () => {
               // error during the request
               console.warn(`Error occurs when request remote schema for ${
                 this.id
-              }${
+                }${
                 this.layoutKey ? ` in ${this.layoutKey}` : ''
-              }${
+                }${
                 this.engineId ? ` of ${this.engineId}` : ''
-              }`)
+                }`)
               return undefined
             })
         } else if (_.isObject(schemaCache)) {
@@ -672,11 +673,11 @@ export class UINode implements IUINode {
         } else {
           console.warn(`Can't load layout by invalid schema to ${
             this.id
-          }${
+            }${
             this.layoutKey ? ` in ${this.layoutKey}` : ''
-          }${
+            }${
             this.engineId ? ` of ${this.engineId}` : ''
-          }`)
+            }`)
           return undefined
         }
       }).then((schema: IUISchema | undefined) => {
@@ -690,11 +691,11 @@ export class UINode implements IUINode {
               // error during the analyzation
               console.warn(`Error occurs when analyze schema for ${
                 this.id
-              }${
+                }${
                 this.layoutKey ? ` in ${this.layoutKey}` : ''
-              }${
+                }${
                 this.engineId ? ` of ${this.engineId}` : ''
-              }`)
+                }`)
               return undefined
             })
         } else {
@@ -767,14 +768,17 @@ export class UINode implements IUINode {
   private clearErrorInfo() {
     this.errorInfo = {}
   }
-  clearLayout() {
-    if (_.isString(this.layoutKey) && this.layoutKey) {
-      Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
+  clearLayout(onlyChild?: boolean) {
+    if (!onlyChild) {
+      if (_.isString(this.layoutKey) && this.layoutKey) {
+        Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
+      }
+      this.clearErrorInfo()
+      this.clearSchema()
     }
     // this is not the rootNode of the layout
-    this.clearErrorInfo()
     this.clearChildren()
-    this.clearSchema()
+
     return this
   }
 
