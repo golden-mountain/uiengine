@@ -231,7 +231,7 @@ export class UINode implements IUINode {
 
     let currentSchema: IUISchema = schema
     // use dataNode to load the dataSource
-    if (_.isObject(currentSchema.datasource)) {
+    if (_.isObject(currentSchema.datasource) && this.dataNode.data === undefined) {
       const { source } = currentSchema.datasource
       if (source.startsWith('$dummy.')) {
         // dummy node needn't load data
