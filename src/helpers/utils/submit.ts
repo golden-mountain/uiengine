@@ -72,7 +72,7 @@ function search(
           search(
             item,
             callback,
-             `${index}`,
+            `${index}`,
             currentPath + `[${index}]`,
             target,
           )
@@ -83,7 +83,7 @@ function search(
             item,
             callback,
             key,
-            currentPath ? currentPath + `.${key}`: key,
+            currentPath ? currentPath + `.${key}` : key,
             target,
           )
         })
@@ -519,7 +519,7 @@ export function requestGenerator(
         }
 
         return requestConfig
-      }).filter((request: ISubmitRequest|undefined) => {
+      }).filter((request: ISubmitRequest | undefined) => {
         return !_.isNil(request)
       }) as ISubmitRequest[]
       record.requestMode = 'sync'
@@ -559,7 +559,7 @@ export function dependResolver(
         if (_.isString(dependKey) && dependKey) {
           const dependValue = _.get(dependRecord, `record.requestQueue.${dependKey}`)
 
-          if (_.isString(dependValue) && _.isFinite(dependValue)) {
+          if (_.isString(dependValue) || _.isFinite(dependValue)) {
             dependParam[mapKey] = `${dependValue}`
           }
         }
