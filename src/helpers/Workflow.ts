@@ -1,9 +1,10 @@
 import _ from "lodash";
 
+import { UINode, NodeController } from "../data-layer";
 import { DataPool } from "./DataPool";
 import { PluginManager } from "./PluginManager";
-import { UINode, NodeController } from "../data-layer";
-import { searchNodes, submitToAPI } from "./utils"
+import { searchNodes } from "./utils/ui"
+import { submitToAPI } from "./utils/data"
 
 import {
   IAddLayoutConfig,

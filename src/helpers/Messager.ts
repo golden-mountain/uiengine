@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { IMessager } from "../../typings";
 
-export default class Messager implements IMessager {
+export class Messager implements IMessager {
   static instance: IMessager;
   static getInstance = () => {
     if (!Messager.instance) {
@@ -38,3 +38,5 @@ export default class Messager implements IMessager {
     _.unset(this.objectStateFuncMap, id);
   }
 }
+
+export default Messager

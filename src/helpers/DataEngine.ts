@@ -4,7 +4,7 @@ import { Cache } from './Cache'
 import { DataMapper } from './DataMapper'
 import { PluginManager } from './PluginManager'
 import { Request } from './Request'
-import { getDomainName, getSchemaName } from './utils'
+import { getDomainName, getSchemaName } from './utils/data'
 
 import {
   IDataEngine,
