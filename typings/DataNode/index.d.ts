@@ -37,7 +37,7 @@ export interface IDataLoadOption {
 export interface IDataUpdateOption {
 }
 export interface IDataDeleteOption {
-  path?: string
+  clearPool?: boolean
 }
 
 export interface IDataNode {

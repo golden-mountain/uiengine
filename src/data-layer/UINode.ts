@@ -30,6 +30,7 @@ import {
   IUINode,
   IUINodeConfig,
   IUINodeRenderer,
+  IUINodeClearOption,
   IUISchema,
 } from '../../typings'
 import { on } from 'cluster'
@@ -753,31 +754,56 @@ export class UINode implements IUINode {
     return {}
   }
 
-  private clearSchema() {
-    this.uiSchema = {}
-  }
-  private clearChildren() {
-    const children = this.children
-    if (_.isArray(children) && children.length) {
-      children.forEach((child: IUINode) => {
-        child.clearLayout()
-      })
-    }
-    delete this.children
-  }
-  private clearErrorInfo() {
-    this.errorInfo = {}
-  }
-  clearLayout(onlyChild?: boolean) {
-    if (!onlyChild) {
+  clearLayout(options?: IUINodeClearOption) {
+    if (_.isObject(options)) {
+      const { onlyChild, clearData, clearPool } = options
+
+      if (onlyChild === false) {
+        // clear the UINode from Cache
+        if (_.isString(this.layoutKey) && this.layoutKey) {
+          Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
+        }
+
+        // reset error info of the node
+        this.errorInfo = {}
+        // clear schema of the node
+        this.uiSchema = {}
+      }
+
+      if (clearData === true) {
+        // clear data and pool
+        this.dataNode.deleteData({ clearPool })
+      }
+
+      // clear children layout
+      const children = this.children
+      if (_.isArray(children) && children.length) {
+        children.forEach((child: IUINode) => {
+          child.clearLayout({ clearData, clearPool })
+        })
+      }
+      delete this.children
+
+    } else {
+      // clear the UINode from Cache
       if (_.isString(this.layoutKey) && this.layoutKey) {
         Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
       }
-      this.clearErrorInfo()
-      this.clearSchema()
+
+      // reset error info of the node
+      this.errorInfo = {}
+      // clear schema of the node
+      this.uiSchema = {}
+
+      // clear children layout
+      const children = this.children
+      if (_.isArray(children) && children.length) {
+        children.forEach((child: IUINode) => {
+          child.clearLayout()
+        })
+      }
+      delete this.children
     }
-    // this is not the rootNode of the layout
-    this.clearChildren()
 
     return this
   }

@@ -23,6 +23,12 @@ export interface IUINodeConfig {
   request?: IRequest
 }
 
+export interface IUINodeClearOption {
+  onlyChild?: boolean
+  clearData?: boolean
+  clearPool?: boolean
+}
+
 export interface IUINode {
   readonly id: string
   readonly engineId?: string
@@ -52,7 +58,7 @@ export interface IUINode {
   loadLayout: (schema?: string | IUISchema, loadID?: string | number) => Promise<IUISchema>
   replaceLayout: (newSchema: string | IUISchema, route?: number[], replaceID?: string | number) => Promise<IUISchema>
   refreshLayout: (refreshID?: string | number) => Promise<IUISchema>
-  clearLayout: () => IUINode
+  clearLayout: (options?: IUINodeClearOption) => IUINode
 
   getSchema: (route?: number[]) => IUISchema | undefined
   getParent: (toTop?: boolean) => IUINode | undefined
