@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import {} from '../data-layer'
+import { NodeController } from '../data-layer'
 
 import {
   IListener,
@@ -25,25 +25,44 @@ const listener: IListener = async (directParam: IListenerParam, helper: IListene
         const record = prevRecords[i]
         if (_.isObject(record)) {
           const { listenerName, result } = record
-          if (
-            listenerName === 'submitData' &&
-            result instanceof Promise
-          ) {
-            const status = await result
-            if (status !== 'Submit Succeeded') {
-              return false
+          if (listenerName === 'submitData') {
+            if (result instanceof Promise) {
+              const prevStatus = await result
+              if (prevStatus !== 'Submit Succeeded') {
+                return prevStatus
+              }
+            } else {
+              if (result !== 'Submit Succeeded') {
+                return result
+              }
             }
           }
         }
       }
     }
   }
+  console.log('afterSubmit begin')
 
   const uiNode: IUINode = _.get(directParam, 'uiNode')
   const target: ISubmitProcess | ISubmitTarget = _.get(directParam, 'target')
   const options: ISubmitOption = _.get(directParam, 'options')
   const callbacks: ISubmitCallback = _.get(directParam, 'callbacks')
 
+  if (!_.isNil(uiNode) && _.isString(uiNode.layoutKey)) {
+    const controller = NodeController.getInstance()
+    const renderer = controller.layoutMap[uiNode.layoutKey]
+
+    if (!_.isNil(renderer)) {
+      const { options } = renderer
+
+      if (_.isObject(options)) {
+        const { container } = options
+        if (container === 'antd:Drawer') {
+          controller.removeLayout(uiNode.layoutKey, true)
+        }
+      }
+    }
+  }
 }
 
 export const afterSubmit: IListenerConfig = {

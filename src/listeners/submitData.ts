@@ -65,6 +65,7 @@ const listener: IListener = async (directParam: IListenerParam, helper: IListene
 
   if (_.isObject(target)) {
 
+    console.log(target, options, callbacks)
     const record = await submit(target, options, callbacks)
 
     if (!_.isNil(record) && (record.status === 'COMPLETED' || record.status === 'SUCCESS')) {

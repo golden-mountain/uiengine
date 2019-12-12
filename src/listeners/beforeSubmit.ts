@@ -11,27 +11,34 @@ import {
   ISubmitTarget,
   ISubmitOption,
   ISubmitCallback,
+  ISubmitProcessRecord,
+  ISubmitTargetRecord,
   IUINode,
 } from '../../typings'
 
-function onProcessCompleted() {
+function onProcessCompleted(process: ISubmitProcess, record: ISubmitProcessRecord) {
   let message: string = 'Submit Process Completed'
+  console.log('Submit Process Completed', process, record)
   Feedback.getInstance().send('SubmitSuccess', message)
 }
-function onProcessFailed() {
+function onProcessFailed(process: ISubmitProcess, record: ISubmitProcessRecord) {
   let message: string = 'Submit Process Failed'
+  console.log('Submit Process Failed', process, record)
   Feedback.getInstance().send('SubmitError', message)
 }
-function onProcessTerminated() {
+function onProcessTerminated(process: ISubmitProcess, record: ISubmitProcessRecord) {
   let message: string = 'Submit Process Terminated'
+  console.log('Submit Process Terminated', process, record)
   Feedback.getInstance().send('SubmitError', message)
 }
-function onTargetSuccess() {
+function onTargetSuccess(target: ISubmitTarget, record: ISubmitTargetRecord) {
   let message: string = 'Submit Target Succeeded'
+  console.log('Submit Target Succeeded', target, record)
   Feedback.getInstance().send('SubmitSuccess', message)
 }
-function onTargetFailure() {
+function onTargetFailure(target: ISubmitTarget, record: ISubmitTargetRecord) {
   let message: string = 'Submit Target Failed'
+  console.log('Submit Target Failed', target, record)
   Feedback.getInstance().send('SubmitError', message)
 }
 
