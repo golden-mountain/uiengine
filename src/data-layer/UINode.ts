@@ -59,6 +59,7 @@ export class UINode implements IUINode {
   }
   private loadQueue: number = 0
   private loadProcess: Promise<IUISchema | undefined> | undefined
+  private loadingID?: number | string
 
   props: IObject = {}
   layoutMap: {
@@ -227,18 +228,42 @@ export class UINode implements IUINode {
    * @param schema the source UI schema
    * @returns the final UI schema
    */
-  private async analyzeSchema(schema: IUISchema, loadID?: string | number) {
+  private async analyzeSchema(schema: IUISchema) {
     schema = await this.parseBefore(schema)
 
     let currentSchema: IUISchema = schema
-    // use dataNode to load the dataSource
-    if (_.isObject(currentSchema.datasource) && this.dataNode.data === undefined) {
-      const { source } = currentSchema.datasource
-      if (source.startsWith('$dummy.')) {
-        // dummy node needn't load data
+
+    // get source string and format datasource
+    let sourceStr: string = `$dummy.${this.id}`
+    const { datasource: srcConfig } = currentSchema
+    if (_.isObject(srcConfig) && !_.isEmpty(srcConfig)) {
+      const { source } = srcConfig
+      if (!_.isString(source) || _.isEmpty(source)) {
+        srcConfig.source = sourceStr
       } else {
-        await this.dataNode.loadData(currentSchema.datasource, { loadID })
+        sourceStr = source
       }
+    } else if (_.isString(srcConfig) && srcConfig) {
+      sourceStr = srcConfig
+      currentSchema.datasource = {
+        source: srcConfig,
+      }
+    } else {
+      currentSchema.datasource = {
+        source: sourceStr,
+      }
+    }
+
+    // use dataNode to load the dataSource, except:
+    // 1. the source string is invalid
+    // 2. the source string starts with '$dummy.'
+    // 3. the load without loadID which means it still use prev data
+    if (
+      _.isString(sourceStr) && sourceStr &&
+      !sourceStr.startsWith('$dummy.') &&
+      !_.isNil(this.loadingID)
+    ) {
+      await this.dataNode.loadData(currentSchema.datasource, { loadID: this.loadingID })
     }
 
     if (!_.isNil(currentSchema.$children)) {
@@ -255,7 +280,7 @@ export class UINode implements IUINode {
           for (let element of child) {
             // the upper 'node' is a dummy node which is just used to store these subnodes, so their real parent is still this
             const subnode = this.createChildNode(element, this)
-            await subnode.loadLayout(element, loadID)
+            await subnode.loadLayout(element, this.loadingID)
 
             if (!_.isNil(node)) {
               if (_.isNil(node.children)) {
@@ -269,7 +294,7 @@ export class UINode implements IUINode {
         } else if (_.isObject(child)) {
           node = this.createChildNode(child, this)
           if (!_.isNil(node)) {
-            await node.loadLayout(child, loadID)
+            await node.loadLayout(child, this.loadingID)
           }
         }
         if (!_.isNil(node)) {
@@ -551,13 +576,18 @@ export class UINode implements IUINode {
 
     if (_.isNil(this.loadProcess)) {
       this.loadProcess = new Promise((resolve, reject) => {
+        // set the current loading ID
+        if (!_.isNil(loadID)) {
+          this.loadingID = loadID
+        }
+
         if (_.isString(schemaCache) && schemaCache) {
 
           this.getRemoteSchema(schemaCache)
             .then((remoteSchema: IUISchema | undefined) => {
               if (_.isObject(remoteSchema)) {
                 this.uiSchema = remoteSchema
-                this.analyzeSchema(remoteSchema, loadID)
+                this.analyzeSchema(remoteSchema)
                   .then((finalSchema: IUISchema) => {
                     resolve(finalSchema)
                   })
@@ -598,7 +628,7 @@ export class UINode implements IUINode {
         } else if (_.isObject(schemaCache)) {
 
           this.uiSchema = schemaCache
-          this.analyzeSchema(schemaCache, loadID)
+          this.analyzeSchema(schemaCache)
             .then((finalSchema: IUISchema) => {
               resolve(finalSchema)
             })
@@ -636,6 +666,10 @@ export class UINode implements IUINode {
         this.uiSchema = loadResult
       }
 
+      if (!_.isNil(loadID)) {
+        delete this.loadingID
+      }
+
       this.loadQueue--
       if (this.loadQueue === 0) {
         delete this.loadProcess
@@ -644,6 +678,11 @@ export class UINode implements IUINode {
       return loadResult || this.schema
     } else {
       this.loadProcess = this.loadProcess.then(() => {
+        // set the current loading ID
+        if (!_.isNil(loadID)) {
+          this.loadingID = loadID
+        }
+
         // prepare the schema
         if (_.isString(schemaCache) && schemaCache) {
           return this.getRemoteSchema(schemaCache)
@@ -685,7 +724,7 @@ export class UINode implements IUINode {
         // analyze the schema
         if (_.isObject(schema)) {
           this.uiSchema = schema
-          return this.analyzeSchema(schema, loadID)
+          return this.analyzeSchema(schema)
             .then((finalSchema) => {
               return finalSchema
             }, () => {
@@ -711,6 +750,10 @@ export class UINode implements IUINode {
           Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
         }
         this.uiSchema = loadResult
+      }
+
+      if (!_.isNil(loadID)) {
+        delete this.loadingID
       }
 
       this.loadQueue--
