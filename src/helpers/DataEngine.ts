@@ -328,7 +328,9 @@ export class DataEngine implements IDataEngine {
             }
             if (_.isObject(RP.response)) {
               const { data } = RP.response
-              if (!_.isNil(data)) {
+
+              // Todo: should use a plugin to solve the response
+              if (_.isObject(data)) {
                 if (_.isString(RP.responseID) && RP.responseID) {
                   // cache the response data with the ID
                   // Pay attention: the API of the source should always response the same data
