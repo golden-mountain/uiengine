@@ -801,7 +801,7 @@ export class UINode implements IUINode {
     if (_.isObject(options)) {
       const { onlyChild, clearData, clearPool } = options
 
-      if (onlyChild === false) {
+      if (!onlyChild) {
         // clear the UINode from Cache
         if (_.isString(this.layoutKey) && this.layoutKey) {
           Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
