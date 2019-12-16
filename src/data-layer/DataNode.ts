@@ -165,6 +165,21 @@ export default class DataNode implements IDataNode {
     }
   }
 
+  async loadSchema(source?: string|IDataSource) {
+    if (!_.isNil(source)) {
+      this.source= this.initialSource(source)
+    }
+
+    this.rootSchema = await this.dataEngine.loadSchema(
+      this.source,
+      { engineId: this.uiNode.engineId },
+    )
+    // assign schema from the root
+    this.schema = await this.dataEngine.mapper.getDataSchema(
+      this.source,
+      true,
+    )
+  }
   getSchema(path?: string) {
     if (_.isString(path) && path) {
       return _.cloneDeep(_.get(this.schema, path))
@@ -298,20 +313,8 @@ export default class DataNode implements IDataNode {
     return this.data
   }
   async loadData(source?: string|IDataSource, options?: IDataLoadOption) {
-    if (!_.isNil(source)) {
-      this.source= this.initialSource(source)
-    }
-
     // load the dataSchema of the root
-    this.rootSchema = await this.dataEngine.loadSchema(
-      this.source,
-      { engineId: this.uiNode.engineId },
-    )
-    // assign schema from the root
-    this.schema = await this.dataEngine.mapper.getDataSchema(
-      this.source,
-      true,
-    )
+    await this.loadSchema(source)
 
     // get the working mode of the layout
     let workingMode: IWorkingMode = { mode: 'new' }
@@ -490,7 +493,9 @@ export default class DataNode implements IDataNode {
         }
       })
       if (hasError === false) {
-        this.errorInfo = undefined
+        this.errorInfo = {
+          status: true,
+        } as any
       }
     }
 

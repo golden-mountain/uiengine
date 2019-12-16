@@ -264,6 +264,8 @@ export class UINode implements IUINode {
       !_.isNil(this.loadingID)
     ) {
       await this.dataNode.loadData(currentSchema.datasource, { loadID: this.loadingID })
+    } else {
+      await this.dataNode.loadSchema(currentSchema.datasource)
     }
 
     if (!_.isNil(currentSchema.$children)) {
