@@ -399,20 +399,25 @@ export default class DataNode implements IDataNode {
       currentData.forEach((item: any, index: number) => {
         const downSource = this.source.source + `[${index}]`
         const downStatus = this.dataPool.getInfo(downSource, 'status')
-        if (downStatus === undefined) {
-          if (createCondition) {
+
+        if (createCondition) {
+          if (downStatus !== 'create') {
             this.dataPool.setInfo(downSource, { key: 'status', value: 'create' })
-          } else if (updateCondition) {
+          }
+        } else if (updateCondition) {
+          if (downStatus === 'create' || downStatus === undefined) {
             this.dataPool.setInfo(downSource, { key: "status", value: "view" })
           }
         }
       })
     } else if (_.isObject(currentData)) {
       const status = this.dataPool.getInfo(this.source.source, 'status')
-      if (status === undefined) {
-        if (createCondition) {
+      if (createCondition) {
+        if (status !== 'create') {
           this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create' })
-        } else if (updateCondition) {
+        }
+      } else if (updateCondition) {
+        if (status === 'create' || status === undefined) {
           this.dataPool.setInfo(this.source.source, { key: "status", value: "view" })
         }
       }
@@ -421,23 +426,27 @@ export default class DataNode implements IDataNode {
         const parentHandle = handle.getParent();
         if (!_.isNil(parentHandle)) {
           const parentStatus = parentHandle.getInfo('status')
-          if (parentStatus === undefined) {
-            if (createCondition) {
+          if (createCondition) {
+            if (parentStatus !== 'create') {
               parentHandle.setInfo('status', 'create')
-            } else if (updateCondition) {
+            }
+          } else if (updateCondition) {
+            if (parentStatus === 'create' || parentStatus === undefined) {
               parentHandle.setInfo('status', "view")
             }
           }
         }
       }
       const status = this.dataPool.getInfo(this.source.source, 'status')
-      if (status === undefined) {
-        if (createCondition) {
+      if (createCondition) {
+        if (status !== 'create') {
           this.dataPool.setInfo(
             this.source.source,
             { key: 'status', value: 'create', setDataInfo }
           )
-        } else if (updateCondition) {
+        }
+      } else if (updateCondition) {
+        if (status === 'create' || status === undefined) {
           this.dataPool.setInfo(
             this.source.source,
             { key: "status", value: "view", setDataInfo }

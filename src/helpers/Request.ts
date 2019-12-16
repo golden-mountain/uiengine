@@ -13,8 +13,6 @@ import {
   IRequestGetConfigOption,
 } from '../../typings'
 
-axios.defaults.headers.common['Content-Type'] = 'application/json'
-
 type RequestInterceptor = (
   value: AxiosRequestConfig,
 ) => AxiosRequestConfig | Promise<AxiosRequestConfig>

@@ -15,34 +15,39 @@ import {
  */
 const execution: IPluginExecution = async (param: IPluginParam) => {
   const dataSource: IDataSource|string = _.get(param, 'source')
+  const RP: any = _.get(param, 'RP')
 
-  let errors: any = []
-  const validate = async (target: string) => {
-    // validate all values
-    if (target[target.length - 1] === ':') {
-      const regExp = new RegExp(target)
-      const errorInfos = await validateAll([regExp])
-      if (errorInfos.length) {
-        errors = errors.concat(errorInfos)
+  if (RP.sendMethod === 'delete' || RP.sendMethod === 'get') {
+    // don't need data as payload, so don't need validation
+  } else {
+    let errors: any = []
+    const validate = async (target: string) => {
+      // validate all values
+      if (target[target.length - 1] === ':') {
+        const regExp = new RegExp(target)
+        const errorInfos = await validateAll([regExp])
+        if (errorInfos.length) {
+          errors = errors.concat(errorInfos)
+        }
       }
     }
-  }
 
-  if (_.isObject(dataSource)) {
-    await validate(dataSource.source)
-  } else if (_.isString(dataSource)) {
-    await validate(dataSource)
-  }
+    if (_.isObject(dataSource)) {
+      await validate(dataSource.source)
+    } else if (_.isString(dataSource)) {
+      await validate(dataSource)
+    }
 
-  if (errors.length) {
-    let couldRequest = true
-    errors.forEach((error: any) => {
-      if (error.status !== true) {
-        couldRequest = false
-        return
-      }
-    })
-    if (!couldRequest) return false
+    if (errors.length) {
+      let couldRequest = true
+      errors.forEach((error: any) => {
+        if (error.status !== true) {
+          couldRequest = false
+          return
+        }
+      })
+      if (!couldRequest) return false
+    }
   }
 
   return true
@@ -51,7 +56,7 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
 export const validation: IPlugin = {
   name: 'validation',
   categories: ['data.request.before'],
-  paramKeys: ['source'],
+  paramKeys: ['source', 'RP'],
   execution,
   priority: 200,
 }

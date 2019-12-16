@@ -18,7 +18,7 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
   const RP: any = _.get(directParam, 'RP')
 
   if (_.isObject(RP)) {
-    const { layoutKey, domainSource, endpoint } = RP as any
+    const { layoutKey, domainSource, endpoint, requestPayload } = RP as any
 
     if (_.isString(layoutKey) && layoutKey) {
       const controller = NodeController.getInstance()
@@ -27,7 +27,8 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
       if (_.isObject(wMode)) {
         const { operationModes, options } = wMode
 
-        let urlParamMap = {}
+        let urlParamMap = _.isObject(requestPayload) ? requestPayload : {}
+        console.log(urlParamMap)
         let queryParamMap = {}
         if (_.isObject(options)) {
           const { urlParam, queryParam } = options
