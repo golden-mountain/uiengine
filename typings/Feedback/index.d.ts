@@ -26,7 +26,7 @@ export interface IFeedbackResult {
 }
 
 export interface IFeedback {
-  send: (type: string, info: any, options?: IFeedbackSendOption) => IFeedbackResult[]
+  send: (type: string, info?: any, options?: IFeedbackSendOption) => IFeedbackResult[]
 
   inject: (type: string, feedbacker: IFeedbacker|IFeedbackConfig) => string
   eject: (type: string, name?: string) => void
