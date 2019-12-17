@@ -20,7 +20,7 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
   if (_.isObject(RP)) {
     const {
       layoutKey,
-      domainSource,
+      dataSource,
       sendMethod,
       endpoint,
       requestPayload,
@@ -51,7 +51,7 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
 
               if (_.isObject(config)) {
                 const { source: srcString, options: srcOptions } = config
-                if (srcString === domainSource.source && _.isObject(srcOptions)) {
+                if (srcString === dataSource.source && _.isObject(srcOptions)) {
                   const { urlParam, queryParam } = srcOptions
                   if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
                     _.assign(urlParamMap, urlParam)
@@ -65,7 +65,7 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
             })
           } else if (_.isObject(operationModes)) {
             const { source: srcString, options: srcOptions } = operationModes
-            if (srcString === domainSource.source && _.isObject(srcOptions)) {
+            if (srcString === dataSource.source && _.isObject(srcOptions)) {
               const { urlParam, queryParam } = srcOptions
               if (_.isObject(urlParam) && !_.isEmpty(urlParam)) {
                 _.assign(urlParamMap, urlParam)
@@ -80,7 +80,14 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
       }
     }
 
-    const url = replaceParam(endpoint, urlParamMap)
+    let url = replaceParam(endpoint, urlParamMap, undefined)
+    if (sendMethod === 'get') {
+      const urlPath = url.split('/')
+      const lastPath = urlPath.pop()
+      if (_.isString(lastPath) && lastPath.match(/\{.*\}/)) {
+        url = urlPath.join('/')
+      }
+    }
     if (url !== endpoint) {
       _.set(RP, 'endpoint', url)
     }
