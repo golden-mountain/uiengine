@@ -264,9 +264,10 @@ export class DataEngine implements IDataEngine {
       }
 
       if (_.isObject(options)) {
-        const { data, config, cacheID, engineId, layoutKey } = options
+        const { data, status, config, cacheID, engineId, layoutKey } = options
         if (!_.isNil(data)) {
           RP.requestPayload = _.cloneDeep(data)
+          RP.operateMode = status
         }
         if (!_.isNil(config)) {
           RP.requestConfig = config
@@ -286,9 +287,11 @@ export class DataEngine implements IDataEngine {
         const dataPool = DataPool.getInstance()
         if (_.isString(RP.dataSource)) {
           RP.requestPayload = dataPool.get(RP.dataSource)
+          RP.operateMode = dataPool.getInfo(RP.dataSource, 'status')
         } else if (_.isObject(RP.dataSource)) {
           const { source: srcString } = RP.dataSource
           RP.requestPayload = dataPool.get(srcString)
+          RP.operateMode = dataPool.getInfo(srcString, 'status')
         }
       }
 

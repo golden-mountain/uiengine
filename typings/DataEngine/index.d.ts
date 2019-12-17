@@ -17,6 +17,7 @@ export interface ILoadSchemaOption {
 export interface ISendRequestOption {
   cacheID?: string
   data?: any
+  status?: string
   config?: IRequestConfig
   engineId?: string
   layoutKey?: string
@@ -32,6 +33,7 @@ export interface ILoadDataOption {
 export interface IUpdateDataOption {
   updateID?: string
   data?: any
+  status?: string
   config?: IRequestConfig
   engineId?: string
   layoutKey?: string
@@ -40,6 +42,7 @@ export interface IUpdateDataOption {
 export interface IReplaceDataOption {
   replaceID?: string
   data?: any
+  status?: string
   config?: IRequestConfig
   engineId?: string
   layoutKey?: string
@@ -48,6 +51,7 @@ export interface IReplaceDataOption {
 export interface IDeleteDataOption {
   deleteID?: string
   data?: any
+  status?: string
   config?: IRequestConfig
   engineId?: string
   layoutKey?: string

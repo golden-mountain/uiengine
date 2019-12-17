@@ -24,6 +24,7 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
       sendMethod,
       endpoint,
       requestPayload,
+      operateMode,
     } = RP as any
 
     let urlParamMap = _.isObject(requestPayload) ? _.cloneDeep(requestPayload) : {}
@@ -86,6 +87,12 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
       const lastPath = urlPath.pop()
       if (_.isString(lastPath) && lastPath.match(/\{.*\}/)) {
         url = urlPath.join('/')
+      }
+    } else if (operateMode === 'create') {
+      const urlPath = endpoint.split('/')
+      const lastPath = urlPath.pop()
+      if (_.isString(lastPath) && lastPath.match(/\{.*\}/)) {
+        url = replaceParam(urlPath.join('/'), urlParamMap, undefined)
       }
     }
     if (url !== endpoint) {
