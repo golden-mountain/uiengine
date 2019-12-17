@@ -157,9 +157,6 @@ export function cloneTemplateSchema(schema: IUISchema) {
  * @returns true, if depend on the target
  */
 function isDependantNode(node: IUINode, targetNode: IUINode) {
-  if (node.id === 'UINode-94' && targetNode.id === 'UINode-58') {
-    console.log(node, targetNode)
-  }
   const schema = node.getSchema();
   const targetSchema = targetNode.getSchema();
 

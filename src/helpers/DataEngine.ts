@@ -3,6 +3,7 @@ import _ from 'lodash'
 import { Cache } from './Cache'
 import { DataMapper } from './DataMapper'
 import { DataPool } from './DataPool'
+import { Feedback } from './Feedback'
 import { PluginManager } from './PluginManager'
 import { Request } from './Request'
 import { getDomainName, getSchemaName } from './utils/data'
@@ -14,6 +15,7 @@ import {
   IDataSchema,
   IDataSource,
   IErrorInfo,
+  IFeedback,
   ILoadSchemaOption,
   ILoadDataOption,
   IUpdateDataOption,
@@ -58,8 +60,11 @@ export class DataEngine implements IDataEngine {
   mapper: IDataMapper = DataMapper.getInstance()
   pluginManager: IPluginManager = PluginManager.getInstance()
   request: IRequest = Request.getInstance()
+  feedback: IFeedback = Feedback.getInstance()
 
-  errorInfo?: IErrorInfo
+  set errorInfo(info: IErrorInfo) {
+    this.feedback.send('DataEngine', info)
+  }
 
   constructor(id?: string, config?: IDataEngineConfig) {
 
@@ -203,8 +208,7 @@ export class DataEngine implements IDataEngine {
     method: string,
     options?: ISendRequestOption,
   ) {
-    this.errorInfo = undefined
-    // the running parameters
+    // cache the running parameters
     const RP: any = {}
 
     RP.sendMethod = _.lowerCase(method)
@@ -223,7 +227,21 @@ export class DataEngine implements IDataEngine {
       }
       return null
     } else {
-      RP.domainSource = this.getSourceDomainSource(source)
+      RP.dataSource = source
+
+      switch (RP.sendMethod) {
+        case 'get':
+          // when load data, use source domain
+          RP.domainSource = this.getSourceDomainSource(source)
+          break
+        case 'post':
+        case 'put':
+        case 'delete':
+        default:
+          // when submit data, use schema domain
+          RP.domainSource = this.getSchemaDomainSource(source)
+          break
+      }
       RP.domainSchema = this.mapper.getDataSchema(RP.domainSource, true)
       if (_.isNil(RP.domainSchema)) {
         RP.domainSchema = await this.loadSchema(RP.domainSource, { engineId: _.get(options, 'engineId') })
@@ -266,10 +284,10 @@ export class DataEngine implements IDataEngine {
 
       if (_.isNil(RP.requestPayload) && RP.sendMethod !== 'get') {
         const dataPool = DataPool.getInstance()
-        if (_.isString(source)) {
-          RP.requestPayload = dataPool.get(source)
-        } else if (_.isObject(source)) {
-          const { source: srcString } = source
+        if (_.isString(RP.dataSource)) {
+          RP.requestPayload = dataPool.get(RP.dataSource)
+        } else if (_.isObject(RP.dataSource)) {
+          const { source: srcString } = RP.dataSource
           RP.requestPayload = dataPool.get(srcString)
         }
       }
@@ -338,7 +356,7 @@ export class DataEngine implements IDataEngine {
                   status: 1006,
                   code: `Can't solve the parameters for request method ${RP.sendMethod}`
                 }
-                return
+                return null
             }
             if (_.isObject(RP.response)) {
               const { data } = RP.response
