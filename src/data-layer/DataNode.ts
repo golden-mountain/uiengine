@@ -165,6 +165,21 @@ export default class DataNode implements IDataNode {
     }
   }
 
+  async loadSchema(source?: string|IDataSource) {
+    if (!_.isNil(source)) {
+      this.source= this.initialSource(source)
+    }
+
+    this.rootSchema = await this.dataEngine.loadSchema(
+      this.source,
+      { engineId: this.uiNode.engineId },
+    )
+    // assign schema from the root
+    this.schema = await this.dataEngine.mapper.getDataSchema(
+      this.source,
+      true,
+    )
+  }
   getSchema(path?: string) {
     if (_.isString(path) && path) {
       return _.cloneDeep(_.get(this.schema, path))
@@ -298,20 +313,8 @@ export default class DataNode implements IDataNode {
     return this.data
   }
   async loadData(source?: string|IDataSource, options?: IDataLoadOption) {
-    if (!_.isNil(source)) {
-      this.source= this.initialSource(source)
-    }
-
     // load the dataSchema of the root
-    this.rootSchema = await this.dataEngine.loadSchema(
-      this.source,
-      { engineId: this.uiNode.engineId },
-    )
-    // assign schema from the root
-    this.schema = await this.dataEngine.mapper.getDataSchema(
-      this.source,
-      true,
-    )
+    await this.loadSchema(source)
 
     // get the working mode of the layout
     let workingMode: IWorkingMode = { mode: 'new' }
@@ -396,20 +399,25 @@ export default class DataNode implements IDataNode {
       currentData.forEach((item: any, index: number) => {
         const downSource = this.source.source + `[${index}]`
         const downStatus = this.dataPool.getInfo(downSource, 'status')
-        if (downStatus === undefined) {
-          if (createCondition) {
+
+        if (createCondition) {
+          if (downStatus !== 'create') {
             this.dataPool.setInfo(downSource, { key: 'status', value: 'create' })
-          } else if (updateCondition) {
+          }
+        } else if (updateCondition) {
+          if (downStatus === 'create' || downStatus === undefined) {
             this.dataPool.setInfo(downSource, { key: "status", value: "view" })
           }
         }
       })
     } else if (_.isObject(currentData)) {
       const status = this.dataPool.getInfo(this.source.source, 'status')
-      if (status === undefined) {
-        if (createCondition) {
+      if (createCondition) {
+        if (status !== 'create') {
           this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create' })
-        } else if (updateCondition) {
+        }
+      } else if (updateCondition) {
+        if (status === 'create' || status === undefined) {
           this.dataPool.setInfo(this.source.source, { key: "status", value: "view" })
         }
       }
@@ -418,23 +426,27 @@ export default class DataNode implements IDataNode {
         const parentHandle = handle.getParent();
         if (!_.isNil(parentHandle)) {
           const parentStatus = parentHandle.getInfo('status')
-          if (parentStatus === undefined) {
-            if (createCondition) {
+          if (createCondition) {
+            if (parentStatus !== 'create') {
               parentHandle.setInfo('status', 'create')
-            } else if (updateCondition) {
+            }
+          } else if (updateCondition) {
+            if (parentStatus === 'create' || parentStatus === undefined) {
               parentHandle.setInfo('status', "view")
             }
           }
         }
       }
       const status = this.dataPool.getInfo(this.source.source, 'status')
-      if (status === undefined) {
-        if (createCondition) {
+      if (createCondition) {
+        if (status !== 'create') {
           this.dataPool.setInfo(
             this.source.source,
             { key: 'status', value: 'create', setDataInfo }
           )
-        } else if (updateCondition) {
+        }
+      } else if (updateCondition) {
+        if (status === 'create' || status === undefined) {
           this.dataPool.setInfo(
             this.source.source,
             { key: "status", value: "view", setDataInfo }
@@ -490,7 +502,9 @@ export default class DataNode implements IDataNode {
         }
       })
       if (hasError === false) {
-        this.errorInfo = undefined
+        this.errorInfo = {
+          status: true,
+        } as any
       }
     }
 

@@ -155,7 +155,7 @@ export function requestGenerator(
                 submitURL = path
               }
             }
-          } else {
+          } else if (_.has(endpoints, 'default')) {
             const defaultConfig = _.get(endpoints, 'default')
             if (_.isString(defaultConfig) && defaultConfig) {
               submitURL = defaultConfig
@@ -165,6 +165,14 @@ export function requestGenerator(
                 submitURL = path
               }
             }
+          } else {
+            targetRecord.status = 'HAS_ERROR'
+            if (_.isArray(targetRecord.errorInfo)) {
+              targetRecord.errorInfo.push(
+                'Submit Target Error: No Endpoint Defined.'
+              )
+            }
+            return
           }
 
         } else {
@@ -198,41 +206,64 @@ export function requestGenerator(
       /**  URL  **/
 
 
-      /**  URL Param  **/
+      /**  URL & Query Param  **/
       const urlParam: any = _.cloneDeep(submitData)
+      const queryParam: any = {}
 
       // get working mode
       if (_.isString(layoutKey) && layoutKey) {
         const wMode = controller.getWorkingMode(layoutKey)
 
-        // get url param from working mode
+        // get url param and query param from working mode
         if (_.isObject(wMode)) {
-          const { mode, operationModes, options } = wMode
-          const commonParam = _.get(options, ['urlParam'])
-          if (_.isObject(commonParam) && !_.isEmpty(commonParam)) {
-            _.assign(urlParam, commonParam)
+          const { mode, options, operationModes } = wMode
+          const commonURLParam = _.get(options, ['urlParam'])
+          const commonQueryParam = _.get(options, ['queryParam'])
+
+          if (_.isObject(commonURLParam) && !_.isEmpty(commonURLParam)) {
+            _.assign(urlParam, commonURLParam)
           }
+          if (_.isObject(commonQueryParam) && !_.isEmpty(commonQueryParam)) {
+            _.assign(queryParam, commonQueryParam.common, _.get(commonQueryParam, submitMethod))
+          }
+
           if (mode === 'customize') {
+            // search the customized list
             if (_.isArray(operationModes)) {
               operationModes.forEach((item) => {
-                const { source: itemSrc, options: itemOpt } = item
-                if (_.isString(source) && source.startsWith(itemSrc)) {
-                  const itemParam = _.get(itemOpt, ['urlParam'])
-                  if (_.isObject(itemParam) && !_.isEmpty(itemParam)) {
-                    _.assign(urlParam, itemParam)
+
+                if (_.isObject(item)) {
+                  const { source: itemSrc, options: itemOpt } = item
+                  if (_.isString(source) && source === itemSrc) {
+                    const itemURLParam = _.get(itemOpt, ['urlParam'])
+                    const itemQueryParam = _.get(itemOpt, ['queryParam'])
+
+                    if (_.isObject(itemURLParam) && !_.isEmpty(itemURLParam)) {
+                      _.assign(urlParam, itemURLParam)
+                    }
+                    if (_.isObject(itemQueryParam) && !_.isEmpty(itemQueryParam)) {
+                      _.assign(queryParam, itemQueryParam.common, _.get(itemQueryParam, submitMethod))
+                    }
                   }
                 }
+
               })
             } else if (_.isObject(operationModes)) {
               const { source: itemSrc, options: itemOpt } = operationModes
-              if (_.isString(source) && source.startsWith(itemSrc)) {
-                const itemParam = _.get(itemOpt, ['urlParam'])
-                if (_.isObject(itemParam) && !_.isEmpty(itemParam)) {
-                  _.assign(urlParam, itemParam)
+              if (_.isString(source) && source === itemSrc) {
+                const itemURLParam = _.get(itemOpt, ['urlParam'])
+                const itemQueryParam = _.get(itemOpt, ['queryParam'])
+
+                if (_.isObject(itemURLParam) && !_.isEmpty(itemURLParam)) {
+                  _.assign(urlParam, itemURLParam)
+                }
+                if (_.isObject(itemQueryParam) && !_.isEmpty(itemQueryParam)) {
+                  _.assign(queryParam, itemQueryParam.common, _.get(itemQueryParam, submitMethod))
                 }
               }
             }
           }
+
         }
       }
       /**  URL Param  **/

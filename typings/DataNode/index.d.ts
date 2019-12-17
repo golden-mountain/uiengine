@@ -56,6 +56,7 @@ export interface IDataNode {
   data: any
   errorInfo?: IErrorInfo
 
+  loadSchema: (source?: string|IDataSource) => Promise
   getSchema: (path?: string) => IDataSchema | IDataNodeSchema | any
 
   getData: (options?: IDataGetOption) => any

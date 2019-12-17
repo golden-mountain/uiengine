@@ -19,14 +19,16 @@ export interface IWorkingMode {
   // view: all dataNodes load data and are not editable by default
   // customize: define the operation mode for each data source
   mode: 'new' | 'edit' | 'view' | 'customize'
-  operationModes?: IOperationMode | IOperationMode[]
   options?: {
     envParam?: IObject
-    queryParam?: IObject
     urlParam?: IObject
-    submitMethod?: string
+    queryParam?: {
+      common?: IObject
+      [method: string]: IObject
+    }
     [otherKey: string]: any
   }
+  operationModes?: IOperationMode | IOperationMode[]
 }
 
 export interface IOperationMode {
@@ -38,9 +40,11 @@ export interface IOperationMode {
   source: string
   options?: {
     envParam?: IObject
-    queryParam?: IObject
     urlParam?: IObject
-    submitMethod?: string
+    queryParam?: {
+      common?: IObject
+      [method: string]: IObject
+    }
     [otherKey: string]: any
   }
 }
