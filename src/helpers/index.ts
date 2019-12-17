@@ -10,6 +10,7 @@ export { default as PluginManager } from "./PluginManager";
 export { default as Request } from "./Request";
 export { default as StepProcess } from "./StepProcess";
 export { default as Workflow } from "./Workflow";
+export { default as MemoStore } from "./MemoStore";
 
 // others
 export * from "./UIEngineRegister";
