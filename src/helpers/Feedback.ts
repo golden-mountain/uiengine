@@ -23,7 +23,7 @@ export class Feedback implements IFeedback {
 
   }
 
-  send = (type: string, info: any, options?: IFeedbackSendOption) => {
+  send = (type: string, info?: any, options?: IFeedbackSendOption) => {
     const results: IFeedbackResult[] = []
     if (_.isString(type) && type) {
       const feedbackList = this.feedbackMap[type]
