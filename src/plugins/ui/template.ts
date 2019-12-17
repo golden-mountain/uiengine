@@ -4,7 +4,7 @@ import {
   IPlugin,
   IPluginExecution,
   IPluginParam,
-  IUINode,
+  IUINode
 } from '../../../typings'
 
 const execution: IPluginExecution = async (param: IPluginParam) => {
@@ -13,16 +13,14 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
   const tplSchemaPath = _.get(schema, '$template')
   let result = {}
   if (tplSchemaPath) {
-    const reqConfig = uiNode.request.getConfig()
-    let response: any = await uiNode.request.get(tplSchemaPath, { prefixType: 'uiSchema' }, uiNode.engineId)
+    let response: any = await uiNode.request.get(
+      tplSchemaPath,
+      { prefixType: 'uiSchema' },
+      uiNode.engineId
+    )
     if (response.data) {
       result = response.data
-      // Cache.setLayoutSchema(rootName, result)
       _.unset(uiNode.schema, '$template')
-      _.forIn(result, (v, k) => {
-        uiNode.schema[k] = v
-      })
-      await uiNode.replaceLayout(uiNode.schema)
     }
   }
   return result
@@ -30,8 +28,8 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
 
 export const template: IPlugin = {
   name: 'template',
-  categories: ['ui.parser'],
+  categories: ['ui.parser.before'],
   paramKeys: ['uiNode'],
   execution,
-  priority: 0,
+  priority: 0
 }
