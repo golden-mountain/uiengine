@@ -2,8 +2,7 @@
   "id": "template-definition",
   "component": "lib:DemoElement1",
   "datasource": "foo:bar",
-  "children": [
-    {
+  "children": [{
       "component": "lib:DemoElement2",
       "id": "id-of-demo-element-2",
       "datasource": "foo:bar.name",
