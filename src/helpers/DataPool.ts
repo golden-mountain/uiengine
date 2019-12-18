@@ -90,11 +90,13 @@ export class DataPool implements IDataPool {
             const matchResult = slice.match(accessArray);
             if (!_.isNil(matchResult)) {
               let restStr = slice;
-              matchResult.forEach((matchStr: string) => {
+              matchResult.forEach((matchStr: string, matchIndex: number) => {
                 const startIndex = restStr.indexOf(matchStr);
                 const endIndex = startIndex + matchStr.length;
 
-                accessList.push(restStr.slice(0, startIndex));
+                if (matchIndex === 0) {
+                  accessList.push(restStr.slice(0, startIndex));
+                }
                 restStr = restStr.slice(endIndex);
 
                 const arrayIndex = /\[(\d*)\]/;

@@ -82,7 +82,7 @@ export default class DataNode implements IDataNode {
   }
   private initialSource(dataSrc: string|IDataSource) {
     if (_.isObject(dataSrc)) {
-      const { source, schema, autoload, defaultValue, loadOptions } = dataSrc
+      const { source, schema, autoload, defaultValue, loadOptions, ...rest } = dataSrc
       const initialSrc: IDataSource = {
         source,
         schema: _.isString(schema) && schema ? schema : source,
@@ -93,6 +93,10 @@ export default class DataNode implements IDataNode {
       }
       if (_.isObject(loadOptions)) {
         initialSrc.loadOptions = _.cloneDeep(loadOptions)
+      }
+
+      if (!_.isEmpty(rest)) {
+        _.assign(initialSrc, rest)
       }
       return initialSrc
     } else if (_.isString(dataSrc)) {

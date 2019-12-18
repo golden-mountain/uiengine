@@ -36,6 +36,16 @@ import {
 import { on } from 'cluster'
 
 export class UINode implements IUINode {
+  private static $ExceptList: string[] = [
+    '$dummy',
+    '$generated',
+  ]
+  private static match$ExceptList(str: string) {
+    return UINode.$ExceptList.some((except) => {
+      return str.startsWith(except)
+    })
+  }
+
   readonly id: string
   readonly engineId?: string
   readonly layoutKey?: string
@@ -260,7 +270,7 @@ export class UINode implements IUINode {
     // 3. the load without loadID which means it still use prev data
     if (
       _.isString(sourceStr) && sourceStr &&
-      !sourceStr.startsWith('$dummy.') &&
+      !UINode.match$ExceptList(sourceStr) &&
       !_.isNil(this.loadingID)
     ) {
       await this.dataNode.loadData(currentSchema.datasource, { loadID: this.loadingID })
@@ -349,6 +359,9 @@ export class UINode implements IUINode {
         if (_.isArray(except) && except.length) {
           const isExcepted = except.some((value: string | RegExp) => {
             if (_.isString(value) && matchString.startsWith(value)) {
+              if (!_.isNil(depth)) {
+                depth++
+              }
               return true
             } else if (_.isRegExp(value) && value.test(matchString)) {
               return true
@@ -409,14 +422,14 @@ export class UINode implements IUINode {
             $child.datasource,
             '$',
             `${index}`,
-            ['$dummy'],
+            UINode.$ExceptList,
             1,
           )
           $child.state = this.searchAndReplace(
             $child.state,
             '$',
             `${index}`,
-            ['$dummy'],
+            UINode.$ExceptList,
             1,
           )
           this.replaceChildToken($child, index)
@@ -426,14 +439,14 @@ export class UINode implements IUINode {
           $children.datasource,
           '$',
           `${index}`,
-          ['$dummy'],
+          UINode.$ExceptList,
           1,
         )
         $children.state = this.searchAndReplace(
           $children.state,
           '$',
           `${index}`,
-          ['$dummy'],
+          UINode.$ExceptList,
           1,
         )
         this.replaceChildToken($children, index)
@@ -446,14 +459,14 @@ export class UINode implements IUINode {
               item.datasource,
               '$',
               `${index}`,
-              ['$dummy'],
+              UINode.$ExceptList,
               1,
             )
             item.state = this.searchAndReplace(
               item.state,
               '$',
               `${index}`,
-              ['$dummy'],
+              UINode.$ExceptList,
               1,
             )
             this.replaceChildToken(item, index)
@@ -463,14 +476,14 @@ export class UINode implements IUINode {
             child.datasource,
             '$',
             `${index}`,
-            ['$dummy'],
+            UINode.$ExceptList,
             1,
           )
           child.state = this.searchAndReplace(
             child.state,
             '$',
             `${index}`,
-            ['$dummy'],
+            UINode.$ExceptList,
             1,
           )
           this.replaceChildToken(child, index)
@@ -492,14 +505,14 @@ export class UINode implements IUINode {
                 cloneSchema.datasource,
                 '$',
                 `${index}`,
-                ['$dummy'],
+                UINode.$ExceptList,
                 1,
               )
               cloneSchema.state = this.searchAndReplace(
                 cloneSchema.state,
                 '$',
                 `${index}`,
-                ['$dummy'],
+                UINode.$ExceptList,
                 1,
               )
             }
@@ -515,14 +528,14 @@ export class UINode implements IUINode {
               cloneSchema.datasource,
               '$',
               `${index}`,
-              ['$dummy'],
+              UINode.$ExceptList,
               1,
             )
             cloneSchema.state = this.searchAndReplace(
               cloneSchema.state,
               '$',
               `${index}`,
-              ['$dummy'],
+              UINode.$ExceptList,
               1,
             )
           }

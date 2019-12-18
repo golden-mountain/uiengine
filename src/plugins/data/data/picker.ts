@@ -1,6 +1,10 @@
 import _ from 'lodash'
 
 import {
+  DataPool,
+  UIEngineRegister,
+} from '../../../helpers'
+import {
   getAccessRoute
 } from '../../../helpers/utils'
 
@@ -52,10 +56,13 @@ const execution: IPluginExecution = (param: IPluginParam) => {
           route.push(slice);
         }
       })
+
+    let pickedData: any = undefined
     while (true) {
-      const pickedData = _.get(data, route)
-      if (pickedData !== undefined) {
-        return pickedData
+      const picked = _.get(data, route)
+      if (picked !== undefined) {
+        pickedData = picked
+        break
       } else if (route.length > 0) {
         route.shift()
         continue
@@ -63,6 +70,33 @@ const execution: IPluginExecution = (param: IPluginParam) => {
         break
       }
     }
+
+    const generateConfig = _.get(source, 'generate')
+    if (_.isObject(generateConfig)) {
+      const { source: targetSrc, generator } = generateConfig
+
+      if (_.isString(targetSrc) && targetSrc) {
+        const dataPool = DataPool.getInstance()
+
+        if (_.isString(generator) && generator) {
+          const generatorConfig = UIEngineRegister.searchMap('generators', generator)
+
+          if (_.isObject(generatorConfig)) {
+            const { execution } = generatorConfig as any
+
+            if (_.isFunction(execution)) {
+              const generatedData = execution(pickedData)
+
+              dataPool.set(targetSrc, generatedData)
+            }
+          }
+        } else {
+          dataPool.set(targetSrc, pickedData)
+        }
+      }
+    }
+
+    return pickedData
   }
 
   return undefined

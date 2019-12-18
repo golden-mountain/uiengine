@@ -13,6 +13,10 @@ export interface IDataSource {
   defaultValue?: any
   autoload?: boolean
   loadOptions?: IObject
+  generate?: {
+    source: string
+    generator?: string
+  }
 }
 
 export interface IDataConnector {
