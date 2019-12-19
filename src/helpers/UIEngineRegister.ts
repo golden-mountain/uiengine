@@ -1,14 +1,14 @@
 import _ from 'lodash'
 
 import PluginManager from './PluginManager'
-import ListenerManager from './ListenerManager'
+import HandlerManager from './HandlerManager'
 import {
   IPlugin,
   IPluginMap,
   IPluginManager,
-  IListenerConfig,
-  IListenerMap,
-  IListenerManager,
+  IHandlerConfig,
+  IHandlerMap,
+  IHandlerManager,
 } from '../../typings'
 
 export class UIEngineRegister {
@@ -26,14 +26,14 @@ export class UIEngineRegister {
     }
   }
 
-  static registerListeners(listeners: IListenerConfig[] | IListenerMap, manager?: IListenerManager) {
+  static registerHandlers(handlers: IHandlerConfig[] | IHandlerMap, manager?: IHandlerManager) {
     if (_.isNil(manager)) {
-      manager = ListenerManager.getInstance()
+      manager = HandlerManager.getInstance()
     }
-    if (_.isArray(listeners)) {
-      manager.loadListeners(listeners)
+    if (_.isArray(handlers)) {
+      manager.loadHandlers(handlers)
     } else {
-      manager.loadListeners(Object.values(listeners))
+      manager.loadHandlers(Object.values(handlers))
     }
   }
 

@@ -3,10 +3,10 @@ import _ from 'lodash'
 import { Feedback } from '../helpers/Feedback'
 
 import {
-  IListener,
-  IListenerConfig,
-  IListenerHelper,
-  IListenerParam,
+  IHandler,
+  IHandlerConfig,
+  IHandlerHelper,
+  IHandlerParam,
   ISubmitProcess,
   ISubmitTarget,
   ISubmitOption,
@@ -42,7 +42,7 @@ function onTargetFailure(target: ISubmitTarget, record: ISubmitTargetRecord) {
   Feedback.getInstance().send('SubmitError', message)
 }
 
-const listener: IListener = async (directParam: IListenerParam) => {
+const handler: IHandler = async (directParam: IHandlerParam) => {
   console.log('beforeSubmit begin')
 
   const uiNode: IUINode = _.get(directParam, 'uiNode')
@@ -79,11 +79,11 @@ const listener: IListener = async (directParam: IListenerParam) => {
 
 }
 
-export const beforeSubmit: IListenerConfig = {
+export const beforeSubmit: IHandlerConfig = {
   name: 'beforeSubmit',
   paramKeys: ['uiNode', 'target', 'options', 'callbacks'],
   debugList: [],
-  listener,
+  handler,
   weight: 0,
   describe: {
     target: {

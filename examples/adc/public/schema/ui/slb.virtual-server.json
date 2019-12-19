@@ -226,7 +226,7 @@
                             "eventName": "onSelect",
                             "receiveParams": ["value", "option"],
                             "defaultParams": {},
-                            "listener": "updateData"
+                            "handler": "updateData"
                           }
                         ]
                       },
@@ -548,7 +548,7 @@
                       "callbacks": {
                       }
                     },
-                    "listener": "submitData"
+                    "handler": "submitData"
                   }
                 ]
               }
@@ -568,7 +568,7 @@
                         "redirect": "#/"
                       }
                     },
-                    "listener": "routeTo"
+                    "handler": "routeTo"
                   }
                 ]
               }

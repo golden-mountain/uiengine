@@ -3,21 +3,21 @@ import _ from 'lodash'
 import { NodeController } from 'uiengine'
 
 import {
-  IListenerConfig,
-  IListener,
-  IListenerParam,
+  IHandlerConfig,
+  IHandler,
+  IHandlerParam,
   IUINode,
 } from 'uiengine/typings'
 
-const listener: IListener = (directParam: IListenerParam) => {
+const handler: IHandler = (directParam: IHandlerParam) => {
   const uiNode: IUINode = _.get(directParam, 'uiNode')
   const nodeController = NodeController.getInstance()
   nodeController.workflow.hideLayout()
 }
 
-export const hideNode: IListenerConfig = {
+export const hideNode: IHandlerConfig = {
   name: 'hideNode',
   paramKeys: ['uiNode'],
-  listener,
+  handler,
   weight: 100,
 }

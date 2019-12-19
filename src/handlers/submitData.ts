@@ -3,10 +3,10 @@ import _ from 'lodash'
 import { submit } from '../helpers'
 
 import {
-  IListener,
-  IListenerConfig,
-  IListenerHelper,
-  IListenerParam,
+  IHandler,
+  IHandlerConfig,
+  IHandlerHelper,
+  IHandlerParam,
   ISubmitProcess,
   ISubmitTarget,
   ISubmitOption,
@@ -14,18 +14,18 @@ import {
   IUINode,
 } from '../../typings'
 
-const listener: IListener = async (directParam: IListenerParam, helper: IListenerHelper) => {
+const handler: IHandler = async (directParam: IHandlerParam, helper: IHandlerHelper) => {
   if (
     _.isObject(helper) &&
-    _.isFunction(helper.getListenerRecords)
+    _.isFunction(helper.getHandlerRecords)
   ) {
-    const prevRecords = helper.getListenerRecords()
+    const prevRecords = helper.getHandlerRecords()
     if (_.isArray(prevRecords) && prevRecords.length) {
       for(let i = 0; i < prevRecords.length; i++) {
         const record = prevRecords[i]
         if (_.isObject(record)) {
-          const { listenerName, result } = record
-          if (listenerName === 'beforeSubmit') {
+          const { handlerName, result } = record
+          if (handlerName === 'beforeSubmit') {
             if (result instanceof Promise) {
               const prevStatus = await result
               if (prevStatus !== 'Submit Prepared') {
@@ -76,7 +76,7 @@ const listener: IListener = async (directParam: IListenerParam, helper: IListene
   return 'Submit Failed'
 }
 
-export const submitData: IListenerConfig = {
+export const submitData: IHandlerConfig = {
   name: 'submitData',
   paramKeys: ['uiNode', 'target', 'options', 'callbacks'],
   debugList: [
@@ -86,7 +86,7 @@ export const submitData: IListenerConfig = {
     'target',
     'options',
   ],
-  listener,
+  handler,
   weight: 0,
   describe: {
     target: {

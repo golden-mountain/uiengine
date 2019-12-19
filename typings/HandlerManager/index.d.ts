@@ -1,45 +1,45 @@
 
-// Listener interfaces
-export interface IListenerConfig {
+// Handler interfaces
+export interface IHandlerConfig {
   name: string
-  paramKeys?: Array<string|IListenerParamConfig>
-  debugList?: Array<string|IListenerDebugConfig>
-  listener: IListener
+  paramKeys?: Array<string|IHandlerParamConfig>
+  debugList?: Array<string|IHandlerDebugConfig>
+  handler: IHandler
   weight?: number
   simpleMode?: boolean
   [anyKey: string]: any
 }
 
-export interface IListenerParamConfig {
+export interface IHandlerParamConfig {
   key: string
   default?: any
 }
-export interface IListenerDebugConfig {
+export interface IHandlerDebugConfig {
   lineage: string
   label?: string
 }
-export type IListener = (
-  directParam: IListenerParam,
-  helper: IListenerHelper
+export type IHandler = (
+  directParam: IHandlerParam,
+  helper: IHandlerHelper
 ) => any | Promise<any>
 
-export interface IListenerParam{
+export interface IHandlerParam{
   [paramKey: string]: any
 }
-export interface IListenerHelper {
+export interface IHandlerHelper {
   getEventName: () => string
-  getListenerQueue: () => string[]
-  getListenerRecords: () => IListenerRecord[]
+  getHandlerQueue: () => string[]
+  getHandlerRecords: () => IHandlerRecord[]
 }
 
 // Event interfaces
 export interface IEventConfig {
   eventName: string
   receiveParams?: string[]
-  defaultParams?: IListenerParam
+  defaultParams?: IHandlerParam
   debugList?: Array<string|IEventDebugConfig>
   target?: string | IEventTargetConfig
-  listener: string | IEventListenerConfig | Array<string|IEventListenerConfig>
+  handler: string | IEventHandlerConfig | Array<string|IEventHandlerConfig>
   resultSolver?: IEventResultSolver
   simpleMode?: boolean
   [anyKey: string]: any
@@ -53,20 +53,20 @@ export interface IEventTargetConfig {
   name?: string
   reference?: object
 }
-export interface IEventListenerConfig {
+export interface IEventHandlerConfig {
   name: string
-  adapter?: IListenerParamRouteMap | IListenerParamAdapter
+  adapter?: IHandlerParamRouteMap | IHandlerParamAdapter
 }
-export type IListenerParamAdapter = (
-  receivedParam: IListenerParam
-) => IListenerParam
-export interface IListenerParamRouteMap {
+export type IHandlerParamAdapter = (
+  receivedParam: IHandlerParam
+) => IHandlerParam
+export interface IHandlerParamRouteMap {
   [paramKey: string]: string
 }
 
-// Listener Manager interfaces
-export interface IListenerMap {
-  [listenerName: string]: IListenerConfig
+// Handler Manager interfaces
+export interface IHandlerMap {
+  [handlerName: string]: IHandlerConfig
 }
 export interface IEventHistory {
   capacity: number
@@ -96,9 +96,9 @@ export interface IEventHistory {
         }
       }
     }
-    listenerTree: {
-      [listenerName: string]: {
-        indexes: Array<{ eventIndex: number, listenerIndex: number }>
+    handlerTree: {
+      [handlerName: string]: {
+        indexes: Array<{ eventIndex: number, handlerIndex: number }>
       }
     }
   }
@@ -108,24 +108,24 @@ export interface IEventRecord {
   eventName: string
   target?: string | IEventTargetConfig
   queue: string[]
-  records: IListenerRecord[]
+  records: IHandlerRecord[]
   originInfo?: { [debugKey: string]: any }
   finialInfo?: { [debugKey: string]: any }
   startNumber?: number
   storeNumber?: number
 }
-export interface IListenerRecord {
-  listenerName: string
+export interface IHandlerRecord {
+  handlerName: string
   eventRecord: IEventRecord
   originInfo?: { [debugKey: string]: any }
   finialInfo?: { [debugKey: string]: any }
   result: any
 }
 
-export type IListenerConflictResolver = (
-  listenerA: IListenerConfig,
-  listenerB: IListenerConfig,
-) => IListenerConfig
+export type IHandlerConflictResolver = (
+  handlerA: IHandlerConfig,
+  handlerB: IHandlerConfig,
+) => IHandlerConfig
 
 export type IEventResultSolver = (
   eventResult: IEventResult,
@@ -134,17 +134,17 @@ export interface IEventResult {
   eventName: string
   target?: string | IEventTargetConfig
   queue: string[]
-  results: IListenerResult[]
+  results: IHandlerResult[]
 }
-export interface IListenerResult {
-  listenerName: string
+export interface IHandlerResult {
+  handlerName: string
   result: any
 }
-export type IEventListener = (
+export type IEventHandler = (
   ...args: any[],
 ) => IEventResult | any
 export interface IEventProps {
-  [eventName: string]: IEventListener
+  [eventName: string]: IEventHandler
 }
 
 export interface IEventExportOption {
@@ -158,7 +158,7 @@ export type IEventExportType = 'sequence'
   | 'target-event-tree'
   | 'event-tree'
   | 'event-target-tree'
-  | 'listener-tree'
+  | 'handler-tree'
 export interface IEventExportExclude {
   noTarget?: boolean
   hasTarget?: boolean
@@ -170,7 +170,7 @@ export interface IEventExportExclude {
 export interface IEventExportInclude {
   target?: string | IEventTargetConfig | Array<string|IEventTargetConfig>
   event?: string | string[]
-  listener?: string | string[]
+  handler?: string | string[]
 }
 export interface IEventTargetExportTree {
   [targetName: string]: IEventRecord[] | { [eventName:string]: IEventRecord[] }
@@ -178,20 +178,20 @@ export interface IEventTargetExportTree {
 export interface IEventExportTree {
   [eventName: string]: IEventRecord[] | { [targetName:string]: IEventRecord[] }
 }
-export interface IListenerExportTree {
-  [listenerName: string]: IListenerRecord[]
+export interface IHandlerExportTree {
+  [handlerName: string]: IHandlerRecord[]
 }
 
-export interface IListenerManager {
-  loadListeners: (listeners: IListenerConfig | IListenerConfig[], resolver?: IListenerConflictResolver) => boolean
-  unloadListeners: (name?: string) => boolean
-  getListenerConfig: (name: string) => IListenerMap | IListenerConfig | null
+export interface IHandlerManager {
+  loadHandlers: (handlers: IHandlerConfig | IHandlerConfig[], resolver?: IHandlerConflictResolver) => boolean
+  unloadHandlers: (name?: string) => boolean
+  getHandlerConfig: (name: string) => IHandlerMap | IHandlerConfig | null
 
   getStaticEventProps: (events: IEventConfig | IEventConfig[], simpleMode?: boolean) => IEventProps
-  getDynamicEventListener: (event: IEventConfig, simpleMode?: boolean) => IEventListener
+  getDynamicEventHandler: (event: IEventConfig, simpleMode?: boolean) => IEventHandler
 
   resetHistory: (capacity?: number) => void
   setHistoryCapacity: (capacity: number) => boolean
   searchHistoryRecords: (target?: string | IEventTargetConfig, event?: string, exclude?: IEventExportExclude) => IEventRecord[]
-  exportHistoryRecords: (options?: IEventExportOption) => IEventRecord[] | IEventTargetExportTree | IEventExportTree | IListenerExportTree
+  exportHistoryRecords: (options?: IEventExportOption) => IEventRecord[] | IEventTargetExportTree | IEventExportTree | IHandlerExportTree
 }

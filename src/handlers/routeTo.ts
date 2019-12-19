@@ -1,13 +1,13 @@
 import _ from 'lodash'
 
 import {
-  IListenerConfig,
-  IListener,
-  IListenerParam,
+  IHandlerConfig,
+  IHandler,
+  IHandlerParam,
   IUINode,
 } from '../../typings'
 
-const listener: IListener = async (directParam: IListenerParam) => {
+const handler: IHandler = async (directParam: IHandlerParam) => {
   const event: Event = _.get(directParam, 'event')
   const options: any = _.get(directParam, 'options')
   const uiNode: IUINode = _.get(directParam, 'uiNode')
@@ -21,11 +21,11 @@ const listener: IListener = async (directParam: IListenerParam) => {
 
 }
 
-export const routeTo: IListenerConfig = {
+export const routeTo: IHandlerConfig = {
   name: 'routeTo',
   paramKeys: ['event', 'options', 'uiNode'],
   debugList: ['options.redirect'],
-  listener,
+  handler,
   weight: 0,
   describe: {
     options: [

@@ -4,22 +4,22 @@ import chai from 'chai'
 import chaiSpies from 'chai-spies'
 import _ from 'lodash'
 
-import { ListenerManager } from '../../src/helpers/ListenerManager'
+import { HandlerManager } from '../../src/helpers/HandlerManager'
 import {
-  IListenerConfig,
-  IListenerParam,
-  IListenerHelper,
+  IHandlerConfig,
+  IHandlerParam,
+  IHandlerHelper,
   IEventConfig,
 } from '../../typings'
 
 chai.use(chaiSpies)
 const expect = chai.expect
 
-const listenerA1: IListenerConfig = {
+const handlerA1: IHandlerConfig = {
   name: 'hello',
   paramKeys: ['target'],
   debugList: ['target'],
-  listener: (directParam: IListenerParam, helper: IListenerHelper) => {
+  handler: (directParam: IHandlerParam, helper: IHandlerHelper) => {
     const target = _.get(directParam, 'target')
     if (!_.isNil(target)) {
       return `Hello ${target}!`
@@ -28,11 +28,11 @@ const listenerA1: IListenerConfig = {
   weight: 0,
 }
 
-const listenerA2: IListenerConfig = {
+const handlerA2: IHandlerConfig = {
   name: 'hello',
   paramKeys: ['target', 'source'],
   debugList: ['target', 'source'],
-  listener: (directParam: IListenerParam, helper: IListenerHelper) => {
+  handler: (directParam: IHandlerParam, helper: IHandlerHelper) => {
     const target = _.get(directParam, 'target')
     const source = _.get(directParam, 'source')
     if (!_.isNil(target) && !_.isNil(source)) {
@@ -42,11 +42,11 @@ const listenerA2: IListenerConfig = {
   weight: 1,
 }
 
-const listenerB1: IListenerConfig = {
+const handlerB1: IHandlerConfig = {
   name: 'weather',
   paramKeys: ['weather'],
   debugList: ['weather'],
-  listener: (directParam: IListenerParam, helper: IListenerHelper) => {
+  handler: (directParam: IHandlerParam, helper: IHandlerHelper) => {
     const weather = _.get(directParam, 'weather')
     if (weather === true) {
       return 'It is a good day!'
@@ -57,11 +57,11 @@ const listenerB1: IListenerConfig = {
   weight: 0,
 }
 
-const listenerB2: IListenerConfig = {
+const handlerB2: IHandlerConfig = {
   name: 'weather',
   paramKeys: ['event', 'weather'],
   debugList: ['event', 'weather'],
-  listener: (directParam: IListenerParam, helper: IListenerHelper) => {
+  handler: (directParam: IHandlerParam, helper: IHandlerHelper) => {
     const target = _.get(directParam, 'event.target')
     const weather = _.get(directParam, 'weather')
     if (weather === true) {
@@ -73,11 +73,11 @@ const listenerB2: IListenerConfig = {
   weight: 1,
 }
 
-const listenerC1: IListenerConfig = {
+const handlerC1: IHandlerConfig = {
   name: 'goodbye',
   paramKeys: ['date'],
   debugList: ['date'],
-  listener: async (directParam: IListenerParam, helper: IListenerHelper) => {
+  handler: async (directParam: IHandlerParam, helper: IHandlerHelper) => {
     const date = _.get(directParam, 'date')
     return await new Promise((resolve) => {
       setTimeout(() => {
@@ -92,9 +92,9 @@ const listenerC1: IListenerConfig = {
   weight: 0,
 }
 
-describe('ListenerManager Unit Test:', () => {
+describe('HandlerManager Unit Test:', () => {
   before(() => {
-    const manager = ListenerManager.getInstance()
+    const manager = HandlerManager.getInstance()
     manager.setHistoryCapacity(10)
   })
   beforeEach(() => {
@@ -102,73 +102,73 @@ describe('ListenerManager Unit Test:', () => {
 
   describe('Test load and unload:', () => {
     it('should get the instance successfully:', () => {
-      const manager = ListenerManager.getInstance()
+      const manager = HandlerManager.getInstance()
       expect(manager).to.exist
     })
     it('should load one plugin successfully:', () => {
-      const manager = ListenerManager.getInstance()
-      const success = manager.loadListeners(listenerA1)
-      const loadedListener = manager.getListenerConfig('hello')
+      const manager = HandlerManager.getInstance()
+      const success = manager.loadHandlers(handlerA1)
+      const loadedHandler = manager.getHandlerConfig('hello')
       expect(success).to.equal(true)
-      expect(loadedListener).to.deep.equal(listenerA1)
+      expect(loadedHandler).to.deep.equal(handlerA1)
     })
     it('should load plugins successfully:', () => {
-      const manager = ListenerManager.getInstance()
-      const success = manager.loadListeners([listenerA1, listenerB1])
-      const helloListener = manager.getListenerConfig('hello')
-      const weatherListener = manager.getListenerConfig('weather')
+      const manager = HandlerManager.getInstance()
+      const success = manager.loadHandlers([handlerA1, handlerB1])
+      const helloHandler = manager.getHandlerConfig('hello')
+      const weatherHandler = manager.getHandlerConfig('weather')
       expect(success).to.equal(true)
-      expect(helloListener).to.deep.equal(listenerA1)
-      expect(weatherListener).to.deep.equal(listenerB1)
+      expect(helloHandler).to.deep.equal(handlerA1)
+      expect(weatherHandler).to.deep.equal(handlerB1)
     })
     it('should load the plugin with higher weight successfully:', () => {
-      const manager = ListenerManager.getInstance()
-      const success = manager.loadListeners([listenerA1, listenerA2, listenerA1])
-      const loadedPlugin = manager.getListenerConfig('hello')
+      const manager = HandlerManager.getInstance()
+      const success = manager.loadHandlers([handlerA1, handlerA2, handlerA1])
+      const loadedPlugin = manager.getHandlerConfig('hello')
       expect(success).to.equal(true)
-      expect(loadedPlugin).to.deep.equal(listenerA2)
+      expect(loadedPlugin).to.deep.equal(handlerA2)
     })
     it('should unload the plugin successfully:', () => {
-      const manager = ListenerManager.getInstance()
-      const success = manager.loadListeners([listenerA1, listenerA2, listenerB1, listenerB2, listenerC1])
+      const manager = HandlerManager.getInstance()
+      const success = manager.loadHandlers([handlerA1, handlerA2, handlerB1, handlerB2, handlerC1])
       expect(success).to.equal(true)
 
-      expect(manager.getListenerConfig('hello')).to.deep.equal(listenerA2)
-      expect(manager.unloadListeners('hello')).to.equal(true)
-      expect(manager.getListenerConfig('hello')).to.equal(null)
+      expect(manager.getHandlerConfig('hello')).to.deep.equal(handlerA2)
+      expect(manager.unloadHandlers('hello')).to.equal(true)
+      expect(manager.getHandlerConfig('hello')).to.equal(null)
 
-      expect(manager.getListenerConfig('weather')).to.deep.equal(listenerB2)
-      expect(manager.unloadListeners('weather')).to.equal(true)
-      expect(manager.getListenerConfig('weather')).to.equal(null)
+      expect(manager.getHandlerConfig('weather')).to.deep.equal(handlerB2)
+      expect(manager.unloadHandlers('weather')).to.equal(true)
+      expect(manager.getHandlerConfig('weather')).to.equal(null)
 
-      expect(manager.getListenerConfig('goodbye')).to.deep.equal(listenerC1)
-      expect(manager.unloadListeners('Goodbye')).to.equal(true)
-      expect(manager.getListenerConfig('goodbye')).to.deep.equal(listenerC1)
+      expect(manager.getHandlerConfig('goodbye')).to.deep.equal(handlerC1)
+      expect(manager.unloadHandlers('Goodbye')).to.equal(true)
+      expect(manager.getHandlerConfig('goodbye')).to.deep.equal(handlerC1)
     })
   })
 
   describe('Test static event props:', () => {
-    it('should call the single listener successfully:', () => {
-      const manager = ListenerManager.getInstance()
-      manager.loadListeners([listenerA1, listenerB1, listenerC1])
+    it('should call the single handler successfully:', () => {
+      const manager = HandlerManager.getInstance()
+      manager.loadHandlers([handlerA1, handlerB1, handlerC1])
 
       const eventConfig: IEventConfig = {
         eventName: 'onClick',
         defaultParams: { target: 'Tom', source: 'Jason' },
         debugList: ['target', 'source'],
         target: 'Button1',
-        listener: 'hello',
+        handler: 'hello',
       }
       const props = manager.getStaticEventProps(eventConfig)
 
-      manager.loadListeners([listenerA2, listenerB2])
+      manager.loadHandlers([handlerA2, handlerB2])
       eventConfig.eventName = 'onFocus'
       if (!_.isNil(eventConfig.defaultParams)) {
         eventConfig.defaultParams.target = 'Peter'
         eventConfig.defaultParams = { weather: true }
       }
       eventConfig.target = 'Button2'
-      eventConfig.listener = 'weather'
+      eventConfig.handler = 'weather'
 
       const result = props.onClick()
       expect(result).to.deep.equal({
@@ -177,16 +177,16 @@ describe('ListenerManager Unit Test:', () => {
         queue: ['hello'],
         results: [
           {
-            listenerName: 'hello',
+            handlerName: 'hello',
             result: 'Hello Tom!',
           }
         ],
       })
     })
 
-    it('should call the multiple listeners successfully:', () => {
-      const manager = ListenerManager.getInstance()
-      manager.loadListeners([listenerA1, listenerB1, listenerC1])
+    it('should call the multiple handlers successfully:', () => {
+      const manager = HandlerManager.getInstance()
+      manager.loadHandlers([handlerA1, handlerB1, handlerC1])
 
       const eventConfig: IEventConfig = {
         eventName: 'onClick',
@@ -194,11 +194,11 @@ describe('ListenerManager Unit Test:', () => {
         defaultParams: { target: '', source: '', weather: false },
         debugList: ['target', 'source', 'weather'],
         target: 'Button1',
-        listener: ['hello', 'weather'],
+        handler: ['hello', 'weather'],
       }
       const props = manager.getStaticEventProps(eventConfig)
 
-      manager.loadListeners([listenerA2, listenerB2])
+      manager.loadHandlers([handlerA2, handlerB2])
       eventConfig.eventName = 'onFocus'
       eventConfig.receiveParams = []
       if (!_.isNil(eventConfig.defaultParams)) {
@@ -206,7 +206,7 @@ describe('ListenerManager Unit Test:', () => {
         eventConfig.defaultParams = { date: 'next week' }
       }
       eventConfig.target = 'Button2'
-      eventConfig.listener = 'goodbye'
+      eventConfig.handler = 'goodbye'
 
       const result = props.onClick('Tom', 'Jason', true)
 
@@ -216,11 +216,11 @@ describe('ListenerManager Unit Test:', () => {
         queue: ['hello', 'weather'],
         results: [
           {
-            listenerName: 'hello',
+            handlerName: 'hello',
             result: 'Hello Tom!',
           },
           {
-            listenerName: 'weather',
+            handlerName: 'weather',
             result: 'It is a good day!',
           }
         ],
@@ -228,10 +228,10 @@ describe('ListenerManager Unit Test:', () => {
     })
   })
 
-  describe('Test dynamic event listener:', () => {
-    it('should call the single listener successfully:', () => {
-      const manager = ListenerManager.getInstance()
-      manager.loadListeners([listenerA1, listenerB1, listenerC1])
+  describe('Test dynamic event handler:', () => {
+    it('should call the single handler successfully:', () => {
+      const manager = HandlerManager.getInstance()
+      manager.loadHandlers([handlerA1, handlerB1, handlerC1])
 
       const eventConfig: IEventConfig = {
         eventName: 'onClick',
@@ -239,20 +239,20 @@ describe('ListenerManager Unit Test:', () => {
         defaultParams: { target: 'Tom', source: 'Jason' },
         debugList: ['target', 'source'],
         target: 'Button1',
-        listener: 'hello',
+        handler: 'hello',
       }
-      const listener = manager.getDynamicEventListener(eventConfig)
+      const handler = manager.getDynamicEventHandler(eventConfig)
 
-      manager.loadListeners([listenerA2, listenerB2])
+      manager.loadHandlers([handlerA2, handlerB2])
       eventConfig.defaultParams = { target: 'Peter', source: 'John' }
-      const hResult = listener()
+      const hResult = handler()
       expect(hResult).to.deep.equal({
         eventName: 'onClick',
         target: 'Button1',
         queue: ['hello'],
         results: [
           {
-            listenerName: 'hello',
+            handlerName: 'hello',
             result: 'Hello Peter! This is John.',
           }
         ],
@@ -262,15 +262,15 @@ describe('ListenerManager Unit Test:', () => {
       eventConfig.receiveParams = ['weather', 'event']
       eventConfig.defaultParams = { weather: false }
       eventConfig.target = 'Button2'
-      eventConfig.listener = 'weather'
-      const wResult = listener(true, { target: 'Beijing' })
+      eventConfig.handler = 'weather'
+      const wResult = handler(true, { target: 'Beijing' })
       expect(wResult).to.deep.equal({
         eventName: 'onFocus',
         target: 'Button2',
         queue: ['weather'],
         results: [
           {
-            listenerName: 'weather',
+            handlerName: 'weather',
             result: 'The weather in Beijing is good today.',
           }
         ],
@@ -278,27 +278,27 @@ describe('ListenerManager Unit Test:', () => {
 
     })
 
-    it('should call the multiple listeners successfully:', (done: any) => {
-      const manager = ListenerManager.getInstance()
-      manager.loadListeners([listenerA1, listenerB1])
+    it('should call the multiple handlers successfully:', (done: any) => {
+      const manager = HandlerManager.getInstance()
+      manager.loadHandlers([handlerA1, handlerB1])
 
       const eventConfig: IEventConfig = {
         eventName: 'onClick',
         defaultParams: { target: 'Tom', source: 'Jason', weather: true },
         debugList: ['target', 'source', 'weather'],
         target: 'Button1',
-        listener: ['hello', 'weather'],
+        handler: ['hello', 'weather'],
       }
-      const listener = manager.getDynamicEventListener(eventConfig)
+      const handler = manager.getDynamicEventHandler(eventConfig)
 
-      manager.loadListeners([listenerA2, listenerB2, listenerC1])
+      manager.loadHandlers([handlerA2, handlerB2, handlerC1])
       eventConfig.eventName = 'onFocus'
       eventConfig.receiveParams = ['event']
       eventConfig.defaultParams = { target: 'Peter', source: 'John', weather: false, date: 'next week' }
       eventConfig.target = 'Button2'
-      eventConfig.listener = ['hello', 'weather', 'goodbye']
+      eventConfig.handler = ['hello', 'weather', 'goodbye']
 
-      const result = listener({ target: 'Beijing' })
+      const result = handler({ target: 'Beijing' })
       const promise = result.results[2].result
       promise.then(() => {
         try {
@@ -308,15 +308,15 @@ describe('ListenerManager Unit Test:', () => {
             queue: ['hello' ,'weather', 'goodbye'],
             results: [
               {
-                listenerName: 'hello',
+                handlerName: 'hello',
                 result: 'Hello Peter! This is John.',
               },
               {
-                listenerName: 'weather',
+                handlerName: 'weather',
                 result: 'The weather in Beijing is bad today.',
               },
               {
-                listenerName: 'goodbye',
+                handlerName: 'goodbye',
                 result: 'Good bye, see you next week!',
               },
             ],
@@ -331,8 +331,8 @@ describe('ListenerManager Unit Test:', () => {
 
   describe('Test history and debug:', () => {
     it('should store the event record and debug info successfully:', (done: any) => {
-      const manager = ListenerManager.getInstance()
-      manager.loadListeners([listenerA2, listenerB2, listenerC1])
+      const manager = HandlerManager.getInstance()
+      manager.loadHandlers([handlerA2, handlerB2, handlerC1])
 
       const eventConfig: IEventConfig = {
         eventName: 'onClick',
@@ -340,7 +340,7 @@ describe('ListenerManager Unit Test:', () => {
         defaultParams: { target: 'Tom', source: 'Jason', weather: false, date: 'tomorrow' },
         debugList: ['target', 'source', 'weather', 'date', 'event'],
         target: 'Button1',
-        listener: ['hello', 'weather', 'goodbye'],
+        handler: ['hello', 'weather', 'goodbye'],
       }
       const props = manager.getStaticEventProps([eventConfig])
       const result = props.onClick({ type: 'click', target: 'NewYork' })
@@ -354,15 +354,15 @@ describe('ListenerManager Unit Test:', () => {
             queue: ['hello', 'weather', 'goodbye'],
             results: [
               {
-                listenerName: 'hello',
+                handlerName: 'hello',
                 result: 'Hello Tom! This is Jason.',
               },
               {
-                listenerName: 'weather',
+                handlerName: 'weather',
                 result: 'The weather in NewYork is bad today.',
               },
               {
-                listenerName: 'goodbye',
+                handlerName: 'goodbye',
                 result: 'Good bye, see you tomorrow!',
               },
             ],
@@ -377,19 +377,19 @@ describe('ListenerManager Unit Test:', () => {
             queue: ['hello', 'weather', 'goodbye'],
             records: [
               {
-                listenerName: 'hello',
+                handlerName: 'hello',
                 originInfo: { target: 'Tom', source: 'Jason' },
                 finialInfo: { target: 'Tom', source: 'Jason' },
                 result: 'Hello Tom! This is Jason.',
               },
               {
-                listenerName: 'weather',
+                handlerName: 'weather',
                 originInfo: { weather: false, event: { type: 'click', target: 'NewYork' } },
                 finialInfo: { weather: false, event: { type: 'click', target: 'NewYork' } },
                 result: 'The weather in NewYork is bad today.',
               },
               {
-                listenerName: 'goodbye',
+                handlerName: 'goodbye',
                 originInfo: { date: 'tomorrow' },
                 finialInfo: { date: 'tomorrow' },
                 result: 'Good bye, see you tomorrow!',
@@ -434,7 +434,7 @@ describe('ListenerManager Unit Test:', () => {
             },
           })
 
-          historyRecords = manager.exportHistoryRecords({ struct: 'listener-tree' })
+          historyRecords = manager.exportHistoryRecords({ struct: 'handler-tree' })
           expect(historyRecords).to.deep.equal({
             hello: [expectRecord.records[0]],
             weather: [expectRecord.records[1]],
@@ -450,8 +450,8 @@ describe('ListenerManager Unit Test:', () => {
   })
 
   afterEach(() => {
-    const manager = ListenerManager.getInstance()
-    manager.unloadListeners()
+    const manager = HandlerManager.getInstance()
+    manager.unloadHandlers()
     manager.resetHistory()
   })
   after(() => {

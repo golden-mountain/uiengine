@@ -1,17 +1,17 @@
 import _ from 'lodash'
 
-import * as TYPES from '../../typings/ListenerManager'
+import * as TYPES from '../../typings/HandlerManager'
 
-export class ListenerManager implements TYPES.IListenerManager {
-  private static instance: ListenerManager
+export class HandlerManager implements TYPES.IHandlerManager {
+  private static instance: HandlerManager
   static getInstance() {
-    if (_.isNil(ListenerManager.instance)) {
-      ListenerManager.instance = new ListenerManager
+    if (_.isNil(HandlerManager.instance)) {
+      HandlerManager.instance = new HandlerManager
     }
-    return ListenerManager.instance
+    return HandlerManager.instance
   }
 
-  private listeners: TYPES.IListenerMap = {
+  private handlers: TYPES.IHandlerMap = {
   }
   private history: TYPES.IEventHistory = {
     capacity: 100,
@@ -21,35 +21,35 @@ export class ListenerManager implements TYPES.IListenerManager {
     indexTree: {
       targetTree: {},
       eventTree: {},
-      listenerTree: {},
+      handlerTree: {},
     },
     indexOffset: 0,
   }
 
   private defaultConflictResolver (
-    listenerA: TYPES.IListenerConfig,
-    listenerB: TYPES.IListenerConfig,
+    handlerA: TYPES.IHandlerConfig,
+    handlerB: TYPES.IHandlerConfig,
   ) {
-    const weightA = _.get(listenerA, 'weight', 0)
-    const weightB = _.get(listenerB, 'weight', 0)
+    const weightA = _.get(handlerA, 'weight', 0)
+    const weightB = _.get(handlerB, 'weight', 0)
     if (weightA > weightB) {
-      return listenerA
+      return handlerA
     }
-    return listenerB
+    return handlerB
   }
-  loadListeners(
-    listeners: TYPES.IListenerConfig | TYPES.IListenerConfig[],
-    resolver?: TYPES.IListenerConflictResolver,
+  loadHandlers(
+    handlers: TYPES.IHandlerConfig | TYPES.IHandlerConfig[],
+    resolver?: TYPES.IHandlerConflictResolver,
   ) {
-    let listenerArray: TYPES.IListenerConfig[] = []
-    if (_.isArray(listeners)) {
-      listenerArray = listeners
+    let handlerArray: TYPES.IHandlerConfig[] = []
+    if (_.isArray(handlers)) {
+      handlerArray = handlers
     } else {
-      listenerArray.push(listeners)
+      handlerArray.push(handlers)
     }
 
     let allAreLoaded: boolean = true
-    listenerArray.forEach((config: TYPES.IListenerConfig) => {
+    handlerArray.forEach((config: TYPES.IHandlerConfig) => {
       if (_.isObject(config)) {
         const { name } = config
         if (!_.isString(name) || _.isEmpty(name)) {
@@ -57,21 +57,21 @@ export class ListenerManager implements TYPES.IListenerManager {
           return
         }
 
-        if (_.isNil(this.listeners[name])) {
-          this.listeners[name] = _.cloneDeep(config)
+        if (_.isNil(this.handlers[name])) {
+          this.handlers[name] = _.cloneDeep(config)
         } else if (_.isFunction(resolver)) {
-          const prevListener = this.listeners[name]
-          const nextListener = _.cloneDeep(config)
+          const prevHandler = this.handlers[name]
+          const nextHandler = _.cloneDeep(config)
           const result = resolver(
-            prevListener,
-            nextListener,
+            prevHandler,
+            nextHandler,
           )
           if (!_.isEmpty(result)) {
-            this.listeners[name] = result
+            this.handlers[name] = result
           }
         } else {
-          this.listeners[name] = this.defaultConflictResolver(
-            this.listeners[name],
+          this.handlers[name] = this.defaultConflictResolver(
+            this.handlers[name],
             _.cloneDeep(config),
           )
         }
@@ -82,65 +82,65 @@ export class ListenerManager implements TYPES.IListenerManager {
     })
     return allAreLoaded
   }
-  unloadListeners(
+  unloadHandlers(
     name?: string
   ) {
     if (!_.isNil(name)) {
       if (_.isString(name)) {
-        delete this.listeners[name]
+        delete this.handlers[name]
       } else {
         return false
       }
     } else {
-      this.listeners = {}
+      this.handlers = {}
     }
     return true
   }
-  getListenerConfig(
+  getHandlerConfig(
     name: string
   ) {
     if (_.isString(name) && name.length > 0) {
-      return _.cloneDeep(this.listeners[name]) || null
+      return _.cloneDeep(this.handlers[name]) || null
     }
-    return this.listeners
+    return this.handlers
   }
 
-  private prepareListenerQueue(
+  private prepareHandlerQueue(
     eventConfig: TYPES.IEventConfig
   ) {
-    const { listener } = eventConfig
+    const { handler } = eventConfig
 
-    const listenerQueue: TYPES.IListenerConfig[] = []
-    if (_.isString(listener)) {
-      if (!_.isNil(this.listeners[listener])) {
-        listenerQueue.push(
-          _.cloneDeep(this.listeners[listener])
+    const handlerQueue: TYPES.IHandlerConfig[] = []
+    if (_.isString(handler)) {
+      if (!_.isNil(this.handlers[handler])) {
+        handlerQueue.push(
+          _.cloneDeep(this.handlers[handler])
         )
       }
-    } else if (!_.isArray(listener) && _.isObject(listener)) {
-      const { name, adapter } = listener
-      if (_.isString(name) && !_.isNil(this.listeners[name])) {
-        listenerQueue.push(
+    } else if (!_.isArray(handler) && _.isObject(handler)) {
+      const { name, adapter } = handler
+      if (_.isString(name) && !_.isNil(this.handlers[name])) {
+        handlerQueue.push(
           _.cloneDeep({
-            ...this.listeners[name],
+            ...this.handlers[name],
             adapter,
           })
         )
       }
-    } else if (_.isArray(listener)) {
-      listener.forEach((config: string | TYPES.IEventListenerConfig) => {
+    } else if (_.isArray(handler)) {
+      handler.forEach((config: string | TYPES.IEventHandlerConfig) => {
         if (_.isString(config)) {
-          if (!_.isNil(this.listeners[config])) {
-            listenerQueue.push(
-              _.cloneDeep(this.listeners[config])
+          if (!_.isNil(this.handlers[config])) {
+            handlerQueue.push(
+              _.cloneDeep(this.handlers[config])
             )
           }
         } else if (_.isObject(config)) {
           const { name, adapter } = config
-          if (_.isString(name) && !_.isNil(this.listeners[name])) {
-            listenerQueue.push(
+          if (_.isString(name) && !_.isNil(this.handlers[name])) {
+            handlerQueue.push(
               _.cloneDeep({
-                ...this.listeners[name],
+                ...this.handlers[name],
                 adapter,
               })
             )
@@ -149,15 +149,15 @@ export class ListenerManager implements TYPES.IListenerManager {
       })
     }
 
-    return listenerQueue
+    return handlerQueue
   }
   private generateDebugInfo(
     dataSource: any,
-    debugList: Array<string|TYPES.IEventDebugConfig|TYPES.IListenerDebugConfig>,
+    debugList: Array<string|TYPES.IEventDebugConfig|TYPES.IHandlerDebugConfig>,
   ) {
     const info: { [debugKey: string]: any } = {}
     if (_.isArray(debugList) && debugList.length > 0) {
-      debugList.forEach((config: string|TYPES.IEventDebugConfig|TYPES.IListenerDebugConfig) => {
+      debugList.forEach((config: string|TYPES.IEventDebugConfig|TYPES.IHandlerDebugConfig) => {
         if (_.isString(config)) {
           info[config] = _.get(dataSource, config)
         } else if (_.isObject(config)) {
@@ -168,35 +168,35 @@ export class ListenerManager implements TYPES.IListenerManager {
     }
     return info
   }
-  private callEventListener(
-    listenerConfig: TYPES.IListenerConfig,
-    receivedParam: TYPES.IListenerParam,
+  private callEventHandler(
+    handlerConfig: TYPES.IHandlerConfig,
+    receivedParam: TYPES.IHandlerParam,
     eventRecord: TYPES.IEventRecord,
   ) {
-    if (_.isObject(listenerConfig)) {
-      const { name, paramKeys, debugList, listener, adapter } = listenerConfig
+    if (_.isObject(handlerConfig)) {
+      const { name, paramKeys, debugList, handler, adapter } = handlerConfig
 
-      const listenerRecord: TYPES.IListenerRecord = {
-        listenerName: name,
+      const handlerRecord: TYPES.IHandlerRecord = {
+        handlerName: name,
         eventRecord,
         result: null,
       }
 
-      const directParam: TYPES.IListenerParam = {}
+      const directParam: TYPES.IHandlerParam = {}
       if (_.isArray(paramKeys) && paramKeys.length > 0) {
 
-        let adaptedParam: TYPES.IListenerParam = {}
+        let adaptedParam: TYPES.IHandlerParam = {}
         if (_.isFunction(adapter)) {
-          const paramAdapter = adapter as TYPES.IListenerParamAdapter
+          const paramAdapter = adapter as TYPES.IHandlerParamAdapter
           try {
             adaptedParam = paramAdapter(receivedParam)
           } catch (e) {
-            console.error(`Error happens in the param adapter for listener "${name}".`)
+            console.error(`Error happens in the param adapter for handler "${name}".`)
             console.error('Which is called in the event ', eventRecord.eventName, ', and its target is ', eventRecord.target)
             console.error(e)
           }
         } else if (_.isObject(adapter) && !_.isEmpty(adapter)) {
-          const paramRouteMap = adapter as TYPES.IListenerParamRouteMap
+          const paramRouteMap = adapter as TYPES.IHandlerParamRouteMap
           Object.keys(paramRouteMap).forEach((key: string) => {
             if (_.isString(paramRouteMap[key]) && paramRouteMap[key]) {
               adaptedParam[key] = _.get(receivedParam, paramRouteMap[key])
@@ -206,7 +206,7 @@ export class ListenerManager implements TYPES.IListenerManager {
           adaptedParam = receivedParam
         }
 
-        paramKeys.forEach((item: string | TYPES.IListenerParamConfig) => {
+        paramKeys.forEach((item: string | TYPES.IHandlerParamConfig) => {
           if (_.isString(item) && item) {
             directParam[item] = _.get(adaptedParam, item)
           } else if (_.isObject(item)) {
@@ -219,55 +219,55 @@ export class ListenerManager implements TYPES.IListenerManager {
       }
 
       if (_.isArray(debugList) && debugList.length > 0) {
-        listenerRecord.originInfo = this.generateDebugInfo(directParam, debugList)
+        handlerRecord.originInfo = this.generateDebugInfo(directParam, debugList)
       }
 
-      if (_.isFunction(listener)) {
+      if (_.isFunction(handler)) {
         const { eventName, queue, records } = eventRecord
-        const helper: TYPES.IListenerHelper = {
+        const helper: TYPES.IHandlerHelper = {
           getEventName: () => eventName,
-          getListenerQueue: () => queue,
-          getListenerRecords: () => records,
+          getHandlerQueue: () => queue,
+          getHandlerRecords: () => records,
         }
         try {
-          const result = listener(directParam, helper)
+          const result = handler(directParam, helper)
           if (result instanceof Promise) {
-            listenerRecord.result = result.then((returnData: any) => {
+            handlerRecord.result = result.then((returnData: any) => {
               if (_.isArray(debugList) && debugList.length > 0) {
-                listenerRecord.finialInfo = this.generateDebugInfo(directParam, debugList)
+                handlerRecord.finialInfo = this.generateDebugInfo(directParam, debugList)
               }
-              listenerRecord.result = returnData
+              handlerRecord.result = returnData
               return returnData
             })
           } else {
-            listenerRecord.result = result
+            handlerRecord.result = result
           }
         } catch(e) {
-          console.error(`Error happens when call the listener "${name}".`)
+          console.error(`Error happens when call the handler "${name}".`)
           console.error('Which is called in the event ', eventName, ', its target is ', eventRecord.target)
           console.error(e)
         }
       } else {
-        this.defaultEventListener(eventRecord, listenerRecord)
+        this.defaultEventHandler(eventRecord, handlerRecord)
       }
 
       if (
-        !(listenerRecord.result instanceof Promise) &&
+        !(handlerRecord.result instanceof Promise) &&
         _.isArray(debugList) && debugList.length > 0
       ) {
-        listenerRecord.finialInfo = this.generateDebugInfo(directParam, debugList)
+        handlerRecord.finialInfo = this.generateDebugInfo(directParam, debugList)
       }
 
-      return listenerRecord
+      return handlerRecord
     }
   }
-  private defaultEventListener(
+  private defaultEventHandler(
     eventRecord: TYPES.IEventRecord,
-    listenerRecord: TYPES.IListenerRecord
+    handlerRecord: TYPES.IHandlerRecord
   ) {
     const { eventName, target } = eventRecord
-    const { listenerName } = listenerRecord
-    console.log(`In the "${eventName}" event, the "${listenerName}" listener has no function to call.`)
+    const { handlerName } = handlerRecord
+    console.log(`In the "${eventName}" event, the "${handlerName}" handler has no function to call.`)
     if (target) {
       console.log(`Target is: `, target)
     }
@@ -279,7 +279,7 @@ export class ListenerManager implements TYPES.IListenerManager {
     const {
       capacity,
       records,
-      indexTree: { targetTree, eventTree, listenerTree },
+      indexTree: { targetTree, eventTree, handlerTree },
     } = history
 
     // check capacity
@@ -295,7 +295,7 @@ export class ListenerManager implements TYPES.IListenerManager {
     const recordIndex = records.push(eventRecord) - 1 - history.indexOffset
 
     // store index
-    const { eventName, target, records: listenerRecords } = eventRecord
+    const { eventName, target, records: handlerRecords } = eventRecord
     const targetName = _.isString(target) ? target : _.get(target, 'name')
     const targetRef = _.get(target, 'reference')
     // target and event trees
@@ -451,24 +451,24 @@ export class ListenerManager implements TYPES.IListenerManager {
       }
 
     }
-    // listener tree
-    if (_.isArray(listenerRecords) && listenerRecords.length > 0) {
-      listenerRecords.forEach((record: TYPES.IListenerRecord, index: number) => {
-        const { listenerName } = record
-        if (_.isString(listenerName) && listenerName) {
+    // handler tree
+    if (_.isArray(handlerRecords) && handlerRecords.length > 0) {
+      handlerRecords.forEach((record: TYPES.IHandlerRecord, index: number) => {
+        const { handlerName } = record
+        if (_.isString(handlerName) && handlerName) {
 
-          // create listener node when not find
-          if (_.isNil(listenerTree[listenerName])) {
-            listenerTree[listenerName] = {
+          // create handler node when not find
+          if (_.isNil(handlerTree[handlerName])) {
+            handlerTree[handlerName] = {
               indexes: [],
             }
           }
 
-          // store index in the listener node
-          const { indexes: lIndexes } = listenerTree[listenerName]
+          // store index in the handler node
+          const { indexes: lIndexes } = handlerTree[handlerName]
           lIndexes.push({
             eventIndex: recordIndex,
-            listenerIndex: index,
+            handlerIndex: index,
           })
         }
       })
@@ -501,17 +501,17 @@ export class ListenerManager implements TYPES.IListenerManager {
         if (simple === true || simpleMode === true || _.isEqual(simpleMode, 'true')) {
           if (_.isString(eventName) && eventName.length > 0) {
 
-            // In case that the event config changes or load new listeners
-            // save listener config
-            const listenerQueue = this.prepareListenerQueue(config)
+            // In case that the event config changes or load new handlers
+            // save handler config
+            const handlerQueue = this.prepareHandlerQueue(config)
             // save param config
             const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : {}
 
             props[eventName] = (...args: any[]) => {
-              listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-                const { listener } = listenerConfig
-                if (_.isFunction(listener)) {
-                  listener(...args, defaultConfig)
+              handlerQueue.forEach((handlerConfig: TYPES.IHandlerConfig) => {
+                const { handler } = handlerConfig
+                if (_.isFunction(handler)) {
+                  handler(...args, defaultConfig)
                 }
               })
             }
@@ -520,9 +520,9 @@ export class ListenerManager implements TYPES.IListenerManager {
         } else {
           if (_.isString(eventName) && eventName.length > 0) {
 
-            // In case that the event config changes or load new listeners
-            // save listener config
-            const listenerQueue = this.prepareListenerQueue(config)
+            // In case that the event config changes or load new handlers
+            // save handler config
+            const handlerQueue = this.prepareHandlerQueue(config)
             // save param config
             const receiveConfig = _.isArray(receiveParams) ? [...receiveParams] : []
             const defaultConfig = _.isObject(defaultParams) ? {...defaultParams} : {}
@@ -548,7 +548,7 @@ export class ListenerManager implements TYPES.IListenerManager {
               // create event record
               const eventRecord: TYPES.IEventRecord = {
                 eventName: eventName,
-                queue: listenerQueue.map((item) => item.name),
+                queue: handlerQueue.map((item) => item.name),
                 records: [],
               }
 
@@ -572,16 +572,16 @@ export class ListenerManager implements TYPES.IListenerManager {
                 eventRecord.originInfo = this.generateDebugInfo(receivedParam, debugConfig)
               }
 
-              if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
-                listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-                  const { simpleMode: listenerMode, listener } = listenerConfig
-                  if (listenerMode === true || _.isEqual(listenerMode, 'true')) {
-                    if (_.isFunction(listener)) {
-                      listener(...args, defaultConfig)
+              if (_.isArray(handlerQueue) && handlerQueue.length > 0) {
+                handlerQueue.forEach((handlerConfig: TYPES.IHandlerConfig) => {
+                  const { simpleMode: handlerMode, handler } = handlerConfig
+                  if (handlerMode === true || _.isEqual(handlerMode, 'true')) {
+                    if (_.isFunction(handler)) {
+                      handler(...args, defaultConfig)
                     }
                   } else {
-                    const record = this.callEventListener(
-                      listenerConfig,
+                    const record = this.callEventHandler(
+                      handlerConfig,
                       receivedParam,
                       eventRecord,
                     )
@@ -601,9 +601,9 @@ export class ListenerManager implements TYPES.IListenerManager {
               const eventResult: TYPES.IEventResult = {
                 eventName: eventRecord.eventName,
                 queue: _.cloneDeep(eventRecord.queue),
-                results: eventRecord.records.map((record: TYPES.IListenerRecord) => {
-                  const resultObj: TYPES.IListenerResult = {
-                    listenerName: record.listenerName,
+                results: eventRecord.records.map((record: TYPES.IHandlerRecord) => {
+                  const resultObj: TYPES.IHandlerResult = {
+                    handlerName: record.handlerName,
                     result: record.result,
                   }
                   if (record.result instanceof Promise) {
@@ -632,7 +632,7 @@ export class ListenerManager implements TYPES.IListenerManager {
 
     return props
   }
-  getDynamicEventListener(
+  getDynamicEventHandler(
     event: TYPES.IEventConfig,
     simple?: boolean,
   ) {
@@ -648,14 +648,14 @@ export class ListenerManager implements TYPES.IListenerManager {
           simpleMode,
         } = event
 
-        // get listener queue
-        const listenerQueue = this.prepareListenerQueue(event)
+        // get handler queue
+        const handlerQueue = this.prepareHandlerQueue(event)
 
         if (simple === true || simpleMode === true || _.isEqual(simpleMode, 'true')) {
-          listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-            const { listener } = listenerConfig
-            if (_.isFunction(listener)) {
-              listener(...args, defaultParams)
+          handlerQueue.forEach((handlerConfig: TYPES.IHandlerConfig) => {
+            const { handler } = handlerConfig
+            if (_.isFunction(handler)) {
+              handler(...args, defaultParams)
             }
           })
         } else {
@@ -674,7 +674,7 @@ export class ListenerManager implements TYPES.IListenerManager {
           // create event record
           const eventRecord: TYPES.IEventRecord = {
             eventName,
-            queue: listenerQueue.map((item) => item.name),
+            queue: handlerQueue.map((item) => item.name),
             records: [],
           }
 
@@ -703,16 +703,16 @@ export class ListenerManager implements TYPES.IListenerManager {
             eventRecord.originInfo = this.generateDebugInfo(receivedParam, debugList)
           }
 
-          if (_.isArray(listenerQueue) && listenerQueue.length > 0) {
-            listenerQueue.forEach((listenerConfig: TYPES.IListenerConfig) => {
-              const { simpleMode: listenerMode, listener } = listenerConfig
-              if (listenerMode === true || _.isEqual(listenerMode, 'true')) {
-                if (_.isFunction(listener)) {
-                  listener(...args, defaultParams)
+          if (_.isArray(handlerQueue) && handlerQueue.length > 0) {
+            handlerQueue.forEach((handlerConfig: TYPES.IHandlerConfig) => {
+              const { simpleMode: handlerMode, handler } = handlerConfig
+              if (handlerMode === true || _.isEqual(handlerMode, 'true')) {
+                if (_.isFunction(handler)) {
+                  handler(...args, defaultParams)
                 }
               } else {
-                const record = this.callEventListener(
-                  listenerConfig,
+                const record = this.callEventHandler(
+                  handlerConfig,
                   receivedParam,
                   eventRecord,
                 )
@@ -732,9 +732,9 @@ export class ListenerManager implements TYPES.IListenerManager {
           const eventResult: TYPES.IEventResult = {
             eventName: eventRecord.eventName,
             queue: _.cloneDeep(eventRecord.queue),
-            results: eventRecord.records.map((record: TYPES.IListenerRecord) => {
-              const resultObj: TYPES.IListenerResult = {
-                listenerName: record.listenerName,
+            results: eventRecord.records.map((record: TYPES.IHandlerRecord) => {
+              const resultObj: TYPES.IHandlerResult = {
+                handlerName: record.handlerName,
                 result: record.result,
               }
               if (record.result instanceof Promise) {
@@ -872,46 +872,46 @@ export class ListenerManager implements TYPES.IListenerManager {
       return true
     })
   }
-  private mapListenerRecords(
-    indexes: Array<{ eventIndex: number, listenerIndex: number }>,
+  private mapHandlerRecords(
+    indexes: Array<{ eventIndex: number, handlerIndex: number }>,
   ) {
     const history = this.history
     const indexOffset = history.indexOffset
-    return indexes.map((index: { eventIndex: number, listenerIndex: number }) => {
+    return indexes.map((index: { eventIndex: number, handlerIndex: number }) => {
       if (_.isObject(index)) {
-        const { eventIndex, listenerIndex } = index
+        const { eventIndex, handlerIndex } = index
         const eventRecord = history.records[eventIndex + indexOffset]
         if (!_.isNil(eventRecord)) {
-          return _.cloneDeep(eventRecord.records[listenerIndex])
+          return _.cloneDeep(eventRecord.records[handlerIndex])
         }
       }
     })
   }
-  private filterListenerRecords(
-    records: (TYPES.IListenerRecord|undefined)[],
+  private filterHandlerRecords(
+    records: (TYPES.IHandlerRecord|undefined)[],
     exclude?: TYPES.IEventExportExclude,
     include?: TYPES.IEventExportInclude,
   ) {
-    const includeListenerName: string[] = []
+    const includeHandlerName: string[] = []
     if (!_.isNil(include)) {
-      const listener = _.get(include, 'listener')
-      if (_.isArray(listener) && listener.length > 0) {
-        listener.forEach((item: string) => {
+      const handler = _.get(include, 'handler')
+      if (_.isArray(handler) && handler.length > 0) {
+        handler.forEach((item: string) => {
           if (_.isString(item) && item) {
-            includeListenerName.push(item)
+            includeHandlerName.push(item)
           }
         })
-      } else if (_.isString(listener) && listener) {
-        includeListenerName.push(listener)
+      } else if (_.isString(handler) && handler) {
+        includeHandlerName.push(handler)
       }
     }
 
-    return records.filter((record?: TYPES.IListenerRecord) => {
+    return records.filter((record?: TYPES.IHandlerRecord) => {
       if (_.isNil(record)) {
         return false
       } else {
-        const listenerName = _.get(record, 'listenerName')
-        if (includeListenerName.length > 0 && !includeListenerName.includes(listenerName)) {
+        const handlerName = _.get(record, 'handlerName')
+        if (includeHandlerName.length > 0 && !includeHandlerName.includes(handlerName)) {
           return false
         }
       }
@@ -929,7 +929,7 @@ export class ListenerManager implements TYPES.IListenerManager {
       indexTree: {
         targetTree: {},
         eventTree: {},
-        listenerTree: {},
+        handlerTree: {},
       },
       indexOffset: 0,
     }
@@ -1015,7 +1015,7 @@ export class ListenerManager implements TYPES.IListenerManager {
     const history = this.history
     const {
       records,
-      indexTree: { targetTree, eventTree, listenerTree },
+      indexTree: { targetTree, eventTree, handlerTree },
     } = history
 
     if (!_.isNil(options) && _.isObject(options)) {
@@ -1023,7 +1023,7 @@ export class ListenerManager implements TYPES.IListenerManager {
 
       let exportHistory: TYPES.IEventTargetExportTree |
         TYPES.IEventExportTree |
-        TYPES.IListenerExportTree |
+        TYPES.IHandlerExportTree |
         TYPES.IEventRecord[] = {}
 
       switch (struct) {
@@ -1091,15 +1091,15 @@ export class ListenerManager implements TYPES.IListenerManager {
             }
           })
           break
-        case 'listener-tree':
-          Object.keys(listenerTree).forEach((listenerName: string) => {
-            const records = this.filterListenerRecords(
-              this.mapListenerRecords(listenerTree[listenerName].indexes),
+        case 'handler-tree':
+          Object.keys(handlerTree).forEach((handlerName: string) => {
+            const records = this.filterHandlerRecords(
+              this.mapHandlerRecords(handlerTree[handlerName].indexes),
               exclude,
               include,
             )
             if (_.isArray(records) && records.length > 0) {
-              exportHistory[listenerName] = records
+              exportHistory[handlerName] = records
             }
           })
           break
@@ -1118,7 +1118,7 @@ export class ListenerManager implements TYPES.IListenerManager {
         history.indexTree = {
           targetTree: {},
           eventTree: {},
-          listenerTree: {},
+          handlerTree: {},
         }
         history.indexOffset = 0
       }
@@ -1130,4 +1130,4 @@ export class ListenerManager implements TYPES.IListenerManager {
   }
 }
 
-export default ListenerManager
+export default HandlerManager

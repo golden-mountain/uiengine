@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 
 import { default as components } from "./components";
 import * as plugins from "./plugins";
-import * as listeners from "./listeners";
+import * as handlers from "./handlers";
 import { requestConfig, widgetConfig } from "./config";
 import {
   Request,
@@ -20,7 +20,7 @@ import { useMemo } from "react";
 
 UIEngineRegister.registerComponents(components);
 UIEngineRegister.registerPlugins(plugins);
-UIEngineRegister.registerListeners(listeners);
+UIEngineRegister.registerHandlers(handlers);
 
 const App: React.FC = () => {
   const [current, setCurrent] = useState();
