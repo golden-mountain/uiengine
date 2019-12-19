@@ -269,13 +269,14 @@ export class UINode implements IUINode {
     // 2. the source string starts with '$dummy.'
     // 3. the load without loadID which means it still use prev data
     if (
-      _.isString(sourceStr) && sourceStr &&
-      !UINode.match$ExceptList(sourceStr) &&
-      !_.isNil(this.loadingID)
+      _.isString(sourceStr) && sourceStr
+      && !UINode.match$ExceptList(sourceStr)
     ) {
-      await this.dataNode.loadData(currentSchema.datasource, { loadID: this.loadingID })
-    } else {
-      await this.dataNode.loadSchema(currentSchema.datasource)
+      if (!_.isNil(this.loadingID)) {
+        await this.dataNode.loadData(currentSchema.datasource, { loadID: this.loadingID })
+      } else {
+        await this.dataNode.loadSchema(currentSchema.datasource)
+      }
     }
 
     if (!_.isNil(currentSchema.$children)) {
