@@ -1,6 +1,6 @@
 import _ from 'lodash'
 
-import { ListenerManager } from '../../helpers'
+import { HandlerManager } from '../../helpers'
 
 import {
   IPlugin,
@@ -18,7 +18,7 @@ const execution: IPluginExecution = async (param: IPluginParam) => {
     const { $events, ...rest } = props as any
     let eventFuncs = {}
     if (_.isArray($events)) {
-      const manager = ListenerManager.getInstance()
+      const manager = HandlerManager.getInstance()
       eventFuncs = manager.getStaticEventProps($events)
     }
 

@@ -226,7 +226,7 @@
                             "eventName": "onSelect",
                             "receiveParams": ["value", "option"],
                             "defaultParams": {},
-                            "listener": "updateData"
+                            "handler": "updateData"
                           }
                         ]
                       },
@@ -535,19 +535,20 @@
                             "dataSource": "slb.virtual-server:port-list",
                             "dataSchema": "slb.virtual-server.port:",
                             "dependOn": {
-                              "targetKey": "main",
-                              "dependList": ["name"]
+                              "main": {
+                                "0.payload.virtual-server.name": "name"
+                              }
                             }
                           }
                         ],
                         "mode": "sync"
                       },
                       "options": {
-                        "urlParam": {},
-                        "envParam": {}
+                      },
+                      "callbacks": {
                       }
                     },
-                    "listener": "submitData"
+                    "handler": "submitData"
                   }
                 ]
               }
@@ -567,7 +568,7 @@
                         "redirect": "#/"
                       }
                     },
-                    "listener": "routeTo"
+                    "handler": "routeTo"
                   }
                 ]
               }

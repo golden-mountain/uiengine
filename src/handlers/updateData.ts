@@ -2,15 +2,15 @@ import _ from 'lodash'
 
 import {
   IUINode,
-  IListenerConfig,
-  IListener,
-  IListenerParam,
-  IListenerHelper,
+  IHandlerConfig,
+  IHandler,
+  IHandlerParam,
+  IHandlerHelper,
 } from '../../typings'
 
-const listener: IListener = (
-  directParam: IListenerParam,
-  helper: IListenerHelper,
+const handler: IHandler = (
+  directParam: IHandlerParam,
+  helper: IHandlerHelper,
 ) => {
   const event: Event = _.get(directParam, 'event')
   if (_.isFunction(_.get(event, 'stopPropagation'))) {
@@ -29,17 +29,17 @@ const listener: IListener = (
     if (_.isFunction(_.get(uiNode, 'dataNode.updateData'))) {
       uiNode.dataNode.updateData(value)
     } else {
-      console.log('Can\'t find function dataNode.updateData in listener "updateData"')
+      console.log('Can\'t find function dataNode.updateData in handler "updateData"')
     }
   } else {
-    console.log('Can\'t find the target uiNode in listener "updateData"')
+    console.log('Can\'t find the target uiNode in handler "updateData"')
   }
 }
 
-export const updateData: IListenerConfig = {
+export const updateData: IHandlerConfig = {
   name: 'updateData',
   paramKeys: ['event', 'value', 'uiNode'],
   debugList: ['event', 'value', 'uiNode.id', 'uiNode.dataNode.data'],
-  listener,
+  handler,
   weight: 0,
 }

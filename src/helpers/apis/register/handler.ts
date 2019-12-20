@@ -1,7 +1,7 @@
 import _ from "lodash";
 import { createInstanceProxy } from "../../APIEngine";
 
-class ListenerProxy {
+class HandlerProxy {
   constructor(name: string, plugin?: any) {
     if (!plugin) {
       this.get(name);
@@ -20,7 +20,7 @@ class ListenerProxy {
 }
 
 // callbacks
-const ListenerProxyGetCallback = function(target: any, key: string) {
+const HandlerProxyGetCallback = function(target: any, key: string) {
   if (!_.isNil(target[key])) {
     return target[key];
   }
@@ -28,7 +28,7 @@ const ListenerProxyGetCallback = function(target: any, key: string) {
   return target.get(key);
 };
 
-const ListenerProxySetCallback = function(
+const HandlerProxySetCallback = function(
   target: any,
   key: string,
   value: any
@@ -36,12 +36,12 @@ const ListenerProxySetCallback = function(
   return target.set(key, value);
 };
 
-const listener = function(this: any, path: string, configObject?: any) {
+const handler = function(this: any, path: string, configObject?: any) {
   return createInstanceProxy(
-    new ListenerProxy(path, configObject),
-    ListenerProxyGetCallback,
-    ListenerProxySetCallback
+    new HandlerProxy(path, configObject),
+    HandlerProxyGetCallback,
+    HandlerProxySetCallback
   );
 };
 
-export default listener;
+export default handler;

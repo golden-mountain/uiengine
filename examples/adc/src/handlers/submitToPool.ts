@@ -8,14 +8,14 @@ import {
 
 import {
   IConnectOptions,
-  IListenerConfig,
-  IListener,
-  IListenerParam,
+  IHandlerConfig,
+  IHandler,
+  IHandlerParam,
   IObject,
   IUINode,
 } from 'uiengine/typings'
 
-const listener: IListener = async (directParam: IListenerParam) => {
+const handler: IHandler = async (directParam: IHandlerParam) => {
   const uiNode: IUINode = _.get(directParam, 'uiNode')
 
   if (uiNode instanceof UINode) {
@@ -54,9 +54,9 @@ const listener: IListener = async (directParam: IListenerParam) => {
   }
 }
 
-export const submitToPool: IListenerConfig = {
+export const submitToPool: IHandlerConfig = {
   name: 'submitToPool',
   paramKeys: ['uiNode'],
-  listener,
+  handler,
   weight: 100,
 }

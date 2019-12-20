@@ -13,6 +13,10 @@ export interface IDataSource {
   defaultValue?: any
   autoload?: boolean
   loadOptions?: IObject
+  generate?: {
+    source: string
+    generator?: string
+  }
 }
 
 export interface IDataConnector {
@@ -32,11 +36,12 @@ export interface IDataGetOption {
   path?: string
 }
 export interface IDataLoadOption {
+  loadID?: string | number
 }
 export interface IDataUpdateOption {
 }
 export interface IDataDeleteOption {
-  path?: string
+  clearPool?: boolean
 }
 
 export interface IDataNode {
@@ -55,6 +60,7 @@ export interface IDataNode {
   data: any
   errorInfo?: IErrorInfo
 
+  loadSchema: (source?: string|IDataSource) => Promise
   getSchema: (path?: string) => IDataSchema | IDataNodeSchema | any
 
   getData: (options?: IDataGetOption) => any

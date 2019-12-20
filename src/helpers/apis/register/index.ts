@@ -1,9 +1,9 @@
 import component from "./component";
-import listener from "./listener";
+import handler from "./handler";
 import plugin from "./plugin";
 
 export default {
   component,
-  listener,
+  handler,
   plugin
 };

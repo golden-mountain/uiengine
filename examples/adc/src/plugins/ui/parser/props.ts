@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { ListenerManager } from 'uiengine'
+import { HandlerManager } from 'uiengine'
 
 import {
   IPlugin,
@@ -13,12 +13,12 @@ function getDefaultEventConfig(component: string, type: string) {
   const onChangeWithEvent: IEventConfig = {
     eventName: 'onChange',
     receiveParams: ['event'],
-    listener: 'updateData'
+    handler: 'updateData'
   }
   const onChangeWithValue: IEventConfig = {
     eventName: 'onChange',
     receiveParams: ['value'],
-    listener: 'updateData'
+    handler: 'updateData'
   }
 
   switch (component) {
@@ -107,15 +107,15 @@ const execution: IPluginExecution = async (directParam: IPluginParam) => {
     eventConfigs = getDefaultEventConfig(component, type)
   }
 
-  const manager = ListenerManager.getInstance()
+  const manager = HandlerManager.getInstance()
   let eventFuncs = manager.getStaticEventProps(eventConfigs.map((config: IEventConfig) => {
-    const { eventName, receiveParams, defaultParams, target, listener, ...rest } = config
+    const { eventName, receiveParams, defaultParams, target, handler, ...rest } = config
     return {
       eventName: _.isString(eventName) ? eventName : 'unknownEvent',
       receiveParams: _.isArray(receiveParams) ? receiveParams : [],
       defaultParams: { ...(_.isObject(defaultParams) ? defaultParams : {}), uiNode },
       target: _.isString(target) ? target : uiNode.id,
-      listener: _.isString(listener) ? listener : 'unknownListener',
+      handler: _.isString(handler) ? handler : 'unknownHandler',
       ...rest
     }
   }))

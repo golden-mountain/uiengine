@@ -3,13 +3,13 @@ import _ from 'lodash'
 import NodeController from '../data-layer/NodeController'
 
 import {
-  IListenerConfig,
-  IListener,
-  IListenerParam,
+  IHandlerConfig,
+  IHandler,
+  IHandlerParam,
   IUINode,
 } from '../../typings'
 
-const listener: IListener = (directParam: IListenerParam) => {
+const handler: IHandler = (directParam: IHandlerParam) => {
   const uiNode: IUINode = _.get(directParam, 'uiNode')
   const engineId: string = _.get(directParam, 'engineId')
   const layout: string = _.get(directParam, 'layout')
@@ -33,11 +33,11 @@ const listener: IListener = (directParam: IListenerParam) => {
   )
 }
 
-export const loadUI: IListenerConfig = {
+export const loadUI: IHandlerConfig = {
   name: 'loadUI',
   paramKeys: ['uiNode', 'layout', 'container'],
   debugList: ['uiNode.id', 'layout', 'container'],
-  listener,
+  handler,
   weight: 0,
   describe: {
     layout: 'string',

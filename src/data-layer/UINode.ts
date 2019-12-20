@@ -30,10 +30,22 @@ import {
   IUINode,
   IUINodeConfig,
   IUINodeRenderer,
+  IUINodeClearOption,
   IUISchema,
 } from '../../typings'
+import { on } from 'cluster'
 
 export class UINode implements IUINode {
+  private static $ExceptList: string[] = [
+    '$dummy',
+    '$generated',
+  ]
+  private static match$ExceptList(str: string) {
+    return UINode.$ExceptList.some((except) => {
+      return str.startsWith(except)
+    })
+  }
+
   readonly id: string
   readonly engineId?: string
   readonly layoutKey?: string
@@ -56,7 +68,8 @@ export class UINode implements IUINode {
     return this.uiSchema
   }
   private loadQueue: number = 0
-  private loadProcess: Promise<IUISchema|undefined> | undefined
+  private loadProcess: Promise<IUISchema | undefined> | undefined
+  private loadingID?: number | string
 
   props: IObject = {}
   layoutMap: {
@@ -175,7 +188,7 @@ export class UINode implements IUINode {
       const { results } = await this.pluginManager.executePlugins(
         this.id,
         'ui.parser.before',
-        {uiNode: this, schema}
+        { uiNode: this, schema }
       )
       if (_.isArray(results)) {
         results.forEach((resultItem) => {
@@ -196,7 +209,7 @@ export class UINode implements IUINode {
       await this.pluginManager.executePlugins(
         this.id,
         'ui.parser',
-        {uiNode: this}
+        { uiNode: this }
       )
     } catch (e) {
       console.error(e)
@@ -229,13 +242,40 @@ export class UINode implements IUINode {
     schema = await this.parseBefore(schema)
 
     let currentSchema: IUISchema = schema
-    // use dataNode to load the dataSource
-    if (_.isObject(currentSchema.datasource)) {
-      const { source } = currentSchema.datasource
-      if (source.startsWith('$dummy.')) {
-        // dummy node needn't load data
+
+    // get source string and format datasource
+    let sourceStr: string = `$dummy.${this.id}`
+    const { datasource: srcConfig } = currentSchema
+    if (_.isObject(srcConfig) && !_.isEmpty(srcConfig)) {
+      const { source } = srcConfig
+      if (!_.isString(source) || _.isEmpty(source)) {
+        srcConfig.source = sourceStr
       } else {
-        await this.dataNode.loadData(currentSchema.datasource)
+        sourceStr = source
+      }
+    } else if (_.isString(srcConfig) && srcConfig) {
+      sourceStr = srcConfig
+      currentSchema.datasource = {
+        source: srcConfig,
+      }
+    } else {
+      currentSchema.datasource = {
+        source: sourceStr,
+      }
+    }
+
+    // use dataNode to load the dataSource, except:
+    // 1. the source string is invalid
+    // 2. the source string starts with '$dummy.'
+    // 3. the load without loadID which means it still use prev data
+    if (
+      _.isString(sourceStr) && sourceStr
+      && !UINode.match$ExceptList(sourceStr)
+    ) {
+      if (!_.isNil(this.loadingID)) {
+        await this.dataNode.loadData(currentSchema.datasource, { loadID: this.loadingID })
+      } else {
+        await this.dataNode.loadSchema(currentSchema.datasource)
       }
     }
 
@@ -253,7 +293,7 @@ export class UINode implements IUINode {
           for (let element of child) {
             // the upper 'node' is a dummy node which is just used to store these subnodes, so their real parent is still this
             const subnode = this.createChildNode(element, this)
-            await subnode.loadLayout(element)
+            await subnode.loadLayout(element, this.loadingID)
 
             if (!_.isNil(node)) {
               if (_.isNil(node.children)) {
@@ -267,7 +307,7 @@ export class UINode implements IUINode {
         } else if (_.isObject(child)) {
           node = this.createChildNode(child, this)
           if (!_.isNil(node)) {
-            await node.loadLayout(child)
+            await node.loadLayout(child, this.loadingID)
           }
         }
         if (!_.isNil(node)) {
@@ -290,7 +330,7 @@ export class UINode implements IUINode {
     source: string,
     token: string,
     replace: string,
-    except?: Array<string|RegExp>,
+    except?: Array<string | RegExp>,
     depth?: number,
   ) {
     // format the token to create the RegExp
@@ -318,8 +358,11 @@ export class UINode implements IUINode {
         }
         // the exception of the replacement
         if (_.isArray(except) && except.length) {
-          const isExcepted = except.some((value: string|RegExp) => {
+          const isExcepted = except.some((value: string | RegExp) => {
             if (_.isString(value) && matchString.startsWith(value)) {
+              if (!_.isNil(depth)) {
+                depth++
+              }
               return true
             } else if (_.isRegExp(value) && value.test(matchString)) {
               return true
@@ -350,7 +393,7 @@ export class UINode implements IUINode {
     target: any,
     token: string,
     replace: string,
-    except?: Array<string|RegExp>,
+    except?: Array<string | RegExp>,
     depth?: number,
   ) {
     if (_.isString(target)) {
@@ -380,14 +423,14 @@ export class UINode implements IUINode {
             $child.datasource,
             '$',
             `${index}`,
-            ['$dummy'],
+            UINode.$ExceptList,
             1,
           )
           $child.state = this.searchAndReplace(
             $child.state,
             '$',
             `${index}`,
-            ['$dummy'],
+            UINode.$ExceptList,
             1,
           )
           this.replaceChildToken($child, index)
@@ -397,34 +440,34 @@ export class UINode implements IUINode {
           $children.datasource,
           '$',
           `${index}`,
-          ['$dummy'],
+          UINode.$ExceptList,
           1,
         )
         $children.state = this.searchAndReplace(
           $children.state,
           '$',
           `${index}`,
-          ['$dummy'],
+          UINode.$ExceptList,
           1,
         )
         this.replaceChildToken($children, index)
       }
     } else if (_.isArray(children) && children.length) {
-      children.forEach((child: IUISchema|IUISchema[]) => {
+      children.forEach((child: IUISchema | IUISchema[]) => {
         if (_.isArray(child)) {
           child.forEach((item: IUISchema) => {
             item.datasource = this.searchAndReplace(
               item.datasource,
               '$',
               `${index}`,
-              ['$dummy'],
+              UINode.$ExceptList,
               1,
             )
             item.state = this.searchAndReplace(
               item.state,
               '$',
               `${index}`,
-              ['$dummy'],
+              UINode.$ExceptList,
               1,
             )
             this.replaceChildToken(item, index)
@@ -434,14 +477,14 @@ export class UINode implements IUINode {
             child.datasource,
             '$',
             `${index}`,
-            ['$dummy'],
+            UINode.$ExceptList,
             1,
           )
           child.state = this.searchAndReplace(
             child.state,
             '$',
             `${index}`,
-            ['$dummy'],
+            UINode.$ExceptList,
             1,
           )
           this.replaceChildToken(child, index)
@@ -463,14 +506,14 @@ export class UINode implements IUINode {
                 cloneSchema.datasource,
                 '$',
                 `${index}`,
-                ['$dummy'],
+                UINode.$ExceptList,
                 1,
               )
               cloneSchema.state = this.searchAndReplace(
                 cloneSchema.state,
                 '$',
                 `${index}`,
-                ['$dummy'],
+                UINode.$ExceptList,
                 1,
               )
             }
@@ -486,14 +529,14 @@ export class UINode implements IUINode {
               cloneSchema.datasource,
               '$',
               `${index}`,
-              ['$dummy'],
+              UINode.$ExceptList,
               1,
             )
             cloneSchema.state = this.searchAndReplace(
               cloneSchema.state,
               '$',
               `${index}`,
-              ['$dummy'],
+              UINode.$ExceptList,
               1,
             )
           }
@@ -506,7 +549,7 @@ export class UINode implements IUINode {
       }).filter((item) => {
         // remove the undefined
         return item !== undefined
-      }) as Array<IUISchema|IUISchema[]>
+      }) as Array<IUISchema | IUISchema[]>
     } else {
       schema.children = []
     }
@@ -540,7 +583,7 @@ export class UINode implements IUINode {
     return _.cloneDeep(schema)
   }
 
-  async loadLayout(schema?: string | IUISchema) {
+  async loadLayout(schema?: string | IUISchema, loadID?: string | number) {
     // cache the schema which will be loaded, if not provide, use the current loaded schema as default
     const schemaCache = _.isNil(schema) ? this.schema : schema
 
@@ -549,6 +592,11 @@ export class UINode implements IUINode {
 
     if (_.isNil(this.loadProcess)) {
       this.loadProcess = new Promise((resolve, reject) => {
+        // set the current loading ID
+        if (!_.isNil(loadID)) {
+          this.loadingID = loadID
+        }
+
         if (_.isString(schemaCache) && schemaCache) {
 
           this.getRemoteSchema(schemaCache)
@@ -563,21 +611,21 @@ export class UINode implements IUINode {
                     // error during the analyzation
                     console.warn(`Error occurs when analyze schema for ${
                       this.id
-                    }${
+                      }${
                       this.layoutKey ? ` in ${this.layoutKey}` : ''
-                    }${
+                      }${
                       this.engineId ? ` of ${this.engineId}` : ''
-                    }`)
+                      }`)
                     resolve(undefined)
                   })
               } else {
                 console.warn(`Can't get remote schema ${schemaCache} for ${
                   this.id
-                }${
+                  }${
                   this.layoutKey ? ` in ${this.layoutKey}` : ''
-                }${
+                  }${
                   this.engineId ? ` of ${this.engineId}` : ''
-                }`)
+                  }`)
                 resolve(undefined)
               }
             })
@@ -585,11 +633,11 @@ export class UINode implements IUINode {
               // error during the request
               console.warn(`Error occurs when request remote schema for ${
                 this.id
-              }${
+                }${
                 this.layoutKey ? ` in ${this.layoutKey}` : ''
-              }${
+                }${
                 this.engineId ? ` of ${this.engineId}` : ''
-              }`)
+                }`)
               resolve(undefined)
             })
 
@@ -604,11 +652,11 @@ export class UINode implements IUINode {
               // error during the analyzation
               console.warn(`Error occurs when analyze schema for ${
                 this.id
-              }${
+                }${
                 this.layoutKey ? ` in ${this.layoutKey}` : ''
-              }${
+                }${
                 this.engineId ? ` of ${this.engineId}` : ''
-              }`)
+                }`)
               resolve(undefined)
             })
 
@@ -616,11 +664,11 @@ export class UINode implements IUINode {
           // invalid schema param
           console.warn(`Can't load layout by invalid schema to ${
             this.id
-          }${
+            }${
             this.layoutKey ? ` in ${this.layoutKey}` : ''
-          }${
+            }${
             this.engineId ? ` of ${this.engineId}` : ''
-          }`)
+            }`)
           resolve(undefined)
         }
       })
@@ -634,6 +682,10 @@ export class UINode implements IUINode {
         this.uiSchema = loadResult
       }
 
+      if (!_.isNil(loadID)) {
+        delete this.loadingID
+      }
+
       this.loadQueue--
       if (this.loadQueue === 0) {
         delete this.loadProcess
@@ -642,6 +694,11 @@ export class UINode implements IUINode {
       return loadResult || this.schema
     } else {
       this.loadProcess = this.loadProcess.then(() => {
+        // set the current loading ID
+        if (!_.isNil(loadID)) {
+          this.loadingID = loadID
+        }
+
         // prepare the schema
         if (_.isString(schemaCache) && schemaCache) {
           return this.getRemoteSchema(schemaCache)
@@ -649,22 +706,22 @@ export class UINode implements IUINode {
               if (_.isNil(schema)) {
                 console.warn(`Can't get remote schema ${schemaCache} for ${
                   this.id
-                }${
+                  }${
                   this.layoutKey ? ` in ${this.layoutKey}` : ''
-                }${
+                  }${
                   this.engineId ? ` of ${this.engineId}` : ''
-                }`)
+                  }`)
               }
               return schema
             }, () => {
               // error during the request
               console.warn(`Error occurs when request remote schema for ${
                 this.id
-              }${
+                }${
                 this.layoutKey ? ` in ${this.layoutKey}` : ''
-              }${
+                }${
                 this.engineId ? ` of ${this.engineId}` : ''
-              }`)
+                }`)
               return undefined
             })
         } else if (_.isObject(schemaCache)) {
@@ -672,11 +729,11 @@ export class UINode implements IUINode {
         } else {
           console.warn(`Can't load layout by invalid schema to ${
             this.id
-          }${
+            }${
             this.layoutKey ? ` in ${this.layoutKey}` : ''
-          }${
+            }${
             this.engineId ? ` of ${this.engineId}` : ''
-          }`)
+            }`)
           return undefined
         }
       }).then((schema: IUISchema | undefined) => {
@@ -690,11 +747,11 @@ export class UINode implements IUINode {
               // error during the analyzation
               console.warn(`Error occurs when analyze schema for ${
                 this.id
-              }${
+                }${
                 this.layoutKey ? ` in ${this.layoutKey}` : ''
-              }${
+                }${
                 this.engineId ? ` of ${this.engineId}` : ''
-              }`)
+                }`)
               return undefined
             })
         } else {
@@ -709,6 +766,10 @@ export class UINode implements IUINode {
           Cache.setLayoutNode(this.layoutKey, this, { cacheKey: this.id })
         }
         this.uiSchema = loadResult
+      }
+
+      if (!_.isNil(loadID)) {
+        delete this.loadingID
       }
 
       this.loadQueue--
@@ -728,52 +789,81 @@ export class UINode implements IUINode {
   async replaceLayout(
     newSchema: string | IUISchema,
     route?: number[],
+    replaceID?: string | number,
   ) {
     if (_.isArray(route) && route.length) {
       const child = this.getChildren(route)
       if (!_.isArray(child) && _.isObject(child)) {
-        return await child.loadLayout(newSchema)
+        return await child.loadLayout(newSchema, replaceID)
       } else {
         return {}
       }
     } else {
-      return await this.loadLayout(newSchema)
+      return await this.loadLayout(newSchema, replaceID)
     }
   }
 
   /**
    * refresh the layout of the node. When the node is still loading, the refresh won't work
    */
-  async refreshLayout() {
+  async refreshLayout(refreshID?: string | number) {
     if (this.loadQueue === 0) {
-      return await this.loadLayout()
+      return await this.loadLayout(undefined, refreshID)
     }
     return {}
   }
 
-  private clearSchema() {
-    this.uiSchema = {}
-  }
-  private clearChildren() {
-    const children = this.children
-    if (_.isArray(children) && children.length) {
-      children.forEach((child: IUINode) => {
-        child.clearLayout()
-      })
+  clearLayout(options?: IUINodeClearOption) {
+    if (_.isObject(options)) {
+      const { onlyChild, clearData, clearPool } = options
+
+      if (!onlyChild) {
+        // clear the UINode from Cache
+        if (_.isString(this.layoutKey) && this.layoutKey) {
+          Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
+        }
+
+        // reset error info of the node
+        this.errorInfo = {}
+        // clear schema of the node
+        this.uiSchema = {}
+      }
+
+      if (clearData === true) {
+        // clear data and pool
+        this.dataNode.deleteData({ clearPool })
+      }
+
+      // clear children layout
+      const children = this.children
+      if (_.isArray(children) && children.length) {
+        children.forEach((child: IUINode) => {
+          child.clearLayout({ clearData, clearPool })
+        })
+      }
+      delete this.children
+
+    } else {
+      // clear the UINode from Cache
+      if (_.isString(this.layoutKey) && this.layoutKey) {
+        Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
+      }
+
+      // reset error info of the node
+      this.errorInfo = {}
+      // clear schema of the node
+      this.uiSchema = {}
+
+      // clear children layout
+      const children = this.children
+      if (_.isArray(children) && children.length) {
+        children.forEach((child: IUINode) => {
+          child.clearLayout()
+        })
+      }
+      delete this.children
     }
-    delete this.children
-  }
-  private clearErrorInfo() {
-    this.errorInfo = {}
-  }
-  clearLayout() {
-    if (_.isString(this.layoutKey) && this.layoutKey) {
-      Cache.clearLayoutNode(this.layoutKey, { cacheKey: this.id })
-    }
-    // this is not the rootNode of the layout
-    this.clearErrorInfo()
-    this.clearChildren()
-    this.clearSchema()
+
     return this
   }
 

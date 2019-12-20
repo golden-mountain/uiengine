@@ -840,7 +840,7 @@
                   {
                     "eventName": "onClick",
                     "receiveParams": ["event"],
-                    "listener": "submitToPool"
+                    "handler": "submitToPool"
                   }
                 ]
               }
@@ -858,7 +858,7 @@
                     "defaultParams": {
                       "options": {}
                     },
-                    "listener": "hideNode"
+                    "handler": "hideNode"
                   }
                 ]
               }

@@ -16,9 +16,9 @@ import {
   UIEngineRegister,
 } from '../helpers/UIEngineRegister'
 import * as plugins from '../plugins'
-import * as listeners from '../listeners'
+import * as handlers from '../handlers'
 UIEngineRegister.registerPlugins(plugins)
-UIEngineRegister.registerListeners(listeners)
+UIEngineRegister.registerHandlers(handlers)
 
 import {
   IErrorInfo,

@@ -10,24 +10,52 @@ export interface IDataEngineConfig {
   request: IRequest
 }
 
+export interface ILoadSchemaOption {
+  engineId?: string
+}
+
 export interface ISendRequestOption {
-  data?: any
-  config?: IRequestConfig
   cacheID?: string
+  data?: any
+  status?: string
+  config?: IRequestConfig
   engineId?: string
   layoutKey?: string
   [otherKey: string]: any
 }
-
 export interface ILoadDataOption {
-  engineId?: string
-  layoutKey?: string
   loadID?: string
-}
-
-export interface IOtherOperOption {
+  config?: IRequestConfig
   engineId?: string
   layoutKey?: string
+  [otherKey: string]: any
+}
+export interface IUpdateDataOption {
+  updateID?: string
+  data?: any
+  status?: string
+  config?: IRequestConfig
+  engineId?: string
+  layoutKey?: string
+  [otherKey: string]: any
+}
+export interface IReplaceDataOption {
+  replaceID?: string
+  data?: any
+  status?: string
+  config?: IRequestConfig
+  engineId?: string
+  layoutKey?: string
+  [otherKey: string]: any
+}
+export interface IDeleteDataOption {
+  deleteID?: string
+  data?: any
+  status?: string
+  config?: IRequestConfig
+  engineId?: string
+  layoutKey?: string
+  [otherKey: string]: any
 }
 
 export interface IDataEngine {
@@ -40,11 +68,11 @@ export interface IDataEngine {
 
   initializeConfig: (config?: IDataEngineConfig) => void
 
-  loadSchema: (source: IDataSource|string, options?: IOtherOperOption) => Promise<IDataSchema|undefined>
+  loadSchema: (source: IDataSource|string, options?: ILoadSchemaOption) => Promise<IDataSchema|undefined>
 
   sendRequest: (source: IDataSource|string, method: string, options?: ISendRequestOption) => Promise<any>
   loadData: (source: IDataSource|string, options?: ILoadDataOption) => Promise<any>
-  updateData: (source: IDataSource|string, data: any, options?: IOtherOperOption) => Promise<any>
-  replaceData: (source: IDataSource|string, data: any, options?: IOtherOperOption) => Promise<any>
-  deleteData: (source: IDataSource|string, options?: IOtherOperOption) => Promise<any>
+  updateData: (source: IDataSource|string, options?: IUpdateDataOption) => Promise<any>
+  replaceData: (source: IDataSource|string, options?: IReplaceDataOption) => Promise<any>
+  deleteData: (source: IDataSource|string, options?: IDeleteDataOption) => Promise<any>
 }

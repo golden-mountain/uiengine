@@ -7,6 +7,7 @@ export interface ILoadOptions {
   container?: string
   parentNode?: IUINode // parent ui node, default render in UIEngine
   props?: IObject
+  [otherKey: string]: any
 }
 
 // using working mode to decide in the layout:
@@ -18,13 +19,16 @@ export interface IWorkingMode {
   // view: all dataNodes load data and are not editable by default
   // customize: define the operation mode for each data source
   mode: 'new' | 'edit' | 'view' | 'customize'
-  operationModes?: IOperationMode | IOperationMode[]
   options?: {
-    urlParam?: IObject
     envParam?: IObject
-    submitMethod?: string
+    urlParam?: IObject
+    queryParam?: {
+      common?: IObject
+      [method: string]: IObject
+    }
     [otherKey: string]: any
   }
+  operationModes?: IOperationMode | IOperationMode[]
 }
 
 export interface IOperationMode {
@@ -35,9 +39,12 @@ export interface IOperationMode {
   mode: 'create' | 'delete' | 'update' | 'view'
   source: string
   options?: {
-    urlParam?: IObject
     envParam?: IObject
-    submitMethod?: string
+    urlParam?: IObject
+    queryParam?: {
+      common?: IObject
+      [method: string]: IObject
+    }
     [otherKey: string]: any
   }
 }

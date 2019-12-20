@@ -25,7 +25,7 @@
               "layout": "layouts/react-component-test-2.json",
               "container": "main"
             },
-            "listener": "loadUI"
+            "handler": "loadUI"
           }
         ]
       }

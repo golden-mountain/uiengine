@@ -82,7 +82,7 @@ export default class DataNode implements IDataNode {
   }
   private initialSource(dataSrc: string|IDataSource) {
     if (_.isObject(dataSrc)) {
-      const { source, schema, autoload, defaultValue, loadOptions } = dataSrc
+      const { source, schema, autoload, defaultValue, loadOptions, ...rest } = dataSrc
       const initialSrc: IDataSource = {
         source,
         schema: _.isString(schema) && schema ? schema : source,
@@ -93,6 +93,10 @@ export default class DataNode implements IDataNode {
       }
       if (_.isObject(loadOptions)) {
         initialSrc.loadOptions = _.cloneDeep(loadOptions)
+      }
+
+      if (!_.isEmpty(rest)) {
+        _.assign(initialSrc, rest)
       }
       return initialSrc
     } else if (_.isString(dataSrc)) {
@@ -118,12 +122,12 @@ export default class DataNode implements IDataNode {
     this.uiNode = uiNode
     this.source = this.initialSource(source)
 
+    // set the helpers which the node depends on
+    this.initialConfig(config)
+
     if (this.source.defaultValue !== undefined) {
       this.data = this.source.defaultValue
     }
-
-    // set the helpers which the node depends on
-    this.initialConfig(config)
 
     // register the plugin types supported
     this.pluginManager.register(
@@ -149,12 +153,9 @@ export default class DataNode implements IDataNode {
     }
   }
 
-  set errorInfo(error: IErrorInfo) {
+  set errorInfo(error: IErrorInfo|undefined) {
     if (this.dataPool instanceof DataPool) {
-      this.dataPool.setInfo(
-        this.source.source,
-        { key: 'error', value: error || {} }
-      )
+      this.dataPool.setInfo(this.source.source, { key: 'error', value: error })
     } else {
       console.warn(`Can't set error info of '${this.source.source}' to the unknown data pool:`, this.dataPool)
     }
@@ -165,10 +166,24 @@ export default class DataNode implements IDataNode {
       return this.dataPool.getInfo(this.source.source, 'error')
     } else {
       console.warn(`Can't get error info of '${this.source.source}' from the unknown data pool:`, this.dataPool)
-      return {}
     }
   }
 
+  async loadSchema(source?: string|IDataSource) {
+    if (!_.isNil(source)) {
+      this.source= this.initialSource(source)
+    }
+
+    this.rootSchema = await this.dataEngine.loadSchema(
+      this.source,
+      { engineId: this.uiNode.engineId },
+    )
+    // assign schema from the root
+    this.schema = await this.dataEngine.mapper.getDataSchema(
+      this.source,
+      true,
+    )
+  }
   getSchema(path?: string) {
     if (_.isString(path) && path) {
       return _.cloneDeep(_.get(this.schema, path))
@@ -176,13 +191,14 @@ export default class DataNode implements IDataNode {
     return _.cloneDeep(this.schema)
   }
 
-  private async loadAndPick() {
+  private async loadAndPick(options?: IDataLoadOption) {
+    const loadID = _.get(options, 'loadID')
     const wholeData = await this.dataEngine.loadData(
       this.source,
       {
         engineId: this.uiNode.engineId,
         layoutKey: this.uiNode.layoutKey,
-        loadID: this.uiNode.layoutKey
+        loadID: !_.isNil(loadID) ? `${this.uiNode.layoutKey}-${loadID}` : this.uiNode.layoutKey
       },
     )
 
@@ -212,6 +228,8 @@ export default class DataNode implements IDataNode {
 
     if (pickedData !== undefined) {
       this.data = pickedData
+    } else {
+      this.data = undefined
     }
   }
   private async refreshUI(holdLayout: boolean) {
@@ -243,6 +261,51 @@ export default class DataNode implements IDataNode {
     }
 
   }
+  private updateInfo(infoKey: string, handle: IDataPoolHandle) {
+    if (infoKey === 'status') {
+      const infoValue = handle.getInfo(infoKey)
+
+      if (infoValue === 'view') {
+        handle.setInfo(infoKey, 'update')
+      }
+
+      let parentHandle = handle.getParent()
+      while (!_.isNil(parentHandle)) {
+        const upperValue = parentHandle.getInfo(infoKey)
+
+        if (!_.isNil(upperValue)) {
+          if (upperValue === 'view') {
+            parentHandle.setInfo(infoKey, 'update')
+          }
+          break
+        } else {
+          parentHandle = parentHandle.getParent()
+          continue
+        }
+      }
+
+      const children = handle.getChildren()
+      if (!_.isNil(children)) {
+        if (_.isArray(children)) {
+          children.forEach((childHandle: IDataPoolHandle) => {
+            const downValue = childHandle.getInfo(infoKey)
+
+            if (downValue === 'view') {
+              childHandle.setInfo(infoKey, 'update')
+            }
+          })
+        } else if (_.isObject(children)) {
+          _.forIn(children, (childHandle: IDataPoolHandle) => {
+            const downValue = childHandle.getInfo(infoKey)
+
+            if (downValue === 'view') {
+              childHandle.setInfo(infoKey, 'update')
+            }
+          })
+        }
+      }
+    }
+  }
 
   getData(options?: IDataGetOption) {
     if (_.isObject(options)) {
@@ -254,20 +317,8 @@ export default class DataNode implements IDataNode {
     return this.data
   }
   async loadData(source?: string|IDataSource, options?: IDataLoadOption) {
-    if (!_.isNil(source)) {
-      this.source= this.initialSource(source)
-    }
-
     // load the dataSchema of the root
-    this.rootSchema = await this.dataEngine.loadSchema(
-      this.source,
-      { engineId: this.uiNode.engineId },
-    )
-    // assign schema from the root
-    this.schema = await this.dataEngine.mapper.getDataSchema(
-      this.source,
-      true,
-    )
+    await this.loadSchema(source)
 
     // get the working mode of the layout
     let workingMode: IWorkingMode = { mode: 'new' }
@@ -298,84 +349,112 @@ export default class DataNode implements IDataNode {
       })
     }
 
+    // get the load mode of data
     let loadMode: string = _.get(workingMode, 'mode')
-    if (parsedResult !== undefined) {
-      this.data = parsedResult
-    } else {
-      if (!this.source.autoload || loadMode === 'new') {
-        // do not need to load data
-      } else if (loadMode === 'edit' || loadMode === 'view') {
-        await this.loadAndPick()
-      } else if (loadMode === 'customize') {
-        const { operationModes } = workingMode
-        if (_.isArray(operationModes)) {
-          for (let i = 0; i < operationModes.length; i++) {
-            const { source, mode } = operationModes[i]
-            if (_.startsWith(this.source.source, source)) {
-              loadMode = mode
-              if (mode !== 'create') {
-                await this.loadAndPick()
-              }
-              break
+    if (loadMode === 'customize') {
+      const { operationModes } = workingMode
+      if (_.isArray(operationModes)) {
+        let matchString = ''
+        operationModes.forEach((modeConfig: IOperationMode) => {
+          const { source: srcString, mode: srcMode } = modeConfig
+          if (_.startsWith(this.source.source, srcString)) {
+            if (_.startsWith(srcString, matchString)) {
+              matchString = srcString
+              loadMode = srcMode
             }
           }
-        } else if (_.isObject(operationModes)) {
-          const { source, mode } = operationModes
-          if (_.startsWith(this.source.source, source)) {
-            loadMode = mode
-            if (mode !== 'create') {
-              await this.loadAndPick()
-            }
-          }
+        })
+      } else if (_.isObject(operationModes)) {
+        const { source: srcString, mode: srcMode } = operationModes
+        if (_.startsWith(this.source.source, srcString)) {
+          loadMode = srcMode
         }
       }
     }
 
-    const loadedData = this.data;
-    if (_.isArray(loadedData)) {
-      loadedData.forEach((item: any, index: number) => {
+    const createCondition =
+      loadMode === 'new' ||
+      loadMode === 'create' ||
+      loadMode === 'customize' ||
+      !this.source.autoload
+
+    const updateCondition =
+      loadMode === 'edit' ||
+      loadMode === 'view' ||
+      loadMode === 'update' ||
+      loadMode === 'delete'
+
+    if (parsedResult !== undefined) {
+      this.data = parsedResult
+    } else {
+      if (createCondition) {
+        // do not need to load data
+        this.data = undefined
+      } else if (updateCondition) {
+        // load remote data and pick from it
+        await this.loadAndPick(options)
+      }
+    }
+
+    // Todo: use a plugin to solve the status
+    // initial data status
+    const currentData = this.data
+    if (_.isArray(currentData)) {
+      currentData.forEach((item: any, index: number) => {
         const downSource = this.source.source + `[${index}]`
-        if (this.dataPool.getInfo(downSource, 'status') === undefined) {
-          if (loadMode === 'new' || loadMode === 'customize' || loadMode === 'create') {
+        const downStatus = this.dataPool.getInfo(downSource, 'status')
+
+        if (createCondition) {
+          if (downStatus !== 'create') {
             this.dataPool.setInfo(downSource, { key: 'status', value: 'create' })
-          } else {
-            this.dataPool.setInfo(downSource, { key: "status", value: "view" });
+          }
+        } else if (updateCondition) {
+          if (downStatus === 'create' || downStatus === undefined) {
+            this.dataPool.setInfo(downSource, { key: "status", value: "view" })
           }
         }
-      });
-    } else if (_.isObject(loadedData)) {
-      if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
-        if (loadMode === 'new' || loadMode === 'customize' || loadMode === 'create') {
+      })
+    } else if (_.isObject(currentData)) {
+      const status = this.dataPool.getInfo(this.source.source, 'status')
+      if (createCondition) {
+        if (status !== 'create') {
           this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create' })
-        } else {
-          this.dataPool.setInfo(this.source.source, {
-            key: "status",
-            value: "view"
-          });
+        }
+      } else if (updateCondition) {
+        if (status === 'create' || status === undefined) {
+          this.dataPool.setInfo(this.source.source, { key: "status", value: "view" })
         }
       }
     } else {
       const setDataInfo = (infoKey: string, handle: IDataPoolHandle) => {
         const parentHandle = handle.getParent();
         if (!_.isNil(parentHandle)) {
-          if (parentHandle.getInfo('status') === undefined) {
-            if (loadMode === 'new' || loadMode === 'customize' || loadMode === 'create') {
+          const parentStatus = parentHandle.getInfo('status')
+          if (createCondition) {
+            if (parentStatus !== 'create') {
               parentHandle.setInfo('status', 'create')
-            } else {
-              parentHandle.setInfo("status", "view");
+            }
+          } else if (updateCondition) {
+            if (parentStatus === 'create' || parentStatus === undefined) {
+              parentHandle.setInfo('status', "view")
             }
           }
         }
       }
-      if (this.dataPool.getInfo(this.source.source, 'status') === undefined) {
-        if (loadMode === 'new' || loadMode === 'customize' || loadMode === 'create') {
-          this.dataPool.setInfo(this.source.source, { key: 'status', value: 'create', setDataInfo })
-        } else {
-          this.dataPool.setInfo(this.source.source, {
-            key: "status",
-            value: "view",
-            setDataInfo
-          });
+      const status = this.dataPool.getInfo(this.source.source, 'status')
+      if (createCondition) {
+        if (status !== 'create') {
+          this.dataPool.setInfo(
+            this.source.source,
+            { key: 'status', value: 'create', setDataInfo }
+          )
+        }
+      } else if (updateCondition) {
+        if (status === 'create' || status === undefined) {
+          this.dataPool.setInfo(
+            this.source.source,
+            { key: "status", value: "view", setDataInfo }
+          )
         }
       }
     }
@@ -386,22 +465,21 @@ export default class DataNode implements IDataNode {
       stateNode.syncStateWithDataPool()
     }
 
-    return loadedData
+    return currentData
   }
   async updateData(value: any, options?: IDataUpdateOption) {
     // set the value
     this.data = value
 
+    // Todo: use a plugin to solve the status
     // update the status
-    if (this.dataPool.getInfo(this.source.source, 'status') === 'view') {
-      this.dataPool.setInfo(this.source.source, { key: 'status', value: 'update' })
-    }
-    if (this.source.source.includes(':')) {
-      const domain = this.source.source.split(':')[0] + ':'
-      if (this.dataPool.getInfo(domain, 'status') === 'view') {
-        this.dataPool.setInfo(domain, { key: 'status', value: 'update' })
+    this.dataPool.setInfo(
+      this.source.source,
+      {
+        key: 'status',
+        setDataInfo: this.updateInfo
       }
-    }
+    )
 
     // exec plugins to check the new value
     // each plugin can return an error info
@@ -428,7 +506,9 @@ export default class DataNode implements IDataNode {
         }
       })
       if (hasError === false) {
-        delete this.errorInfo
+        this.errorInfo = {
+          status: true,
+        } as any
       }
     }
 
@@ -446,6 +526,16 @@ export default class DataNode implements IDataNode {
     return status
   }
   async deleteData(options?: IDataDeleteOption) {
+    if (_.isObject(options)) {
+      const { clearPool } = options
+
+      if (clearPool === true) {
+        this.dataPool.clear(this.source.source)
+        return
+      }
+    }
+
+    this.data = undefined
   }
 
   getRow(index: number) {

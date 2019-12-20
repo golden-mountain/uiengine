@@ -1,16 +1,12 @@
 import _ from 'lodash'
 
-import { UINode } from '../data-layer'
-import {
-  DataPool,
-  Messager,
-  PluginManager,
-  Request,
-  Workflow,
-} from '../helpers'
-import {
-  searchNodes,
-} from '../helpers/utils'
+import { UINode } from './UINode'
+import { DataPool } from '../helpers/DataPool'
+import { Messager } from '../helpers/Messager'
+import { PluginManager } from '../helpers/PluginManager'
+import { Request } from '../helpers/Request'
+import { Workflow } from '../helpers/Workflow'
+import { searchNodes } from '../helpers/utils/ui'
 
 import {
   IErrorInfo,
@@ -381,7 +377,8 @@ export class NodeController implements INodeController {
 
     const rootNode = targetRenderer.uiNode
     try {
-      await rootNode.loadLayout(schema)
+      const loadTime = new Date().getTime()
+      await rootNode.loadLayout(schema, loadTime)
       targetRenderer.visible = true
 
       // update parent node
@@ -497,14 +494,24 @@ export class NodeController implements INodeController {
     const renderer = this.layoutMap[targetLayout]
 
     if (!_.isNil(renderer)) {
+      const { uiNode: rootNode } = renderer
+
+      // clear UINode layout
+      if (!_.isNil(rootNode)) {
+        rootNode.clearLayout({ clearData })
+      }
+
+      // remove the layout renderer from layoutMap
       delete this.layoutMap[targetLayout]
 
+      // clear the layout name from engineMap
       _.forIn(this.engineMap, (layouts: string[], engineId: string) => {
         _.remove(layouts, (layout: string) => {
           return layout === targetLayout
         })
       })
 
+      // reset the active layout
       if (targetLayout === this.activeLayout) {
         // activate the last layout of active engine
         const loadedLayouts = this.engineMap[this.activeEngine]
@@ -515,18 +522,6 @@ export class NodeController implements INodeController {
           this.activeLayout = ''
         } else {
           this.activeLayout = lastLayout
-        }
-      }
-
-      // clear data pool
-      if (clearData === true) {
-        const { uiNode } = renderer
-        const data = _.get(uiNode, ['dataNode', 'data'])
-        const datasource = _.get(uiNode.getSchema(), 'datasource')
-        if (!_.isNil(data) && !_.isNil(datasource)) {
-          const { source } = datasource
-          const dataPool = DataPool.getInstance()
-          dataPool.clear(source)
         }
       }
 

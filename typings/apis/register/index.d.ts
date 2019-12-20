@@ -1,5 +1,5 @@
 export interface IApiRegister {
   plugin: IApiRegisterPlugin;
-  listener: IApiRegisterListener;
+  handler: IApiRegisterHandler;
   component: IApiRegisterComponent;
 }

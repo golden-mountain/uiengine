@@ -16,7 +16,7 @@
             "workingMode": {
               "mode": "edit",
               "options": {
-                "urlParam": { "name": "test" }
+                "urlParam": { "name": "http" }
               }
             }
           }
